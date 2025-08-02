@@ -11,10 +11,10 @@
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
         }
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
         }
         input[type="number"] {
             -moz-appearance: textfield;
@@ -25,491 +25,726 @@
 
     <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg">
         <h1 class="text-3xl md:text-4xl font-extrabold text-center text-gray-800 mb-6">Sim Racing Strategy Planner</h1>
-        <p class="text-center text-gray-600 mb-8">Plan your race strategy, pit stops, and driver stints with ease.</p>
+        <p class="text-center text-gray-600 mb-8">Plan your race strategy, manage drivers, cars, and tracks with ease.</p>
 
-        <div id="app-container">
+        <div class="flex justify-center space-x-4 mb-8">
+            <button onclick="showPage1()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200">Planner</button>
+            <button onclick="showAdminPage()" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition duration-200">Admin</button>
+        </div>
 
-            <div id="page-1" class="space-y-6">
-                <h2 class="text-2xl font-bold mb-4 text-gray-700">1. Setup</h2>
-                
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Drivers <span class="text-sm text-gray-500">(Max 6)</span></h3>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <select id="driver-select" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full">
-                            <option value="">Select a Driver...</option>
-                        </select>
-                        <button onclick="addDriver()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+        <div id="page-1">
+            <div class="space-y-6">
+
+                <div class="p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h2 class="text-2xl font-bold text-gray-700 mb-4">Drivers</h2>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <div class="relative flex-grow">
+                            <select id="driver-select" class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="">Select a Driver...</option>
+                            </select>
+                        </div>
+                        <button onclick="addDriver()" class="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition duration-200">
                             <i class="fas fa-plus"></i> Add
                         </button>
                     </div>
-                    <ul id="driver-list" class="space-y-2"></ul>
+                    <ul id="driver-list" class="space-y-2 max-h-48 overflow-y-auto">
+                        </ul>
                 </div>
 
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Car & Track</h3>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="flex flex-col">
-                            <label for="car-select" class="text-sm font-medium text-gray-700">Car</label>
-                            <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <option value="">Select a Car...</option>
-                            </select>
+                <div class="grid md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-4">Race Setup</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="car-select" class="block text-sm font-medium text-gray-700">Car</label>
+                                <select id="car-select" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">Select a Car...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="track-select" class="block text-sm font-medium text-gray-700">Track</label>
+                                <select id="track-select" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">Select a Track...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="race-duration" class="block text-sm font-medium text-gray-700">Race Duration</label>
+                                <div class="mt-1 flex space-x-2">
+                                    <input type="number" id="race-duration-hours" placeholder="Hours" class="w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="race-duration-minutes" placeholder="Minutes" class="w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex flex-col">
-                            <label for="track-select" class="text-sm font-medium text-gray-700">Track</label>
-                            <select id="track-select" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <option value="">Select a Track...</option>
-                            </select>
+                    </div>
+
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-4">Inputs</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="avg-lap-time" class="block text-sm font-medium text-gray-700">Average Lap Time (min:sec)</label>
+                                <div class="mt-1 flex space-x-2">
+                                    <input type="number" id="avg-lap-time-minutes" placeholder="Minutes" class="w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="avg-lap-time-seconds" placeholder="Seconds" class="w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="pit-stop-time" class="block text-sm font-medium text-gray-700">Pit Stop Time (seconds)</label>
+                                <input type="number" id="pit-stop-time" value="30" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-8">
-                    <button onclick="showPage2()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                        Continue <i class="fas fa-arrow-right ml-2"></i>
-                    </button>
-                    <button onclick="showAdminPage()" class="w-full mt-4 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                        <i class="fas fa-user-shield mr-2"></i> Admin Page
-                    </button>
+                <div class="flex justify-center">
+                    <button onclick="showPage2()" class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-indigo-700 transition duration-200 shadow-md">Calculate</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-2" class="hidden">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Race Strategy Results</h2>
+            
+            <div id="overall-summary" class="hidden p-6 bg-gray-50 rounded-lg border border-gray-200 mb-8">
+                <h3 class="text-xl font-bold text-gray-700 mb-4">Summary</h3>
+                <div class="grid md:grid-cols-3 gap-4 text-gray-600 mb-6">
+                    <div><span class="font-semibold text-gray-900">Car:</span> <span id="car-display"></span></div>
+                    <div><span class="font-semibold text-gray-900">Track:</span> <span id="track-display"></span></div>
+                    <div><span class="font-semibold text-gray-900">SoF:</span> <span id="sof-display">N/A</span></div>
+                    <div><span class="font-semibold text-gray-900">Total Laps:</span> <span id="est-laps-display"></span></div>
+                    <div><span class="font-semibold text-gray-900">Fuel/Lap:</span> <span id="fuel-per-lap-display"></span></div>
+                    <div><span class="font-semibold text-gray-900">Est. Lap Time:</span> <span id="lap-time-display"></span></div>
+                    <div><span class="font-semibold text-gray-900">Pit Stops:</span> <span id="pit-stops-display"></span></div>
+                    <div><span class="font-semibold text-gray-900">Stint Duration:</span> <span id="stint-duration-display"></span></div>
+                    <div><span class="font-semibold text-gray-900">Laps/Stint:</span> <span id="laps-per-stint-display"></span></div>
+                </div>
+
+                <div id="sliders-container" class="mt-6 hidden">
+                    <div class="mb-4">
+                        <label for="fuel-slider" class="block text-sm font-medium text-gray-700">
+                            Fuel/Lap Adjustment: <span id="fuel-slider-value">0.0</span> L
+                        </label>
+                        <input type="range" id="fuel-slider" min="-0.5" max="0.5" value="0.0" step="0.1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="lap-time-slider" class="block text-sm font-medium text-gray-700">
+                            Lap Time Adjustment: <span id="lap-time-slider-value">0</span> seconds
+                        </label>
+                        <input type="range" id="lap-time-slider" min="-5" max="5" value="0" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4 mt-6">
+                    <div>
+                        <label for="race-start-time-page2" class="block text-sm font-medium text-gray-700">Race Start Time (HH:MM)</label>
+                        <input type="time" id="race-start-time-page2" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="00:00">
+                    </div>
+                    <div>
+                        <label for="qualifying-minutes-page2" class="block text-sm font-medium text-gray-700">Qualifying Time (minutes)</label>
+                        <input type="number" id="qualifying-minutes-page2" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="0">
+                    </div>
                 </div>
             </div>
 
-            <div id="page-2" class="space-y-6 hidden">
-
-                <button onclick="showPage1()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6">
-                    <i class="fas fa-arrow-left mr-2"></i> Back
-                </button>
-                
-                <h2 class="text-2xl font-bold mb-4 text-gray-700">2. Race Details</h2>
-
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Race Inputs</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Car</label>
-                            <span id="car-display" class="mt-1 p-3 bg-white border border-gray-300 rounded-lg text-gray-900">N/A</span>
-                        </div>
-                        <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Track</label>
-                            <span id="track-display" class="mt-1 p-3 bg-white border border-gray-300 rounded-lg text-gray-900">N/A</span>
-                        </div>
-                        <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Potential SOF</label>
-                            <span id="sof-display" class="mt-1 p-3 bg-white border border-gray-300 rounded-lg text-gray-900">N/A</span>
-                        </div>
-                        
-                        <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Avg. Lap Time</label>
-                            <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="avg-lap-time-minutes" min="0" value="1" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">min</span>
-                                <input type="number" id="avg-lap-time-seconds" min="0" max="59" value="45" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">sec</span>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col">
-                            <label for="fuel-per-lap" class="text-sm font-medium text-gray-700">Fuel Per Lap (L)</label>
-                            <input type="number" id="fuel-per-lap" value="3.5" step="0.1" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                        </div>
-                        
-                        <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Race Duration</label>
-                            <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="race-duration-hours" min="0" value="1" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">hr</span>
-                                <input type="number" id="race-duration-minutes" min="0" max="59" value="0" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">min</span>
-                            </div>
-                        </div>
-                        
-                        <div class="flex flex-col">
-                            <label for="tank-capacity" class="text-sm font-medium text-gray-700">Tank Capacity (L)</label>
-                            <input type="number" id="tank-capacity" value="95" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                        </div>
-                        
-                        <div class="flex flex-col">
-                            <label for="pit-stop-time" class="text-sm font-medium text-gray-700">Avg. Pit Stop Time (sec)</label>
-                            <input type="number" id="pit-stop-time" value="30" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-8 text-center">
-                    <button id="calculate-button" onclick="calculateAndShowPage2()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                        Calculate Strategy <i class="fas fa-calculator ml-2"></i>
-                    </button>
-                </div>
-
-                <div id="overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg hidden">
-                    <h3 class="text-xl font-bold mb-4 text-blue-800">Overall Strategy Summary</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-blue-800">
-                        <div><span class="font-semibold">Est. Laps:</span> <span id="est-laps-display"></span></div>
-                        <div><span class="font-semibold">Stint Duration:</span> <span id="stint-duration-display"></span></div>
-                        <div><span class="font-semibold">Laps per Stint:</span> <span id="laps-per-stint-display"></span></div>
-                        <div><span class="font-semibold">Pit Stops:</span> <span id="pit-stops-display"></span></div>
-                        <div><span class="font-semibold">Total Fuel:</span> <span id="total-fuel-display"></span></div>
-                        <div><span class="font-semibold">Fuel per Lap:</span> <span id="fuel-per-lap-display"></span></div>
-                        <div><span class="font-semibold">Lap Time:</span> <span id="lap-time-display"></span></div>
-                        <div><span class="font-semibold">Pit Stop Duration:</span> <span id="pit-stop-duration-display"></span></div>
-                    </div>
-                </div>
-
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg hidden" id="sliders-container">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Dynamic Adjustments</h3>
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                        <div class="flex-grow w-full">
-                            <label for="fuel-slider" class="text-sm font-medium text-gray-700">Adjust Fuel per Lap</label>
-                            <div class="flex items-center mt-1 space-x-2">
-                                <input type="range" id="fuel-slider" min="-1.0" max="1.0" value="0" step="0.1" class="w-full">
-                                <span id="fuel-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.0</span> L
-                            </div>
-                        </div>
-                        <div class="flex-grow w-full">
-                            <label for="lap-time-slider" class="text-sm font-medium text-gray-700">Adjust Lap Time</label>
-                            <div class="flex items-center mt-1 space-x-2">
-                                <input type="range" id="lap-time-slider" min="-3" max="3" value="0" step="1" class="w-full">
-                                <span id="lap-time-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0</span> sec
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <h2 class="text-2xl font-bold mb-4 mt-8 text-gray-700">Stint Breakdown</h2>
-                <div id="stint-breakdown-display" class="p-6 bg-gray-50 border border-gray-200 rounded-lg overflow-x-auto hidden">
-                    
-                    <div class="flex flex-col mb-4">
-                        <label class="text-sm font-medium text-gray-700">Race Start & Qualifying</label>
-                        <div class="flex items-center space-x-2">
-                            <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                            <span class="text-gray-700 font-bold">+</span>
-                            <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                            <span class="text-sm font-medium text-gray-700">min (Qualifying)</span>
-                            <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105" onclick="calculateAndShowPage2()">Update</button>
-                        </div>
-                    </div>
-                    
-                    <table class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg">
-                        <thead class="bg-gray-200">
+            <div id="stint-breakdown-display" class="hidden">
+                <h3 class="text-xl font-bold text-gray-700 mb-4">Stint Breakdown</h3>
+                <div class="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
+                    <table class="min-w-full divide-y divide-gray-300">
+                        <thead class="bg-gray-100">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Lap</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Lap</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Driver</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Backup</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-300">Stint Start</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-300">Stint End</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-300">Start Lap</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-300">End Lap</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-300">Driver</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Next Driver</th>
                             </tr>
                         </thead>
                         <tbody id="stint-table-body" class="bg-white divide-y divide-gray-200">
-                        </tbody>
+                            </tbody>
                     </table>
-                </div>
-
-                <div id="share-link-container" class="p-6 bg-purple-100 border border-purple-200 rounded-lg hidden">
-                    <h3 class="text-xl font-semibold mb-4 text-purple-800">Share/Save This Strategy</h3>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="generateShareLink()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                            <i class="fas fa-share-alt mr-2"></i> Generate Link
-                        </button>
-                        <input type="text" id="share-link-output" readonly class="flex-grow p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-copy" placeholder="Click 'Generate Link' to create a shareable URL">
-                        <button onclick="copyShareLink()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
 
-            <div id="admin-page" class="space-y-6 hidden">
-                <button onclick="showPage1()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6">
-                    <i class="fas fa-arrow-left mr-2"></i> Back
-                </button>
-                <h2 class="text-2xl font-bold mb-4 text-gray-700">Admin Panel</h2>
-                <p class="text-gray-600 mb-8">Manage the data for drivers, cars, and tracks.</p>
+            <div id="share-link-container" class="mt-8 hidden">
+                <h3 class="text-xl font-bold text-gray-700 mb-4">Share Your Strategy</h3>
+                <div class="flex items-center space-x-4">
+                    <input type="text" id="share-link-output" class="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" readonly>
+                    <button onclick="generateShareLink()" class="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition duration-200">Generate Link</button>
+                    <button onclick="copyShareLink()" class="bg-gray-200 text-gray-800 p-2 rounded-lg hover:bg-gray-300 transition duration-200"><i class="fas fa-copy"></i></button>
+                </div>
+            </div>
 
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Manage Drivers</h3>
-                    <div class="space-y-4">
-                        <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
-                            <div class="flex-grow">
-                                <label for="new-driver-name" class="text-sm font-medium text-gray-700">Driver Name</label>
-                                <input type="text" id="new-driver-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="new-driver-irating" class="text-sm font-medium text-gray-700">iRating</label>
-                                <input type="number" id="new-driver-irating" class="mt-1 p-3 border border-gray-300 rounded-lg w-28 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="new-driver-license" class="text-sm font-medium text-gray-700">License</label>
-                                <input type="text" id="new-driver-license" class="mt-1 p-3 border border-gray-300 rounded-lg w-28 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <button id="add-driver-btn" onclick="addDriverAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                                Add Driver
-                            </button>
-                        </div>
-                        <ul id="admin-driver-list" class="space-y-2 mt-4"></ul>
-                    </div>
-                </div>
+            <div class="flex justify-center mt-8">
+                <button onclick="showPage1()" class="bg-gray-200 text-gray-800 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-300 transition duration-200 shadow-md">Back to Planner</button>
+            </div>
+        </div>
 
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Manage Cars</h3>
-                    <div class="space-y-4">
-                        <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
-                            <div class="flex-grow">
-                                <label for="new-car-name" class="text-sm font-medium text-gray-700">Car Name</label>
-                                <input type="text" id="new-car-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="new-car-fuel" class="text-sm font-medium text-gray-700">Fuel Per Lap (L)</label>
-                                <input type="number" id="new-car-fuel" step="0.1" class="mt-1 p-3 border border-gray-300 rounded-lg w-32 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="new-car-tank" class="text-sm font-medium text-gray-700">Tank Capacity (L)</label>
-                                <input type="number" id="new-car-tank" class="mt-1 p-3 border border-gray-300 rounded-lg w-32 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <button id="add-car-btn" onclick="addCarAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                                Add Car
-                            </button>
-                        </div>
-                        <ul id="admin-car-list" class="space-y-2 mt-4"></ul>
-                    </div>
+        <div id="admin-page" class="hidden">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Admin Panel</h2>
+
+            <div class="flex justify-center mb-8">
+                <button onclick="saveDataToServer()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200">Save All Changes</button>
+            </div>
+
+            <div class="p-6 bg-gray-50 rounded-lg border border-gray-200 mb-8">
+                <h3 class="text-2xl font-bold text-gray-700 mb-4">Drivers</h3>
+                <div class="grid md:grid-cols-4 gap-4 mb-4">
+                    <input type="text" id="new-driver-name" placeholder="Name" class="col-span-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                    <input type="number" id="new-driver-irating" placeholder="iRating" class="col-span-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                    <input type="text" id="new-driver-license" placeholder="License" class="col-span-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                    <button id="add-driver-btn" onclick="addDriverAdmin()" class="col-span-1 bg-green-500 text-white p-2 rounded-md font-semibold hover:bg-green-600">Add Driver</button>
                 </div>
-                
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Manage Tracks</h3>
-                    <div class="space-y-4">
-                        <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
-                            <div class="flex-grow">
-                                <label for="new-track-name" class="text-sm font-medium text-gray-700">Track Name</label>
-                                <input type="text" id="new-track-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <button id="add-track-btn" onclick="addTrackAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                                Add Track
-                            </button>
-                        </div>
-                        <ul id="admin-track-list" class="space-y-2 mt-4"></ul>
-                    </div>
+                <ul id="admin-driver-list" class="space-y-2 max-h-48 overflow-y-auto">
+                    </ul>
+            </div>
+
+            <div class="p-6 bg-gray-50 rounded-lg border border-gray-200 mb-8">
+                <h3 class="text-2xl font-bold text-gray-700 mb-4">Cars</h3>
+                <div class="grid md:grid-cols-4 gap-4 mb-4">
+                    <input type="text" id="new-car-name" placeholder="Name" class="col-span-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                    <input type="number" id="new-car-fuel" placeholder="Fuel per Lap" class="col-span-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                    <input type="number" id="new-car-tank" placeholder="Tank Capacity" class="col-span-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                    <button id="add-car-btn" onclick="addCarAdmin()" class="col-span-1 bg-green-500 text-white p-2 rounded-md font-semibold hover:bg-green-600">Add Car</button>
                 </div>
+                <ul id="admin-car-list" class="space-y-2 max-h-48 overflow-y-auto">
+                    </ul>
+            </div>
+
+            <div class="p-6 bg-gray-50 rounded-lg border border-gray-200 mb-8">
+                <h3 class="text-2xl font-bold text-gray-700 mb-4">Tracks</h3>
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <input type="text" id="new-track-name" placeholder="Track Name" class="col-span-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                    <button id="add-track-btn" onclick="addTrackAdmin()" class="col-span-1 bg-green-500 text-white p-2 rounded-md font-semibold hover:bg-green-600">Add Track</button>
+                </div>
+                <ul id="admin-track-list" class="space-y-2 max-h-48 overflow-y-auto">
+                    </ul>
+            </div>
+            
+            <div class="flex justify-center">
+                <button onclick="showPage1()" class="bg-gray-200 text-gray-800 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-300 transition duration-200 shadow-md">Back to Planner</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // Global state
-        let drivers = [];
-        let cars = [];
-        let tracks = [];
-        let selectedDrivers = [];
-        let totalStints = 0;
-        let raceDurationSeconds = 0;
-        let lapsPerStint = 0;
-        let lapsInLastStint = 0;
+<script>
+    // Global state
+    let drivers = [];
+    let cars = [];
+    let tracks = [];
+    let selectedDrivers = [];
+    let totalStints = 0;
+    let raceDurationSeconds = 0;
+    let lapsPerStint = 0;
+    let lapsInLastStint = 0;
+    let driversPerPage = 10;
+    let currentPage = 1;
 
-        // On initial page load
-        window.onload = function() {
-            fetchDataAndPopulate();
-            // Event listeners for dynamic sliders
-            const fuelSlider = document.getElementById('fuel-slider');
-            const fuelSliderValue = document.getElementById('fuel-slider-value');
-            const lapTimeSlider = document.getElementById('lap-time-slider');
-            const lapTimeSliderValue = document.getElementById('lap-time-slider-value');
+    // On initial page load
+    window.onload = function() {
+        fetchDataAndPopulate();
+        // Event listeners for dynamic sliders
+        const fuelSlider = document.getElementById('fuel-slider');
+        const fuelSliderValue = document.getElementById('fuel-slider-value');
+        const lapTimeSlider = document.getElementById('lap-time-slider');
+        const lapTimeSliderValue = document.getElementById('lap-time-slider-value');
+        
+        if (fuelSlider) {
+            fuelSlider.addEventListener('input', () => {
+                fuelSliderValue.textContent = parseFloat(fuelSlider.value).toFixed(1);
+                calculateAndShowPage2();
+            });
+        }
+        if (lapTimeSlider) {
+            lapTimeSlider.addEventListener('input', () => {
+                lapTimeSliderValue.textContent = lapTimeSlider.value;
+                calculateAndShowPage2();
+            });
+        }
+    };
+
+    // Function to fetch data from the server
+    async function fetchDataAndPopulate() {
+        try {
+            const response = await fetch('/api/data');
+            const data = await response.json();
+            drivers = data.drivers;
+            cars = data.cars;
+            tracks = data.tracks;
             
-            if (fuelSlider) {
-                fuelSlider.addEventListener('input', () => {
-                    fuelSliderValue.textContent = parseFloat(fuelSlider.value).toFixed(1);
-                    calculateAndShowPage2();
-                });
+            populateDrivers();
+            populateCars();
+            populateTracks();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('state')) {
+                const decodedState = JSON.parse(atob(urlParams.get('state')));
+                loadState(decodedState);
             }
-            if (lapTimeSlider) {
-                lapTimeSlider.addEventListener('input', () => {
-                    lapTimeSliderValue.textContent = lapTimeSlider.value;
-                    calculateAndShowPage2();
-                });
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+            alert('Could not load data from the server. Please check the server status.');
+        }
+    }
+
+    // Helper function to show pages
+    function showPage1() {
+        document.getElementById('page-1').classList.remove('hidden');
+        document.getElementById('page-2').classList.add('hidden');
+        document.getElementById('admin-page').classList.add('hidden');
+    }
+    function showPage2() {
+        const carSelect = document.getElementById('car-select');
+        const trackSelect = document.getElementById('track-select');
+        if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+            alert("Please select at least one driver, a car, and a track before continuing.");
+            return;
+        }
+        document.getElementById('page-1').classList.add('hidden');
+        document.getElementById('page-2').classList.remove('hidden');
+        document.getElementById('admin-page').classList.add('hidden');
+
+        // Update Page 2 displays
+        const selectedCar = cars.find(c => c.name === carSelect.value);
+        document.getElementById('car-display').textContent = selectedCar.name;
+        document.getElementById('track-display').textContent = trackSelect.value;
+        document.getElementById('fuel-per-lap').value = selectedCar.fuelPerLap;
+        document.getElementById('tank-capacity').value = selectedCar.tankCapacity;
+
+        const totalIRating = selectedDrivers.reduce((sum, driver) => sum + driver.iRating, 0);
+        const sof = Math.round(totalIRating / selectedDrivers.length);
+        document.getElementById('sof-display').textContent = sof;
+        
+        // Show sections and perform initial calculation
+        document.getElementById('overall-summary').classList.remove('hidden');
+        document.getElementById('stint-breakdown-display').classList.remove('hidden');
+        document.getElementById('sliders-container').classList.remove('hidden');
+        document.getElementById('share-link-container').classList.remove('hidden');
+        
+        calculateAndShowPage2();
+    }
+    function showAdminPage() {
+        document.getElementById('page-1').classList.add('hidden');
+        document.getElementById('page-2').classList.add('hidden');
+        document.getElementById('admin-page').classList.remove('hidden');
+        renderAdminLists();
+        resetDriverAdminForm();
+        resetCarAdminForm();
+        resetTrackAdminForm();
+    }
+
+    // --- Core Logic ---
+
+    function calculateAndShowPage2() {
+        const avgLapTimeMinutes = parseInt(document.getElementById('avg-lap-time-minutes').value) || 0;
+        const avgLapTimeSeconds = parseInt(document.getElementById('avg-lap-time-seconds').value) || 0;
+        let avgLapTimeInSeconds = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+
+        const raceDurationHours = parseInt(document.getElementById('race-duration-hours').value) || 0;
+        const raceDurationMinutes = parseInt(document.getElementById('race-duration-minutes').value) || 0;
+        raceDurationSeconds = (raceDurationHours * 3600) + (raceDurationMinutes * 60);
+
+        let fuelPerLap = parseFloat(document.getElementById('fuel-per-lap').value) || 0;
+        const tankCapacity = parseInt(document.getElementById('tank-capacity').value) || 0;
+        const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
+        
+        // Apply slider adjustments
+        const fuelSliderAdjustment = parseFloat(document.getElementById('fuel-slider').value) || 0;
+        fuelPerLap += fuelSliderAdjustment;
+        
+        const lapTimeSliderAdjustment = parseInt(document.getElementById('lap-time-slider').value) || 0;
+        avgLapTimeInSeconds += lapTimeSliderAdjustment;
+
+        const lapsPerTank = Math.floor(tankCapacity / fuelPerLap);
+        totalStints = Math.ceil(raceDurationSeconds / (lapsPerTank * avgLapTimeInSeconds));
+        lapsPerStint = lapsPerTank;
+        lapsInLastStint = totalStints === 1 ? Math.floor(raceDurationSeconds / avgLapTimeInSeconds) : Math.floor(raceDurationSeconds / avgLapTimeInSeconds) % lapsPerTank;
+
+        const totalLaps = Math.floor(raceDurationSeconds / avgLapTimeInSeconds);
+        const stintDuration = lapsPerTank * avgLapTimeInSeconds;
+
+        document.getElementById('est-laps-display').textContent = totalLaps;
+        document.getElementById('stint-duration-display').textContent = formatDuration(stintDuration);
+        document.getElementById('laps-per-stint-display').textContent = lapsPerStint;
+        document.getElementById('pit-stops-display').textContent = totalStints - 1;
+        document.getElementById('total-fuel-display').textContent = (totalLaps * fuelPerLap).toFixed(1) + ' L';
+        document.getElementById('fuel-per-lap-display').textContent = fuelPerLap.toFixed(1) + ' L';
+        document.getElementById('lap-time-display').textContent = `${Math.floor(avgLapTimeInSeconds / 60)}:${(avgLapTimeInSeconds % 60).toFixed(0).padStart(2, '0')}`;
+        document.getElementById('pit-stop-duration-display').textContent = `${pitStopTime} sec`;
+
+        populateStintTable(avgLapTimeInSeconds);
+    }
+    function formatDuration(totalSeconds) {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = Math.floor(totalSeconds % 60);
+        
+        const parts = [];
+        if (hours > 0) parts.push(`${hours}h`);
+        if (minutes > 0) parts.push(`${minutes}m`);
+        if (seconds > 0) parts.push(`${seconds}s`);
+        
+        return parts.length > 0 ? parts.join(' ') : '0s';
+    }
+    function secondsToTimeString(totalSeconds) {
+        const date = new Date(null);
+        date.setSeconds(totalSeconds);
+        const utc = date.toUTCString().substr(11, 8);
+        return utc;
+    }
+    
+    // --- Populating Dropdowns and Lists ---
+
+    function populateDrivers() {
+        const select = document.getElementById('driver-select');
+        select.innerHTML = '<option value="">Select a Driver...</option>';
+        drivers.sort((a, b) => b.iRating - a.iRating).forEach(driver => {
+            const option = document.createElement('option');
+            option.value = driver.name;
+            option.textContent = `${driver.name} (iR: ${driver.iRating}, L: ${driver.license})`;
+            select.appendChild(option);
+        });
+    }
+    function populateCars() {
+        const select = document.getElementById('car-select');
+        select.innerHTML = '<option value="">Select a Car...</option>';
+        cars.forEach(car => {
+            const option = document.createElement('option');
+            option.value = car.name;
+            option.textContent = car.name;
+            select.appendChild(option);
+        });
+    }
+    function populateTracks() {
+        const select = document.getElementById('track-select');
+        select.innerHTML = '<option value="">Select a Track...</option>';
+        tracks.forEach(track => {
+            const option = document.createElement('option');
+            option.value = track.name;
+            option.textContent = track.name;
+            select.appendChild(option);
+        });
+    }
+    function addDriver() {
+        const select = document.getElementById('driver-select');
+        const driverName = select.value;
+        if (driverName && selectedDrivers.length < 6) {
+            const driver = drivers.find(d => d.name === driverName);
+            if (driver && !selectedDrivers.includes(driver)) {
+                selectedDrivers.push(driver);
+                renderDriverList();
+                select.value = '';
             }
+        }
+    }
+    function removeDriver(name) {
+        selectedDrivers = selectedDrivers.filter(driver => driver.name !== name);
+        renderDriverList();
+    }
+    function renderDriverList() {
+        const list = document.getElementById('driver-list');
+        list.innerHTML = '';
+        selectedDrivers.forEach(driver => {
+            const li = document.createElement('li');
+            li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm border border-gray-200';
+            li.innerHTML = `
+                <span class="text-gray-900">${driver.name} (iR: ${driver.iRating})</span>
+                <button onclick="removeDriver('${driver.name}')" class="text-red-500 hover:text-red-700 transition duration-200">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            list.appendChild(li);
+        });
+    }
+    function populateStintTable(avgLapTimeInSeconds) {
+        const tbody = document.getElementById('stint-table-body');
+        tbody.innerHTML = '';
+        const raceStartTimeInput = document.getElementById('race-start-time-page2');
+        const qualifyingMinutesInput = document.getElementById('qualifying-minutes-page2');
+        const raceStartTime = raceStartTimeInput.value.split(':').map(Number);
+        const qualifyingDurationSeconds = (parseInt(qualifyingMinutesInput.value) || 0) * 60;
+        
+        let currentTimeSeconds = (raceStartTime[0] * 3600) + (raceStartTime[1] * 60);
+        let currentLap = 1;
+        let driverIndex = 0;
+
+        for (let i = 0; i < totalStints; i++) {
+            const stintLaps = (i === totalStints - 1) && (lapsInLastStint !== 0) ? lapsInLastStint : lapsPerStint;
+            
+            const startTimeString = secondsToTimeString(currentTimeSeconds + qualifyingDurationSeconds);
+            const endTimeSeconds = currentTimeSeconds + (stintLaps * avgLapTimeInSeconds);
+            const endTimeString = secondsToTimeString(endTimeSeconds + qualifyingDurationSeconds);
+
+            const startLap = currentLap;
+            const endLap = startLap + stintLaps - 1;
+            
+            const driver = selectedDrivers[driverIndex];
+            const nextDriver = selectedDrivers[(driverIndex + 1) % selectedDrivers.length];
+            
+            const tr = document.createElement('tr');
+            tr.className = 'text-gray-700 hover:bg-gray-100 transition-colors duration-200';
+            tr.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap border-r border-gray-300">${startTimeString}</td>
+                <td class="px-6 py-4 whitespace-nowrap border-r border-gray-300">${endTimeString}</td>
+                <td class="px-6 py-4 whitespace-nowrap border-r border-gray-300">${startLap}</td>
+                <td class="px-6 py-4 whitespace-nowrap border-r border-gray-300">${endLap}</td>
+                <td class="px-6 py-4 whitespace-nowrap border-r border-gray-300">${driver.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${nextDriver.name}</td>
+            `;
+            tbody.appendChild(tr);
+
+            currentTimeSeconds = endTimeSeconds;
+            currentLap = endLap + 1;
+            driverIndex = (driverIndex + 1) % selectedDrivers.length;
+        }
+    }
+
+    // --- Share Link Logic ---
+
+    function saveState() {
+        const state = {
+            selectedDrivers: selectedDrivers.map(d => d.name),
+            car: document.getElementById('car-select').value,
+            track: document.getElementById('track-select').value,
+            avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes').value,
+            avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds').value,
+            fuelPerLap: document.getElementById('fuel-per-lap').value,
+            raceDurationHours: document.getElementById('race-duration-hours').value,
+            raceDurationMinutes: document.getElementById('race-duration-minutes').value,
+            tankCapacity: document.getElementById('tank-capacity').value,
+            pitStopTime: document.getElementById('pit-stop-time').value
         };
+        return btoa(JSON.stringify(state));
+    }
+    function generateShareLink() {
+        const stateString = saveState();
+        const shareLink = `${window.location.origin}/?state=${stateString}`;
+        document.getElementById('share-link-output').value = shareLink;
+    }
+    function copyShareLink() {
+        const copyText = document.getElementById("share-link-output");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); 
+        navigator.clipboard.writeText(copyText.value);
+        alert("Link copied to clipboard!");
+    }
+    function loadState(state) {
+        selectedDrivers = state.selectedDrivers.map(name => drivers.find(d => d.name === name)).filter(d => d);
+        renderDriverList();
+        document.getElementById('car-select').value = state.car;
+        document.getElementById('track-select').value = state.track;
+        document.getElementById('avg-lap-time-minutes').value = state.avgLapTimeMinutes;
+        document.getElementById('avg-lap-time-seconds').value = state.avgLapTimeSeconds;
+        document.getElementById('fuel-per-lap').value = state.fuelPerLap;
+        document.getElementById('race-duration-hours').value = state.raceDurationHours;
+        document.getElementById('race-duration-minutes').value = state.raceDurationMinutes;
+        document.getElementById('tank-capacity').value = state.tankCapacity;
+        document.getElementById('pit-stop-time').value = state.pitStopTime;
+        showPage2();
+    }
+    
+    // --- Admin Functions ---
 
-        // Function to fetch data from the server
-        async function fetchDataAndPopulate() {
-            try {
-                const response = await fetch('/api/data');
-                const data = await response.json();
-                drivers = data.drivers;
-                cars = data.cars;
-                tracks = data.tracks;
-                
-                populateDrivers();
-                populateCars();
-                populateTracks();
-
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('state')) {
-                    const decodedState = JSON.parse(atob(urlParams.get('state')));
-                    loadState(decodedState);
-                }
-            } catch (error) {
-                console.error('Failed to fetch data:', error);
-                alert('Could not load data from the server. Please check the server status.');
-            }
+    async function saveDataToServer() {
+        try {
+            await fetch('/api/data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ drivers, cars, tracks: tracks.map(t => ({ name: t })) })
+            });
+            alert('Data saved successfully!');
+        } catch (error) {
+            console.error('Failed to save data:', error);
+            alert('Could not save data to the server.');
         }
+    }
+    
+    function renderAdminLists() {
+        const driverList = document.getElementById('admin-driver-list');
+        const carList = document.getElementById('admin-car-list');
+        const trackList = document.getElementById('admin-track-list');
+        
+        driverList.innerHTML = '';
+        carList.innerHTML = '';
+        trackList.innerHTML = '';
 
-        // Helper function to show pages
-        function showPage1() {
-            document.getElementById('page-1').classList.remove('hidden');
-            document.getElementById('page-2').classList.add('hidden');
-            document.getElementById('admin-page').classList.add('hidden');
-        }
-        function showPage2() {
-            const carSelect = document.getElementById('car-select');
-            const trackSelect = document.getElementById('track-select');
-            if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
-                alert("Please select at least one driver, a car, and a track before continuing.");
-                return;
-            }
-            document.getElementById('page-1').classList.add('hidden');
-            document.getElementById('page-2').classList.remove('hidden');
-            document.getElementById('admin-page').classList.add('hidden');
+        drivers.sort((a, b) => b.iRating - a.iRating).forEach(driver => {
+            const li = document.createElement('li');
+            li.className = 'flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border border-gray-200';
+            li.innerHTML = `
+                <span class="text-gray-900">${driver.name} (iR: ${driver.iRating}, L: ${driver.license})</span>
+                <div>
+                    <button onclick="editDriverAdmin('${driver.name}')" class="text-blue-500 hover:text-blue-700 transition duration-200 mr-2"><i class="fas fa-edit"></i></button>
+                    <button onclick="removeDriverAdmin('${driver.name}')" class="text-red-500 hover:text-red-700 transition duration-200"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            driverList.appendChild(li);
+        });
 
-            // Update Page 2 displays
-            const selectedCar = cars.find(c => c.name === carSelect.value);
-            document.getElementById('car-display').textContent = selectedCar.name;
-            document.getElementById('track-display').textContent = trackSelect.value;
-            document.getElementById('fuel-per-lap').value = selectedCar.fuelPerLap;
-            document.getElementById('tank-capacity').value = selectedCar.tankCapacity;
+        cars.forEach(car => {
+            const li = document.createElement('li');
+            li.className = 'flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border border-gray-200';
+            li.innerHTML = `
+                <span class="text-gray-900">${car.name} (Fuel/Lap: ${car.fuelPerLap} L, Tank: ${car.tankCapacity} L)</span>
+                <div>
+                    <button onclick="editCarAdmin('${car.name}')" class="text-blue-500 hover:text-blue-700 transition duration-200 mr-2"><i class="fas fa-edit"></i></button>
+                    <button onclick="removeCarAdmin('${car.name}')" class="text-red-500 hover:text-red-700 transition duration-200"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            carList.appendChild(li);
+        });
 
-            const totalIRating = selectedDrivers.reduce((sum, driver) => sum + driver.iRating, 0);
-            const sof = Math.round(totalIRating / selectedDrivers.length);
-            document.getElementById('sof-display').textContent = sof;
-            
-            // Show sections and perform initial calculation
-            document.getElementById('overall-summary').classList.remove('hidden');
-            document.getElementById('stint-breakdown-display').classList.remove('hidden');
-            document.getElementById('sliders-container').classList.remove('hidden');
-            document.getElementById('share-link-container').classList.remove('hidden');
-            
-            calculateAndShowPage2();
-        }
-        function showAdminPage() {
-            document.getElementById('page-1').classList.add('hidden');
-            document.getElementById('page-2').classList.add('hidden');
-            document.getElementById('admin-page').classList.remove('hidden');
+        tracks.forEach(track => {
+            const li = document.createElement('li');
+            li.className = 'flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border border-gray-200';
+            li.innerHTML = `
+                <span class="text-gray-900">${track.name}</span>
+                <div>
+                    <button onclick="editTrackAdmin('${track.name}')" class="text-blue-500 hover:text-blue-700 transition duration-200 mr-2"><i class="fas fa-edit"></i></button>
+                    <button onclick="removeTrackAdmin('${track.name}')" class="text-red-500 hover:text-red-700 transition duration-200"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            trackList.appendChild(li);
+        });
+    }
+    function resetDriverAdminForm() {
+        document.getElementById('new-driver-name').value = '';
+        document.getElementById('new-driver-irating').value = '';
+        document.getElementById('new-driver-license').value = '';
+        document.getElementById('add-driver-btn').textContent = 'Add Driver';
+        document.getElementById('add-driver-btn').onclick = addDriverAdmin;
+    }
+    async function addDriverAdmin() {
+        const name = document.getElementById('new-driver-name').value;
+        const iRating = parseInt(document.getElementById('new-driver-irating').value);
+        const license = document.getElementById('new-driver-license').value;
+        if (name && iRating && license) {
+            drivers.push({ name, iRating, license });
+            await saveDataToServer();
             renderAdminLists();
             resetDriverAdminForm();
-            resetCarAdminForm();
-            resetTrackAdminForm();
         }
-
-        // --- Core Logic ---
-
-        function calculateAndShowPage2() {
-            // Your existing calculation logic here
+    }
+    function editDriverAdmin(name) {
+        const driver = drivers.find(d => d.name === name);
+        if (driver) {
+            document.getElementById('new-driver-name').value = driver.name;
+            document.getElementById('new-driver-irating').value = driver.iRating;
+            document.getElementById('new-driver-license').value = driver.license;
+            document.getElementById('add-driver-btn').textContent = 'Update Driver';
+            document.getElementById('add-driver-btn').onclick = () => updateDriverAdmin(name);
         }
-        function formatDuration(totalSeconds) {
-            // Your existing formatDuration logic here
-        }
-        function secondsToTimeString(totalSeconds) {
-            // Your existing secondsToTimeString logic here
-        }
-        
-        // --- Populating Dropdowns and Lists ---
-
-        function populateDrivers() {
-            // Your existing populateDrivers logic here
-        }
-        function populateCars() {
-            // Your existing populateCars logic here
-        }
-        function populateTracks() {
-            // Your existing populateTracks logic here
-        }
-        function addDriver() {
-            // Your existing addDriver logic here
-        }
-        function removeDriver(name) {
-            // Your existing removeDriver logic here
-        }
-        function renderDriverList() {
-            // Your existing renderDriverList logic here
-        }
-        function populateStintTable(avgLapTimeInSeconds) {
-            // Your existing populateStintTable logic here
-        }
-
-        // --- Share Link Logic ---
-
-        function saveState() {
-            // Your existing saveState logic here
-        }
-        function generateShareLink() {
-            // Your existing generateShareLink logic here
-        }
-        function copyShareLink() {
-            // Your existing copyShareLink logic here
-        }
-        function loadState(state) {
-            // Your existing loadState logic here
-        }
-        
-        // --- Admin Functions ---
-
-        async function saveDataToServer() {
-            try {
-                await fetch('/api/data', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ drivers, cars, tracks })
-                });
-            } catch (error) {
-                console.error('Failed to save data:', error);
-                alert('Could not save data to the server.');
+    }
+    async function updateDriverAdmin(originalName) {
+        const name = document.getElementById('new-driver-name').value;
+        const iRating = parseInt(document.getElementById('new-driver-irating').value);
+        const license = document.getElementById('new-driver-license').value;
+        if (name && iRating && license) {
+            const index = drivers.findIndex(d => d.name === originalName);
+            if (index !== -1) {
+                drivers[index] = { name, iRating, license };
+                await saveDataToServer();
+                renderAdminLists();
+                resetDriverAdminForm();
             }
         }
-        
-        function renderAdminLists() {
-            // Your existing renderAdminLists logic here
+    }
+    async function removeDriverAdmin(name) {
+        if (confirm(`Are you sure you want to remove ${name}?`)) {
+            drivers = drivers.filter(d => d.name !== name);
+            await saveDataToServer();
+            renderAdminLists();
         }
-        function resetDriverAdminForm() {
-            // Your existing resetDriverAdminForm logic here
+    }
+    function resetCarAdminForm() {
+        document.getElementById('new-car-name').value = '';
+        document.getElementById('new-car-fuel').value = '';
+        document.getElementById('new-car-tank').value = '';
+        document.getElementById('add-car-btn').textContent = 'Add Car';
+        document.getElementById('add-car-btn').onclick = addCarAdmin;
+    }
+    async function addCarAdmin() {
+        const name = document.getElementById('new-car-name').value;
+        const fuelPerLap = parseFloat(document.getElementById('new-car-fuel').value);
+        const tankCapacity = parseInt(document.getElementById('new-car-tank').value);
+        if (name && fuelPerLap && tankCapacity) {
+            cars.push({ name, fuelPerLap, tankCapacity });
+            await saveDataToServer();
+            renderAdminLists();
+            resetCarAdminForm();
         }
-        async function addDriverAdmin() {
-            // Your existing addDriverAdmin logic here, now with a call to saveDataToServer()
+    }
+    function editCarAdmin(name) {
+        const car = cars.find(c => c.name === name);
+        if (car) {
+            document.getElementById('new-car-name').value = car.name;
+            document.getElementById('new-car-fuel').value = car.fuelPerLap;
+            document.getElementById('new-car-tank').value = car.tankCapacity;
+            document.getElementById('add-car-btn').textContent = 'Update Car';
+            document.getElementById('add-car-btn').onclick = () => updateCarAdmin(name);
         }
-        function editDriverAdmin(name) {
-            // Your existing editDriverAdmin logic here
+    }
+    async function updateCarAdmin(originalName) {
+        const name = document.getElementById('new-car-name').value;
+        const fuelPerLap = parseFloat(document.getElementById('new-car-fuel').value);
+        const tankCapacity = parseInt(document.getElementById('new-car-tank').value);
+        if (name && fuelPerLap && tankCapacity) {
+            const index = cars.findIndex(c => c.name === originalName);
+            if (index !== -1) {
+                cars[index] = { name, fuelPerLap, tankCapacity };
+                await saveDataToServer();
+                renderAdminLists();
+                resetCarAdminForm();
+            }
         }
-        async function updateDriverAdmin(originalName) {
-            // Your existing updateDriverAdmin logic here, now with a call to saveDataToServer()
+    }
+    async function removeCarAdmin(name) {
+        if (confirm(`Are you sure you want to remove ${name}?`)) {
+            cars = cars.filter(c => c.name !== name);
+            await saveDataToServer();
+            renderAdminLists();
         }
-        async function removeDriverAdmin(name) {
-            // Your existing removeDriverAdmin logic here, now with a call to saveDataToServer()
+    }
+    function resetTrackAdminForm() {
+        document.getElementById('new-track-name').value = '';
+        document.getElementById('add-track-btn').textContent = 'Add Track';
+        document.getElementById('add-track-btn').onclick = addTrackAdmin;
+    }
+    async function addTrackAdmin() {
+        const name = document.getElementById('new-track-name').value;
+        if (name) {
+            tracks.push({ name });
+            await saveDataToServer();
+            renderAdminLists();
+            resetTrackAdminForm();
         }
-        function resetCarAdminForm() {
-            // Your existing resetCarAdminForm logic here
+    }
+    function editTrackAdmin(name) {
+        const track = tracks.find(t => t.name === name);
+        if (track) {
+            document.getElementById('new-track-name').value = track.name;
+            document.getElementById('add-track-btn').textContent = 'Update Track';
+            document.getElementById('add-track-btn').onclick = () => updateTrackAdmin(name);
         }
-        async function addCarAdmin() {
-            // Your existing addCarAdmin logic here, now with a call to saveDataToServer()
+    }
+    async function updateTrackAdmin(originalName) {
+        const name = document.getElementById('new-track-name').value;
+        if (name) {
+            const index = tracks.findIndex(t => t.name === originalName);
+            if (index !== -1) {
+                tracks[index] = { name };
+                await saveDataToServer();
+                renderAdminLists();
+                resetTrackAdminForm();
+            }
         }
-        function editCarAdmin(name) {
-            // Your existing editCarAdmin logic here
+    }
+    async function removeTrackAdmin(name) {
+        if (confirm(`Are you sure you want to remove ${name}?`)) {
+            tracks = tracks.filter(t => t.name !== name);
+            await saveDataToServer();
+            renderAdminLists();
         }
-        async function updateCarAdmin(originalName) {
-            // Your existing updateCarAdmin logic here, now with a call to saveDataToServer()
-        }
-        async function removeCarAdmin(name) {
-            // Your existing removeCarAdmin logic here, now with a call to saveDataToServer()
-        }
-        function resetTrackAdminForm() {
-            // Your existing resetTrackAdminForm logic here
-        }
-        async function addTrackAdmin() {
-            // Your existing addTrackAdmin logic here, now with a call to saveDataToServer()
-        }
-        function editTrackAdmin(name) {
-            // Your existing editTrackAdmin logic here
-        }
-        async function updateTrackAdmin(originalName) {
-            // Your existing updateTrackAdmin logic here, now with a call to saveDataToServer()
-        }
-        async function removeTrackAdmin(name) {
-            // Your existing removeTrackAdmin logic here, now with a call to saveDataToServer()
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
