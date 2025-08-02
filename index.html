@@ -256,6 +256,14 @@
                                 <label for="new-car-name" class="text-sm font-medium text-gray-700">Car Name</label>
                                 <input type="text" id="new-car-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
+                            <div>
+                                <label for="new-car-fuel" class="text-sm font-medium text-gray-700">Fuel Per Lap (L)</label>
+                                <input type="number" id="new-car-fuel" step="0.1" class="mt-1 p-3 border border-gray-300 rounded-lg w-32 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="new-car-tank" class="text-sm font-medium text-gray-700">Tank Capacity (L)</label>
+                                <input type="number" id="new-car-tank" class="mt-1 p-3 border border-gray-300 rounded-lg w-32 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
                             <button id="add-car-btn" onclick="addCarAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                                 Add Car
                             </button>
@@ -896,4 +904,3 @@
     </script>
 </body>
 </html>
-
