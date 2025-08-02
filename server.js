@@ -49,7 +49,7 @@ app.post('/api/data', async (req, res) => {
 
     // Insert new drivers
     for (const driver of drivers) {
-      await pool.query('INSERT INTO drivers (name, irating, license) VALUES ($1, $2, $3)', [driver.name, driver.iRating, driver.license]);
+      await pool.query('INSERT INTO drivers (name, drivernumber, irating, license) VALUES ($1, $2, $3, $4)', [driver.name, driver.drivernumber, driver.iRating, driver.license]);
     }
 
     // Insert new cars
@@ -72,7 +72,3 @@ app.post('/api/data', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-
-
-
