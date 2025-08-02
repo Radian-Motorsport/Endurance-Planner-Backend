@@ -23,21 +23,16 @@ app.get('/', (req, res) => {
 
 // API endpoint to get all data from the database
 app.get('/api/data', async (req, res) => {
-  try {
-    const driversResult = await pool.query('SELECT * FROM drivers');
-    const carsResult = await pool.query('SELECT * FROM cars');
-    const tracksResult = await pool.query('SELECT * FROM tracks');
+    try {
+        const driversResult = await db.query('SELECT * FROM drivers');
+        // const carsResult = await db.query('SELECT * FROM cars');
+        // const tracksResult = await db.query('SELECT * FROM tracks');
 
-    const data = {
-      drivers: driversResult.rows,
-      cars: carsResult.rows,
-      tracks: tracksResult.rows.map(t => ({ name: t.name })),
-    };
-    res.json(data);
-  } catch (error) {
-    console.error('Failed to retrieve data:', error);
-    res.status(500).json({ error: 'Failed to retrieve data' });
-  }
+        res.json({ drivers: driversResult.rows });
+    } catch (err) {
+        console.error('Error fetching data:', err);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
 // API endpoint to save all data to the database
@@ -73,3 +68,4 @@ app.post('/api/data', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
