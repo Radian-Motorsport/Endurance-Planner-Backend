@@ -1,60 +1,84 @@
-// server.js
 const express = require('express');
-const fs = require('fs').promises; // Use the promise-based version of fs
-const path = require('path');
 const cors = require('cors');
-const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const DATA_DIR = 'data';
+const PORT = 3000;
+const DB_FILE = 'db.json';
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-async function ensureDataDirectory() {
-    try {
-        await fs.mkdir(DATA_DIR, { recursive: true });
-        console.log(`Directory created: ${DATA_DIR}`);
-    } catch (err) {
-        console.error('Error creating data directory:', err);
-    }
+// Read data from the "database"
+function readDb() {
+  const data = fs.readFileSync(DB_FILE);
+  return JSON.parse(data);
 }
 
-app.post('/api/strategy', async (req, res) => {
-    try {
-        const strategyData = req.body;
-        let strategyId = strategyData.id;
+// Write data to the "database"
+function writeDb(data) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+}
 
-        if (!strategyId) {
-            strategyId = uuidv4();
-            strategyData.id = strategyId;
-        }
+// API Routes
+app.get('/api/data', (req, res) => {
+  const data = readDb();
+  res.json(data);
+});
 
-        const filePath = path.join(DATA_DIR, `${strategyId}.json`);
-        await fs.writeFile(filePath, JSON.stringify(strategyData, null, 2));
+app.post('/api/drivers', (req, res) => {
+  const newDriver = req.body;
+  const db = readDb();
+  db.drivers.push(newDriver);
+  writeDb(db);
+  res.status(201).json(newDriver);
+});
 
-        res.status(200).json({ id: strategyId, message: 'Strategy saved successfully.' });
-    } catch (error) {
-        console.error('Failed to save strategy:', error);
-        res.status(500).json({ message: 'Error saving strategy.' });
+app.post('/api/cars', (req, res) => {
+  const newCar = req.body;
+  const db = readDb();
+  db.cars.push(newCar);
+  writeDb(db);
+  res.status(201).json(newCar);
+});
+
+app.post('/api/tracks', (req, res) => {
+  const newTrack = req.body;
+  const db = readDb();
+  db.tracks.push(newTrack);
+  writeDb(db);
+  res.status(201).json(newTrack);
+});
+
+// A simple API to save/load a full strategy
+app.post('/api/strategy', (req, res) => {
+    const newStrategy = req.body;
+    const db = readDb();
+    
+    // Assign a simple ID for now
+    const newId = Math.random().toString(36).substring(2, 9);
+    newStrategy.id = newId;
+
+    // A mock "strategies" array in the db.json
+    if (!db.strategies) {
+        db.strategies = [];
+    }
+    db.strategies.push(newStrategy);
+    writeDb(db);
+    res.status(201).json({ id: newId });
+});
+
+app.get('/api/strategy/:id', (req, res) => {
+    const db = readDb();
+    const strategy = db.strategies.find(s => s.id === req.params.id);
+    if (strategy) {
+        res.json(strategy);
+    } else {
+        res.status(404).send('Strategy not found');
     }
 });
 
-app.get('/api/strategy/:id', async (req, res) => {
-    const { id } = req.params;
-    const filePath = path.join(DATA_DIR, `${id}.json`);
-
-    try {
-        const data = await fs.readFile(filePath, 'utf8');
-        res.status(200).json(JSON.parse(data));
-    } catch (error) {
-        console.error(`Strategy with ID ${id} not found:`, error);
-        res.status(404).json({ message: 'Strategy not found.' });
-    }
-});
-
-app.listen(PORT, async () => {
-    await ensureDataDirectory();
-    console.log(`Server is running on port ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
