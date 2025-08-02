@@ -415,8 +415,8 @@
             let avgLapTimeInSeconds = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
 
             const selectedCar = cars.find(c => c.name === document.getElementById('car-select').value);
-            let fuelPerLap = parseFloat(selectedCar.fuelPerLap) || 0;
-            const tankCapacity = parseInt(selectedCar.tankCapacity) || 0;
+            let fuelPerLap = parseFloat(selectedCar.fuel_per_lap) || 0;
+            const tankCapacity = parseInt(selectedCar.tank_capacity) || 0;
             const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
             
             // Check if essential fields are filled
@@ -702,7 +702,7 @@
                 const li = document.createElement('li');
                 li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
                 li.innerHTML = `
-                    <span>${car.name} (Fuel/Lap: ${car.fuelPerLap} L, Tank: ${car.tankCapacity} L)</span>
+                    <span>${car.name} (Fuel/Lap: ${car.fuel_per_lap} L, Tank: ${car.tank_capacity} L)</span>
                     <div class="space-x-2">
                         <button onclick="editCarAdmin('${car.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
                         <button onclick="removeCarAdmin('${car.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
@@ -879,3 +879,4 @@
     </script>
 </body>
 </html>
+
