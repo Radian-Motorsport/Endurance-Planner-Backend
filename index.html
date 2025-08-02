@@ -340,7 +340,18 @@
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const stateParam = urlParams.get('state');
-                if (stateParam) {
+                const idParam = urlParams.get('id');
+
+                if (idParam) {
+                    try {
+                        const strategyResponse = await fetch(`/api/strategies/${idParam}`);
+                        const strategyData = await strategyResponse.json();
+                        loadState(strategyData);
+                    } catch (e) {
+                        console.error('Failed to load strategy from database:', e);
+                        alert('Could not load saved strategy from the database.');
+                    }
+                } else if (stateParam) {
                     try {
                         const decodedState = JSON.parse(atob(stateParam));
                         loadState(decodedState);
@@ -595,7 +606,20 @@
             }
         }
         
-        function generateShareLink() {
+        async function saveStrategyToDatabase(state) {
+            const response = await fetch('/api/strategies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(state)
+            });
+            if (!response.ok) {
+                throw new Error('Failed to save strategy.');
+            }
+            const data = await response.json();
+            return data.id;
+        }
+
+        async function generateShareLink() {
             const state = {
                 drivers: selectedDrivers.map(d => d.name),
                 car: document.getElementById('car-select').value,
@@ -612,9 +636,15 @@
                 raceStartTime: document.getElementById('race-start-time-page2').value,
                 qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
             };
-            const encodedState = btoa(JSON.stringify(state));
-            const shareLink = `${window.location.origin}${window.location.pathname}?state=${encodedState}`;
-            document.getElementById('share-link-output').value = shareLink;
+            
+            try {
+                const uniqueId = await saveStrategyToDatabase(state);
+                const shareLink = `${window.location.origin}${window.location.pathname}?id=${uniqueId}`;
+                document.getElementById('share-link-output').value = shareLink;
+            } catch (error) {
+                console.error('Error generating share link:', error);
+                alert('Failed to generate a shareable link. Please check server connection.');
+            }
         }
 
         function copyShareLink() {
