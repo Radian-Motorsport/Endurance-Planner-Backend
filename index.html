@@ -129,11 +129,11 @@
                         </div>
                         <div class="flex flex-col">
                             <label for="fuel-per-lap-display-input" class="text-sm font-medium text-gray-700">Fuel Use per Lap (L)</label>
-                            <input type="number" id="fuel-per-lap-display-input" readonly class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-gray-100 cursor-not-allowed">
+                            <input type="number" id="fuel-per-lap-display-input" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                         <div class="flex flex-col">
                             <label for="tank-capacity-display-input" class="text-sm font-medium text-gray-700">Fuel Tank Size (L)</label>
-                            <input type="number" id="tank-capacity-display-input" readonly class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-gray-100 cursor-not-allowed">
+                            <input type="number" id="tank-capacity-display-input" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                     </div>
                     <div class="mt-4 flex justify-end">
@@ -401,13 +401,6 @@
             document.getElementById('page2-car').textContent = carSelect.value;
             const driverNames = selectedDrivers.map(d => d.name).join(', ');
             document.getElementById('page2-drivers').textContent = driverNames;
-
-            // Populate new read-only fields on Page 2
-            const selectedCar = cars.find(c => c.name === carSelect.value);
-            if (selectedCar) {
-                document.getElementById('fuel-per-lap-display-input').value = selectedCar.fuel_per_lap;
-                document.getElementById('tank-capacity-display-input').value = selectedCar.tank_capacity;
-            }
         }
 
         // --- Core Logic ---
@@ -421,9 +414,8 @@
             const avgLapTimeSeconds = parseInt(document.getElementById('avg-lap-time-seconds').value) || 0;
             let avgLapTimeInSeconds = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
 
-            const selectedCar = cars.find(c => c.name === document.getElementById('car-select').value);
-            let fuelPerLap = parseFloat(selectedCar.fuel_per_lap) || 0;
-            const tankCapacity = parseInt(selectedCar.tank_capacity) || 0;
+            let fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input').value) || 0;
+            const tankCapacity = parseInt(document.getElementById('tank-capacity-display-input').value) || 0;
             const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
             
             // Check if essential fields are filled
@@ -613,6 +605,8 @@
                 avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes').value,
                 avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds').value,
                 pitStopTime: document.getElementById('pit-stop-time').value,
+                fuelPerLapInput: document.getElementById('fuel-per-lap-display-input').value,
+                tankCapacityInput: document.getElementById('tank-capacity-display-input').value,
                 fuelSlider: document.getElementById('fuel-slider').value,
                 lapTimeSlider: document.getElementById('lap-time-slider').value,
                 raceStartTime: document.getElementById('race-start-time-page2').value,
@@ -652,6 +646,8 @@
             document.getElementById('avg-lap-time-minutes').value = state.avgLapTimeMinutes;
             document.getElementById('avg-lap-time-seconds').value = state.avgLapTimeSeconds;
             document.getElementById('pit-stop-time').value = state.pitStopTime;
+            document.getElementById('fuel-per-lap-display-input').value = state.fuelPerLapInput;
+            document.getElementById('tank-capacity-display-input').value = state.tankCapacityInput;
             
             document.getElementById('fuel-slider').value = state.fuelSlider;
             document.getElementById('lap-time-slider').value = state.lapTimeSlider;
