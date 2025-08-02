@@ -27,9 +27,7 @@ async function createTables() {
         `;
         const createCarsTable = `
             CREATE TABLE IF NOT EXISTS cars (
-                name VARCHAR(255) PRIMARY KEY,
-                fuel_per_lap NUMERIC,
-                tank_capacity INT
+                name VARCHAR(255) PRIMARY KEY
             );
         `;
         const createTracksTable = `
@@ -94,7 +92,7 @@ app.post('/api/data', async (req, res) => {
 
     // Insert new cars
     for (const car of cars) {
-      await pool.query('INSERT INTO cars (name,) VALUES ($1)', [car.name]);
+      await pool.query('INSERT INTO cars (name) VALUES ($1)', [car.name]);
     }
 
     // Insert new tracks
