@@ -1,0 +1,17 @@
+{
+  "name": "strategy-planner-backend",
+  "version": "1.0.0",
+  "description": "Backend for the Sim Racing Strategy Planner",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "uuid": "^9.0.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
