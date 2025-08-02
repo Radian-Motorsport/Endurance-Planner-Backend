@@ -8,6 +8,9 @@ const PORT = process.env.PORT || 3000;
 // Use the DATABASE_URL environment variable from Render
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 app.use(express.json());
@@ -24,7 +27,7 @@ app.get('/api/data', async (req, res) => {
     const driversResult = await pool.query('SELECT * FROM drivers');
     const carsResult = await pool.query('SELECT * FROM cars');
     const tracksResult = await pool.query('SELECT * FROM tracks');
-    
+
     const data = {
       drivers: driversResult.rows,
       cars: carsResult.rows,
@@ -49,7 +52,7 @@ app.post('/api/data', async (req, res) => {
     for (const driver of drivers) {
       await pool.query('INSERT INTO drivers (name, irating, license) VALUES ($1, $2, $3)', [driver.name, driver.iRating, driver.license]);
     }
-    
+
     // Insert new cars
     for (const car of cars) {
       await pool.query('INSERT INTO cars (name, fuel_per_lap, tank_capacity) VALUES ($1, $2, $3)', [car.name, car.fuelPerLap, car.tankCapacity]);
@@ -59,7 +62,7 @@ app.post('/api/data', async (req, res) => {
     for (const track of tracks) {
       await pool.query('INSERT INTO tracks (name) VALUES ($1)', [track.name]);
     }
-    
+
     res.status(200).json({ message: 'Data saved successfully' });
   } catch (error) {
     console.error('Failed to save data:', error);
