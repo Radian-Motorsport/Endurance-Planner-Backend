@@ -333,11 +333,14 @@
 
     <script>
         // Check for saved preference and set it on page load
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-            document.getElementById('darkModeSwitch').checked = true;
-        } else {
-            document.documentElement.classList.remove('dark');
+        function setInitialTheme() {
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('darkModeSwitch').checked = true;
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('darkModeSwitch').checked = false;
+            }
         }
 
         // Listen for the toggle switch click
@@ -366,6 +369,7 @@
 
         // On initial page load
         window.onload = function() {
+            setInitialTheme();
             fetchDataAndPopulate();
 
             // Event listeners for dynamic sliders
