@@ -85,6 +85,23 @@
                     <h2 class="text-2xl font-bold text-gray-700">Race Strategy</h2>
                 </div>
 
+                <div class="p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div>
+                            <span class="text-blue-800 font-semibold">Track:</span>
+                            <span id="page2-track" class="text-gray-900"></span>
+                        </div>
+                        <div>
+                            <span class="text-blue-800 font-semibold">Car:</span>
+                            <span id="page2-car" class="text-gray-900"></span>
+                        </div>
+                        <div>
+                            <span class="text-blue-800 font-semibold">Drivers:</span>
+                            <span id="page2-drivers" class="text-gray-900"></span>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="race-inputs-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
                     <h3 class="text-xl font-semibold mb-4 text-gray-800">Race Inputs</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -373,6 +390,12 @@
             document.getElementById('stint-breakdown-display').classList.add('hidden');
             document.getElementById('sliders-container').classList.add('hidden');
             document.getElementById('share-link-container').classList.add('hidden');
+
+            // Populate the new display elements with the selected data
+            document.getElementById('page2-track').textContent = trackSelect.value;
+            document.getElementById('page2-car').textContent = carSelect.value;
+            const driverNames = selectedDrivers.map(d => d.name).join(', ');
+            document.getElementById('page2-drivers').textContent = driverNames;
         }
 
         // --- Core Logic ---
