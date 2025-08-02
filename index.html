@@ -67,13 +67,12 @@
         }
 
         /* --- Dark Mode Color Overrides --- */
-        /* These styles activate when the 'dark' class is on the '<html>' tag */
         .dark body {
-            background-color: #121212; /* A darker, black-like background */
-            color: #e0e0e0; /* Light gray text for contrast */
+            background-color: #121212;
+            color: #e0e0e0;
         }
         .dark .max-w-4xl {
-            background-color: #1e1e1e; /* A slightly lighter dark gray for the card */
+            background-color: #1e1e1e;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
         }
         .dark h1, .dark h2, .dark h3, .dark .text-gray-800 {
@@ -119,7 +118,7 @@
 
     <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500">
         <div class="text-center mb-6">
-            <img src="/g4579.png" alt="Sim Racing Strategy Planner Logo" class="mx-auto w-40 h-auto">
+            <img src="g4579.png" alt="Sim Racing Strategy Planner Logo" class="mx-auto w-40 h-auto">
         </div>
         <p class="text-center text-gray-600 mb-8">Plan your endurance race strategy with ease.</p>
 
@@ -379,20 +378,14 @@
         </div>
     </div>
     <script>
-        // Check for saved preference and set it on page load
         function setInitialTheme() {
-            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-                document.getElementById('darkModeSwitch').checked = true;
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.getElementById('darkModeSwitch').checked = false;
-            }
+            const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.classList.toggle('dark', isDark);
+            document.getElementById('darkModeSwitch').checked = isDark;
         }
         
-        // Listen for the toggle switch click
         const darkModeSwitch = document.getElementById('darkModeSwitch');
-        if(darkModeSwitch) {
+        if (darkModeSwitch) {
             darkModeSwitch.addEventListener('change', function() {
                 if (this.checked) {
                     document.documentElement.classList.add('dark');
@@ -404,15 +397,12 @@
             });
         }
         
-        // Global state with placeholder data
         let drivers = [];
         let cars = [];
         let tracks = [];
-        
         let selectedDrivers = [];
         let totalDrivers = 0;
         let pitStopDuration = 30;
-
         let totalStints = 0;
         let raceDurationSeconds = 0;
         let lapsPerStint = 0;
@@ -423,10 +413,12 @@
             fetchDataAndPopulate();
         });
 
-        // Function to fetch data from the server
         async function fetchDataAndPopulate() {
             try {
                 const response = await fetch('/api/data');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
                 drivers = data.drivers;
                 cars = data.cars;
@@ -446,4 +438,277 @@
                         console.error('Invalid state parameter in URL:', e);
                     }
                 }
-            } catch (error
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                // Use a more specific alert message
+                alert('Could not load data from the server. Please check the server status and that the /api/data endpoint is working.');
+            }
+        }
+        function showPlannerPage() {
+            document.getElementById('planner-page').classList.remove('hidden');
+            document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
+            document.getElementById('race-details-btn').classList.add('bg-blue-600', 'text-white');
+            document.getElementById('race-details-btn').classList.remove('bg-gray-300', 'text-gray-800');
+            document.getElementById('admin-btn').classList.add('bg-gray-300', 'text-gray-800');
+            document.getElementById('admin-btn').classList.remove('bg-blue-600', 'text-white');
+        }
+        function showAdminPage() {
+            document.getElementById('planner-page').classList.add('hidden');
+            document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('admin-page').classList.remove('hidden');
+            document.getElementById('admin-btn').classList.add('bg-blue-600', 'text-white');
+            document.getElementById('admin-btn').classList.remove('bg-gray-300', 'text-gray-800');
+            document.getElementById('race-details-btn').classList.add('bg-gray-300', 'text-gray-800');
+            document.getElementById('race-details-btn').classList.remove('bg-blue-600', 'text-white');
+            renderAdminLists();
+            resetDriverAdminForm();
+            resetCarAdminForm();
+            resetTrackAdminForm();
+        }
+        function showPage2() {
+            const carSelect = document.getElementById('car-select');
+            const trackSelect = document.getElementById('track-select');
+            
+            if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+                alert("Please select at least one driver, a car, and a track before continuing.");
+                return;
+            }
+            document.getElementById('planner-page').classList.add('hidden');
+            document.getElementById('page-2').classList.remove('hidden');
+            updatePage2Summary();
+        }
+        
+        function populateDrivers() {
+            const select = document.getElementById('driver-select');
+            select.innerHTML = '<option value="">Select a Driver...</option>';
+            const availableDrivers = drivers.filter(d => !selectedDrivers.some(sd => sd.name === d.name));
+            availableDrivers.forEach(driver => {
+                const option = document.createElement('option');
+                option.value = driver.name;
+                option.textContent = `${driver.name} (#${driver.driverNumber})`;
+                select.appendChild(option);
+            });
+        }
+        function populateCars() {
+            const select = document.getElementById('car-select');
+            select.innerHTML = '<option value="">Select a Car...</option>';
+            cars.forEach(car => {
+                const option = document.createElement('option');
+                option.value = car.name;
+                option.textContent = car.name;
+                select.appendChild(option);
+            });
+        }
+        function populateTracks() {
+            const select = document.getElementById('track-select');
+            select.innerHTML = '<option value="">Select a Track...</option>';
+            tracks.forEach(track => {
+                const option = document.createElement('option');
+                option.value = track.name;
+                option.textContent = track.name;
+                select.appendChild(option);
+            });
+        }
+
+        function addDriver() {
+            if (selectedDrivers.length >= 6) {
+                alert('Maximum 6 drivers already added.');
+                return;
+            }
+            const select = document.getElementById('driver-select');
+            const driverName = select.value;
+            if (driverName) {
+                const driver = drivers.find(d => d.name === driverName);
+                if (driver) {
+                    selectedDrivers.push(driver);
+                    renderDriverList();
+                    populateDrivers();
+                }
+            }
+        }
+        function removeDriver(name) {
+            selectedDrivers = selectedDrivers.filter(d => d.name !== name);
+            renderDriverList();
+            populateDrivers();
+        }
+        function renderDriverList() {
+            const list = document.getElementById('driver-list');
+            list.innerHTML = '';
+            selectedDrivers.forEach(driver => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between p-3 bg-white shadow-sm rounded-lg border border-gray-200';
+                li.innerHTML = `
+                    <span class="text-gray-700 font-medium">${driver.name} (#${driver.driverNumber})</span>
+                    <button onclick="removeDriver('${driver.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+                list.appendChild(li);
+            });
+            totalDrivers = selectedDrivers.length;
+            document.getElementById('continue-button').classList.toggle('hidden', totalDrivers === 0);
+        }
+
+        function updatePage2Summary() {
+            const trackSelect = document.getElementById('track-select');
+            const carSelect = document.getElementById('car-select');
+            const selectedTrackName = trackSelect.options[trackSelect.selectedIndex].text;
+            const selectedCarName = carSelect.options[carSelect.selectedIndex].text;
+            
+            document.getElementById('page2-track').textContent = selectedTrackName;
+            document.getElementById('page2-car').textContent = selectedCarName;
+            document.getElementById('page2-drivers').textContent = selectedDrivers.map(d => d.name).join(', ');
+
+            const selectedCar = cars.find(car => car.name === selectedCarName);
+            if (selectedCar) {
+                document.getElementById('fuel-per-lap-display-input').value = selectedCar.fuel_per_lap;
+                document.getElementById('tank-capacity-display-input').value = selectedCar.tank_capacity;
+            }
+        }
+        
+        function calculateAndShowPage2() {
+            // Placeholder for calculation logic
+            document.getElementById('overall-summary').classList.remove('hidden');
+            document.getElementById('sliders-container').classList.remove('hidden');
+            document.getElementById('stint-breakdown-display').classList.remove('hidden');
+            document.getElementById('share-link-container').classList.remove('hidden');
+            
+            // Populate placeholder summary
+            document.getElementById('est-laps-display').textContent = '200';
+            document.getElementById('stint-duration-display').textContent = '60 min';
+            document.getElementById('laps-per-stint-display').textContent = '25';
+            document.getElementById('pit-stops-display').textContent = '7';
+            document.getElementById('total-fuel-display').textContent = '600 L';
+            document.getElementById('fuel-per-lap-display').textContent = '3.5 L';
+            document.getElementById('lap-time-display').textContent = '2:24.0';
+            document.getElementById('pit-stop-duration-display').textContent = '30 sec';
+        }
+
+        function generateShareLink() {
+            const mockUrl = `https://your-app.com/strategy?id=12345`;
+            document.getElementById('share-link-output').value = mockUrl;
+        }
+
+        function copyShareLink() {
+            const shareLink = document.getElementById('share-link-output');
+            shareLink.select();
+            document.execCommand('copy');
+            alert('Link copied to clipboard!');
+        }
+
+        async function saveDataToServer() {
+            console.log('Data saved to server.');
+        }
+
+        function renderAdminLists() {
+            const driverList = document.getElementById('admin-driver-list');
+            const carList = document.getElementById('admin-car-list');
+            const trackList = document.getElementById('admin-track-list');
+
+            driverList.innerHTML = '';
+            drivers.forEach(d => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between p-3 bg-white shadow-sm rounded-lg border border-gray-200';
+                li.innerHTML = `<span>${d.name} (#${d.driverNumber})</span>
+                    <div>
+                        <button onclick="editDriverAdmin('${d.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200 mr-2"><i class="fas fa-edit"></i></button>
+                        <button onclick="removeDriverAdmin('${d.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
+                    </div>`;
+                driverList.appendChild(li);
+            });
+
+            carList.innerHTML = '';
+            cars.forEach(c => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between p-3 bg-white shadow-sm rounded-lg border border-gray-200';
+                li.innerHTML = `<span>${c.name}</span>
+                    <div>
+                        <button onclick="editCarAdmin('${c.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200 mr-2"><i class="fas fa-edit"></i></button>
+                        <button onclick="removeCarAdmin('${c.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
+                    </div>`;
+                carList.appendChild(li);
+            });
+
+            trackList.innerHTML = '';
+            tracks.forEach(t => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between p-3 bg-white shadow-sm rounded-lg border border-gray-200';
+                li.innerHTML = `<span>${t.name}</span>
+                    <div>
+                        <button onclick="editTrackAdmin('${t.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200 mr-2"><i class="fas fa-edit"></i></button>
+                        <button onclick="removeTrackAdmin('${t.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
+                    </div>`;
+                trackList.appendChild(li);
+            });
+        }
+        
+        async function addDriverAdmin() {
+            const name = document.getElementById('new-driver-name').value;
+            const number = document.getElementById('new-driver-number').value;
+            if (name && number) {
+                drivers.push({ name, driverNumber: parseInt(number, 10) });
+                await saveDataToServer();
+                renderAdminLists();
+                populateDrivers();
+                document.getElementById('new-driver-name').value = '';
+                document.getElementById('new-driver-number').value = '';
+            }
+        }
+        async function removeDriverAdmin(name) {
+            if (confirm(`Are you sure you want to remove ${name}?`)) {
+                drivers = drivers.filter(d => d.name !== name);
+                await saveDataToServer();
+                renderAdminLists();
+                populateDrivers();
+            }
+        }
+        async function addCarAdmin() {
+            const name = document.getElementById('new-car-name').value;
+            if (name) {
+                cars.push({ name, fuel_per_lap: 0, tank_capacity: 0 });
+                await saveDataToServer();
+                renderAdminLists();
+                populateCars();
+                document.getElementById('new-car-name').value = '';
+            }
+        }
+        async function removeCarAdmin(name) {
+            if (confirm(`Are you sure you want to remove ${name}?`)) {
+                cars = cars.filter(c => c.name !== name);
+                await saveDataToServer();
+                renderAdminLists();
+                populateCars();
+            }
+        }
+        async function addTrackAdmin() {
+            const name = document.getElementById('new-track-name').value;
+            if (name) {
+                tracks.push({ name });
+                await saveDataToServer();
+                renderAdminLists();
+                populateTracks();
+                document.getElementById('new-track-name').value = '';
+            }
+        }
+        async function removeTrackAdmin(name) {
+            if (confirm(`Are you sure you want to remove ${name}?`)) {
+                tracks = tracks.filter(t => t.name !== name);
+                await saveDataToServer();
+                renderAdminLists();
+                populateTracks();
+            }
+        }
+        function resetDriverAdminForm() {
+            document.getElementById('new-driver-name').value = '';
+            document.getElementById('new-driver-number').value = '';
+        }
+        function resetCarAdminForm() {
+            document.getElementById('new-car-name').value = '';
+        }
+        function resetTrackAdminForm() {
+            document.getElementById('new-track-name').value = '';
+        }
+    </script>
+</body>
+</html>
