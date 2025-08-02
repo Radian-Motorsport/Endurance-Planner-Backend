@@ -70,7 +70,22 @@
                     </div>
                 </div>
 
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
+                <div class="mt-8">
+                    <button onclick="showPage2()" id="continue-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                        Calculate <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="page-2" class="space-y-6 hidden">
+                <div class="flex items-center space-x-4 mb-6">
+                    <button onclick="showPlannerPage()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                        <i class="fas fa-arrow-left mr-2"></i> Back
+                    </button>
+                    <h2 class="text-2xl font-bold text-gray-700">Race Strategy</h2>
+                </div>
+
+                <div id="race-inputs-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
                     <h3 class="text-xl font-semibold mb-4 text-gray-800">Race Inputs</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="flex flex-col">
@@ -96,21 +111,11 @@
                             <input type="number" id="pit-stop-time" value="30" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                     </div>
-                </div>
-
-                <div class="mt-8">
-                    <button onclick="showPage2()" id="continue-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                        Calculate <i class="fas fa-arrow-right ml-2"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div id="page-2" class="space-y-6 hidden">
-                <div class="flex items-center space-x-4 mb-6">
-                    <button onclick="showPlannerPage()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                        <i class="fas fa-arrow-left mr-2"></i> Back
-                    </button>
-                    <h2 class="text-2xl font-bold text-gray-700">Race Details & Strategy</h2>
+                    <div class="mt-4 flex justify-end">
+                        <button id="calculate-page2-button" onclick="calculateAndShowPage2()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
+                            Calculate
+                        </button>
+                    </div>
                 </div>
 
                 <div id="overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg hidden">
@@ -311,6 +316,17 @@
                 populateCars();
                 populateTracks();
 
+                const urlParams = new URLSearchParams(window.location.search);
+                const stateParam = urlParams.get('state');
+                if (stateParam) {
+                    try {
+                        const decodedState = JSON.parse(atob(stateParam));
+                        loadState(decodedState);
+                    } catch (e) {
+                        console.error('Invalid state parameter in URL:', e);
+                    }
+                }
+
             } catch (error) {
                 console.error('Failed to fetch data:', error);
                 alert('Could not load data from the server. Please check the server status.');
@@ -343,68 +359,50 @@
         function showPage2() {
             const carSelect = document.getElementById('car-select');
             const trackSelect = document.getElementById('track-select');
-            const raceDurationHours = parseInt(document.getElementById('race-duration-hours').value) || 0;
-            const raceDurationMinutes = parseInt(document.getElementById('race-duration-minutes').value) || 0;
-            const avgLapTimeMinutes = parseInt(document.getElementById('avg-lap-time-minutes').value) || 0;
-            const avgLapTimeSeconds = parseInt(document.getElementById('avg-lap-time-seconds').value) || 0;
             
-            if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value || (raceDurationHours === 0 && raceDurationMinutes === 0) || (avgLapTimeMinutes === 0 && avgLapTimeSeconds === 0)) {
-                alert("Please select at least one driver, a car, a track, and input a race duration and average lap time before continuing.");
+            if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+                alert("Please select at least one driver, a car, and a track before continuing.");
                 return;
             }
             document.getElementById('planner-page').classList.add('hidden');
             document.getElementById('page-2').classList.remove('hidden');
             document.getElementById('admin-page').classList.add('hidden');
-
-            // Update Page 2 displays
-            const selectedCar = cars.find(c => c.name === carSelect.value);
-            // document.getElementById('car-display').textContent = selectedCar.name;
-            // document.getElementById('track-display').textContent = trackSelect.value;
             
-            // Set fuel and tank inputs from selected car
-            // document.getElementById('fuel-per-lap').value = selectedCar.fuelPerLap;
-            // document.getElementById('tank-capacity').value = selectedCar.tankCapacity;
-
-            const totalIRating = selectedDrivers.reduce((sum, driver) => sum + driver.iRating, 0);
-            const sof = Math.round(totalIRating / selectedDrivers.length);
-            // document.getElementById('sof-display').textContent = sof;
-            
-            // Show sections and perform initial calculation
-            document.getElementById('overall-summary').classList.remove('hidden');
-            document.getElementById('stint-breakdown-display').classList.remove('hidden');
-            document.getElementById('sliders-container').classList.remove('hidden');
-            document.getElementById('share-link-container').classList.remove('hidden');
-            
-            calculateAndShowPage2();
+            // Re-hide results sections until calculation is run on page 2
+            document.getElementById('overall-summary').classList.add('hidden');
+            document.getElementById('stint-breakdown-display').classList.add('hidden');
+            document.getElementById('sliders-container').classList.add('hidden');
+            document.getElementById('share-link-container').classList.add('hidden');
         }
 
         // --- Core Logic ---
 
         function calculateAndShowPage2() {
-            const avgLapTimeMinutes = parseInt(document.getElementById('avg-lap-time-minutes').value) || 0;
-            const avgLapTimeSeconds = parseInt(document.getElementById('avg-lap-time-seconds').value) || 0;
-            let avgLapTimeInSeconds = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
-
             const raceDurationHours = parseInt(document.getElementById('race-duration-hours').value) || 0;
             const raceDurationMinutes = parseInt(document.getElementById('race-duration-minutes').value) || 0;
             raceDurationSeconds = (raceDurationHours * 3600) + (raceDurationMinutes * 60);
+
+            const avgLapTimeMinutes = parseInt(document.getElementById('avg-lap-time-minutes').value) || 0;
+            const avgLapTimeSeconds = parseInt(document.getElementById('avg-lap-time-seconds').value) || 0;
+            let avgLapTimeInSeconds = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
 
             const selectedCar = cars.find(c => c.name === document.getElementById('car-select').value);
             let fuelPerLap = parseFloat(selectedCar.fuelPerLap) || 0;
             const tankCapacity = parseInt(selectedCar.tankCapacity) || 0;
             const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
             
+            // Check if essential fields are filled
+            if (raceDurationSeconds === 0 || avgLapTimeInSeconds === 0 || fuelPerLap <= 0 || tankCapacity <= 0) {
+                 alert("Please ensure all race inputs are filled and valid before calculating.");
+                 return;
+            }
+
             // Apply slider adjustments
             const fuelSliderAdjustment = parseFloat(document.getElementById('fuel-slider').value) || 0;
             fuelPerLap += fuelSliderAdjustment;
             
             const lapTimeSliderAdjustment = parseInt(document.getElementById('lap-time-slider').value) || 0;
             avgLapTimeInSeconds += lapTimeSliderAdjustment;
-
-            if (fuelPerLap <= 0 || avgLapTimeInSeconds <= 0 || tankCapacity <= 0) {
-                 alert("Fuel per lap, average lap time, and tank capacity must be positive numbers.");
-                 return;
-            }
 
             const lapsPerTank = Math.floor(tankCapacity / fuelPerLap);
             const totalLaps = Math.floor(raceDurationSeconds / avgLapTimeInSeconds);
@@ -424,6 +422,12 @@
             document.getElementById('pit-stop-duration-display').textContent = `${pitStopTime} sec`;
 
             populateStintTable(avgLapTimeInSeconds);
+            
+            // Show results sections after successful calculation
+            document.getElementById('overall-summary').classList.remove('hidden');
+            document.getElementById('stint-breakdown-display').classList.remove('hidden');
+            document.getElementById('sliders-container').classList.remove('hidden');
+            document.getElementById('share-link-container').classList.remove('hidden');
         }
         function formatDuration(totalSeconds) {
             if (totalSeconds <= 0) return '0s';
@@ -558,8 +562,6 @@
                 avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes').value,
                 avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds').value,
                 pitStopTime: document.getElementById('pit-stop-time').value,
-                fuelPerLap: document.getElementById('fuel-per-lap').value,
-                tankCapacity: document.getElementById('tank-capacity').value,
                 fuelSlider: document.getElementById('fuel-slider').value,
                 lapTimeSlider: document.getElementById('lap-time-slider').value,
                 raceStartTime: document.getElementById('race-start-time-page2').value,
@@ -592,25 +594,25 @@
             document.getElementById('car-select').value = state.car;
             document.getElementById('track-select').value = state.track;
 
-            // Restore inputs
+            // Restore inputs on page 2
             document.getElementById('race-duration-hours').value = state.raceDurationHours;
             document.getElementById('race-duration-minutes').value = state.raceDurationMinutes;
             document.getElementById('avg-lap-time-minutes').value = state.avgLapTimeMinutes;
             document.getElementById('avg-lap-time-seconds').value = state.avgLapTimeSeconds;
             document.getElementById('pit-stop-time').value = state.pitStopTime;
             
-            // Restore Page 2 specific inputs
-            if (document.getElementById('fuel-per-lap')) {
-                document.getElementById('fuel-per-lap').value = state.fuelPerLap;
-                document.getElementById('tank-capacity').value = state.tankCapacity;
-                document.getElementById('fuel-slider').value = state.fuelSlider;
-                document.getElementById('lap-time-slider').value = state.lapTimeSlider;
-                document.getElementById('race-start-time-page2').value = state.raceStartTime;
-                document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes;
-            }
+            document.getElementById('fuel-slider').value = state.fuelSlider;
+            document.getElementById('lap-time-slider').value = state.lapTimeSlider;
+            document.getElementById('race-start-time-page2').value = state.raceStartTime;
+            document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes;
+            
+            document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
+            document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
+
 
             // Navigate to page 2 and calculate
             showPage2();
+            calculateAndShowPage2();
         }
 
         // --- Admin Functions ---
