@@ -1,88 +1,41 @@
 const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs/promises'); // Use fs.promises for async file operations
 
 const app = express();
-const PORT = 3000;
-const DB_FILE = 'db.json';
+const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+const DATA_FILE = path.join(__dirname, 'db.json');
 
-// Read data from the "database"
-function readDb() {
-  const data = fs.readFileSync(DB_FILE);
-  return JSON.parse(data);
-}
+app.use(express.json()); // Enable JSON body parsing for POST requests
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files (if any)
 
-// Write data to the "database"
-function writeDb(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-}
-
-// API Routes
-app.get('/api/data', (req, res) => {
-  const data = readDb();
-  res.json(data);
-});
-
-app.post('/api/drivers', (req, res) => {
-  const newDriver = req.body;
-  const db = readDb();
-  db.drivers.push(newDriver);
-  writeDb(db);
-  res.status(201).json(newDriver);
-});
-
-app.post('/api/cars', (req, res) => {
-  const newCar = req.body;
-  const db = readDb();
-  db.cars.push(newCar);
-  writeDb(db);
-  res.status(201).json(newCar);
-});
-
-app.post('/api/tracks', (req, res) => {
-  const newTrack = req.body;
-  const db = readDb();
-  db.tracks.push(newTrack);
-  writeDb(db);
-  res.status(201).json(newTrack);
-});
-
-// A simple API to save/load a full strategy
-app.post('/api/strategy', (req, res) => {
-    const newStrategy = req.body;
-    const db = readDb();
-    
-    // Assign a simple ID for now
-    const newId = Math.random().toString(36).substring(2, 9);
-    newStrategy.id = newId;
-
-    // A mock "strategies" array in the db.json
-    if (!db.strategies) {
-        db.strategies = [];
-    }
-    db.strategies.push(newStrategy);
-    writeDb(db);
-    res.status(201).json({ id: newId });
-});
-
-app.get('/api/strategy/:id', (req, res) => {
-    const db = readDb();
-    const strategy = db.strategies.find(s => s.id === req.params.id);
-    if (strategy) {
-        res.json(strategy);
-    } else {
-        res.status(404).send('Strategy not found');
-    }
-});
-
-// Serve the index.html file for the root URL
+// Serve the main HTML file
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// API endpoint to get all data
+app.get('/api/data', async (req, res) => {
+  try {
+    const data = await fs.readFile(DATA_FILE, 'utf8');
+    res.json(JSON.parse(data));
+  } catch (error) {
+    console.error('Failed to read db.json:', error);
+    res.status(500).json({ error: 'Failed to load data' });
+  }
+});
+
+// API endpoint to save all data
+app.post('/api/data', async (req, res) => {
+  try {
+    const dataToSave = req.body;
+    await fs.writeFile(DATA_FILE, JSON.stringify(dataToSave, null, 2), 'utf8');
+    res.status(200).json({ message: 'Data saved successfully' });
+  } catch (error) {
+    console.error('Failed to write to db.json:', error);
+    res.status(500).json({ error: 'Failed to save data' });
+  }
 });
 
 app.listen(PORT, () => {
