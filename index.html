@@ -232,14 +232,6 @@
                                 <label for="new-driver-number" class="text-sm font-medium text-gray-700">Driver Number</label>
                                 <input type="number" id="new-driver-number" class="mt-1 p-3 border border-gray-300 rounded-lg w-28 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
-                            <div>
-                                <label for="new-driver-irating" class="text-sm font-medium text-gray-700">iRating</label>
-                                <input type="number" id="new-driver-irating" class="mt-1 p-3 border border-gray-300 rounded-lg w-28 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="new-driver-license" class="text-sm font-medium text-gray-700">License</label>
-                                <input type="text" id="new-driver-license" class="mt-1 p-3 border border-gray-300 rounded-lg w-28 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
                             <button id="add-driver-btn" onclick="addDriverAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                                 Add Driver
                             </button>
@@ -484,10 +476,10 @@
         function populateDrivers() {
             const select = document.getElementById('driver-select');
             select.innerHTML = '<option value="">Select a Driver...</option>';
-            drivers.sort((a, b) => b.iRating - a.iRating).forEach(driver => {
+            drivers.forEach(driver => {
                 const option = document.createElement('option');
                 option.value = driver.name;
-                option.textContent = `${driver.name} (iR: ${driver.iRating}, L: ${driver.license})`;
+                option.textContent = `${driver.name} (#${driver.drivernumber})`;
                 select.appendChild(option);
             });
         }
@@ -533,7 +525,7 @@
             selectedDrivers.forEach(driver => {
                 const li = document.createElement('li');
                 li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
-                li.innerHTML = `<span>${driver.name} (iR: ${driver.iRating})</span> <button onclick="removeDriver('${driver.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>`;
+                li.innerHTML = `<span>${driver.name}</span> <button onclick="removeDriver('${driver.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>`;
                 list.appendChild(li);
             });
         }
@@ -685,7 +677,7 @@
             carList.innerHTML = '';
             trackList.innerHTML = '';
 
-            drivers.sort((a, b) => b.iRating - a.iRating).forEach(driver => {
+            drivers.forEach(driver => {
                 const li = document.createElement('li');
                 li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
                 li.innerHTML = `
@@ -727,18 +719,14 @@
         function resetDriverAdminForm() {
             document.getElementById('new-driver-name').value = '';
             document.getElementById('new-driver-number').value = '';
-            document.getElementById('new-driver-irating').value = '';
-            document.getElementById('new-driver-license').value = '';
             document.getElementById('add-driver-btn').textContent = 'Add Driver';
             document.getElementById('add-driver-btn').onclick = addDriverAdmin;
         }
         async function addDriverAdmin() {
             const name = document.getElementById('new-driver-name').value;
             const drivernumber = parseInt(document.getElementById('new-driver-number').value);
-            const iRating = parseInt(document.getElementById('new-driver-irating').value);
-            const license = document.getElementById('new-driver-license').value;
-            if (name && !isNaN(drivernumber) && iRating && license) {
-                drivers.push({ name, drivernumber, iRating, license });
+            if (name && !isNaN(drivernumber)) {
+                drivers.push({ name, drivernumber });
                 await saveDataToServer();
                 renderAdminLists();
                 populateDrivers();
@@ -750,8 +738,6 @@
             if (driver) {
                 document.getElementById('new-driver-name').value = driver.name;
                 document.getElementById('new-driver-number').value = driver.drivernumber;
-                document.getElementById('new-driver-irating').value = driver.iRating;
-                document.getElementById('new-driver-license').value = driver.license;
                 document.getElementById('add-driver-btn').textContent = 'Update Driver';
                 document.getElementById('add-driver-btn').onclick = () => updateDriverAdmin(name);
             }
@@ -759,12 +745,10 @@
         async function updateDriverAdmin(originalName) {
             const name = document.getElementById('new-driver-name').value;
             const drivernumber = parseInt(document.getElementById('new-driver-number').value);
-            const iRating = parseInt(document.getElementById('new-driver-irating').value);
-            const license = document.getElementById('new-driver-license').value;
-            if (name && !isNaN(drivernumber) && iRating && license) {
+            if (name && !isNaN(drivernumber)) {
                 const index = drivers.findIndex(d => d.name === originalName);
                 if (index !== -1) {
-                    drivers[index] = { name, drivernumber, iRating, license };
+                    drivers[index] = { name, drivernumber };
                     await saveDataToServer();
                     renderAdminLists();
                     populateDrivers();
@@ -792,7 +776,7 @@
             const fuelPerLap = parseFloat(document.getElementById('new-car-fuel').value);
             const tankCapacity = parseInt(document.getElementById('new-car-tank').value);
             if (name && fuelPerLap && tankCapacity) {
-                cars.push({ name, fuelPerLap, tankCapacity });
+                cars.push({ name, fuel_per_lap: fuelPerLap, tank_capacity: tankCapacity });
                 await saveDataToServer();
                 renderAdminLists();
                 populateCars();
@@ -803,8 +787,8 @@
             const car = cars.find(c => c.name === name);
             if (car) {
                 document.getElementById('new-car-name').value = car.name;
-                document.getElementById('new-car-fuel').value = car.fuelPerLap;
-                document.getElementById('new-car-tank').value = car.tankCapacity;
+                document.getElementById('new-car-fuel').value = car.fuel_per_lap;
+                document.getElementById('new-car-tank').value = car.tank_capacity;
                 document.getElementById('add-car-btn').textContent = 'Update Car';
                 document.getElementById('add-car-btn').onclick = () => updateCarAdmin(name);
             }
@@ -816,7 +800,7 @@
             if (name && fuelPerLap && tankCapacity) {
                 const index = cars.findIndex(c => c.name === originalName);
                 if (index !== -1) {
-                    cars[index] = { name, fuelPerLap, tankCapacity };
+                    cars[index] = { name, fuel_per_lap: fuelPerLap, tank_capacity: tankCapacity };
                     await saveDataToServer();
                     renderAdminLists();
                     populateCars();
