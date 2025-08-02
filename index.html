@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sim Racing Strategy Planner</title>
+    <title>Radian Endurance</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Road+Rage&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+        }
+        h1 {
+            font-family: 'Road Rage', sans-serif;
         }
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
@@ -19,17 +24,59 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
+        .toggle-switch-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 100;
+        }
+        .toggle-label {
+            width: 50px;
+            height: 26px;
+            background-color: #ccc;
+            display: block;
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.4s;
+        }
+        .toggle-label:after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 9999px;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: all 0.4s;
+        }
+        input:checked + .toggle-label {
+            background-color: #2196F3;
+        }
+        input:checked + .toggle-label:after {
+            left: calc(100% - 3px);
+            transform: translateX(-100%);
+        }
+        #darkModeSwitch {
+            display: none;
+        }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-8 bg-[#f0fdf4] text-gray-900 dark:bg-[#2C2B2B] dark:text-gray-100 transition-colors duration-500">
+    
+    <div class="toggle-switch-container">
+        <input type="checkbox" id="darkModeSwitch" class="hidden">
+        <label for="darkModeSwitch" class="toggle-label"></label>
+    </div>
 
-    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-center text-gray-800 mb-6">Sim Racing Strategy Planner</h1>
-        <p class="text-center text-gray-600 mb-8">Plan your endurance race strategy with ease.</p>
+    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg dark:bg-[#494949] transition-colors duration-500">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-center text-gray-900 dark:text-gray-200 mb-6 transition-colors duration-500">Radian Endurance</h1>
+        <p class="text-center text-gray-600 dark:text-gray-200 mb-8 transition-colors duration-500">Plan your endurance race strategy with ease.</p>
 
         <div id="app-container">
             <div class="flex justify-center space-x-4 mb-8">
-                <button id="race-details-btn" onclick="showPlannerPage()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
+                <button id="race-details-btn" onclick="showPlannerPage()" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
                     <i class="fas fa-car-side"></i> <span>Race Details</span>
                 </button>
                 <button id="admin-btn" onclick="showAdminPage()" class="bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
@@ -38,32 +85,32 @@
             </div>
             
             <div id="planner-page" class="">
-                <h2 class="text-2xl font-bold mb-4 text-gray-700">Drivers</h2>
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Drivers <span class="text-sm text-gray-500">(Max 6)</span></h3>
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200 transition-colors duration-500">Drivers</h2>
+                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg dark:bg-[#2C2B2B] dark:border-gray-700 transition-colors duration-500">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 transition-colors duration-500">Drivers <span class="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-500">(Max 6)</span></h3>
                     <div class="flex items-center space-x-2 mb-4">
-                        <select id="driver-select" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full">
+                        <select id="driver-select" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-teal-500 transition duration-200 w-full dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
                             <option value="">Select a Driver...</option>
                         </select>
-                        <button onclick="addDriver()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                        <button onclick="addDriver()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-plus"></i> Add
                         </button>
                     </div>
                     <ul id="driver-list" class="space-y-2"></ul>
                 </div>
 
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Track & Car</h3>
+                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6 dark:bg-[#2C2B2B] dark:border-gray-700 transition-colors duration-500">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 transition-colors duration-500">Track & Car</h3>
                     <div class="grid md:grid-cols-2 gap-6">
                         <div class="flex flex-col">
-                            <label for="track-select" class="text-sm font-medium text-gray-700">Track</label>
-                            <select id="track-select" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <label for="track-select" class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Track</label>
+                            <select id="track-select" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
                                 <option value="">Select a Track...</option>
                             </select>
                         </div>
                         <div class="flex flex-col">
-                            <label for="car-select" class="text-sm font-medium text-gray-700">Car</label>
-                            <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <label for="car-select" class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Car</label>
+                            <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
                                 <option value="">Select a Car...</option>
                             </select>
                         </div>
@@ -82,70 +129,70 @@
                     <button onclick="showPlannerPage()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-arrow-left mr-2"></i> Back
                     </button>
-                    <h2 class="text-2xl font-bold text-gray-700">Race Strategy</h2>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 transition-colors duration-500">Race Strategy</h2>
                 </div>
 
-                <div class="p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="p-6 bg-green-100 border border-green-200 rounded-lg dark:bg-green-900 dark:border-green-700 transition-colors duration-500">
                     <div class="grid md:grid-cols-3 gap-4">
                         <div>
-                            <span class="text-blue-800 font-semibold">Track:</span>
-                            <span id="page2-track" class="text-gray-900"></span>
+                            <span class="text-green-800 dark:text-green-200 font-semibold transition-colors duration-500">Track:</span>
+                            <span id="page2-track" class="text-gray-900 dark:text-gray-200 transition-colors duration-500"></span>
                         </div>
                         <div>
-                            <span class="text-blue-800 font-semibold">Car:</span>
-                            <span id="page2-car" class="text-gray-900"></span>
+                            <span class="text-green-800 dark:text-green-200 font-semibold transition-colors duration-500">Car:</span>
+                            <span id="page2-car" class="text-gray-900 dark:text-gray-200 transition-colors duration-500"></span>
                         </div>
                         <div>
-                            <span class="text-blue-800 font-semibold">Drivers:</span>
-                            <span id="page2-drivers" class="text-gray-900"></span>
+                            <span class="text-green-800 dark:text-green-200 font-semibold transition-colors duration-500">Drivers:</span>
+                            <span id="page2-drivers" class="text-gray-900 dark:text-gray-200 transition-colors duration-500"></span>
                         </div>
                     </div>
                 </div>
 
-                <div id="race-inputs-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Race Inputs</h3>
+                <div id="race-inputs-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg dark:bg-[#2C2B2B] dark:border-gray-700 transition-colors duration-500">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 transition-colors duration-500">Race Inputs</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Race Duration</label>
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Race Duration</label>
                             <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="race-duration-hours" placeholder="Hours" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">h</span>
-                                <input type="number" id="race-duration-minutes" placeholder="Minutes" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">m</span>
+                                <input type="number" id="race-duration-hours" placeholder="Hours" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
+                                <span class="text-gray-600 dark:text-gray-100 transition-colors duration-500">h</span>
+                                <input type="number" id="race-duration-minutes" placeholder="Minutes" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
+                                <span class="text-gray-600 dark:text-gray-100 transition-colors duration-500">m</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Avg. Lap Time</label>
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Avg. Lap Time</label>
                             <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="avg-lap-time-minutes" placeholder="Minutes" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">min</span>
-                                <input type="number" id="avg-lap-time-seconds" placeholder="Seconds" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">sec</span>
+                                <input type="number" id="avg-lap-time-minutes" placeholder="Minutes" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
+                                <span class="text-gray-600 dark:text-gray-100 transition-colors duration-500">min</span>
+                                <input type="number" id="avg-lap-time-seconds" placeholder="Seconds" class="p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
+                                <span class="text-gray-600 dark:text-gray-100 transition-colors duration-500">sec</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label for="pit-stop-time" class="text-sm font-medium text-gray-700">Avg. Pit Stop Time (sec)</label>
-                            <input type="number" id="pit-stop-time" value="30" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <label for="pit-stop-time" class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Avg. Pit Stop Time (sec)</label>
+                            <input type="number" id="pit-stop-time" value="30" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
                         </div>
                         <div class="flex flex-col">
-                            <label for="fuel-per-lap-display-input" class="text-sm font-medium text-gray-700">Fuel Use per Lap (L)</label>
-                            <input type="number" id="fuel-per-lap-display-input" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <label for="fuel-per-lap-display-input" class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Fuel Use per Lap (L)</label>
+                            <input type="number" id="fuel-per-lap-display-input" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
                         </div>
                         <div class="flex flex-col">
-                            <label for="tank-capacity-display-input" class="text-sm font-medium text-gray-700">Fuel Tank Size (L)</label>
-                            <input type="number" id="tank-capacity-display-input" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <label for="tank-capacity-display-input" class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Fuel Tank Size (L)</label>
+                            <input type="number" id="tank-capacity-display-input" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
                         </div>
                     </div>
                     <div class="mt-4 flex justify-end">
-                        <button id="calculate-page2-button" onclick="calculateAndShowPage2()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
+                        <button id="calculate-page2-button" onclick="calculateAndShowPage2()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
                             Calculate
                         </button>
                     </div>
                 </div>
 
-                <div id="overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg hidden">
-                    <h3 class="text-xl font-bold mb-4 text-blue-800">Overall Strategy Summary</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-blue-800">
+                <div id="overall-summary" class="p-6 bg-green-100 border border-green-200 rounded-lg hidden dark:bg-green-900 dark:border-green-700 transition-colors duration-500">
+                    <h3 class="text-xl font-bold mb-4 text-green-800 dark:text-green-200 transition-colors duration-500">Overall Strategy Summary</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-green-800 dark:text-green-200 transition-colors duration-500">
                         <div><span class="font-semibold">Est. Laps:</span> <span id="est-laps-display"></span></div>
                         <div><span class="font-semibold">Stint Duration:</span> <span id="stint-duration-display"></span></div>
                         <div><span class="font-semibold">Laps per Stint:</span> <span id="laps-per-stint-display"></span></div>
@@ -157,64 +204,64 @@
                     </div>
                 </div>
 
-                <div id="sliders-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg hidden">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Dynamic Adjustments</h3>
+                <div id="sliders-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg hidden dark:bg-[#2C2B2B] dark:border-gray-700 transition-colors duration-500">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 transition-colors duration-500">Dynamic Adjustments</h3>
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                         <div class="flex-grow w-full">
-                            <label for="fuel-slider" class="text-sm font-medium text-gray-700">Adjust Fuel per Lap</label>
+                            <label for="fuel-slider" class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Adjust Fuel per Lap</label>
                             <div class="flex items-center mt-1 space-x-2">
                                 <input type="range" id="fuel-slider" min="-1.0" max="1.0" value="0" step="0.1" class="w-full">
-                                <span id="fuel-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.0</span> L
+                                <span id="fuel-slider-value" class="text-gray-900 dark:text-gray-200 font-mono text-sm w-12 text-right transition-colors duration-500">0.0</span> L
                             </div>
                         </div>
                         <div class="flex-grow w-full">
-                            <label for="lap-time-slider" class="text-sm font-medium text-gray-700">Adjust Lap Time</label>
+                            <label for="lap-time-slider" class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Adjust Lap Time</label>
                             <div class="flex items-center mt-1 space-x-2">
                                 <input type="range" id="lap-time-slider" min="-3" max="3" value="0" step="1" class="w-full">
-                                <span id="lap-time-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0</span> sec
+                                <span id="lap-time-slider-value" class="text-gray-900 dark:text-gray-200 font-mono text-sm w-12 text-right transition-colors duration-500">0</span> sec
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <h2 class="text-2xl font-bold mb-4 mt-8 text-gray-700">Stint Breakdown</h2>
-                <div id="stint-breakdown-display" class="p-6 bg-gray-50 border border-gray-200 rounded-lg overflow-x-auto hidden">
+                <h2 class="text-2xl font-bold mb-4 mt-8 text-gray-800 dark:text-gray-200 transition-colors duration-500">Stint Breakdown</h2>
+                <div id="stint-breakdown-display" class="p-6 bg-gray-50 border border-gray-200 rounded-lg overflow-x-auto hidden dark:bg-[#2C2B2B] dark:border-gray-700 transition-colors duration-500">
                     
                     <div class="flex flex-col mb-4">
-                        <label class="text-sm font-medium text-gray-700">Race Start & Qualifying</label>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Race Start & Qualifying</label>
                         <div class="flex items-center space-x-2">
-                            <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                            <span class="text-gray-700 font-bold">+</span>
-                            <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                            <span class="text-sm font-medium text-gray-700">min (Qualifying)</span>
-                            <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105" onclick="calculateAndShowPage2()">Update</button>
+                            <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
+                            <span class="text-gray-700 dark:text-gray-100 font-bold transition-colors duration-500">+</span>
+                            <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-3 border border-gray-300 rounded-lg w-20 text-center focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">min (Qualifying)</span>
+                            <button id="recalculate-button" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105" onclick="calculateAndShowPage2()">Update</button>
                         </div>
                     </div>
                     
-                    <table class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg">
-                        <thead class="bg-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg dark:divide-gray-700 dark:border-gray-600">
+                        <thead class="bg-gray-200 dark:bg-[#494949] transition-colors duration-500">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Lap</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Lap</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Laps per Stint</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Driver</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Backup</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r border-gray-300 dark:border-gray-600">Start Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r border-gray-300 dark:border-gray-600">End Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r border-gray-300 dark:border-gray-600">Start Lap</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r border-gray-300 dark:border-gray-600">End Lap</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r border-gray-300 dark:border-gray-600">Laps per Stint</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r border-gray-300 dark:border-gray-600">Driver</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Backup</th>
                             </tr>
                         </thead>
-                        <tbody id="stint-table-body" class="bg-white divide-y divide-gray-200">
+                        <tbody id="stint-table-body" class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                         </tbody>
                     </table>
                 </div>
 
-                <div id="share-link-container" class="p-6 bg-purple-100 border border-purple-200 rounded-lg hidden">
-                    <h3 class="text-xl font-semibold mb-4 text-purple-800">Share/Save This Strategy</h3>
+                <div id="share-link-container" class="p-6 bg-teal-100 border border-teal-200 rounded-lg hidden dark:bg-teal-900 dark:border-teal-700 transition-colors duration-500">
+                    <h3 class="text-xl font-semibold mb-4 text-teal-800 dark:text-teal-200 transition-colors duration-500">Share/Save This Strategy</h3>
                     <div class="flex items-center space-x-2">
-                        <button onclick="generateShareLink()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                        <button onclick="generateShareLink()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-share-alt mr-2"></i> Generate Link
                         </button>
-                        <input type="text" id="share-link-output" readonly class="flex-grow p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-copy" placeholder="Click 'Generate Link' to create a shareable URL">
+                        <input type="text" id="share-link-output" readonly class="flex-grow p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-copy dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600 transition-colors duration-500" placeholder="Click 'Generate Link' to create a shareable URL">
                         <button onclick="copyShareLink()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-copy"></i>
                         </button>
@@ -223,24 +270,24 @@
             </div>
 
             <div id="admin-page" class="hidden">
-                <h2 class="text-2xl font-bold mb-4 text-gray-700">Admin Panel</h2>
-                <button onclick="saveDataToServer()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200 transition-colors duration-500">Admin Panel</h2>
+                <button onclick="saveDataToServer()" class="bg-teal-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                     Save All Changes
                 </button>
 
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Manage Drivers</h3>
+                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6 dark:bg-[#2C2B2B] dark:border-gray-700 transition-colors duration-500">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 transition-colors duration-500">Manage Drivers</h3>
                     <div class="space-y-4">
                         <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
                             <div class="flex-grow">
-                                <label for="new-driver-name" class="text-sm font-medium text-gray-700">Driver Name</label>
-                                <input type="text" id="new-driver-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <label for="new-driver-name" class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Driver Name</label>
+                                <input type="text" id="new-driver-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
                             </div>
                             <div>
-                                <label for="new-driver-number" class="text-sm font-medium text-gray-700">Driver Number</label>
-                                <input type="number" id="new-driver-number" class="mt-1 p-3 border border-gray-300 rounded-lg w-28 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <label for="new-driver-number" class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Driver Number</label>
+                                <input type="number" id="new-driver-number" class="mt-1 p-3 border border-gray-300 rounded-lg w-28 text-center focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
                             </div>
-                            <button id="add-driver-btn" onclick="addDriverAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                            <button id="add-driver-btn" onclick="addDriverAdmin()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                                 Add Driver
                             </button>
                         </div>
@@ -248,15 +295,15 @@
                     </div>
                 </div>
 
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Manage Cars</h3>
+                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6 dark:bg-[#2C2B2B] dark:border-gray-700 transition-colors duration-500">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 transition-colors duration-500">Manage Cars</h3>
                     <div class="space-y-4">
                         <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
                             <div class="flex-grow">
-                                <label for="new-car-name" class="text-sm font-medium text-gray-700">Car Name</label>
-                                <input type="text" id="new-car-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <label for="new-car-name" class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Car Name</label>
+                                <input type="text" id="new-car-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
                             </div>
-                            <button id="add-car-btn" onclick="addCarAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                            <button id="add-car-btn" onclick="addCarAdmin()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                                 Add Car
                             </button>
                         </div>
@@ -264,15 +311,15 @@
                     </div>
                 </div>
                 
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Manage Tracks</h3>
+                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6 dark:bg-[#2C2B2B] dark:border-gray-700 transition-colors duration-500">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 transition-colors duration-500">Manage Tracks</h3>
                     <div class="space-y-4">
                         <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
                             <div class="flex-grow">
-                                <label for="new-track-name" class="text-sm font-medium text-gray-700">Track Name</label>
-                                <input type="text" id="new-track-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <label for="new-track-name" class="text-sm font-medium text-gray-700 dark:text-gray-100 transition-colors duration-500">Track Name</label>
+                                <input type="text" id="new-track-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-[#2C2B2B] dark:text-gray-200 dark:border-gray-600">
                             </div>
-                            <button id="add-track-btn" onclick="addTrackAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                            <button id="add-track-btn" onclick="addTrackAdmin()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                                 Add Track
                             </button>
                         </div>
@@ -293,6 +340,33 @@
         let raceDurationSeconds = 0;
         let lapsPerStint = 0;
         let lapsInLastStint = 0;
+
+        // Dark Mode Logic
+        const darkModeSwitch = document.getElementById('darkModeSwitch');
+        const html = document.documentElement;
+
+        function updateDarkMode(isDark) {
+            if (isDark) {
+                html.classList.add('dark');
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                html.classList.remove('dark');
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        darkModeSwitch.addEventListener('change', () => {
+            updateDarkMode(darkModeSwitch.checked);
+        });
+
+        // Check for saved preference on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedDarkMode = localStorage.getItem('darkMode');
+            if (savedDarkMode === 'enabled') {
+                darkModeSwitch.checked = true;
+                updateDarkMode(true);
+            }
+        });
 
         // On initial page load
         window.onload = function() {
@@ -363,19 +437,19 @@
             document.getElementById('planner-page').classList.remove('hidden');
             document.getElementById('page-2').classList.add('hidden');
             document.getElementById('admin-page').classList.add('hidden');
-            document.getElementById('race-details-btn').classList.add('bg-blue-600', 'text-white');
+            document.getElementById('race-details-btn').classList.add('bg-green-600', 'text-white');
             document.getElementById('race-details-btn').classList.remove('bg-gray-300', 'text-gray-800');
             document.getElementById('admin-btn').classList.add('bg-gray-300', 'text-gray-800');
-            document.getElementById('admin-btn').classList.remove('bg-blue-600', 'text-white');
+            document.getElementById('admin-btn').classList.remove('bg-green-600', 'text-white');
         }
         function showAdminPage() {
             document.getElementById('planner-page').classList.add('hidden');
             document.getElementById('page-2').classList.add('hidden');
             document.getElementById('admin-page').classList.remove('hidden');
-            document.getElementById('admin-btn').classList.add('bg-blue-600', 'text-white');
+            document.getElementById('admin-btn').classList.add('bg-green-600', 'text-white');
             document.getElementById('admin-btn').classList.remove('bg-gray-300', 'text-gray-800');
             document.getElementById('race-details-btn').classList.add('bg-gray-300', 'text-gray-800');
-            document.getElementById('race-details-btn').classList.remove('bg-blue-600', 'text-white');
+            document.getElementById('race-details-btn').classList.remove('bg-green-600', 'text-white');
             renderAdminLists();
             resetDriverAdminForm();
             resetCarAdminForm();
@@ -534,7 +608,7 @@
             list.innerHTML = '';
             selectedDrivers.forEach(driver => {
                 const li = document.createElement('li');
-                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.className = 'flex items-center justify-between p-3 rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-gray-200 transition-colors duration-500';
                 li.innerHTML = `<span>${driver.name}</span> <button onclick="removeDriver('${driver.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>`;
                 list.appendChild(li);
             });
@@ -578,13 +652,13 @@
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-300">${startTimeString}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${endTimeString}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${startLap}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${endLap}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${stintLaps}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${driver.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${nextDriver.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200 border-r border-gray-300 dark:border-gray-600 transition-colors duration-500">${startTimeString}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 border-r border-gray-300 dark:border-gray-600 transition-colors duration-500">${endTimeString}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 border-r border-gray-300 dark:border-gray-600 transition-colors duration-500">${startLap}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 border-r border-gray-300 dark:border-gray-600 transition-colors duration-500">${endLap}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 border-r border-gray-300 dark:border-gray-600 transition-colors duration-500">${stintLaps}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 border-r border-gray-300 dark:border-gray-600 transition-colors duration-500">${driver.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 transition-colors duration-500">${nextDriver.name}</td>
                 `;
                 tbody.appendChild(tr);
 
@@ -712,11 +786,11 @@
 
             drivers.forEach(driver => {
                 const li = document.createElement('li');
-                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.className = 'flex items-center justify-between p-3 rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-gray-200 transition-colors duration-500';
                 li.innerHTML = `
                     <span>${driver.name} (#${driver.drivernumber})</span>
                     <div class="space-x-2">
-                        <button onclick="editDriverAdmin('${driver.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
+                        <button onclick="editDriverAdmin('${driver.name}')" class="text-teal-500 hover:text-teal-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
                         <button onclick="removeDriverAdmin('${driver.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
@@ -725,11 +799,11 @@
 
             cars.forEach(car => {
                 const li = document.createElement('li');
-                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.className = 'flex items-center justify-between p-3 rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-gray-200 transition-colors duration-500';
                 li.innerHTML = `
-                    <span>${car.name}</span>
+                    <span>${car.name} (Fuel/Lap: ${car.fuel_per_lap} L, Tank: ${car.tank_capacity} L)</span>
                     <div class="space-x-2">
-                        <button onclick="editCarAdmin('${car.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
+                        <button onclick="editCarAdmin('${car.name}')" class="text-teal-500 hover:text-teal-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
                         <button onclick="removeCarAdmin('${car.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
@@ -738,11 +812,11 @@
 
             tracks.forEach(track => {
                 const li = document.createElement('li');
-                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.className = 'flex items-center justify-between p-3 rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-gray-200 transition-colors duration-500';
                 li.innerHTML = `
                     <span>${track.name}</span>
                     <div class="space-x-2">
-                        <button onclick="editTrackAdmin('${track.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
+                        <button onclick="editTrackAdmin('${track.name}')" class="text-teal-500 hover:text-teal-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
                         <button onclick="removeTrackAdmin('${track.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
@@ -799,13 +873,17 @@
         }
         function resetCarAdminForm() {
             document.getElementById('new-car-name').value = '';
+            document.getElementById('new-car-fuel').value = '';
+            document.getElementById('new-car-tank').value = '';
             document.getElementById('add-car-btn').textContent = 'Add Car';
             document.getElementById('add-car-btn').onclick = addCarAdmin;
         }
         async function addCarAdmin() {
             const name = document.getElementById('new-car-name').value;
-            if (name) {
-                cars.push({ name });
+            const fuelPerLap = parseFloat(document.getElementById('new-car-fuel').value);
+            const tankCapacity = parseInt(document.getElementById('new-car-tank').value);
+            if (name && fuelPerLap && tankCapacity) {
+                cars.push({ name, fuel_per_lap: fuelPerLap, tank_capacity: tankCapacity });
                 await saveDataToServer();
                 renderAdminLists();
                 populateCars();
@@ -816,16 +894,20 @@
             const car = cars.find(c => c.name === name);
             if (car) {
                 document.getElementById('new-car-name').value = car.name;
+                document.getElementById('new-car-fuel').value = car.fuel_per_lap;
+                document.getElementById('new-car-tank').value = car.tank_capacity;
                 document.getElementById('add-car-btn').textContent = 'Update Car';
                 document.getElementById('add-car-btn').onclick = () => updateCarAdmin(name);
             }
         }
         async function updateCarAdmin(originalName) {
             const name = document.getElementById('new-car-name').value;
-            if (name) {
+            const fuelPerLap = parseFloat(document.getElementById('new-car-fuel').value);
+            const tankCapacity = parseInt(document.getElementById('new-car-tank').value);
+            if (name && fuelPerLap && tankCapacity) {
                 const index = cars.findIndex(c => c.name === originalName);
                 if (index !== -1) {
-                    cars[index] = { name };
+                    cars[index] = { name, fuel_per_lap: fuelPerLap, tank_capacity: tankCapacity };
                     await saveDataToServer();
                     renderAdminLists();
                     populateCars();
