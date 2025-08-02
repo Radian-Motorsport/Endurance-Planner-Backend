@@ -28,7 +28,11 @@ app.get('/api/data', async (req, res) => {
         const carsResult = await pool.query('SELECT * FROM cars');
         const tracksResult = await pool.query('SELECT * FROM tracks');
 
-        res.json({ drivers: driversResult.rows });
+        res.json({
+            drivers: driversResult.rows,
+            cars: carsResult.rows,
+            tracks: tracksResult.rows
+        });
     } catch (err) {
         console.error('Error fetching data:', err);
         res.status(500).send('Internal Server Error');
@@ -68,6 +72,7 @@ app.post('/api/data', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
 
 
 
