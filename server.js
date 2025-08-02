@@ -24,9 +24,9 @@ app.get('/', (req, res) => {
 // API endpoint to get all data from the database
 app.get('/api/data', async (req, res) => {
     try {
-        const driversResult = await db.query('SELECT * FROM drivers');
-        const carsResult = await db.query('SELECT * FROM cars');
-        const tracksResult = await db.query('SELECT * FROM tracks');
+        const driversResult = await pool.query('SELECT * FROM drivers');
+        const carsResult = await pool.query('SELECT * FROM cars');
+        const tracksResult = await pool.query('SELECT * FROM tracks');
 
         res.json({ drivers: driversResult.rows });
     } catch (err) {
@@ -68,5 +68,6 @@ app.post('/api/data', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
 
 
