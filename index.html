@@ -452,6 +452,7 @@
             document.getElementById('sliders-container').classList.remove('hidden');
             document.getElementById('share-link-container').classList.remove('hidden');
         }
+        
         function formatDuration(totalSeconds) {
             if (totalSeconds <= 0) return '0s';
             const hours = Math.floor(totalSeconds / 3600);
@@ -465,11 +466,12 @@
             
             return parts.length > 0 ? parts.join(' ') : '0s';
         }
-        function secondsToTimeString(totalSeconds) {
-            const date = new Date(null);
-            date.setSeconds(totalSeconds);
-            const utc = date.toUTCString().substr(11, 8);
-            return utc;
+
+        function formatTime(date) {
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
         }
         
         // --- Populating Dropdowns and Lists ---
@@ -534,23 +536,33 @@
             const tbody = document.getElementById('stint-table-body');
             tbody.innerHTML = '';
             
-            const raceStartTimeInput = document.getElementById('race-start-time-page2');
-            const qualifyingMinutesInput = document.getElementById('qualifying-minutes-page2');
-
-            const raceTimeParts = raceStartTimeInput.value.split(':').map(Number);
-            const qualifyingDurationSeconds = (parseInt(qualifyingMinutesInput.value) || 0) * 60;
+            const raceStartTimeInput = document.getElementById('race-start-time-page2').value;
+            const qualifyingMinutesInput = parseInt(document.getElementById('qualifying-minutes-page2').value) || 0;
             
-            let currentTimeSeconds = (raceTimeParts[0] * 3600) + (raceTimeParts[1] * 60);
+            const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
+            
+            // Get the current date and set the race start time
+            const raceDate = new Date();
+            raceDate.setHours(hours, minutes, 0, 0);
+
+            let currentTime = new Date(raceDate.getTime());
+            
+            // Add qualifying time to the first stint's start time
+            currentTime.setMinutes(currentTime.getMinutes() + qualifyingMinutesInput);
+
             let currentLap = 1;
             let driverIndex = 0;
-
+            
             for (let i = 0; i < totalStints; i++) {
                 const stintLaps = (i === totalStints - 1) && (lapsInLastStint !== 0) ? lapsInLastStint : lapsPerStint;
                 if (stintLaps <= 0) break;
 
-                const startTimeString = secondsToTimeString(currentTimeSeconds + qualifyingDurationSeconds);
-                const endTimeSeconds = currentTimeSeconds + (stintLaps * avgLapTimeInSeconds);
-                const endTimeString = secondsToTimeString(endTimeSeconds + qualifyingDurationSeconds);
+                const startTimeString = formatTime(currentTime);
+                
+                const stintDurationSeconds = stintLaps * avgLapTimeInSeconds;
+                currentTime.setSeconds(currentTime.getSeconds() + stintDurationSeconds);
+
+                const endTimeString = formatTime(currentTime);
 
                 const startLap = currentLap;
                 const endLap = startLap + stintLaps - 1;
@@ -569,7 +581,6 @@
                 `;
                 tbody.appendChild(tr);
 
-                currentTimeSeconds = endTimeSeconds;
                 currentLap = endLap + 1;
                 driverIndex = (driverIndex + 1) % selectedDrivers.length;
             }
