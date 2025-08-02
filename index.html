@@ -538,16 +538,15 @@
             
             const raceStartTimeInput = document.getElementById('race-start-time-page2').value;
             const qualifyingMinutesInput = parseInt(document.getElementById('qualifying-minutes-page2').value) || 0;
-            
+            const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
+
             const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
             
-            // Get the current date and set the race start time
             const raceDate = new Date();
             raceDate.setHours(hours, minutes, 0, 0);
 
             let currentTime = new Date(raceDate.getTime());
             
-            // Add qualifying time to the first stint's start time
             currentTime.setMinutes(currentTime.getMinutes() + qualifyingMinutesInput);
 
             let currentLap = 1;
@@ -583,6 +582,11 @@
 
                 currentLap = endLap + 1;
                 driverIndex = (driverIndex + 1) % selectedDrivers.length;
+                
+                // Add pit stop time for every stint except the last one
+                if (i < totalStints - 1) {
+                    currentTime.setSeconds(currentTime.getSeconds() + pitStopTime);
+                }
             }
         }
         
