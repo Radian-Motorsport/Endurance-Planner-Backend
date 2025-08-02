@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #f3ff6;
         }
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
@@ -479,7 +479,7 @@
             drivers.forEach(driver => {
                 const option = document.createElement('option');
                 option.value = driver.name;
-                option.textContent = `${driver.name} (#${driver.drivernumber})`;
+                option.textContent = `${driver.name} ${driver.drivernumber}`;
                 select.appendChild(option);
             });
         }
