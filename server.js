@@ -16,24 +16,45 @@ const pool = new Pool({
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Function to create the strategies table if it doesn't exist
-async function createStrategiesTable() {
+// Function to create all necessary tables if they don't exist
+async function createTables() {
     try {
-        const createTableQuery = `
+        const createDriversTable = `
+            CREATE TABLE IF NOT EXISTS drivers (
+                name VARCHAR(255) PRIMARY KEY,
+                drivernumber INT
+            );
+        `;
+        const createCarsTable = `
+            CREATE TABLE IF NOT EXISTS cars (
+                name VARCHAR(255) PRIMARY KEY,
+                fuel_per_lap NUMERIC,
+                tank_capacity INT
+            );
+        `;
+        const createTracksTable = `
+            CREATE TABLE IF NOT EXISTS tracks (
+                name VARCHAR(255) PRIMARY KEY
+            );
+        `;
+        const createStrategiesTable = `
             CREATE TABLE IF NOT EXISTS strategies (
                 id VARCHAR(36) PRIMARY KEY,
                 strategy_data JSONB NOT NULL
             );
         `;
-        await pool.query(createTableQuery);
-        console.log('Strategies table checked/created successfully.');
+        await pool.query(createDriversTable);
+        await pool.query(createCarsTable);
+        await pool.query(createTracksTable);
+        await pool.query(createStrategiesTable);
+        console.log('Database tables checked/created successfully.');
     } catch (err) {
-        console.error('Error creating strategies table:', err);
+        console.error('Error creating database tables:', err);
     }
 }
 
 // Call the function on server start
-createStrategiesTable();
+createTables();
 
 // Serve the main HTML file
 app.get('/', (req, res) => {
@@ -73,7 +94,7 @@ app.post('/api/data', async (req, res) => {
 
     // Insert new cars
     for (const car of cars) {
-      await pool.query('INSERT INTO cars (name, fuel_per_lap, tank_capacity) VALUES ($1, $2, $3)', [car.name, car.fuel_per_lap, car.tank_capacity]);
+      await pool.query('INSERT INTO cars (name,) VALUES ($1)', [car.name]);
     }
 
     // Insert new tracks
