@@ -12,7 +12,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Original light background */
+            background-color: #f3f4f6;
             transition: background-color 0.5s, color 0.5s;
         }
         h1 {
@@ -26,7 +26,7 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
-        
+
         /* Dark Mode Switch CSS */
         .toggle-switch-container {
             position: fixed;
@@ -69,29 +69,29 @@
         /* --- Dark Mode Color Overrides --- */
         /* These styles activate when the 'dark' class is on the <html> tag */
         .dark body {
-            background-color: #1a202c; /* A dark gray background */
-            color: #e2e8f0; /* Light gray text */
+            background-color: #121212; /* A darker, black-like background */
+            color: #e0e0e0; /* Light gray text for contrast */
         }
         .dark .max-w-4xl {
-            background-color: #2d3748; /* A slightly lighter dark gray for the card */
+            background-color: #1e1e1e; /* A slightly lighter dark gray for the card */
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
         }
         .dark h1, .dark h2, .dark h3, .dark .text-gray-800 {
             color: #ffffff;
         }
         .dark p, .dark label, .dark .text-gray-600, .dark .text-gray-700 {
-            color: #a0aec0;
+            color: #a0a0a0;
         }
         .dark .bg-white {
-            background-color: #2d3748;
+            background-color: #1e1e1e;
         }
         .dark .bg-gray-50, .dark .bg-gray-200 {
-            background-color: #4a5568;
-            border-color: #4a5568;
+            background-color: #2a2a2a;
+            border-color: #333333;
         }
         .dark .bg-gray-300 {
-            background-color: #a0aec0;
-            color: #2d3748;
+            background-color: #a0a0a0;
+            color: #1e1e1e;
         }
         .dark .bg-blue-600 { background-color: #2b6cb0; }
         .dark .bg-purple-600 { background-color: #6b46c1; }
@@ -101,12 +101,12 @@
         .dark .bg-purple-100 { background-color: #44337a; border-color: #553c9a; }
         .dark .text-purple-800 { color: #d6bcfa; }
         .dark .border-gray-200, .dark .border-gray-300 {
-            border-color: #718096;
+            border-color: #4a4a4a;
         }
         .dark select, .dark input, .dark textarea {
-            background-color: #4a5568;
-            color: #e2e8f0;
-            border-color: #718096;
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+            border-color: #4a4a4a;
         }
     </style>
 </head>
