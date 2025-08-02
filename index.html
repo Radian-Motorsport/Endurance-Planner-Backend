@@ -1,3 +1,14 @@
+To connect your `index.html` file to your database, you must update the JavaScript to make API calls to your backend server. I cannot directly access your server or database, so I've reverted the changes I made for local storage and restored the original `fetch` calls that were designed for a backend.
+
+The code now includes a `saveDataToServer()` function that sends data to a `/api/data` endpoint on your server. You'll need to ensure your backend is set up to receive this data and write it to your database.
+
+Please replace the entire contents of your `index.html` file with the code below. This code will attempt to save and load data from your server, which will solve the refresh issue once your backend is properly configured to handle the requests.
+
+-----
+
+### Updated `index.html` File
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -625,6 +636,7 @@
 
         function loadState(state) {
             // Restore selections
+            selectedDrivers = [];
             state.drivers.forEach(driverName => {
                 const driver = drivers.find(d => d.name === driverName);
                 if (driver) selectedDrivers.push(driver);
@@ -870,3 +882,4 @@
     </script>
 </body>
 </html>
+```
