@@ -256,14 +256,6 @@
                                 <label for="new-car-name" class="text-sm font-medium text-gray-700">Car Name</label>
                                 <input type="text" id="new-car-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
-                            <div>
-                                <label for="new-car-fuel" class="text-sm font-medium text-gray-700">Fuel Per Lap (L)</label>
-                                <input type="number" id="new-car-fuel" step="0.1" class="mt-1 p-3 border border-gray-300 rounded-lg w-32 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="new-car-tank" class="text-sm font-medium text-gray-700">Tank Capacity (L)</label>
-                                <input type="number" id="new-car-tank" class="mt-1 p-3 border border-gray-300 rounded-lg w-32 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
                             <button id="add-car-btn" onclick="addCarAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                                 Add Car
                             </button>
@@ -735,7 +727,7 @@
                 const li = document.createElement('li');
                 li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
                 li.innerHTML = `
-                    <span>${car.name} (Fuel/Lap: ${car.fuel_per_lap} L, Tank: ${car.tank_capacity} L)</span>
+                    <span>${car.name}</span>
                     <div class="space-x-2">
                         <button onclick="editCarAdmin('${car.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
                         <button onclick="removeCarAdmin('${car.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
@@ -807,17 +799,13 @@
         }
         function resetCarAdminForm() {
             document.getElementById('new-car-name').value = '';
-            document.getElementById('new-car-fuel').value = '';
-            document.getElementById('new-car-tank').value = '';
             document.getElementById('add-car-btn').textContent = 'Add Car';
             document.getElementById('add-car-btn').onclick = addCarAdmin;
         }
         async function addCarAdmin() {
             const name = document.getElementById('new-car-name').value;
-            const fuelPerLap = parseFloat(document.getElementById('new-car-fuel').value);
-            const tankCapacity = parseInt(document.getElementById('new-car-tank').value);
-            if (name && fuelPerLap && tankCapacity) {
-                cars.push({ name, fuel_per_lap: fuelPerLap, tank_capacity: tankCapacity });
+            if (name) {
+                cars.push({ name });
                 await saveDataToServer();
                 renderAdminLists();
                 populateCars();
@@ -828,20 +816,16 @@
             const car = cars.find(c => c.name === name);
             if (car) {
                 document.getElementById('new-car-name').value = car.name;
-                document.getElementById('new-car-fuel').value = car.fuel_per_lap;
-                document.getElementById('new-car-tank').value = car.tank_capacity;
                 document.getElementById('add-car-btn').textContent = 'Update Car';
                 document.getElementById('add-car-btn').onclick = () => updateCarAdmin(name);
             }
         }
         async function updateCarAdmin(originalName) {
             const name = document.getElementById('new-car-name').value;
-            const fuelPerLap = parseFloat(document.getElementById('new-car-fuel').value);
-            const tankCapacity = parseInt(document.getElementById('new-car-tank').value);
-            if (name && fuelPerLap && tankCapacity) {
+            if (name) {
                 const index = cars.findIndex(c => c.name === originalName);
                 if (index !== -1) {
-                    cars[index] = { name, fuel_per_lap: fuelPerLap, tank_capacity: tankCapacity };
+                    cars[index] = { name };
                     await saveDataToServer();
                     renderAdminLists();
                     populateCars();
