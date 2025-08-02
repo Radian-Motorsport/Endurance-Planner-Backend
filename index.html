@@ -405,34 +405,88 @@
         }
         
         // Global state with placeholder data
-        let drivers = [
-            { name: 'Lewis Hamilton', driverNumber: 44 },
-            { name: 'Max Verstappen', driverNumber: 1 },
-            { name: 'Lando Norris', driverNumber: 4 }
-        ];
-        let cars = [
-            { name: 'Porsche 911 GT3 R', fuel_per_lap: 3.5, tank_capacity: 120 },
-            { name: 'Audi R8 GT3 Evo II', fuel_per_lap: 3.3, tank_capacity: 120 },
-            { name: 'BMW M4 GT3', fuel_per_lap: 3.8, tank_capacity: 120 }
-        ];
-        let tracks = [
-            { name: 'Spa-Francorchamps' },
-            { name: 'Nürburgring' },
-            { name: 'Monza' }
-        ];
+        let drivers = [];
+        let cars = [];
+        let tracks = [];
         
         let selectedDrivers = [];
         let totalDrivers = 0;
         let pitStopDuration = 30;
+
+        let totalStints = 0;
+        let raceDurationSeconds = 0;
+        let lapsPerStint = 0;
+        let lapsInLastStint = 0;
         
         document.addEventListener('DOMContentLoaded', () => {
             setInitialTheme();
-            renderAdminLists();
-            populateDrivers();
-            populateCars();
-            populateTracks();
+            fetchDataAndPopulate();
         });
 
+        // Function to fetch data from the server
+        async function fetchDataAndPopulate() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                drivers = data.drivers;
+                cars = data.cars;
+                tracks = data.tracks;
+                
+                populateDrivers();
+                populateCars();
+                populateTracks();
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const stateParam = urlParams.get('state');
+                if (stateParam) {
+                    try {
+                        const decodedState = JSON.parse(atob(stateParam));
+                        loadState(decodedState);
+                    } catch (e) {
+                        console.error('Invalid state parameter in URL:', e);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                alert('Could not load data from the server. Please check the server status.');
+            }
+        }
+        // Helper function to show pages
+        function showPlannerPage() {
+            document.getElementById('planner-page').classList.remove('hidden');
+            document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
+            document.getElementById('race-details-btn').classList.add('bg-blue-600', 'text-white');
+            document.getElementById('race-details-btn').classList.remove('bg-gray-300', 'text-gray-800');
+            document.getElementById('admin-btn').classList.add('bg-gray-300', 'text-gray-800');
+            document.getElementById('admin-btn').classList.remove('bg-blue-600', 'text-white');
+        }
+        function showAdminPage() {
+            document.getElementById('planner-page').classList.add('hidden');
+            document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('admin-page').classList.remove('hidden');
+            document.getElementById('admin-btn').classList.add('bg-blue-600', 'text-white');
+            document.getElementById('admin-btn').classList.remove('bg-gray-300', 'text-gray-800');
+            document.getElementById('race-details-btn').classList.add('bg-gray-300', 'text-gray-800');
+            document.getElementById('race-details-btn').classList.remove('bg-blue-600', 'text-white');
+            renderAdminLists();
+            resetDriverAdminForm();
+            resetCarAdminForm();
+            resetTrackAdminForm();
+        }
+        function showPage2() {
+            const carSelect = document.getElementById('car-select');
+            const trackSelect = document.getElementById('track-select');
+            
+            if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+                alert("Please select at least one driver, a car, and a track before continuing.");
+                return;
+            }
+            document.getElementById('planner-page').classList.add('hidden');
+            document.getElementById('page-2').classList.remove('hidden');
+            updatePage2Summary();
+        }
+        
         function populateDrivers() {
             const select = document.getElementById('driver-select');
             select.innerHTML = '<option value="">Select a Driver...</option>';
@@ -444,7 +498,6 @@
                 select.appendChild(option);
             });
         }
-
         function populateCars() {
             const select = document.getElementById('car-select');
             select.innerHTML = '<option value="">Select a Car...</option>';
@@ -455,7 +508,6 @@
                 select.appendChild(option);
             });
         }
-
         function populateTracks() {
             const select = document.getElementById('track-select');
             select.innerHTML = '<option value="">Select a Track...</option>';
@@ -465,24 +517,6 @@
                 option.textContent = track.name;
                 select.appendChild(option);
             });
-        }
-
-        function showPlannerPage() {
-            document.getElementById('planner-page').classList.remove('hidden');
-            document.getElementById('admin-page').classList.add('hidden');
-            document.getElementById('race-details-btn').classList.add('bg-blue-600', 'text-white');
-            document.getElementById('race-details-btn').classList.remove('bg-gray-300', 'text-gray-800');
-            document.getElementById('admin-btn').classList.remove('bg-blue-600', 'text-white');
-            document.getElementById('admin-btn').classList.add('bg-gray-300', 'text-gray-800');
-        }
-
-        function showAdminPage() {
-            document.getElementById('planner-page').classList.add('hidden');
-            document.getElementById('admin-page').classList.remove('hidden');
-            document.getElementById('race-details-btn').classList.remove('bg-blue-600', 'text-white');
-            document.getElementById('race-details-btn').classList.add('bg-gray-300', 'text-gray-800');
-            document.getElementById('admin-btn').classList.add('bg-blue-600', 'text-white');
-            document.getElementById('admin-btn').classList.remove('bg-gray-300', 'text-gray-800');
         }
 
         function addDriver() {
@@ -501,13 +535,11 @@
                 }
             }
         }
-
         function removeDriver(name) {
             selectedDrivers = selectedDrivers.filter(d => d.name !== name);
             renderDriverList();
             populateDrivers();
         }
-
         function renderDriverList() {
             const list = document.getElementById('driver-list');
             list.innerHTML = '';
@@ -526,12 +558,6 @@
             document.getElementById('continue-button').classList.toggle('hidden', totalDrivers === 0);
         }
 
-        function showPage2() {
-            document.getElementById('planner-page').classList.add('hidden');
-            document.getElementById('page-2').classList.remove('hidden');
-            updatePage2Summary();
-        }
-
         function updatePage2Summary() {
             const trackSelect = document.getElementById('track-select');
             const carSelect = document.getElementById('car-select');
@@ -548,7 +574,7 @@
                 document.getElementById('tank-capacity-display-input').value = selectedCar.tank_capacity;
             }
         }
-
+        
         function calculateAndShowPage2() {
             // Placeholder for calculation logic
             // This would calculate laps, pit stops, etc.
@@ -583,7 +609,7 @@
             alert('Link copied to clipboard!');
         }
 
-        function saveDataToServer() {
+        async function saveDataToServer() {
             // Placeholder for saving data
             console.log('Data saved to server.');
         }
@@ -685,6 +711,17 @@
                 renderAdminLists();
                 populateTracks();
             }
+        }
+        // Admin form reset functions
+        function resetDriverAdminForm() {
+            document.getElementById('new-driver-name').value = '';
+            document.getElementById('new-driver-number').value = '';
+        }
+        function resetCarAdminForm() {
+            document.getElementById('new-car-name').value = '';
+        }
+        function resetTrackAdminForm() {
+            document.getElementById('new-track-name').value = '';
         }
     </script>
 </body>
