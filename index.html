@@ -389,7 +389,7 @@
             </div>
         </div>
     </div>
-   <script>
+<script>
     // Global state
     let drivers = [];
     let cars = [];
@@ -438,6 +438,7 @@
     }
 
     function convertTimezone(date, fromTz, toTz) {
+        // This function converts a date string from one timezone to another
         return new Date(date.toLocaleString('en-US', { timeZone: fromTz }));
     }
 
