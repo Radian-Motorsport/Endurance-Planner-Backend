@@ -425,7 +425,8 @@
         // Load the saved theme and set up the dark mode switch
         loadTheme();
         document.getElementById('darkModeSwitch').addEventListener('change', toggleDarkMode);
-
+		// Add event listener for the calculate button
+        document.getElementById('calculate-btn').addEventListener('click', calculateAndShowPage2);
         // Fetch initial data for the race planner
         fetchDataAndPopulate();
 
