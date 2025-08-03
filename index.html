@@ -419,29 +419,37 @@
         // Function to fetch data from the server
         async function fetchDataAndPopulate() {
             try {
+                // First, fetch the global data (drivers, cars, tracks)
                 const response = await fetch('/api/data');
                 const data = await response.json();
                 drivers = data.drivers;
                 cars = data.cars;
                 tracks = data.tracks;
                 
+                // Populate the dropdowns
                 populateDrivers();
                 populateCars();
                 populateTracks();
 
+                // Now, check for a shared strategy link with an ID
                 const urlParams = new URLSearchParams(window.location.search);
-                const stateParam = urlParams.get('state');
-                if (stateParam) {
-                    try {
-                        const decodedState = JSON.parse(atob(stateParam));
-                        loadState(decodedState);
-                    } catch (e) {
-                        console.error('Invalid state parameter in URL:', e);
+                const strategyId = urlParams.get('id');
+
+                if (strategyId) {
+                    // If an ID exists, fetch the specific strategy from the server
+                    const strategyResponse = await fetch(`/api/strategies/${strategyId}`);
+                    if (!strategyResponse.ok) {
+                        throw new Error('Failed to load shared strategy.');
                     }
+                    const state = await strategyResponse.json();
+                    loadState(state);
+                } else {
+                    // If no ID is in the URL, show the first page as normal
+                    showPlannerPage();
                 }
 
             } catch (error) {
-                console.error('Failed to fetch data:', error);
+                console.error('Failed to fetch data or load strategy:', error);
                 alert('Could not load data from the server. Please check the server status.');
             }
         }
