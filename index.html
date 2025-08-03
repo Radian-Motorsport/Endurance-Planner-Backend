@@ -1009,6 +1009,28 @@
                 populateTracks();
             }
         }
+		document.addEventListener('DOMContentLoaded', () => {
+            const darkModeSwitch = document.getElementById('darkModeSwitch');
+            const body = document.body;
+
+            // Check for saved user preference
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                body.classList.add('dark');
+                darkModeSwitch.checked = true;
+            }
+
+            // Listen for toggle switch change
+            darkModeSwitch.addEventListener('change', () => {
+                if (darkModeSwitch.checked) {
+                    body.classList.add('dark');
+                    localStorage.setItem('darkMode', 'true');
+                } else {
+                    body.classList.remove('dark');
+                    localStorage.setItem('darkMode', 'false');
+                }
+            });
+        });
     </script>
 </body>
 </html>
