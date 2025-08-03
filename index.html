@@ -751,11 +751,12 @@ function convertTimezone(date, fromTz, toTz) {
             }
         }
         
-        async function generateShareLink() {
+         async function generateShareLink() {
             const state = {
                 drivers: selectedDrivers.map(d => d.name),
                 car: document.getElementById('car-select').value,
                 track: document.getElementById('track-select').value,
+                timezone: document.getElementById('timezone-select').value,
                 raceDurationHours: document.getElementById('race-duration-hours').value,
                 raceDurationMinutes: document.getElementById('race-duration-minutes').value,
                 avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes').value,
