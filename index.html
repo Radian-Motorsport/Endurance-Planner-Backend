@@ -290,7 +290,14 @@
                             <span class="text-sm font-medium text-gray-700">min (Qualifying)</span>
                             <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105" onclick="calculateAndShowPage2()">Update</button>
                         </div>
-                    </div>
+						<div class="mt-4">
+							<label for="timezone-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+								Race Timezone
+							</label>
+							<select id="timezone-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-gray-200">
+							</select>
+					    </div>
+					</div>
                     
                     <table class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg">
                         <thead class="bg-gray-200">
@@ -480,7 +487,28 @@
                 alert('Could not load data from the server. Please check the server status.');
             }
         }
+		// --- Timezone Helper Functions ---
+			function populateTimezones() {
+			const timezoneSelect = document.getElementById('timezone-select');
+			const timezones = [
+				'Europe/London', 'America/New_York', 'America/Los_Angeles', 'Australia/Sydney',
+				'Asia/Tokyo', 'Asia/Dubai', 'Europe/Berlin', 'Europe/Paris', 'Etc/GMT+12',
+				'Etc/GMT-12',
+			];
+			timezones.forEach(tz => {
+				const option = document.createElement('option');
+				option.value = tz;
+				option.textContent = tz.replace('_', ' '); // Make the text more readable
+				timezoneSelect.appendChild(option);
+    });
+    // Set the default to the user's local timezone if possible
+    timezoneSelect.value = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London';
+}
 
+function convertTimezone(date, fromTz, toTz) {
+    // This function converts a date string from one timezone to another
+    return new Date(date.toLocaleString('en-US', { timeZone: fromTz }));
+}
         // Helper function to show pages
         function showPlannerPage() {
             document.getElementById('planner-page').classList.remove('hidden');
@@ -669,13 +697,16 @@
             const raceStartTimeInput = document.getElementById('race-start-time-page2').value;
             const qualifyingMinutesInput = parseInt(document.getElementById('qualifying-minutes-page2').value) || 0;
             const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
+            const selectedTimezone = document.getElementById('timezone-select').value; // Get the selected timezone
 
             const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
             
-            const raceDate = new Date();
+            // Create a date object for the race start time in the selected timezone
+            let raceDate = new Date();
             raceDate.setHours(hours, minutes, 0, 0);
 
-            let currentTime = new Date(raceDate.getTime());
+            // Create a new date object that is correctly converted to the user's local timezone
+            let currentTime = convertTimezone(raceDate, selectedTimezone, Intl.DateTimeFormat().resolvedOptions().timeZone);
             
             currentTime.setMinutes(currentTime.getMinutes() + qualifyingMinutesInput);
 
@@ -701,13 +732,13 @@
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-300">${startTimeString}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${endTimeString}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${startLap}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${endLap}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${stintLaps}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${driver.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${nextDriver.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-300 dark:text-gray-100">${startTimeString}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300 dark:text-gray-300">${endTimeString}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300 dark:text-gray-300">${startLap}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300 dark:text-gray-300">${endLap}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300 dark:text-gray-300">${stintLaps}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300 dark:text-gray-300">${driver.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${nextDriver.name}</td>
                 `;
                 tbody.appendChild(tr);
 
