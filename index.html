@@ -452,7 +452,7 @@
 
 
         // Function to fetch data from the server
-             async function fetchDataAndPopulate() {
+            async function fetchDataAndPopulate() {
             try {
                 // First, fetch the global data (drivers, cars, tracks)
                 const response = await fetch('/api/data');
@@ -465,7 +465,7 @@
                 populateDrivers();
                 populateCars();
                 populateTracks();
-                populateTimezones(); // Ensure timezones are populated
+                populateTimezones();
 
                 // Now, check for a shared strategy link with an ID
                 const urlParams = new URLSearchParams(window.location.search);
@@ -489,28 +489,29 @@
                 alert('Could not load data from the server. Please check the server status.');
             }
         }
-		// --- Timezone Helper Functions ---
-			function populateTimezones() {
-			const timezoneSelect = document.getElementById('timezone-select');
-			const timezones = [
-				'Europe/London', 'America/New_York', 'America/Los_Angeles', 'Australia/Sydney',
-				'Asia/Tokyo', 'Asia/Dubai', 'Europe/Berlin', 'Europe/Paris', 'Etc/GMT+12',
-				'Etc/GMT-12',
-			];
-			timezones.forEach(tz => {
-				const option = document.createElement('option');
-				option.value = tz;
-				option.textContent = tz.replace('_', ' '); // Make the text more readable
-				timezoneSelect.appendChild(option);
-    });
-    // Set the default to the user's local timezone if possible
-    timezoneSelect.value = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London';
-}
+        }
+		/ --- Timezone Helper Functions ---
+        function populateTimezones() {
+            const timezoneSelect = document.getElementById('timezone-select');
+            const timezones = [
+                'Europe/London', 'America/New_York', 'America/Los_Angeles', 'Australia/Sydney',
+                'Asia/Tokyo', 'Asia/Dubai', 'Europe/Berlin', 'Europe/Paris', 'Etc/GMT+12',
+                'Etc/GMT-12',
+            ];
+            timezones.forEach(tz => {
+                const option = document.createElement('option');
+                option.value = tz;
+                option.textContent = tz.replace('_', ' '); // Make the text more readable
+                timezoneSelect.appendChild(option);
+            });
+            // Set the default to the user's local timezone if possible
+            timezoneSelect.value = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London';
+        }
 
-function convertTimezone(date, fromTz, toTz) {
-    // This function converts a date string from one timezone to another
-    return new Date(date.toLocaleString('en-US', { timeZone: fromTz }));
-}
+        function convertTimezone(date, fromTz, toTz) {
+            // This function converts a date string from one timezone to another
+            return new Date(date.toLocaleString('en-US', { timeZone: fromTz }));
+        }
         // Helper function to show pages
         function showPlannerPage() {
             document.getElementById('planner-page').classList.remove('hidden');
