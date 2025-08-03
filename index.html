@@ -686,7 +686,7 @@
             }
         }
         
-        function generateShareLink() {
+        async function generateShareLink() {
             const state = {
                 drivers: selectedDrivers.map(d => d.name),
                 car: document.getElementById('car-select').value,
@@ -703,51 +703,29 @@
                 raceStartTime: document.getElementById('race-start-time-page2').value,
                 qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
             };
-            const encodedState = btoa(JSON.stringify(state));
-            const shareLink = `${window.location.origin}${window.location.pathname}?state=${encodedState}`;
-            document.getElementById('share-link-output').value = shareLink;
-        }
 
-        function copyShareLink() {
-            const shareLinkOutput = document.getElementById('share-link-output');
-            if (shareLinkOutput.value) {
-                shareLinkOutput.select();
-                navigator.clipboard.writeText(shareLinkOutput.value);
-                alert('Share link copied to clipboard!');
-            } else {
-                alert('Please generate a link first.');
+            try {
+                const response = await fetch('/api/strategies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(state),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save strategy.');
+                }
+
+                const data = await response.json();
+                const shareLink = `${window.location.origin}${window.location.pathname}?id=${data.id}`;
+                document.getElementById('share-link-output').value = shareLink;
+
+            } catch (error) {
+                console.error('Error saving strategy:', error);
+                alert('Could not save strategy. Please try again.');
             }
         }
-
-        function loadState(state) {
-            // Restore selections
-            selectedDrivers = [];
-            state.drivers.forEach(driverName => {
-                const driver = drivers.find(d => d.name === driverName);
-                if (driver) selectedDrivers.push(driver);
-            });
-            renderDriverList();
-            
-            document.getElementById('car-select').value = state.car;
-            document.getElementById('track-select').value = state.track;
-
-            // Restore inputs on page 2
-            document.getElementById('race-duration-hours').value = state.raceDurationHours;
-            document.getElementById('race-duration-minutes').value = state.raceDurationMinutes;
-            document.getElementById('avg-lap-time-minutes').value = state.avgLapTimeMinutes;
-            document.getElementById('avg-lap-time-seconds').value = state.avgLapTimeSeconds;
-            document.getElementById('pit-stop-time').value = state.pitStopTime;
-            document.getElementById('fuel-per-lap-display-input').value = state.fuelPerLapInput;
-            document.getElementById('tank-capacity-display-input').value = state.tankCapacityInput;
-            
-            document.getElementById('fuel-slider').value = state.fuelSlider;
-            document.getElementById('lap-time-slider').value = state.lapTimeSlider;
-            document.getElementById('race-start-time-page2').value = state.raceStartTime;
-            document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes;
-            
-            document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
-            document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
-
 
             // Navigate to page 2 and calculate
             showPage2();
