@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -452,7 +452,7 @@
 
 
         // Function to fetch data from the server
-        async function fetchDataAndPopulate() {
+         async function fetchDataAndPopulate() {
             try {
                 // First, fetch the global data (drivers, cars, tracks)
                 const response = await fetch('/api/data');
@@ -461,7 +461,7 @@
                 cars = data.cars;
                 tracks = data.tracks;
                 
-                // Populate the dropdowns
+                // Populate the dropdowns with data
                 populateDrivers();
                 populateCars();
                 populateTracks();
