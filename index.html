@@ -476,10 +476,10 @@
             const carSelect = document.getElementById('car-select');
             const trackSelect = document.getElementById('track-select');
              // Remove or comment out this block for testing:
-            // if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
-            //     alert("Please select at least one driver, a car, and a track before continuing.");
-             //     return;
-            // }
+            if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+                alert("Please select at least one driver, a car, and a track before continuing.");
+                return;
+            }
             document.getElementById('planner-page').classList.add('hidden');
             document.getElementById('page-2').classList.remove('hidden');
             updatePage2Summary();
@@ -718,3 +718,4 @@
     </script>
 </body>
 </html>
+
