@@ -727,9 +727,70 @@
             }
         }
 
-            // Navigate to page 2 and calculate
-            showPage2();
-            calculateAndShowPage2();
+        function copyShareLink() {
+            const shareLinkOutput = document.getElementById('share-link-output');
+            if (shareLinkOutput.value) {
+                shareLinkOutput.select();
+                navigator.clipboard.writeText(shareLinkOutput.value);
+                alert('Share link copied to clipboard!');
+            } else {
+                alert('Please generate a link first.');
+            }
+        }
+
+        async function loadState() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const strategyId = urlParams.get('id');
+
+            if (strategyId) {
+                try {
+                    const response = await fetch(`/api/strategies/${strategyId}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to load strategy.');
+                    }
+                    
+                    const state = await response.json();
+
+                    // Restore selections
+                    selectedDrivers = [];
+                    state.drivers.forEach(driverName => {
+                        const driver = drivers.find(d => d.name === driverName);
+                        if (driver) selectedDrivers.push(driver);
+                    });
+                    renderDriverList();
+                    
+                    document.getElementById('car-select').value = state.car;
+                    document.getElementById('track-select').value = state.track;
+
+                    // Restore inputs on page 2
+                    document.getElementById('race-duration-hours').value = state.raceDurationHours;
+                    document.getElementById('race-duration-minutes').value = state.raceDurationMinutes;
+                    document.getElementById('avg-lap-time-minutes').value = state.avgLapTimeMinutes;
+                    document.getElementById('avg-lap-time-seconds').value = state.avgLapTimeSeconds;
+                    document.getElementById('pit-stop-time').value = state.pitStopTime;
+                    document.getElementById('fuel-per-lap-display-input').value = state.fuelPerLapInput;
+                    document.getElementById('tank-capacity-display-input').value = state.tankCapacityInput;
+                    
+                    document.getElementById('fuel-slider').value = state.fuelSlider;
+                    document.getElementById('lap-time-slider').value = state.lapTimeSlider;
+                    document.getElementById('race-start-time-page2').value = state.raceStartTime;
+                    document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes;
+                    
+                    document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
+                    document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
+
+                    // Navigate to page 2 and calculate
+                    showPage2();
+                    calculateAndShowPage2();
+
+                } catch (error) {
+                    console.error('Error loading strategy:', error);
+                    alert('Could not load strategy from the provided link.');
+                }
+            } else {
+                // If no ID is in the URL, initialize the page as normal
+                showPage1();
+            }
         }
 
         // --- Admin Functions ---
