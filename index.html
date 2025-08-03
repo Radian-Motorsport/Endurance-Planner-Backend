@@ -383,62 +383,65 @@
         </div>
     </div>
     <script>
-        // Global state
+// Global state
         let drivers = [];
-        let cars = [];
-        let tracks = [];
-        let selectedDrivers = [];
-        let totalStints = 0;
-        let raceDurationSeconds = 0;
-        let lapsPerStint = 0;
-        let lapsInLastStint = 0;
+    let cars = [];
+    let tracks = [];
+    let selectedDrivers = [];
+    let totalStints = 0;
+    let raceDurationSeconds = 0;
+    let lapsPerStint = 0;
+    let lapsInLastStint = 0;
 
-        // On initial page load
-        window.onload = function() {
-            fetchDataAndPopulate();
-            // Event listeners for dynamic sliders
-            const fuelSlider = document.getElementById('fuel-slider');
-            const fuelSliderValue = document.getElementById('fuel-slider-value');
-            const lapTimeSlider = document.getElementById('lap-time-slider');
-            const lapTimeSliderValue = document.getElementById('lap-time-slider-value');
-            
-            if (fuelSlider) {
-                fuelSlider.addEventListener('input', () => {
-                    fuelSliderValue.textContent = parseFloat(fuelSlider.value).toFixed(1);
-                    calculateAndShowPage2();
-                });
-            }
-            if (lapTimeSlider) {
-                lapTimeSlider.addEventListener('input', () => {
-                    lapTimeSliderValue.textContent = lapTimeSlider.value;
-                    calculateAndShowPage2();
-                });
-            }
-			function toggleDarkMode() {
-            const isDark = document.getElementById('darkModeSwitch').checked;
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            }
+    // --- Dark Mode Switch Functions ---
+    function toggleDarkMode() {
+        const isDark = document.getElementById('darkModeSwitch').checked;
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
         }
-		// Check for saved theme preference on page load
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                document.documentElement.classList.add('dark');
-                document.getElementById('darkModeSwitch').checked = true;
-            }
-        }
+    }
 
-        // Event listener for the dark mode switch
-        document.addEventListener('DOMContentLoaded', (event) => {
-            loadTheme();
-            document.getElementById('darkModeSwitch').addEventListener('change', toggleDarkMode);
-        });
-        };
+    function loadTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.getElementById('darkModeSwitch').checked = true;
+        }
+    }
+
+    // --- Initial Page Load and Event Listeners ---
+    document.addEventListener('DOMContentLoaded', (event) => {
+        // Load the saved theme and set up the dark mode switch
+        loadTheme();
+        document.getElementById('darkModeSwitch').addEventListener('change', toggleDarkMode);
+
+        // Fetch initial data for the race planner
+        fetchDataAndPopulate();
+
+        // Event listeners for dynamic sliders
+        const fuelSlider = document.getElementById('fuel-slider');
+        const fuelSliderValue = document.getElementById('fuel-slider-value');
+        const lapTimeSlider = document.getElementById('lap-time-slider');
+        const lapTimeSliderValue = document.getElementById('lap-time-slider-value');
+
+        if (fuelSlider) {
+            fuelSlider.addEventListener('input', () => {
+                fuelSliderValue.textContent = parseFloat(fuelSlider.value).toFixed(1);
+                calculateAndShowPage2();
+            });
+        }
+        if (lapTimeSlider) {
+            lapTimeSlider.addEventListener('input', () => {
+                lapTimeSliderValue.textContent = lapTimeSlider.value;
+                calculateAndShowPage2();
+            });
+        }
+    });
+
 
         // Function to fetch data from the server
         async function fetchDataAndPopulate() {
