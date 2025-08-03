@@ -452,7 +452,7 @@
 
 
         // Function to fetch data from the server
-         async function fetchDataAndPopulate() {
+             async function fetchDataAndPopulate() {
             try {
                 // First, fetch the global data (drivers, cars, tracks)
                 const response = await fetch('/api/data');
@@ -461,10 +461,11 @@
                 cars = data.cars;
                 tracks = data.tracks;
                 
-                // Populate the dropdowns with data
+                // Populate all dropdowns with data
                 populateDrivers();
                 populateCars();
                 populateTracks();
+                populateTimezones(); // Ensure timezones are populated
 
                 // Now, check for a shared strategy link with an ID
                 const urlParams = new URLSearchParams(window.location.search);
