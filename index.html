@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -333,7 +333,6 @@
                     <div class="space-y-4">
                         <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
                             <div class="flex-grow">
-                                <label for="new-driver-name" class="text-sm font-medium text-gray-700">Driver Name</label>
                                 <input type="text" id="new-driver-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             <div>
@@ -353,7 +352,6 @@
                     <div class="space-y-4">
                         <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
                             <div class="flex-grow">
-                                <label for="new-car-name" class="text-sm font-medium text-gray-700">Car Name</label>
                                 <input type="text" id="new-car-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             <button id="add-car-btn" onclick="addCarAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -369,7 +367,6 @@
                     <div class="space-y-4">
                         <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
                             <div class="flex-grow">
-                                <label for="new-track-name" class="text-sm font-medium text-gray-700">Track Name</label>
                                 <input type="text" id="new-track-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             <button id="add-track-btn" onclick="addTrackAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -922,8 +919,7 @@
         }
         async function addCarAdmin() {
             const name = document.getElementById('new-car-name').value;
-            const fuelPerLap = parseFloat(document.getElementById('new-car-fuel').value);
-            const tankCapacity = parseInt(document.getElementById('new-car-tank').value);
+            
             if (name && fuelPerLap && tankCapacity) {
                 cars.push({ name, fuel_per_lap: fuelPerLap, tank_capacity: tankCapacity });
                 await saveDataToServer();
@@ -936,8 +932,6 @@
             const car = cars.find(c => c.name === name);
             if (car) {
                 document.getElementById('new-car-name').value = car.name;
-                document.getElementById('new-car-fuel').value = car.fuel_per_lap;
-                document.getElementById('new-car-tank').value = car.tank_capacity;
                 document.getElementById('add-car-btn').textContent = 'Update Car';
                 document.getElementById('add-car-btn').onclick = () => updateCarAdmin(name);
             }
@@ -949,7 +943,7 @@
             if (name && fuelPerLap && tankCapacity) {
                 const index = cars.findIndex(c => c.name === originalName);
                 if (index !== -1) {
-                    cars[index] = { name, fuel_per_lap: fuelPerLap, tank_capacity: tankCapacity };
+                    cars[index] = { name };
                     await saveDataToServer();
                     renderAdminLists();
                     populateCars();
