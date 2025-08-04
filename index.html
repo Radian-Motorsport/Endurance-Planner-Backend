@@ -536,21 +536,21 @@
             
 			
 			
-			const raceStartTimeInput = document.getElementById('race-start-time-page2');
-			const qualifyingMinutesInput = document.getElementById('qualifying-minutes-page2');
+		const raceStartTimeInput = document.getElementById('race-start-time-page2');
+		const qualifyingMinutesInput = document.getElementById('qualifying-minutes-page2');
 
-			const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+		const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
-			if (!timeRegex.test(raceStartTimeInput.value)) {
-			alert("Please enter a valid race start time in HH:MM format (e.g., 13:00).");
-			raceStartTimeInput.focus(); // Brings focus back to the invalid field
-			return; // Stop the function from running further
-			}
+		if (!timeRegex.test(raceStartTimeInput.value)) {
+		alert("Please enter a valid race start time in HH:MM format (e.g., 13:00).");
+		raceStartTimeInput.focus(); // Brings focus back to the invalid field
+		return; // Stop the function from running further
+			
 
-			// Your existing calculation logic goes here
-			const [hours, minutes] = raceStartTimeInput.value.split(':').map(Number);
-			// ... rest of your code
-		}
+		// Your existing calculation logic goes here
+		const [hours, minutes] = raceStartTimeInput.value.split(':').map(Number);
+		// ... rest of your code
+	    }
             totalStints = Math.floor(totalLaps / lapsPerTank) + (totalLaps % lapsPerTank > 0 ? 1 : 0);
             lapsPerStint = lapsPerTank;
             lapsInLastStint = totalLaps % lapsPerStint;
@@ -1052,5 +1052,6 @@
     </script>
 </body>
 </html>
+
 
 
