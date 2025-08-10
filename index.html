@@ -1009,28 +1009,28 @@
             }
         }
 		function addTrack() {
- 			const dropdown = document.getElementById("track-select");
-			const trackName = dropdown.value;
-		  if (trackName) {
-		    const container = document.getElementById("trackList");
-		    container.innerHTML = `
-		      <li class="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
-		        <span>${trackName}</span>
-		        <button onclick="removeTrack(this)" class="text-red-500 hover:text-red-700">
-		          <i class="fas fa-trash-alt"></i>
-		        </button>
-		      </li>`;
+		  const trackSelect = document.getElementById("track-select");
+		  const selectedTrack = trackSelect.value;
+		  if (selectedTrack) {
+		    const trackList = document.getElementById("trackList");
+		
+		    const li = document.createElement("li");
+		    li.className = "flex items-center justify-between bg-white p-2 rounded shadow";
+		
+		    const span = document.createElement("span");
+		    span.textContent = selectedTrack;
+		
+		    const deleteBtn = document.createElement("button");
+		    deleteBtn.innerHTML = "🗑️";
+		    deleteBtn.className = "text-red-500 hover:text-red-700";
+		    deleteBtn.onclick = () => li.remove();
+		
+		    li.appendChild(span);
+		    li.appendChild(deleteBtn);
+		    trackList.appendChild(li);
+		
+		    trackSelect.selectedIndex = 0; // Reset dropdown
 		  }
-			const trackSelect = document.getElementById("track-select");
-			  const selectedTrack = trackSelect.value;
-			  if (selectedTrack) {
-			    const trackList = document.getElementById("trackList");
-			    const li = document.createElement("li");
-			    li.textContent = selectedTrack;
-			    // Add delete icon logic here
-			    trackList.appendChild(li);
-			    trackSelect.selectedIndex = 0; // ✅ Reset to "Select a Track"
-			  }
 		}
 		
 		function removeTrack(button) {
@@ -1038,29 +1038,30 @@
 		}
 		
 		function addCar() {
-		  const dropdown = document.getElementById("car-select");
-		  const carName = dropdown.value;
-		  if (carName) {
-		    const container = document.getElementById("carList");
-		    container.innerHTML = `
-		      <li class="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
-		        <span>${carName}</span>
-		        <button onclick="removeCar(this)" class="text-red-500 hover:text-red-700">
-		          <i class="fas fa-trash-alt"></i>
-		        </button>
-		      </li>`;
+		  const carSelect = document.getElementById("car-select");
+		  const selectedCar = carSelect.value;
+		  if (selectedCar) {
+		    const carList = document.getElementById("carList");
+		
+		    const li = document.createElement("li");
+		    li.className = "flex items-center justify-between bg-white p-2 rounded shadow";
+		
+		    const span = document.createElement("span");
+		    span.textContent = selectedCar;
+		
+		    const deleteBtn = document.createElement("button");
+		    deleteBtn.innerHTML = "🗑️";
+		    deleteBtn.className = "text-red-500 hover:text-red-700";
+		    deleteBtn.onclick = () => li.remove();
+		
+		    li.appendChild(span);
+		    li.appendChild(deleteBtn);
+		    carList.appendChild(li);
+		
+		    carSelect.selectedIndex = 0; // Reset dropdown
 		  }
-			const carSelect = document.getElementById("car-select");
-  			const selectedCar = carSelect.value;
-  			if (selectedCar) {
-    		const carList = document.getElementById("carList");
-    		const li = document.createElement("li");
-    		li.textContent = selectedCar;
-		  	// Add delete icon logic here
-		  	carList.appendChild(li);
-		  	carSelect.selectedIndex = 0; // ✅ Reset to "Select a Car"
-			}
 		}
+
 		function removeCar(button) {
 		  button.parentElement.remove();
 		}
@@ -1110,6 +1111,7 @@
     </script>
 </body>
 </html>
+
 
 
 
