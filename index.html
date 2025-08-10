@@ -184,13 +184,15 @@
                                 <option value="">Select a Track...</option>
                             </select>
 							<button onclick="addTrack()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded w-fit">Add Track</button>	
+							<ul id="trackList" class="space-y-2 mt-4"></ul>
                         </div>
                         <div class="flex flex-col w-full">
                             <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <option value="">Select a Car...</option>
                             </select>
 						<button onclick="addCar()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded w-fit">Add Car</button>	
-                        </div>
+                  		<ul id="carList" class="space-y-2 mt-4"></ul>
+						</div>
                     </div>
                 </div>
                 <div class="mt-8">
@@ -199,9 +201,8 @@
                     </button>
                 </div>
             </div>
-			<ul id="trackList" class="space-y-2 mt-4"></ul>
-			<ul id="carList" class="space-y-2 mt-4"></ul>
-
+			
+			
             <div id="page-2" class="space-y-6 hidden">
                 <div class="flex items-center space-x-4 mb-6">
                     <button onclick="showPlannerPage()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -1090,6 +1091,7 @@
     </script>
 </body>
 </html>
+
 
 
 
