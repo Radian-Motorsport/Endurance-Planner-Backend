@@ -322,8 +322,12 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Lap</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Lap</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Laps per Stint</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Driver</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Backup</th>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">
+    								<select id="stint-driver-${i}" class="w-full bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-1 rounded-md border border-gray-300 dark:border-gray-500"></select>
+								</td>
+								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+   									<select id="stint-backup-driver-${i}" class="w-full bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-1 rounded-md border border-gray-300 dark:border-gray-500"></select>
+								</td>
                             </tr>
                         </thead>
                         <tbody id="stint-table-body" class="bg-white divide-y divide-gray-200">
@@ -709,6 +713,8 @@
                 // Add pit stop time for every stint except the last one
                 if (i < totalStints - 1) {
                     currentTime.setSeconds(currentTime.getSeconds() + pitStopTime);
+				// Call the new function to populate the dropdowns
+				populateStintDrivers(i, selectedDrivers);
                 }
             }
         }
@@ -1025,6 +1031,31 @@
                 populateTracks();
             }
         }
+		// Function to populate the driver dropdowns for each stint
+		function populateStintDrivers(stintIndex, drivers) {
+			    const driverSelect = document.getElementById(`stint-driver-${stintIndex}`);
+			    const backupDriverSelect = document.getElementById(`stint-backup-driver-${stintIndex}`);
+			
+			    // Clear existing options
+			    driverSelect.innerHTML = '';
+			    backupDriverSelect.innerHTML = '';
+			
+			    // Add a default option
+			    const defaultOption = document.createElement('option');
+			    defaultOption.textContent = "Select...";
+			    defaultOption.value = "";
+			    driverSelect.appendChild(defaultOption.cloneNode(true));
+			    backupDriverSelect.appendChild(defaultOption.cloneNode(true));
+			
+			    // Add new options from the selected drivers
+			    drivers.forEach(driver => {
+			        const option = document.createElement('option');
+			        option.value = driver.name;
+			        option.textContent = driver.name;
+			        driverSelect.appendChild(option);
+			        backupDriverSelect.appendChild(option.cloneNode(true)); // Create a copy for the backup
+			    });
+		}
 		document.addEventListener('DOMContentLoaded', () => {
             const darkModeSwitch = document.getElementById('darkModeSwitch');
             const body = document.body;
@@ -1050,6 +1081,7 @@
     </script>
 </body>
 </html>
+
 
 
 
