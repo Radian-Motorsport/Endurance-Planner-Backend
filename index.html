@@ -659,65 +659,67 @@
             });
         }
         function populateStintTable(avgLapTimeInSeconds) {
-            const tbody = document.getElementById('stint-table-body');
-            tbody.innerHTML = '';
-            
-            const raceStartTimeInput = document.getElementById('race-start-time-page2').value;
-            const qualifyingMinutesInput = parseInt(document.getElementById('qualifying-minutes-page2').value) || 0;
-            const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
-
-            const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
-            
-            const raceDate = new Date();
-            raceDate.setHours(hours, minutes, 0, 0);
-
-            let currentTime = new Date(raceDate.getTime());
-            
-            currentTime.setMinutes(currentTime.getMinutes() + qualifyingMinutesInput);
-
-            let currentLap = 1;
-            let driverIndex = 0;
-            
-            for (let i = 0; i < totalStints; i++) {
-                const stintLaps = (i === totalStints - 1) && (lapsInLastStint !== 0) ? lapsInLastStint : lapsPerStint;
-                if (stintLaps <= 0) break;
-
-                const startTimeString = formatTime(currentTime);
-                
-                const stintDurationSeconds = stintLaps * avgLapTimeInSeconds;
-                currentTime.setSeconds(currentTime.getSeconds() + stintDurationSeconds);
-
-                const endTimeString = formatTime(currentTime);
-
-                const startLap = currentLap;
-                const endLap = startLap + stintLaps - 1;
-                
-                const driver = selectedDrivers[driverIndex];
-                const nextDriver = selectedDrivers[(driverIndex + 1) % selectedDrivers.length];
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-300">${startTimeString}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${endTimeString}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${startLap}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${endLap}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${stintLaps}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300">${driver.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${nextDriver.name}</td>
-                `;
-                tbody.appendChild(tr);
-
-                currentLap = endLap + 1;
-                driverIndex = (driverIndex + 1) % selectedDrivers.length;
-                
-                // Add pit stop time for every stint except the last one
-                if (i < totalStints - 1) {
-                    currentTime.setSeconds(currentTime.getSeconds() + pitStopTime);
-				// Call the new function to populate the dropdowns
-				populateStintDrivers(i, selectedDrivers);
-                }
-            }
-        }
+			    const tbody = document.getElementById('stint-table-body');
+			    tbody.innerHTML = '';
+			    
+			    const raceStartTimeInput = document.getElementById('race-start-time-page2').value;
+			    const qualifyingMinutesInput = parseInt(document.getElementById('qualifying-minutes-page2').value) || 0;
+			    const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
+			
+			    const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
+			    
+			    const raceDate = new Date();
+			    raceDate.setHours(hours, minutes, 0, 0);
+			
+			    let currentTime = new Date(raceDate.getTime());
+			    
+			    currentTime.setMinutes(currentTime.getMinutes() + qualifyingMinutesInput);
+			
+			    let currentLap = 1;
+			    let driverIndex = 0;
+			    
+			    for (let i = 0; i < totalStints; i++) {
+			        const stintLaps = (i === totalStints - 1) && (lapsInLastStint !== 0) ? lapsInLastStint : lapsPerStint;
+			        if (stintLaps <= 0) break;
+			
+			        const startTimeString = formatTime(currentTime);
+			        
+			        const stintDurationSeconds = stintLaps * avgLapTimeInSeconds;
+			        currentTime.setSeconds(currentTime.getSeconds() + stintDurationSeconds);
+			
+			        const endTimeString = formatTime(currentTime);
+			
+			        const startLap = currentLap;
+			        const endLap = startLap + stintLaps - 1;
+			        
+			        const tr = document.createElement('tr');
+			        tr.innerHTML = `
+			            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${startTimeString}</td>
+			            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${endTimeString}</td>
+			            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${startLap}</td>
+			            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${endLap}</td>
+			            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${stintLaps}</td>
+			            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">
+			                <select id="stint-driver-${i}" class="w-full bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-1 rounded-md border border-gray-300 dark:border-gray-500"></select>
+			            </td>
+			            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+			                <select id="stint-backup-driver-${i}" class="w-full bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-1 rounded-md border border-gray-300 dark:border-gray-500"></select>
+			            </td>
+			        `;
+			        tbody.appendChild(tr);
+			
+			        // This is the call that populates the dropdowns
+			        populateStintDrivers(i, selectedDrivers);
+			
+			        currentLap = endLap + 1;
+			        driverIndex = (driverIndex + 1) % selectedDrivers.length;
+			        
+			        // Add pit stop time for every stint except the last one
+			        if (i < totalStints - 1) {
+			            currentTime.setSeconds(currentTime.getSeconds() + pitStopTime);
+			        }
+			    }
+			}
         
         async function generateShareLink() {
             const state = {
@@ -1081,6 +1083,7 @@
     </script>
 </body>
 </html>
+
 
 
 
