@@ -183,11 +183,13 @@
                             <select id="track-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <option value="">Select a Track...</option>
                             </select>
+							<button onclick="addTrack()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded w-fit">Add Track</button>	
                         </div>
                         <div class="flex flex-col w-full">
                             <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <option value="">Select a Car...</option>
                             </select>
+						<button onclick="addCar()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded w-fit">Add Car</button>	
                         </div>
                     </div>
                 </div>
@@ -197,6 +199,8 @@
                     </button>
                 </div>
             </div>
+			<ul id="trackList" class="space-y-2 mt-4"></ul>
+			<ul id="carList" class="space-y-2 mt-4"></ul>
 
             <div id="page-2" class="space-y-6 hidden">
                 <div class="flex items-center space-x-4 mb-6">
@@ -1004,43 +1008,42 @@
             }
         }
 		function addTrack() {
-			  const dropdown = document.getElementById("trackDropdown");
-			  const trackName = dropdown.value;
-			  if (trackName && trackName !== "Select a Track...") {
-			    const container = document.getElementById("trackList");
-			    const li = document.createElement("li");
-			    li.className = "flex items-center justify-between bg-white dark:bg-[#2a2a2a] p-3 rounded-lg shadow-sm text-black dark:text-[#d4af37]";
-			    li.innerHTML = `<span>${trackName}</span>
-			      <button onclick="removeTrack(this)" class="text-red-500 hover:text-red-700 transition-colors duration-200">
-			        <i class="fas fa-trash-alt"></i>
-			      </button>`;
-			    container.appendChild(li);
-			  }
-		}
-			
-		function removeTrack(button) {
-			  button.parentElement.remove();
-		}
-			
-		function addCar() {
-			  const dropdown = document.getElementById("carDropdown");
-			  const carName = dropdown.value;
-			  if (carName && carName !== "Select a Car...") {
-			    const container = document.getElementById("carList");
-			    const li = document.createElement("li");
-			    li.className = "flex items-center justify-between bg-white dark:bg-[#2a2a2a] p-3 rounded-lg shadow-sm text-black dark:text-[#d4af37]";
-			    li.innerHTML = `<span>${carName}</span>
-			      <button onclick="removeCar(this)" class="text-red-500 hover:text-red-700 transition-colors duration-200">
-			        <i class="fas fa-trash-alt"></i>
-			      </button>`;
-			    container.appendChild(li);
-			  }
-		}
-			
-		function removeCar(button) {
-			  button.parentElement.remove();
+ 			const dropdown = document.getElementById("track-select");
+			const trackName = dropdown.value;
+		  if (trackName) {
+		    const container = document.getElementById("trackList");
+		    container.innerHTML = `
+		      <li class="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
+		        <span>${trackName}</span>
+		        <button onclick="removeTrack(this)" class="text-red-500 hover:text-red-700">
+		          <i class="fas fa-trash-alt"></i>
+		        </button>
+		      </li>`;
+		  }
 		}
 		
+		function removeTrack(button) {
+		  button.parentElement.remove();
+		}
+		
+		function addCar() {
+		  const dropdown = document.getElementById("car-select");
+		  const carName = dropdown.value;
+		  if (carName) {
+		    const container = document.getElementById("carList");
+		    container.innerHTML = `
+		      <li class="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
+		        <span>${carName}</span>
+		        <button onclick="removeCar(this)" class="text-red-500 hover:text-red-700">
+		          <i class="fas fa-trash-alt"></i>
+		        </button>
+		      </li>`;
+		  }
+		}
+		
+		function removeCar(button) {
+		  button.parentElement.remove();
+		}
         async function updateTrackAdmin(originalName) {
             const name = document.getElementById('new-track-name').value;
             if (name) {
@@ -1087,6 +1090,7 @@
     </script>
 </body>
 </html>
+
 
 
 
