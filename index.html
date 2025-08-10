@@ -1021,6 +1021,16 @@
 		        </button>
 		      </li>`;
 		  }
+			const trackSelect = document.getElementById("track-select");
+			  const selectedTrack = trackSelect.value;
+			  if (selectedTrack) {
+			    const trackList = document.getElementById("trackList");
+			    const li = document.createElement("li");
+			    li.textContent = selectedTrack;
+			    // Add delete icon logic here
+			    trackList.appendChild(li);
+			    trackSelect.selectedIndex = 0; // ✅ Reset to "Select a Track"
+			  }
 		}
 		
 		function removeTrack(button) {
@@ -1040,8 +1050,17 @@
 		        </button>
 		      </li>`;
 		  }
+			const carSelect = document.getElementById("car-select");
+  			const selectedCar = carSelect.value;
+  			if (selectedCar) {
+    		const carList = document.getElementById("carList");
+    		const li = document.createElement("li");
+    		li.textContent = selectedCar;
+		  	// Add delete icon logic here
+		  	carList.appendChild(li);
+		  	carSelect.selectedIndex = 0; // ✅ Reset to "Select a Car"
+			}
 		}
-		
 		function removeCar(button) {
 		  button.parentElement.remove();
 		}
@@ -1091,6 +1110,7 @@
     </script>
 </body>
 </html>
+
 
 
 
