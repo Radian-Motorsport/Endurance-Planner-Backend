@@ -96,6 +96,7 @@
         .dark .bg-green-600 { background-color: #2f855a; }
         .dark .bg-blue-50, .dark .bg-blue-100 { background-color: #2a4365; border-color: #2c5282; }
         .dark .text-blue-800 { color: #90cdf4; }
+        .dark .text-gray-900 { color: #a0a0a0; }
         .dark .bg-purple-100 { background-color: #44337a; border-color: #553c9a; }
         .dark .text-purple-800 { color: #d6bcfa; }
         .dark .border-gray-200, .dark .border-gray-300 {
@@ -106,24 +107,6 @@
             color: #e0e0e0;
             border-color: #4a4a4a;
         }
-		.dark select, .dark input, .dark textarea {
-		    background-color: #2a2a2a;
-		    color: #FFFFFF;         /* white */
-		    font-weight: bold;
-		    border-color: #4a4a4a;
-		}
-		.dark option {
-		 	background-color: #2a2a2a;
-			color: #d4af37;
-		}
-		.dark li {
-		    background-color: #2a2a2a;
-		    color: #d4af37;
-		}
-
-		
-
-
              @font-face {
     font-family: 'RoadRage';
     src: url('https://radian-motorsport.github.io/Endurance-Planner-Backend/RoadRage.woff') format('woff');
@@ -183,16 +166,12 @@
                             <select id="track-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <option value="">Select a Track...</option>
                             </select>
-							<button onclick="addTrack()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded w-fit">Add Track</button>	
-							<ul id="trackList" class="space-y-2 mt-4"></ul>
                         </div>
                         <div class="flex flex-col w-full">
                             <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <option value="">Select a Car...</option>
                             </select>
-						<button onclick="addCar()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded w-fit">Add Car</button>	
-                  		<ul id="carList" class="space-y-2 mt-4"></ul>
-						</div>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-8">
@@ -201,8 +180,7 @@
                     </button>
                 </div>
             </div>
-			
-			
+
             <div id="page-2" class="space-y-6 hidden">
                 <div class="flex items-center space-x-4 mb-6">
                     <button onclick="showPlannerPage()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -502,12 +480,12 @@
         }
         function showPage2() {
                     // Comment out this block for testing:
-             const carSelect = document.getElementById('car-select');
-             const trackSelect = document.getElementById('track-select');
-             if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+            const carSelect = document.getElementById('car-select');
+            const trackSelect = document.getElementById('track-select');
+            if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
                  alert("Please select at least one driver, a car, and a track before continuing.");
                  return;
-             }
+            }
     document.getElementById('planner-page').classList.add('hidden');
     document.getElementById('page-2').classList.remove('hidden');
     document.getElementById('admin-page').classList.add('hidden');
@@ -1008,63 +986,6 @@
                 document.getElementById('add-track-btn').onclick = () => updateTrackAdmin(name);
             }
         }
-		function addTrack() {
-		  const trackSelect = document.getElementById("track-select");
-		  const selectedTrack = trackSelect.value;
-		  if (selectedTrack) {
-		    const trackList = document.getElementById("trackList");
-		
-		    const li = document.createElement("li");
-		    li.className = "flex items-center justify-between bg-white p-2 rounded shadow";
-		
-		    const span = document.createElement("span");
-		    span.textContent = selectedTrack;
-		
-		    const deleteBtn = document.createElement("button");
-			    deleteBtn.className = "text-red-500 hover:text-red-700 transition-colors duration-200";
-			    deleteBtn.innerHTML = `<i class="fas fa-trash-alt"></i>`;
-			    deleteBtn.onclick = () => li.remove();
-		
-		    li.appendChild(span);
-		    li.appendChild(deleteBtn);
-		    trackList.appendChild(li);
-		
-		    trackSelect.selectedIndex = 0; // Reset dropdown
-		  }
-		}
-		
-		function removeTrack(button) {
-		  button.parentElement.remove();
-		}
-		
-		function addCar() {
-		  const carSelect = document.getElementById("car-select");
-		  const selectedCar = carSelect.value;
-		  if (selectedCar) {
-		    const carList = document.getElementById("carList");
-		
-		    const li = document.createElement("li");
-		    li.className = "flex items-center justify-between bg-white p-2 rounded shadow";
-		
-		    const span = document.createElement("span");
-		    span.textContent = selectedCar;
-		
-		    const deleteBtn = document.createElement("button");
-			    deleteBtn.className = "text-red-500 hover:text-red-700 transition-colors duration-200";
-			    deleteBtn.innerHTML = `<i class="fas fa-trash-alt"></i>`;
-			    deleteBtn.onclick = () => li.remove();
-		
-		    li.appendChild(span);
-		    li.appendChild(deleteBtn);
-		    carList.appendChild(li);
-		
-		    carSelect.selectedIndex = 0; // Reset dropdown
-		  }
-		}
-
-		function removeCar(button) {
-		  button.parentElement.remove();
-		}
         async function updateTrackAdmin(originalName) {
             const name = document.getElementById('new-track-name').value;
             if (name) {
@@ -1111,14 +1032,5 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
 
 
