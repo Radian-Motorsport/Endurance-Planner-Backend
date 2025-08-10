@@ -493,12 +493,12 @@
         }
         function showPage2() {
                     // Comment out this block for testing:
-             //const carSelect = document.getElementById('car-select');
-             //const trackSelect = document.getElementById('track-select');
-             //if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
-             //    alert("Please select at least one driver, a car, and a track before continuing.");
-             //    return;
-             //}
+             const carSelect = document.getElementById('car-select');
+             const trackSelect = document.getElementById('track-select');
+             if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+                 alert("Please select at least one driver, a car, and a track before continuing.");
+                 return;
+             }
     document.getElementById('planner-page').classList.add('hidden');
     document.getElementById('page-2').classList.remove('hidden');
     document.getElementById('admin-page').classList.add('hidden');
@@ -1074,6 +1074,7 @@
     </script>
 </body>
 </html>
+
 
 
 
