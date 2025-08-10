@@ -63,6 +63,9 @@
             left: calc(100% - 3px);
             transform: translateX(-100%);
         }
+		select, option {
+    		color: #000000; /* Black text */
+		}
         #darkModeSwitch {
             display: none;
         }
@@ -164,7 +167,7 @@
                     <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
                     <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Drivers <span class="text-sm text-gray-500"></span></h3>
                     <div class="flex items-center space-x-2 mb-4">
-                        <select id="driver-select" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full">
+                        <select id="driver-select" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-black">
                             <option value="">Select a Driver...</option>
                         </select>
                         <button onclick="addDriver()" class="bg-purple-600 hover:bg-purple-700 font- mb-4 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -178,12 +181,12 @@
                     <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Track & Car</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                         <div class="flex flex-col w-full">
-                            <select id="track-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <select id="track-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-black">
                                 <option value="">Select a Track...</option>
                             </select>
                         </div>
                         <div class="flex flex-col w-full">
-                            <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-black">
                                 <option value="">Select a Car...</option>
                             </select>
                         </div>
@@ -1047,6 +1050,7 @@
     </script>
 </body>
 </html>
+
 
 
 
