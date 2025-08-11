@@ -296,43 +296,16 @@
                   
                 <div id="stint-breakdown-display" class="p-6 bg-gray-50 border border-gray-200 rounded-lg overflow-x-auto hidden">
                     
-                            <div class="flex flex-col mb-4">
-                            <label class="text-sm font-medium text-gray-700">Race Start (UTC) & Qualifying</label>
-                            <div class="flex items-center space-x-2">
-                                <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-700 font-bold">+</span>
-                                <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-sm font-medium text-gray-700">min (Qualifying)</span>
-                            </div>
-                            <div class="mt-4">
-                                <label for="timezone-select" class="text-sm font-medium text-gray-700">Display Time Zone</label>
-                                <select id="timezone-select" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-black">
-                                    <option value="UTC">UTC</option>
-                                    <option value="US/Samoa">SST (GMT-11)</option>
-                                    <option value="America/Adak">HAST (GMT-10)</option>
-                                    <option value="America/Los_Angeles">PST (GMT-8)</option>
-                                    <option value="America/Denver">MST (GMT-7)</option>
-                                    <option value="America/Chicago">CST (GMT-6)</option>
-                                    <option value="America/New_York">EST (GMT-5)</option>
-                                    <option value="America/Halifax">AST (GMT-4)</option>
-                                    <option value="America/Sao_Paulo">BRT (GMT-3)</option>
-                                    <option value="Atlantic/Azores">AZOT (GMT-1)</option>
-                                    <option value="Europe/London" selected>GMT</option>
-                                    <option value="Europe/Paris">CET (GMT+1)</option>
-                                    <option value="Europe/Athens">EET (GMT+2)</option>
-                                    <option value="Asia/Riyadh">AST (GMT+3)</option>
-                                    <option value="Asia/Dubai">GST (GMT+4)</option>
-                                    <option value="Asia/Karachi">PKT (GMT+5)</option>
-                                    <option value="Asia/Kolkata">IST (GMT+5:30)</option>
-                                    <option value="Asia/Bangkok">ICT (GMT+7)</option>
-                                    <option value="Asia/Shanghai">CST (GMT+8)</option>
-                                    <option value="Asia/Tokyo">JST (GMT+9)</option>
-                                    <option value="Australia/Sydney">AEST (GMT+10)</option>
-                                    <option value="Pacific/Auckland">NZST (GMT+12)</option>
-                                </select>
-                            </div>
-                                    <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="calculateAndShowPage2()">Update</button>
+                    <div class="flex flex-col mb-4">
+                        <label class="text-sm font-medium text-gray-700">Race Start & Qualifying</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <span class="text-gray-700 font-bold">+</span>
+                            <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <span class="text-sm font-medium text-gray-700">min (Qualifying)</span>
+                            <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-gray-800 bg-white transition-all duration-200 transform hover:scale-105" onclick="calculateAndShowPage2()">Update</button>
                         </div>
+                    </div>
                     
                     <table class= "min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg">
                         <thead class="bg-gray-200">
@@ -357,30 +330,13 @@
                         <button onclick="generateShareLink()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-share-alt mr-2"></i> Generate Link
                         </button>
-                        <input type="text" id="share-link-output" readonly class="flex-grow w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-copy" placeholder="Click 'Generate Link' to create a shareable URL">
+                        <input type="text" id="share-link-output" readonly class="flex-grow p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-copy" placeholder="Click 'Generate Link' to create a shareable URL">
                         <button onclick="copyShareLink()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-copy"></i>
                         </button>
-                         </div>
-                        </div>
                     </div>
-                <div class="mt-8 hidden" id="page3-button-container">
-                    <button onclick="showPage3()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                        Go to Third Page <i class="fas fa-arrow-right ml-2"></i>
-                    </button>
                 </div>
-                <div id="page-3" class="hidden space-y-6">
-                        <div class="flex items-center space-x-4 mb-6">
-                            <button onclick="showPage2()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                                <i class="fas fa-arrow-left mr-2"></i> Back
-                            </button>
-                        </div>
-                        <div class="p-6 bg-green-100 border border-green-200 rounded-lg">
-                            <h3 class="text-xl font- mb-4 text-green-800 road-rage-font">Third Page</h3>
-                            <div id="third-page-content" class="text-green-800">
-                                </div>
-                        </div>
-                    </div> 
+            </div>
 
             <div id="admin-page" class="hidden">
                 <button onclick="saveDataToServer()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -534,46 +490,28 @@
             resetTrackAdminForm();
         }
         function showPage2() {
-            const carSelect = document.getElementById('car-select');
-            const trackSelect = document.getElementById('track-select');
-            if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
-                alert("Please select at least one driver, a car, and a track before continuing.");
-                return;
-            }
+                    // Comment out this block for testing:
+             const carSelect = document.getElementById('car-select');
+             const trackSelect = document.getElementById('track-select');
+             if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+                 alert("Please select at least one driver, a car, and a track before continuing.");
+                 return;
+             }
+    document.getElementById('planner-page').classList.add('hidden');
+    document.getElementById('page-2').classList.remove('hidden');
+    document.getElementById('admin-page').classList.add('hidden');
             
-            document.getElementById('planner-page').classList.add('hidden');
-            document.getElementById('page-2').classList.remove('hidden');
-            document.getElementById('page-3').classList.add('hidden');
-            document.getElementById('admin-page').classList.add('hidden');
+            // Re-hide results sections until calculation is run on page 2
+            document.getElementById('overall-summary').classList.add('hidden');
+            document.getElementById('stint-breakdown-display').classList.add('hidden');
+            document.getElementById('sliders-container').classList.add('hidden');
+            document.getElementById('share-link-container').classList.add('hidden');
 
             // Populate the new display elements with the selected data
             document.getElementById('page2-track').textContent = trackSelect.value;
             document.getElementById('page2-car').textContent = carSelect.value;
             const driverNames = selectedDrivers.map(d => d.name).join(', ');
             document.getElementById('page2-drivers').textContent = driverNames;
-            
-            // Check if a calculation has been done and show the results if so.
-            // The totalLaps variable is a good indicator of a completed calculation.
-            if (totalLaps > 0) {
-                document.getElementById('overall-summary').classList.remove('hidden');
-                document.getElementById('stint-breakdown-display').classList.remove('hidden');
-                document.getElementById('sliders-container').classList.remove('hidden');
-                document.getElementById('share-link-container').classList.remove('hidden');
-                document.getElementById('page3-button-container').classList.remove('hidden');
-            } else {
-                // If no calculation has been done, ensure results are hidden
-                document.getElementById('overall-summary').classList.add('hidden');
-                document.getElementById('stint-breakdown-display').classList.add('hidden');
-                document.getElementById('sliders-container').classList.add('hidden');
-                document.getElementById('share-link-container').classList.add('hidden');
-                document.getElementById('page3-button-container').classList.add('hidden');
-            }
-        }
-        function showPage3() {
-            document.getElementById('planner-page').classList.add('hidden');
-            document.getElementById('page-2').classList.add('hidden');
-            document.getElementById('page-3').classList.remove('hidden');
-            document.getElementById('admin-page').classList.add('hidden');
         }
 
         // --- Core Logic ---
@@ -628,11 +566,7 @@
             document.getElementById('stint-breakdown-display').classList.remove('hidden');
             document.getElementById('sliders-container').classList.remove('hidden');
             document.getElementById('share-link-container').classList.remove('hidden');
-       
-            // Show the button to go to the third page after calculation
-            document.getElementById('page3-button-container').classList.remove('hidden');
         }
-
         
         function formatDuration(totalSeconds) {
             if (totalSeconds <= 0) return '0s';
@@ -714,111 +648,108 @@
             });
         }
         function populateStintTable(avgLapTimeInSeconds) {
-				    const tbody = document.getElementById('stint-table-body');
-				    tbody.innerHTML = '';
-				    
-				    const raceStartTimeInput = document.getElementById('race-start-time-page2').value;
-				    const qualifyingMinutesInput = parseInt(document.getElementById('qualifying-minutes-page2').value) || 0;
-				    const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
-				    const selectedTimeZone = document.getElementById('timezone-select').value; // Get the selected time zone
-				    
-				    const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
-				    
-				    const raceDate = new Date();
-				    // Set the race start time in UTC
-				    raceDate.setUTCHours(hours, minutes, 0, 0); 
-				    
-				    let currentTime = new Date(raceDate.getTime());
-				    
-				    currentTime.setMinutes(currentTime.getMinutes() + qualifyingMinutesInput);
-				    
-				    let currentLap = 1;
-				    let driverIndex = 0;
-				    
-				    for (let i = 0; i < totalStints; i++) {
-				        const stintLaps = (i === totalStints - 1) && (lapsInLastStint !== 0) ? lapsInLastStint : lapsPerStint;
-				        if (stintLaps <= 0) break;
-				    
-				        // Format the start time for the selected timezone
-				        const startTimeString = formatTimeWithTimezone(currentTime, selectedTimeZone);
-				        
-				        const stintDurationSeconds = stintLaps * avgLapTimeInSeconds;
-				        currentTime.setSeconds(currentTime.getSeconds() + stintDurationSeconds);
-				    
-				        // Format the end time for the selected timezone
-				        const endTimeString = formatTimeWithTimezone(currentTime, selectedTimeZone);
-				    
-				        const startLap = currentLap;
-				        const endLap = startLap + stintLaps - 1;
-				        
-				        const tr = document.createElement('tr');
-				        tr.innerHTML = `
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${startTimeString}</td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${endTimeString}</td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${startLap}</td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${endLap}</td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${stintLaps}</td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">
-				                <select id="stint-driver-${i}" class="w-auto bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-3 rounded-md border border-gray-300 dark:border-gray-500"></select>
-				            </td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500">
-				                <select id="stint-backup-driver-${i}" class="w-auto bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-3 rounded-md border border-gray-300 dark:border-gray-500"></select>
-				            </td>
-				        `;
-				        tbody.appendChild(tr);
-				    
-				        populateStintDrivers(i, selectedDrivers);
-				    
-				        currentLap = endLap + 1;
-				        driverIndex = (driverIndex + 1) % selectedDrivers.length;
-				        
-				        if (i < totalStints - 1) {
-				            currentTime.setSeconds(currentTime.getSeconds() + pitStopTime);
-				        }
-				    }
-				}
+			    const tbody = document.getElementById('stint-table-body');
+			    tbody.innerHTML = '';
+			    
+			    const raceStartTimeInput = document.getElementById('race-start-time-page2').value;
+			    const qualifyingMinutesInput = parseInt(document.getElementById('qualifying-minutes-page2').value) || 0;
+			    const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
+			
+			    const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
+			    
+			    const raceDate = new Date();
+			    raceDate.setHours(hours, minutes, 0, 0);
+			
+			    let currentTime = new Date(raceDate.getTime());
+			    
+			    currentTime.setMinutes(currentTime.getMinutes() + qualifyingMinutesInput);
+			
+			    let currentLap = 1;
+			    let driverIndex = 0;
+			    
+			    for (let i = 0; i < totalStints; i++) {
+			        const stintLaps = (i === totalStints - 1) && (lapsInLastStint !== 0) ? lapsInLastStint : lapsPerStint;
+			        if (stintLaps <= 0) break;
+			
+			        const startTimeString = formatTime(currentTime);
+			        
+			        const stintDurationSeconds = stintLaps * avgLapTimeInSeconds;
+			        currentTime.setSeconds(currentTime.getSeconds() + stintDurationSeconds);
+			
+			        const endTimeString = formatTime(currentTime);
+			
+			        const startLap = currentLap;
+			        const endLap = startLap + stintLaps - 1;
+			        
+			        const tr = document.createElement('tr');
+			        tr.innerHTML = `
+			            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${startTimeString}</td>
+			            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${endTimeString}</td>
+			            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${startLap}</td>
+			            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${endLap}</td>
+			            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${stintLaps}</td>
+			            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">
+			                <select id="stint-driver-${i}" class="w-auto bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-3 rounded-md border border-gray-300 dark:border-gray-500"></select>
+			            </td>
+			            <td class="px-1 py-4 text-center text-sm text-gray-500">
+			                <select id="stint-backup-driver-${i}" class="w-auto bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-3 rounded-md border border-gray-300 dark:border-gray-500"></select>
+			            </td>
+			        `;
+			        tbody.appendChild(tr);
+			
+			        // This is the call that populates the dropdowns
+			        populateStintDrivers(i, selectedDrivers);
+			
+			        currentLap = endLap + 1;
+			        driverIndex = (driverIndex + 1) % selectedDrivers.length;
+			        
+			        // Add pit stop time for every stint except the last one
+			        if (i < totalStints - 1) {
+			            currentTime.setSeconds(currentTime.getSeconds() + pitStopTime);
+			        }
+			    }
+			}
         
         async function generateShareLink() {
-		    const state = {
-		        drivers: selectedDrivers.map(d => d.name),
-		        car: document.getElementById('car-select').value,
-		        track: document.getElementById('track-select').value,
-		        raceDurationHours: document.getElementById('race-duration-hours').value,
-		        raceDurationMinutes: document.getElementById('race-duration-minutes').value,
-		        avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes').value,
-		        avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds').value,
-		        pitStopTime: document.getElementById('pit-stop-time').value,
-		        fuelPerLapInput: document.getElementById('fuel-per-lap-display-input').value,
-		        tankCapacityInput: document.getElementById('tank-capacity-display-input').value,
-		        fuelSlider: document.getElementById('fuel-slider').value,
-		        lapTimeSlider: document.getElementById('lap-time-slider').value,
-		        raceStartTime: document.getElementById('race-start-time-page2').value,
-		        qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
-		        timezone: document.getElementById('timezone-select').value, // Add the time zone
-		    };
-		
-		    try {
-		        const response = await fetch('/api/strategies', {
-		            method: 'POST',
-		            headers: {
-		                'Content-Type': 'application/json',
-		            },
-		            body: JSON.stringify(state),
-		        });
-		
-		        if (!response.ok) {
-		            throw new Error('Failed to save strategy.');
-		        }
-		
-		        const data = await response.json();
-		        const shareLink = `${window.location.origin}${window.location.pathname}?id=${data.id}`;
-		        document.getElementById('share-link-output').value = shareLink;
-		
-		    } catch (error) {
-		        console.error('Error saving strategy:', error);
-		        alert('Could not save strategy. Please try again.');
-		    }
-		}
+            const state = {
+                drivers: selectedDrivers.map(d => d.name),
+                car: document.getElementById('car-select').value,
+                track: document.getElementById('track-select').value,
+                raceDurationHours: document.getElementById('race-duration-hours').value,
+                raceDurationMinutes: document.getElementById('race-duration-minutes').value,
+                avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes').value,
+                avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds').value,
+                pitStopTime: document.getElementById('pit-stop-time').value,
+                fuelPerLapInput: document.getElementById('fuel-per-lap-display-input').value,
+                tankCapacityInput: document.getElementById('tank-capacity-display-input').value,
+                fuelSlider: document.getElementById('fuel-slider').value,
+                lapTimeSlider: document.getElementById('lap-time-slider').value,
+                raceStartTime: document.getElementById('race-start-time-page2').value,
+                qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
+            };
+
+            try {
+                const response = await fetch('/api/strategies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(state),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save strategy.');
+                }
+
+                const data = await response.json();
+                const shareLink = `${window.location.origin}${window.location.pathname}?id=${data.id}`;
+                document.getElementById('share-link-output').value = shareLink;
+
+            } catch (error) {
+                console.error('Error saving strategy:', error);
+                alert('Could not save strategy. Please try again.');
+            }
+        }
 
         function copyShareLink() {
             const shareLinkOutput = document.getElementById('share-link-output');
@@ -831,70 +762,60 @@
             }
         }
 
-              
-// Function to load a saved strategy from a shareable link
-async function loadState() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const strategyId = urlParams.get('id');
+        async function loadState() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const strategyId = urlParams.get('id');
 
-    if (strategyId) {
-        // Show loading indicator
-        document.getElementById('loading-state-container').classList.remove('hidden');
+            if (strategyId) {
+                try {
+                    const response = await fetch(`/api/strategies/${strategyId}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to load strategy.');
+                    }
+                    
+                    const state = await response.json();
 
-        try {
-            const response = await fetch(`/api/strategies/${strategyId}`);
-            if (!response.ok) {
-                throw new Error('Failed to load strategy.');
+                    // Restore selections
+                    selectedDrivers = [];
+                    state.drivers.forEach(driverName => {
+                        const driver = drivers.find(d => d.name === driverName);
+                        if (driver) selectedDrivers.push(driver);
+                    });
+                    renderDriverList();
+                    
+                    document.getElementById('car-select').value = state.car;
+                    document.getElementById('track-select').value = state.track;
+
+                    // Restore inputs on page 2
+                    document.getElementById('race-duration-hours').value = state.raceDurationHours;
+                    document.getElementById('race-duration-minutes').value = state.raceDurationMinutes;
+                    document.getElementById('avg-lap-time-minutes').value = state.avgLapTimeMinutes;
+                    document.getElementById('avg-lap-time-seconds').value = state.avgLapTimeSeconds;
+                    document.getElementById('pit-stop-time').value = state.pitStopTime;
+                    document.getElementById('fuel-per-lap-display-input').value = state.fuelPerLapInput;
+                    document.getElementById('tank-capacity-display-input').value = state.tankCapacityInput;
+                    
+                    document.getElementById('fuel-slider').value = state.fuelSlider;
+                    document.getElementById('lap-time-slider').value = state.lapTimeSlider;
+                    document.getElementById('race-start-time-page2').value = state.raceStartTime;
+                    document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes;
+                    
+                    document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
+                    document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
+
+                    // Navigate to page 2 and calculate
+                    showPage2();
+                    calculateAndShowPage2();
+
+                } catch (error) {
+                    console.error('Error loading strategy:', error);
+                    alert('Could not load strategy from the provided link.');
+                }
+            } else {
+                // If no ID is in the URL, initialize the page as normal
+                showPage1();
             }
-            
-            const state = await response.json();
-
-            // Restore selections
-            selectedDrivers = [];
-            state.drivers.forEach(driverName => {
-                const driver = drivers.find(d => d.name === driverName);
-                if (driver) selectedDrivers.push(driver);
-            });
-            renderDriverList();
-            
-            document.getElementById('car-select').value = state.car;
-            document.getElementById('track-select').value = state.track;
-
-            // Restore inputs on page 2
-            document.getElementById('race-duration-hours').value = state.raceDurationHours;
-            document.getElementById('race-duration-minutes').value = state.raceDurationMinutes;
-            document.getElementById('avg-lap-time-minutes').value = state.avgLapTimeMinutes;
-            document.getElementById('avg-lap-time-seconds').value = state.avgLapTimeSeconds;
-            document.getElementById('pit-stop-time').value = state.pitStopTime;
-            document.getElementById('fuel-per-lap-display-input').value = state.fuelPerLapInput;
-            document.getElementById('tank-capacity-display-input').value = state.tankCapacityInput;
-            
-            document.getElementById('fuel-slider').value = state.fuelSlider;
-            document.getElementById('lap-time-slider').value = state.lapTimeSlider;
-            document.getElementById('race-start-time-page2').value = state.raceStartTime;
-            document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes;
-            
-            document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
-            document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
-
-            // Navigate to page 2 and calculate
-            showPage2();
-            calculateAndShowPage2();
-
-            // Hide loading indicator
-            document.getElementById('loading-state-container').classList.add('hidden');
-
-        } catch (error) {
-            console.error('Error loading strategy:', error);
-            // Hide loading indicator on error
-            document.getElementById('loading-state-container').classList.add('hidden');
-            alert('Could not load strategy from the provided link.');
         }
-    } else {
-        // If no ID is in the URL, initialize the page as normal
-        showPlannerPage();
-    }
-}
 
         // --- Admin Functions ---
 
@@ -1101,21 +1022,6 @@ async function loadState() {
                 populateTracks();
             }
         }
-
-		// Function to handle time formatting based on the selected time zone
-		function formatTimeWithTimezone(date, timeZone) {
-			    const options = {
-			        timeZone: timeZone,
-			        hour: '2-digit',
-			        minute: '2-digit',
-			        second: '2-digit',
-			        hour12: false
-			    };
-			    return date.toLocaleString('en-GB', options);
-		}
-
-		R
-		
 		// Function to populate the driver dropdowns for each stint
 		function populateStintDrivers(stintIndex, drivers) {
 			    const driverSelect = document.getElementById(`stint-driver-${stintIndex}`);
@@ -1166,15 +1072,6 @@ async function loadState() {
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
 
 
 
