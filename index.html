@@ -124,8 +124,6 @@
 		    color: #ffffff;
 		}
 
-		
-
 
              @font-face {
     font-family: 'RoadRage';
@@ -140,6 +138,28 @@
             max-width: 100%;
             box-sizing: border-box;
         }
+        /* Custom Styles for Live Planner */
+        .live-planner-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .live-planner-controls label {
+            display: block;
+            font-size: 0.9em;
+            text-align: left;
+            margin-bottom: 2px;
+        }
+        .live-planner-controls div {
+            min-width: 150px;
+        }
+        .live-planner-info p { margin: 5px 0; }
+        #countdown-timer { font-size: 1.5em; font-weight: bold; color: green; }
+        .dark #countdown-timer { color: #48bb78; }
+        .dark #live-stint-table th { background-color: #333333; color: #a0a0a0; }
+        .dark #live-stint-table td { background-color: #1e1e1e; border-color: #4a4a4a; }
     </style>
 </head>
 <body class="p-4 md:p-8 bg-white text-black dark:bg-[#121212] dark:text-white">
@@ -372,21 +392,66 @@
                     </div>
                 <div class="mt-8 hidden" id="page3-button-container">
                     <button onclick="showPage3()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                        Go to Third Page <i class="fas fa-arrow-right ml-2"></i>
+                        Go to Live Stint Planner <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                 </div>
                 <div id="page-3" class="hidden space-y-6">
-                        <div class="flex items-center space-x-4 mb-6">
-                            <button onclick="showPage2()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                                <i class="fas fa-arrow-left mr-2"></i> Back
-                            </button>
+                    <div class="flex items-center space-x-4 mb-6">
+                        <button onclick="showPage2()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-arrow-left mr-2"></i> Back
+                        </button>
+                    </div>
+                    <div class="p-6 bg-green-100 border border-green-200 rounded-lg">
+                        <h3 class="text-xl font- mb-4 text-green-800 road-rage-font">Live Stint Planner</h3>
+                        <div class="live-planner-controls">
+                            <div>
+                                <label for="live-race-duration">Total Race Duration (min):</label>
+                                <input type="number" id="live-race-duration" value="180" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            </div>
+                            <div>
+                                <label for="live-time-remaining">Manual Start Time (min):</label>
+                                <input type="number" id="live-time-remaining" placeholder="e.g. 120" value="180" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            </div>
+                            <div>
+                                <label for="live-lap-time-slider">Avg Lap Time (sec): <span id="live-lap-time-value">90</span></label>
+                                <input type="range" id="live-lap-time-slider" min="60" max="150" value="90" oninput="updateLiveLapTime(this.value)">
+                            </div>
+                            <div>
+                                <label for="live-fuel-tank-size">Fuel Tank Size (L):</label>
+                                <input type="number" id="live-fuel-tank-size" value="90" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            </div>
+                            <div>
+                                <label for="live-fuel-use-per-lap-slider">Fuel Use (L/lap): <span id="live-fuel-use-per-lap-value">2.5</span></label>
+                                <input type="range" id="live-fuel-use-per-lap-slider" min="1" max="5" step="0.1" value="2.5" oninput="updateLiveFuelUse(this.value)">
+                            </div>
+                            <div>
+                                <label for="live-time-deduction">Deduct Time (min):</label>
+                                <input type="number" id="live-time-deduction" value="20" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            </div>
+                            <button id="live-start-stop-button" onclick="toggleRace()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">Start Race</button>
+                            <button id="live-deduct-time-button" onclick="deductTime()" class="bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105" disabled>Deduct Time</button>
+                            <button id="live-pit-exit-button" onclick="simulatePitExit()" class="bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105" disabled>Simulate Pit Exit</button>
                         </div>
-                        <div class="p-6 bg-green-100 border border-green-200 rounded-lg">
-                            <h3 class="text-xl font- mb-4 text-green-800 road-rage-font">Third Page</h3>
-                            <div id="third-page-content" class="text-green-800">
-                                </div>
-                        </div>
-                    </div> 
+                        <p class="text-green-800">Time Remaining: <span id="countdown-timer">00:00:00</span></p>
+                        <p class="text-green-800">Approx. Time to Next Pitstop: <span id="next-pitstop-time">00:00:00</span></p>
+
+                        <table id="live-stint-table" class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg mt-6">
+                            <thead class="bg-gray-200">
+                                <tr>
+                                    <th class="px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Stint</th>
+                                    <th class="px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Time</th>
+                                    <th class="px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Time</th>
+                                    <th class="px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Stint Duration</th>
+                                    <th class="px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Stint Laps</th>
+                                    <th class="px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Fuel Per Stint (L)</th>
+                                    <th class="px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Driver</th>
+                                </tr>
+                            </thead>
+                            <tbody id="live-stint-table-body" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
             <div id="admin-page" class="hidden">
                 <button onclick="saveDataToServer()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -454,6 +519,12 @@
         let raceDurationSeconds = 0;
         let lapsPerStint = 0;
         let lapsInLastStint = 0;
+        
+        // Live Planner Global Variables
+        let liveRaceDurationSeconds;
+        let liveTimerInterval;
+        let liveStartTime;
+        let liveStintDurationSeconds;
 
         // On initial page load
         window.onload = function() {
@@ -520,15 +591,21 @@
         function showPlannerPage() {
             document.getElementById('planner-page').classList.remove('hidden');
             document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('page-3').classList.add('hidden');
             document.getElementById('admin-page').classList.add('hidden');
             document.getElementById('race-details-btn').classList.add('bg-blue-600', 'text-white');
             document.getElementById('race-details-btn').classList.remove('bg-gray-300', 'text-gray-800');
             document.getElementById('admin-btn').classList.add('bg-gray-300', 'text-gray-800');
             document.getElementById('admin-btn').classList.remove('bg-blue-600', 'text-white');
+            // Stop the timer if we go back to page 1
+            if (liveTimerInterval) {
+                stopRace();
+            }
         }
         function showAdminPage() {
             document.getElementById('planner-page').classList.add('hidden');
             document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('page-3').classList.add('hidden');
             document.getElementById('admin-page').classList.remove('hidden');
             document.getElementById('admin-btn').classList.add('bg-blue-600', 'text-white');
             document.getElementById('admin-btn').classList.remove('bg-gray-300', 'text-gray-800');
@@ -538,6 +615,10 @@
             resetDriverAdminForm();
             resetCarAdminForm();
             resetTrackAdminForm();
+            // Stop the timer if we go to the admin page
+            if (liveTimerInterval) {
+                stopRace();
+            }
         }
         function showPage2() {
                     // Comment out this block for testing:
@@ -549,6 +630,7 @@
              }
             document.getElementById('planner-page').classList.add('hidden');
             document.getElementById('page-2').classList.remove('hidden');
+            document.getElementById('page-3').classList.add('hidden');
             document.getElementById('admin-page').classList.add('hidden');
             
             // Re-hide results sections until calculation is run on page 2
@@ -568,6 +650,26 @@
             document.getElementById('page-2').classList.add('hidden');
             document.getElementById('page-3').classList.remove('hidden');
             document.getElementById('admin-page').classList.add('hidden');
+
+            // Pass values from page 2 to the live planner on page 3
+            const raceDurationMinutes = parseInt(document.getElementById('race-duration-hours').value) * 60 + parseInt(document.getElementById('race-duration-minutes').value);
+            const avgLapTimeInSeconds = (parseInt(document.getElementById('avg-lap-time-minutes').value) * 60) + parseInt(document.getElementById('avg-lap-time-seconds').value);
+            const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input').value);
+            const tankCapacity = parseInt(document.getElementById('tank-capacity-display-input').value);
+
+            document.getElementById('live-race-duration').value = raceDurationMinutes;
+            document.getElementById('live-time-remaining').value = raceDurationMinutes;
+            document.getElementById('live-fuel-tank-size').value = tankCapacity;
+
+            document.getElementById('live-lap-time-slider').value = avgLapTimeInSeconds;
+            document.getElementById('live-lap-time-value').textContent = avgLapTimeInSeconds;
+
+            document.getElementById('live-fuel-use-per-lap-slider').value = fuelPerLap;
+            document.getElementById('live-fuel-use-per-lap-value').textContent = fuelPerLap;
+
+            // Reset and start the new timer logic from here
+            stopRace(); // Ensure any previous timer is stopped
+            calculateLiveStints(liveRaceDurationSeconds || raceDurationMinutes * 60);
         }
 
         // --- Core Logic ---
@@ -642,11 +744,11 @@
             return parts.length > 0 ? parts.join(' ') : '0s';
         }
 
-        function formatTime(date) {
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            const seconds = date.getSeconds().toString().padStart(2, '0');
-            return `${hours}:${minutes}:${seconds}`;
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
         
         // --- Populating Dropdowns and Lists ---
@@ -1164,7 +1266,158 @@
 		    localStorage.setItem('darkMode', toggle.checked);
 		  });
 		</script>
+    <script>
+        // NEW LIVE PLANNER SCRIPT
+        // These functions have been modified to work within the existing structure.
+        
+        function updateLiveLapTime(value) {
+            document.getElementById('live-lap-time-value').textContent = value;
+            if (liveTimerInterval) {
+                const now = Date.now();
+                const elapsed = Math.floor((now - liveStartTime) / 1000);
+                const remaining = Math.max(0, liveRaceDurationSeconds - elapsed);
+                calculateLiveStints(remaining);
+            }
+        }
+
+        function updateLiveFuelUse(value) {
+            document.getElementById('live-fuel-use-per-lap-value').textContent = value;
+            if (liveTimerInterval) {
+                const now = Date.now();
+                const elapsed = Math.floor((now - liveStartTime) / 1000);
+                const remaining = Math.max(0, liveRaceDurationSeconds - elapsed);
+                calculateLiveStints(remaining);
+            }
+        }
+
+        function calculateLiveStints(totalDuration) {
+            const avgLapTimeInSeconds = parseInt(document.getElementById('live-lap-time-slider').value);
+            const fuelTankSize = parseFloat(document.getElementById('live-fuel-tank-size').value);
+            const fuelUsagePerLap = parseFloat(document.getElementById('live-fuel-use-per-lap-slider').value);
+            
+            if (fuelUsagePerLap <= 0 || avgLapTimeInSeconds <= 0 || fuelTankSize <= 0) {
+                // Prevent division by zero and infinite loops
+                document.getElementById('live-stint-table-body').innerHTML = '';
+                return;
+            }
+
+            const lapsUntilEmpty = Math.floor(fuelTankSize / fuelUsagePerLap);
+            const lapsPerStint = lapsUntilEmpty;
+            
+            liveStintDurationSeconds = lapsPerStint * avgLapTimeInSeconds;
+            
+            const tbody = document.getElementById('live-stint-table-body');
+            tbody.innerHTML = '';
+            
+            let currentTime = 0;
+            const totalLaps = Math.floor(totalDuration / avgLapTimeInSeconds);
+            const totalStints = Math.ceil(totalLaps / lapsPerStint);
+            
+            for (let i = 0; i < totalStints; i++) {
+                const stintLaps = Math.min(lapsPerStint, totalLaps - (i * lapsPerStint));
+                const stintDuration = stintLaps * avgLapTimeInSeconds;
+                const stintFuel = stintLaps * fuelUsagePerLap;
+
+                if (stintLaps <= 0) break;
+                
+                const startTime = formatTime(currentTime);
+                currentTime += stintDuration;
+                const endTime = formatTime(currentTime);
+                const driver = selectedDrivers[i % selectedDrivers.length] ? selectedDrivers[i % selectedDrivers.length].name : 'N/A';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${i + 1}</td>
+                    <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${startTime}</td>
+                    <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${endTime}</td>
+                    <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${formatTime(stintDuration)}</td>
+                    <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${stintLaps}</td>
+                    <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${stintFuel.toFixed(2)} L</td>
+                    <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${driver}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+        
+        function updateTimer() {
+            const now = Date.now();
+            const elapsed = Math.floor((now - liveStartTime) / 1000);
+            const remaining = Math.max(0, liveRaceDurationSeconds - elapsed);
+            
+            document.getElementById('countdown-timer').textContent = formatTime(remaining);
+            
+            const timeToNextPitstop = liveStintDurationSeconds - (elapsed % liveStintDurationSeconds);
+            document.getElementById('next-pitstop-time').textContent = formatTime(timeToNextPitstop);
+
+            if (remaining <= 0) {
+                clearInterval(liveTimerInterval);
+                document.getElementById('countdown-timer').textContent = "00:00:00 - Race Finished!";
+                const startStopButton = document.getElementById('live-start-stop-button');
+                startStopButton.textContent = 'Start Race';
+                document.getElementById('live-deduct-time-button').disabled = true;
+                document.getElementById('live-pit-exit-button').disabled = true;
+            }
+        }
+
+        function toggleRace() {
+            const startStopButton = document.getElementById('live-start-stop-button');
+            if (startStopButton.textContent === 'Start Race') {
+                startRace();
+            } else {
+                stopRace();
+            }
+        }
+
+        function startRace() {
+            const raceDurationMinutes = parseInt(document.getElementById('live-time-remaining').value);
+            
+            if (isNaN(raceDurationMinutes) || raceDurationMinutes <= 0) {
+                alert("Please enter a valid race duration.");
+                return;
+            }
+
+            clearInterval(liveTimerInterval);
+            liveRaceDurationSeconds = raceDurationMinutes * 60;
+            liveStartTime = Date.now();
+            
+            calculateLiveStints(liveRaceDurationSeconds);
+            liveTimerInterval = setInterval(updateTimer, 1000);
+            
+            const startStopButton = document.getElementById('live-start-stop-button');
+            startStopButton.textContent = 'Stop Race';
+            document.getElementById('live-deduct-time-button').disabled = false;
+            document.getElementById('live-pit-exit-button').disabled = false;
+        }
+
+        function stopRace() {
+            clearInterval(liveTimerInterval);
+            const startStopButton = document.getElementById('live-start-stop-button');
+            startStopButton.textContent = 'Start Race';
+            document.getElementById('live-deduct-time-button').disabled = true;
+            document.getElementById('live-pit-exit-button').disabled = true;
+        }
+
+        function deductTime() {
+            const deductionMinutes = parseInt(document.getElementById('live-time-deduction').value);
+            if (isNaN(deductionMinutes) || deductionMinutes <= 0) {
+                alert("Please enter a valid time to deduct.");
+                return;
+            }
+            liveStartTime += deductionMinutes * 60 * 1000;
+            updateTimer();
+        }
+
+        function simulatePitExit() {
+            const now = Date.now();
+            const elapsed = Math.floor((now - liveStartTime) / 1000);
+            const remaining = Math.max(0, liveRaceDurationSeconds - elapsed);
+            
+            liveRaceDurationSeconds = remaining;
+            liveStartTime = now;
+            
+            calculateLiveStints(remaining);
+            updateTimer();
+        }
+    </script>
 </body>
 </html>
-
-
