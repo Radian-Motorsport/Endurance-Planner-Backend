@@ -832,7 +832,7 @@
         }
 
               
-      			// Function to load a saved strategy from a shareable link
+// Function to load a saved strategy from a shareable link
 async function loadState() {
     const urlParams = new URLSearchParams(window.location.search);
     const strategyId = urlParams.get('id');
@@ -878,8 +878,12 @@ async function loadState() {
             document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
             
             // Navigate to page 2 and calculate
-            showPage2();
-
+            // First, make sure the page is visible.
+            document.getElementById('planner-page').classList.add('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
+            document.getElementById('page-3').classList.add('hidden');
+            document.getElementById('page-2').classList.remove('hidden');
+            
             // This function handles the calculations and updates the content for both page 2 and page 3.
             calculateAndShowPage2();
 
@@ -890,7 +894,8 @@ async function loadState() {
             console.error('Error loading strategy:', error);
             // Hide loading indicator on error
             document.getElementById('loading-state-container').classList.add('hidden');
-            alert('Could not load strategy from the provided link.');
+            // Use a custom modal instead of alert() for a better user experience.
+            showCustomAlert('Could not load strategy from the provided link.');
         }
     } else {
         // If no ID is in the URL, initialize the page as normal
@@ -1169,6 +1174,7 @@ async function loadState() {
     </script>
 </body>
 </html>
+
 
 
 
