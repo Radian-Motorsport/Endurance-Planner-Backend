@@ -401,19 +401,7 @@
                             <i class="fas fa-arrow-left mr-2"></i> Back
                         </button>
                     </div>
-					<div id="overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg">
-                    <h3 class="text-xl font- mb-4 text-blue-800 road-rage-font">Overall Strategy Summary</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-blue-800">
-                        <div><span class="font-semibold">Est. Laps:</span> <span id="est-laps-display"></span></div>
-                        <div><span class="font-semibold">Stint Duration:</span> <span id="stint-duration-display"></span></div>
-                        <div><span class="font-semibold">Laps per Stint:</span> <span id="laps-per-stint-display"></span></div>
-                        <div><span class="font-semibold">Pit Stops:</span> <span id="pit-stops-display"></span></div>
-                        <div><span class="font-semibold">Total Fuel:</span> <span id="total-fuel-display"></span></div>
-                        <div><span class="font-semibold">Fuel per Lap:</span> <span id="fuel-per-lap-display"></span></div>
-                        <div><span class="font-semibold">Lap Time:</span> <span id="lap-time-display"></span></div>
-                        <div><span class="font-semibold">Pit Stop Duration:</span> <span id="pit-stop-duration-display"></span></div>
-						</div>
-					</div>
+					
                     <div class="p-6 bg-green-100 border border-green-200 rounded-lg">
                         <h3 class="text-xl font- mb-4 text-green-800 road-rage-font">Live Stint Planner</h3>
                         <div class="live-planner-controls">
@@ -425,6 +413,20 @@
                                 <label for="live-time-remaining">Manual Start Time (min):</label>
                                 <input type="number" id="live-time-remaining" placeholder="e.g. 120" value="180" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                             </div>
+						</div>
+						<div class="flex flex-col">
+                            <label class="text-sm font-medium text-gray-700">Avg. Lap Time</label>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <input type="number" id="live-lap-time-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-gray-600">min</span>
+                                <input type="number" id="live-lap-time-seconds" placeholder="Seconds" class="p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-gray-600">sec</span>
+                            </div>
+                        </div>
+							<div class="flex flex-col">
+                            <label for="live-fuel-per-lap-input" class="text-sm font-medium text-gray-700">Fuel Use per Lap (L)</label>
+                            <input type="number" id="fuel-per-lap-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                        </div>						
                             <div>
                                 <label for="live-lap-time-slider">Avg Lap Time (sec): <span id="live-lap-time-value">90</span></label>
                                 <input type="range" id="live-lap-time-slider" min="60" max="150" value="90" oninput="updateLiveLapTime(this.value)">
@@ -1433,6 +1435,7 @@
     </script>
 </body>
 </html>
+
 
 
 
