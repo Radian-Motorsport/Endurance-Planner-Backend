@@ -296,43 +296,43 @@
                   
                 <div id="stint-breakdown-display" class="p-6 bg-gray-50 border border-gray-200 rounded-lg overflow-x-auto hidden">
                     
-                    <div class="flex flex-col mb-4">
-				    <label class="text-sm font-medium text-gray-700">Race Start (UTC) & Qualifying</label>
-				    <div class="flex items-center space-x-2">
-				        <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-				        <span class="text-gray-700 font-bold">+</span>
-				        <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-				        <span class="text-sm font-medium text-gray-700">min (Qualifying)</span>
-				    </div>
-				    <div class="mt-4">
-				        <label for="timezone-select" class="text-sm font-medium text-gray-700">Display Time Zone</label>
-				        <select id="timezone-select" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-black">
-				            <option value="UTC">UTC</option>
-				            <option value="US/Samoa">SST (GMT-11)</option>
-				            <option value="America/Adak">HAST (GMT-10)</option>
-				            <option value="America/Los_Angeles">PST (GMT-8)</option>
-				            <option value="America/Denver">MST (GMT-7)</option>
-				            <option value="America/Chicago">CST (GMT-6)</option>
-				            <option value="America/New_York">EST (GMT-5)</option>
-				            <option value="America/Halifax">AST (GMT-4)</option>
-				            <option value="America/Sao_Paulo">BRT (GMT-3)</option>
-				            <option value="Atlantic/Azores">AZOT (GMT-1)</option>
-				            <option value="Europe/London" selected>GMT</option>
-				            <option value="Europe/Paris">CET (GMT+1)</option>
-				            <option value="Europe/Athens">EET (GMT+2)</option>
-				            <option value="Asia/Riyadh">AST (GMT+3)</option>
-				            <option value="Asia/Dubai">GST (GMT+4)</option>
-				            <option value="Asia/Karachi">PKT (GMT+5)</option>
-				            <option value="Asia/Kolkata">IST (GMT+5:30)</option>
-				            <option value="Asia/Bangkok">ICT (GMT+7)</option>
-				            <option value="Asia/Shanghai">CST (GMT+8)</option>
-				            <option value="Asia/Tokyo">JST (GMT+9)</option>
-				            <option value="Australia/Sydney">AEST (GMT+10)</option>
-				            <option value="Pacific/Auckland">NZST (GMT+12)</option>
-				        </select>
-				    </div>
-    <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="calculateAndShowPage2()">Update</button>
-</div>
+                            <div class="flex flex-col mb-4">
+                            <label class="text-sm font-medium text-gray-700">Race Start (UTC) & Qualifying</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-gray-700 font-bold">+</span>
+                                <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-sm font-medium text-gray-700">min (Qualifying)</span>
+                            </div>
+                            <div class="mt-4">
+                                <label for="timezone-select" class="text-sm font-medium text-gray-700">Display Time Zone</label>
+                                <select id="timezone-select" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-black">
+                                    <option value="UTC">UTC</option>
+                                    <option value="US/Samoa">SST (GMT-11)</option>
+                                    <option value="America/Adak">HAST (GMT-10)</option>
+                                    <option value="America/Los_Angeles">PST (GMT-8)</option>
+                                    <option value="America/Denver">MST (GMT-7)</option>
+                                    <option value="America/Chicago">CST (GMT-6)</option>
+                                    <option value="America/New_York">EST (GMT-5)</option>
+                                    <option value="America/Halifax">AST (GMT-4)</option>
+                                    <option value="America/Sao_Paulo">BRT (GMT-3)</option>
+                                    <option value="Atlantic/Azores">AZOT (GMT-1)</option>
+                                    <option value="Europe/London" selected>GMT</option>
+                                    <option value="Europe/Paris">CET (GMT+1)</option>
+                                    <option value="Europe/Athens">EET (GMT+2)</option>
+                                    <option value="Asia/Riyadh">AST (GMT+3)</option>
+                                    <option value="Asia/Dubai">GST (GMT+4)</option>
+                                    <option value="Asia/Karachi">PKT (GMT+5)</option>
+                                    <option value="Asia/Kolkata">IST (GMT+5:30)</option>
+                                    <option value="Asia/Bangkok">ICT (GMT+7)</option>
+                                    <option value="Asia/Shanghai">CST (GMT+8)</option>
+                                    <option value="Asia/Tokyo">JST (GMT+9)</option>
+                                    <option value="Australia/Sydney">AEST (GMT+10)</option>
+                                    <option value="Pacific/Auckland">NZST (GMT+12)</option>
+                                </select>
+                            </div>
+                                    <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="calculateAndShowPage2()">Update</button>
+                        </div>
                     
                     <table class= "min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg">
                         <thead class="bg-gray-200">
@@ -361,9 +361,26 @@
                         <button onclick="copyShareLink()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-copy"></i>
                         </button>
+                         </div>
+                        </div>
                     </div>
+                <div class="mt-8 hidden" id="page3-button-container">
+                    <button onclick="showPage3()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                        Go to Third Page <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
                 </div>
-            </div>
+                <div id="page-3" class="hidden space-y-6">
+                        <div class="flex items-center space-x-4 mb-6">
+                            <button onclick="showPage2()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                                <i class="fas fa-arrow-left mr-2"></i> Back
+                            </button>
+                        </div>
+                        <div class="p-6 bg-green-100 border border-green-200 rounded-lg">
+                            <h3 class="text-xl font- mb-4 text-green-800 road-rage-font">Third Page</h3>
+                            <div id="third-page-content" class="text-green-800">
+                                </div>
+                        </div>
+                    </div> 
 
             <div id="admin-page" class="hidden">
                 <button onclick="saveDataToServer()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -524,9 +541,9 @@
                  alert("Please select at least one driver, a car, and a track before continuing.");
                  return;
              }
-    document.getElementById('planner-page').classList.add('hidden');
-    document.getElementById('page-2').classList.remove('hidden');
-    document.getElementById('admin-page').classList.add('hidden');
+            document.getElementById('planner-page').classList.add('hidden');
+            document.getElementById('page-2').classList.remove('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
             
             // Re-hide results sections until calculation is run on page 2
             document.getElementById('overall-summary').classList.add('hidden');
@@ -539,6 +556,12 @@
             document.getElementById('page2-car').textContent = carSelect.value;
             const driverNames = selectedDrivers.map(d => d.name).join(', ');
             document.getElementById('page2-drivers').textContent = driverNames;
+        }
+        function showPage3() {
+            document.getElementById('planner-page').classList.add('hidden');
+            document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('page-3').classList.remove('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
         }
 
         // --- Core Logic ---
@@ -593,7 +616,11 @@
             document.getElementById('stint-breakdown-display').classList.remove('hidden');
             document.getElementById('sliders-container').classList.remove('hidden');
             document.getElementById('share-link-container').classList.remove('hidden');
+       
+            // Show the button to go to the third page after calculation
+            document.getElementById('page3-button-container').classList.remove('hidden');
         }
+
         
         function formatDuration(totalSeconds) {
             if (totalSeconds <= 0) return '0s';
