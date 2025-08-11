@@ -835,60 +835,50 @@
 function loadState(state) {
     // Restore selected drivers
     selectedDrivers = [];
-    if (Array.isArray(state.selectedDrivers)) {
+    if (state.selectedDrivers && Array.isArray(state.selectedDrivers)) {
         selectedDrivers = drivers.filter(d => state.selectedDrivers.includes(d.name));
-        populateSelectedDrivers(); // refresh driver list UI
+        populateSelectedDrivers();
     }
 
-    // Restore selected car & track
-    const carSelect = document.getElementById('car-select');
-    const trackSelect = document.getElementById('track-select');
-    if (state.selectedCar) carSelect.value = state.selectedCar;
-    if (state.selectedTrack) trackSelect.value = state.selectedTrack;
+    // Restore car and track
+    document.getElementById('car-select').value = state.selectedCar || '';
+    document.getElementById('track-select').value = state.selectedTrack || '';
 
     // Restore race inputs
     document.getElementById('race-duration-hours').value = state.raceDurationHours || '';
     document.getElementById('race-duration-minutes').value = state.raceDurationMinutes || '';
-    document.getElementById('avg-lap-time-minutes').value = state.avgLapMinutes || '';
-    document.getElementById('avg-lap-time-seconds').value = state.avgLapSeconds || '';
+    document.getElementById('avg-lap-time-minutes').value = state.avgLapTimeMinutes || '';
+    document.getElementById('avg-lap-time-seconds').value = state.avgLapTimeSeconds || '';
     document.getElementById('pit-stop-time').value = state.pitStopTime || '';
     document.getElementById('fuel-per-lap-display-input').value = state.fuelPerLap || '';
     document.getElementById('tank-capacity-display-input').value = state.tankCapacity || '';
 
-    // Restore dynamic slider positions
-    if (typeof state.fuelSlider === 'number') {
-        const fuelSlider = document.getElementById('fuel-slider');
-        fuelSlider.value = state.fuelSlider;
-        document.getElementById('fuel-slider-value').textContent = state.fuelSlider.toFixed(1);
-    }
-    if (typeof state.lapTimeSlider === 'number') {
-        const lapTimeSlider = document.getElementById('lap-time-slider');
-        lapTimeSlider.value = state.lapTimeSlider;
-        document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
-    }
+    // Restore sliders
+    document.getElementById('fuel-slider').value = state.fuelSlider || 0;
+    document.getElementById('fuel-slider-value').textContent = state.fuelSlider || 0;
+    document.getElementById('lap-time-slider').value = state.lapTimeSlider || 0;
+    document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider || 0;
 
-    // Restore race start, qualifying, and timezone
-    if (state.raceStartTime) {
-        document.getElementById('race-start-time-page2').value = state.raceStartTime;
-    }
-    if (state.qualifyingMinutes !== undefined) {
-        document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes;
-    }
+    // Restore race start and qualifying
+    document.getElementById('race-start-time-page2').value = state.raceStartTime || '';
+    document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes || '';
+
+    // Added for index (30) - restore timezone if present
     if (state.timezone) {
         const tzSelect = document.getElementById('timezone-select');
         if (tzSelect) tzSelect.value = state.timezone;
     }
 
-    // Perform initial calculation so data is visible on load
+    // Run calculation after restoring values
     calculateAndShowPage2();
 
-    // If page 3 data exists in the saved state, navigate there
+    // Added for index (30) - restore page 3 content if present
     if (state.page3Content) {
         document.getElementById('third-page-content').innerHTML = state.page3Content;
         document.getElementById('page3-button-container').classList.remove('hidden');
     }
 
-    // Show planner page by default after loading
+    // Show planner after loading state
     showPlannerPage();
 }
 
@@ -1163,6 +1153,7 @@ function loadState(state) {
     </script>
 </body>
 </html>
+
 
 
 
