@@ -833,75 +833,81 @@
 
                 // Function to load a saved strategy from a shareable link
         async function loadState() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const strategyId = urlParams.get('id');
+			    const urlParams = new URLSearchParams(window.location.search);
+			    const strategyId = urlParams.get('id');
+			
+			    if (strategyId) {
+			        document.getElementById('loading-state-container').classList.remove('hidden');
+			        try {
+			            const response = await fetch(`/api/strategies/${strategyId}`);
+			            
+			            // Check if the server response is successful (200 OK)
+			            // A 304 response means the server is telling the browser to use a cached version,
+			            // but for a dynamic API call, we need a 200 with the full data.
+			            if (!response.ok || response.status !== 200) {
+			                throw new Error('Failed to load strategy from server.');
+			            }
+			
+			            // The 'state' object is the JSON data from the server.
+			            const state = await response.json();
+			
+			            // Restore selections
+			            selectedDrivers = [];
+			            state.drivers.forEach(driverName => {
+			                const driver = drivers.find(d => d.name === driverName);
+			                if (driver) selectedDrivers.push(driver);
+			            });
+			            renderDriverList();
+			            
+			            document.getElementById('car-select').value = state.car;
+			            document.getElementById('track-select').value = state.track;
+			
+			            // Restore inputs on page 2
+			            document.getElementById('race-duration-hours').value = state.raceDurationHours;
+			            document.getElementById('race-duration-minutes').value = state.raceDurationMinutes;
+			            document.getElementById('avg-lap-time-minutes').value = state.avgLapTimeMinutes;
+			            // FIX: Correctly access the property using bracket notation
+			            document.getElementById('avg-lap-time-seconds').value = state['avg-lap-time-seconds']; 
+			            document.getElementById('pit-stop-time').value = state.pitStopTime;
+			            document.getElementById('fuel-per-lap-display-input').value = state.fuelPerLapInput;
+			            document.getElementById('tank-capacity-display-input').value = state.tankCapacityInput;
+			            
+			            document.getElementById('fuel-slider').value = state.fuelSlider;
+			            document.getElementById('lap-time-slider').value = state.lapTimeSlider;
+			            document.getElementById('race-start-time-page2').value = state.raceStartTime;
+			            document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes;
+			            
+			            document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
+			            document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
+			            
+			            // Restore the timezone from the shared link
+			            document.getElementById('timezone-select').value = state.timezone || 'UTC';
+			
+			            // Show page 2 before running the calculation to ensure the elements are visible
+			            document.getElementById('planner-page').classList.add('hidden');
+			            document.getElementById('admin-page').classList.add('hidden');
+			            document.getElementById('page-3').classList.add('hidden');
+			            document.getElementById('page-2').classList.remove('hidden');
+			
+			            // Now, run the calculation which will populate the page content
+			            calculateAndShowPage2();
+			
+			            document.getElementById('loading-state-container').classList.add('hidden');
+			
+			        } catch (error) {
+			            console.error('Error loading strategy:', error);
+			            document.getElementById('loading-state-container').classList.add('hidden');
+			            // Using a custom modal instead of alert() for better UX
+			            showCustomAlert('Could not load strategy from the provided link. Please check your server and the link for errors.');
+			            // Fallback to the planner page if loading fails
+			            showPlannerPage();
+			        }
+			    } else {
+			        // If no ID is in the URL, initialize the page as normal
+			        showPlannerPage();
+			    }
+			}
 
-            if (strategyId) {
-                document.getElementById('loading-state-container').classList.remove('hidden');
-                try {
-                    const response = await fetch(`/api/strategies/${strategyId}`);
-                    
-                    // Check if the server response is successful (200 OK)
-                    // A 304 response means the server is telling the browser to use a cached version,
-                    // but for a dynamic API call, we need a 200 with the full data.
-                    if (!response.ok || response.status !== 200) {
-                        throw new Error('Failed to load strategy from server.');
-                    }
-
-                    // The 'state' object is the JSON data from the server.
-                    const state = await response.json();
-
-                    // Restore selections
-                    selectedDrivers = [];
-                    state.drivers.forEach(driverName => {
-                        const driver = drivers.find(d => d.name === driverName);
-                        if (driver) selectedDrivers.push(driver);
-                    });
-                    renderDriverList();
-                    
-                    document.getElementById('car-select').value = state.car;
-                    document.getElementById('track-select').value = state.track;
-
-                    // Restore inputs on page 2
-                    document.getElementById('race-duration-hours').value = state.raceDurationHours;
-                    document.getElementById('race-duration-minutes').value = state.raceDurationMinutes;
-                    document.getElementById('avg-lap-time-minutes').value = state.avgLapTimeMinutes;
-                    // FIX: Correctly access the property using bracket notation
-                    document.getElementById('avg-lap-time-seconds').value = state['avg-lap-time-seconds']; 
-                    document.getElementById('pit-stop-time').value = state.pitStopTime;
-                    document.getElementById('fuel-per-lap-display-input').value = state.fuelPerLapInput;
-                    document.getElementById('tank-capacity-display-input').value = state.tankCapacityInput;
-                    
-                    document.getElementById('fuel-slider').value = state.fuelSlider;
-                    document.getElementById('lap-time-slider').value = state.lapTimeSlider;
-                    document.getElementById('race-start-time-page2').value = state.raceStartTime;
-                    document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes;
-                    
-                    document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
-                    document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
-                    
-                    // Restore the timezone from the shared link
-                    document.getElementById('timezone-select').value = state.timezone || 'UTC';
-
-                    // Navigate to page 2 and calculate
-                    showPage2();
-                    calculateAndShowPage2();
-
-                    document.getElementById('loading-state-container').classList.add('hidden');
-
-                } catch (error) {
-                    console.error('Error loading strategy:', error);
-                    document.getElementById('loading-state-container').classList.add('hidden');
-                    // Using a custom modal instead of alert() for better UX
-                    showCustomAlert('Could not load strategy from the provided link. Please check your server and the link for errors.');
-                    // Fallback to the planner page if loading fails
-                    showPlannerPage();
-                }
-            } else {
-                // If no ID is in the URL, initialize the page as normal
-                showPlannerPage();
-            }
-        }
         // --- Admin Functions ---
 
         async function saveDataToServer() {
@@ -1172,6 +1178,7 @@
     </script>
 </body>
 </html>
+
 
 
 
