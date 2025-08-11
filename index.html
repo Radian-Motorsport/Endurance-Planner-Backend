@@ -401,60 +401,58 @@
                             <i class="fas fa-arrow-left mr-2"></i> Back
                         </button>
                     </div>
-					<div id="live-race-inputs-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Race Inputs</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Race Duration</label>
-                            <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="live-race-duration-hours" placeholder="Hours" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">h</span>
-                                <input type="number" id="live-race-duration-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">m</span>
-                            </div>
-                        </div>
-                        <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Avg. Lap Time</label>
-                            <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="live-avg-lap-time-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">min</span>
-                                <input type="number" id="live-avg-lap-time-seconds" placeholder="Seconds" class="p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">sec</span>
-                            </div>
-                        </div>
-                        <div class="flex flex-col">
-                            <label for="live-pit-stop-time" class="text-sm font-medium text-gray-700">Avg. Pit Stop Time (sec)</label>
-                            <input type="number" id="live-pit-stop-time" value="30" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                        </div>
-                        <div class="flex flex-col">
-                            <label for="live-fuel-per-lap-display-input" class="text-sm font-medium text-gray-700">Fuel Use per Lap (L)</label>
-                            <input type="number" id="live-fuel-per-lap-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                        </div>
-                        <div class="flex flex-col">
-                            <label for="live-tank-capacity-display-input" class="text-sm font-medium text-gray-700">Fuel Tank Size (L)</label>
-                            <input type="number" id="live-tank-capacity-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                        </div>
-						<div class="mt-4 flex justify-end">
-                        <button id="calculate-page3-button" onclick="calculateAndShowPage3()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
-                            Calculate
-                        </button>
-                    </div>
-					</div>
-					<div id="live-overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg">
-                    <h3 class="text-xl font- mb-4 text-blue-800 road-rage-font">Overall Strategy Summary</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-blue-800">
-                        <div><span class="font-semibold">Est. Laps:</span> <span id="live-est-laps-display"></span></div>
-                        <div><span class="font-semibold">Stint Duration:</span> <span id="live-stint-duration-display"></span></div>
-                        <div><span class="font-semibold">Laps per Stint:</span> <span id="live-laps-per-stint-display"></span></div>
-                        <div><span class="font-semibold">Pit Stops:</span> <span id="live-pit-stops-display"></span></div>
-                        <div><span class="font-semibold">Total Fuel:</span> <span id="live-total-fuel-display"></span></div>
-                        <div><span class="font-semibold">Fuel per Lap:</span> <span id="live-fuel-per-lap-display"></span></div>
-                        <div><span class="font-semibold">Lap Time:</span> <span id="live-lap-time-display"></span></div>
-                        <div><span class="font-semibold">Pit Stop Duration:</span> <span id="live-pit-stop-duration-display"></span></div>
+					<div id="race-inputs-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
+					<h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Race Inputs</h3>
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						<div class="flex flex-col">
+							<label class="text-sm font-medium text-gray-700">Race Duration</label>
+							<div class="flex items-center mt-1 space-x-2">
+								<input type="number" id="race-duration-hours" placeholder="Hours" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+								<span class="text-gray-600">h</span>
+								<input type="number" id="race-duration-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+								<span class="text-gray-600">m</span>
+							</div>
+						</div>
+						<div class="flex flex-col">
+							<label class="text-sm font-medium text-gray-700">Avg. Lap Time</label>
+							<div class="flex items-center mt-1 space-x-2">
+								<input type="number" id="avg-lap-time-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+								<span class="text-gray-600">min</span>
+								<input type="number" id="avg-lap-time-seconds" placeholder="Seconds" class="p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+								<span class="text-gray-600">sec</span>
+							</div>
+						</div>
+						<div class="flex flex-col">
+							<label for="pit-stop-time" class="text-sm font-medium text-gray-700">Avg. Pit Stop Time (sec)</label>
+							<input type="number" id="pit-stop-time" value="30" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+						</div>
+						<div class="flex flex-col">
+							<label for="fuel-per-lap-display-input" class="text-sm font-medium text-gray-700">Fuel Use per Lap (L)</label>
+							<input type="number" id="fuel-per-lap-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+						</div>
+						<div class="flex flex-col">
+							<label for="tank-capacity-display-input" class="text-sm font-medium text-gray-700">Fuel Tank Size (L)</label>
+							<input type="number" id="tank-capacity-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
 						</div>
 					</div>
-						
-                    </div>
+					<div class="mt-4 flex justify-end">
+						<button id="calculate-page2-button" onclick="calculateAndShowPage2()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
+							Calculate
+						</button>
+					</div>
+				</div> <div id="overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg hidden">
+					<h3 class="text-xl font- mb-4 text-blue-800 road-rage-font">Overall Strategy Summary</h3>
+					<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-blue-800">
+						<div><span class="font-semibold">Est. Laps:</span> <span id="est-laps-display"></span></div>
+						<div><span class="font-semibold">Stint Duration:</span> <span id="stint-duration-display"></span></div>
+						<div><span class="font-semibold">Laps per Stint:</span> <span id="laps-per-stint-display"></span></div>
+						<div><span class="font-semibold">Pit Stops:</span> <span id="pit-stops-display"></span></div>
+						<div><span class="font-semibold">Total Fuel:</span> <span id="total-fuel-display"></span></div>
+						<div><span class="font-semibold">Fuel per Lap:</span> <span id="fuel-per-lap-display"></span></div>
+						<div><span class="font-semibold">Lap Time:</span> <span id="lap-time-display"></span></div>
+						<div><span class="font-semibold">Pit Stop Duration:</span> <span id="pit-stop-duration-display"></span></div>
+					</div>
+				</div> ```
 					
 
 					<div id="live-sliders-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg hidden">
@@ -1541,6 +1539,7 @@
     </script>
 </body>
 </html>
+
 
 
 
