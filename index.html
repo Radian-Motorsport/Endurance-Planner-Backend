@@ -450,6 +450,26 @@
                         <p class="text-green-800">Time Remaining: <span id="countdown-timer">00:00:00</span></p>
                         <p class="text-green-800">Approx. Time to Next Pitstop: <span id="next-pitstop-time">00:00:00</span></p>
 
+						<div id="sliders-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg hidden">
+	                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Dynamic Adjustments</h3>
+	                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+	                        <div class="flex-grow w-full">
+	                            <label for="fuel-slider" class="text-sm font-medium text-gray-700">Adjust Fuel per Lap</label>
+	                            <div class="flex items-center mt-1 space-x-2">
+	                                <input type="range" id="fuel-slider" min="-1.0" max="1.0" value="0" step="0.1" class="w-full">
+	                                <span id="fuel-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.0</span>
+	                            </div>
+	                        </div>
+	                        <div class="flex-grow w-full">
+	                            <label for="lap-time-slider" class="text-sm font-medium text-gray-700">Adjust Lap Time</label>
+	                            <div class="flex items-center mt-1 space-x-2">
+	                                <input type="range" id="lap-time-slider" min="-3" max="3" value="0" step="0.1" class="w-full">
+	                                <span id="lap-time-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0</span>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+
                         <table id="live-stint-table" class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg mt-6">
                             <thead class="bg-gray-200">
                                 <tr>
@@ -667,6 +687,7 @@
 			    document.getElementById('admin-page').classList.add('hidden');
 			
 			    document.getElementById('overall-summary').classList.remove('hidden');
+				document.getElementById('sliders-container').classList.remove('hidden');
 			
 			    // Get values from the new user-entered boxes on Page 3
 			    const liveRaceDurationMinutes = parseInt(document.getElementById('live-race-duration').value) || 0;
@@ -1409,6 +1430,14 @@
             document.getElementById('live-pit-exit-button').disabled = false;
         }
 
+		function updateLiveFuelAdjustment(value) {
+			document.getElementById('fuel-slider-value').textContent = parseFloat(value).toFixed(1);
+		}
+		
+		function updateLiveLapTimeAdjustment(value) {
+			document.getElementById('lap-time-slider-value').textContent = parseFloat(value).toFixed(1);
+		}
+
         function stopRace() {
             clearInterval(liveTimerInterval);
             const startStopButton = document.getElementById('live-start-stop-button');
@@ -1441,6 +1470,7 @@
     </script>
 </body>
 </html>
+
 
 
 
