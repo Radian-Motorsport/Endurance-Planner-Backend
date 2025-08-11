@@ -401,7 +401,19 @@
                             <i class="fas fa-arrow-left mr-2"></i> Back
                         </button>
                     </div>
-					
+					<div id="overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg">
+                    <h3 class="text-xl font- mb-4 text-blue-800 road-rage-font">Overall Strategy Summary</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-blue-800">
+                        <div><span class="font-semibold">Est. Laps:</span> <span id="est-laps-display"></span></div>
+                        <div><span class="font-semibold">Stint Duration:</span> <span id="stint-duration-display"></span></div>
+                        <div><span class="font-semibold">Laps per Stint:</span> <span id="laps-per-stint-display"></span></div>
+                        <div><span class="font-semibold">Pit Stops:</span> <span id="pit-stops-display"></span></div>
+                        <div><span class="font-semibold">Total Fuel:</span> <span id="total-fuel-display"></span></div>
+                        <div><span class="font-semibold">Fuel per Lap:</span> <span id="fuel-per-lap-display"></span></div>
+                        <div><span class="font-semibold">Lap Time:</span> <span id="lap-time-display"></span></div>
+                        <div><span class="font-semibold">Pit Stop Duration:</span> <span id="pit-stop-duration-display"></span></div>
+						</div>
+					</div>
                     <div class="p-6 bg-green-100 border border-green-200 rounded-lg">
                         <h3 class="text-xl font- mb-4 text-green-800 road-rage-font">Live Stint Planner</h3>
                         <div class="live-planner-controls">
@@ -413,20 +425,6 @@
                                 <label for="live-time-remaining">Manual Start Time (min):</label>
                                 <input type="number" id="live-time-remaining" placeholder="e.g. 120" value="180" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                             </div>
-						</div>
-						<div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Avg. Lap Time</label>
-                            <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="live-lap-time-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">min</span>
-                                <input type="number" id="live-lap-time-seconds" placeholder="Seconds" class="p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">sec</span>
-                            </div>
-                        </div>
-							<div class="flex flex-col">
-                            <label for="live-fuel-per-lap-input" class="text-sm font-medium text-gray-700">Fuel Use per Lap (L)</label>
-                            <input type="number" id="fuel-per-lap-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                        </div>						
                             <div>
                                 <label for="live-lap-time-slider">Avg Lap Time (sec): <span id="live-lap-time-value">90</span></label>
                                 <input type="range" id="live-lap-time-slider" min="60" max="150" value="90" oninput="updateLiveLapTime(this.value)">
@@ -449,26 +447,6 @@
                         </div>
                         <p class="text-green-800">Time Remaining: <span id="countdown-timer">00:00:00</span></p>
                         <p class="text-green-800">Approx. Time to Next Pitstop: <span id="next-pitstop-time">00:00:00</span></p>
-
-						<div id="sliders-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg hidden">
-	                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Dynamic Adjustments</h3>
-	                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-	                        <div class="flex-grow w-full">
-						    <label for="fuel-slider" class="text-sm font-medium text-gray-700">Adjust Fuel per Lap</label>
-						    <div class="flex items-center mt-1 space-x-2">
-						        <input type="range" id="fuel-slider" min="-1.0" max="1.0" value="0" step="0.1" class="w-full" oninput="updateFuelFromSlider()">
-						        <span id="fuel-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.0</span>
-						    </div>
-						</div>
-						<div class="flex-grow w-full">
-						    <label for="lap-time-slider" class="text-sm font-medium text-gray-700">Adjust Lap Time</label>
-						    <div class="flex items-center mt-1 space-x-2">
-						        <input type="range" id="lap-time-slider" min="-3" max="3" value="0" step="0.1" class="w-full" oninput="updateLapTimeFromSlider()">
-						        <span id="lap-time-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0</span>
-						    </div>
-						</div>
-	                    </div>
-	                </div>
 
                         <table id="live-stint-table" class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg mt-6">
                             <thead class="bg-gray-200">
@@ -680,43 +658,32 @@
             const driverNames = selectedDrivers.map(d => d.name).join(', ');
             document.getElementById('page2-drivers').textContent = driverNames;
         }
-	        function showPage3() {
-			    document.getElementById('planner-page').classList.add('hidden');
-			    document.getElementById('page-2').classList.add('hidden');
-			    document.getElementById('page-3').classList.remove('hidden');
-			    document.getElementById('admin-page').classList.add('hidden');
-			
-			    document.getElementById('overall-summary').classList.remove('hidden');
-				document.getElementById('sliders-container').classList.remove('hidden');
-			
-			    // Get values from the new user-entered boxes on Page 3
-			    const liveRaceDurationMinutes = parseInt(document.getElementById('live-race-duration').value) || 0;
-			    const liveRaceDurationSeconds = liveRaceDurationMinutes * 60;
-			    
-			    const liveAvgLapTimeMinutes = parseInt(document.getElementById('live-avg-lap-time-minutes').value) || 0;
-			    const liveAvgLapTimeSeconds = parseInt(document.getElementById('live-avg-lap-time-seconds').value) || 0;
-			    const liveAvgLapTimeInSeconds = (parseInt(document.getElementById('live-avg-lap-time-minutes').value) * 60) + parseInt(document.getElementById('live-avg-lap-time-seconds').value);
-				const liveFuelPerLap = parseFloat(document.getElementById('live-fuel-per-lap-input').value) || 0;
-				
-				// Store these values as your base for adjustments
-				let currentLiveFuelPerLap = liveFuelPerLap;
-				let currentLiveLapTimeInSeconds = liveAvgLapTimeInSeconds;
+        function showPage3() {
+            document.getElementById('planner-page').classList.add('hidden');
+            document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('page-3').classList.remove('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
 
-			    const tankCapacity = parseInt(document.getElementById('tank-capacity-display-input').value);
-			
-			    // Update the values and sliders on page 3 using the new data
-			    document.getElementById('live-fuel-tank-size').value = tankCapacity;
-			
-			    document.getElementById('live-lap-time-slider').value = liveAvgLapTimeInSeconds;
-			    document.getElementById('live-lap-time-value').textContent = liveAvgLapTimeInSeconds;
-			
-			    document.getElementById('live-fuel-use-per-lap-slider').value = liveFuelPerLap;
-			    document.getElementById('live-fuel-use-per-lap-value').textContent = liveFuelPerLap;
-			
-			    // Reset and start the new timer logic
-			    stopRace(); // Ensure any previous timer is stopped
-			    calculateLiveStints(liveRaceDurationSeconds);
-			}
+            // Pass values from page 2 to the live planner on page 3
+            const raceDurationMinutes = parseInt(document.getElementById('race-duration-hours').value) * 60 + parseInt(document.getElementById('race-duration-minutes').value);
+            const avgLapTimeInSeconds = (parseInt(document.getElementById('avg-lap-time-minutes').value) * 60) + parseInt(document.getElementById('avg-lap-time-seconds').value);
+            const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input').value);
+            const tankCapacity = parseInt(document.getElementById('tank-capacity-display-input').value);
+
+            document.getElementById('overall-summary').classList.remove('hidden');
+            document.getElementById('live-fuel-tank-size').value = tankCapacity;
+
+            document.getElementById('live-lap-time-slider').value = avgLapTimeInSeconds;
+            document.getElementById('live-lap-time-value').textContent = avgLapTimeInSeconds;
+
+            document.getElementById('live-fuel-use-per-lap-slider').value = fuelPerLap;
+            document.getElementById('live-fuel-use-per-lap-value').textContent = fuelPerLap;
+
+            // Reset and start the new timer logic from here
+            stopRace(); // Ensure any previous timer is stopped
+            calculateLiveStints(liveRaceDurationSeconds || raceDurationMinutes * 60);
+        }
+
         // --- Core Logic ---
 
         function calculateAndShowPage2() {
@@ -1434,24 +1401,6 @@
             document.getElementById('live-pit-exit-button').disabled = false;
         }
 
-		function updateFuelFromSlider() {
-		    const fuelSliderAdjustment = parseFloat(document.getElementById('fuel-slider').value) || 0;
-		    // Update the fuel value by adding the adjustment
-		    currentLiveFuelPerLap = liveFuelPerLap + fuelSliderAdjustment;
-		
-		    // You will need to update your stint calculations here
-		    // For example: calculateLiveStints(liveRaceDurationSeconds);
-		}
-		
-		function updateLapTimeFromSlider() {
-		    const lapTimeSliderAdjustment = parseInt(document.getElementById('lap-time-slider').value) || 0;
-		    // Update the lap time value by adding the adjustment
-		    currentLiveLapTimeInSeconds = liveAvgLapTimeInSeconds + lapTimeSliderAdjustment;
-		
-		    // You will need to update your stint calculations here
-		    // For example: calculateLiveStints(liveRaceDurationSeconds);
-		}
-
         function stopRace() {
             clearInterval(liveTimerInterval);
             const startStopButton = document.getElementById('live-start-stop-button');
@@ -1484,10 +1433,6 @@
     </script>
 </body>
 </html>
-
-
-
-
 
 
 
