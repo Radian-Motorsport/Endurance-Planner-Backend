@@ -660,32 +660,38 @@
             const driverNames = selectedDrivers.map(d => d.name).join(', ');
             document.getElementById('page2-drivers').textContent = driverNames;
         }
-        function showPage3() {
-            document.getElementById('planner-page').classList.add('hidden');
-            document.getElementById('page-2').classList.add('hidden');
-            document.getElementById('page-3').classList.remove('hidden');
-            document.getElementById('admin-page').classList.add('hidden');
-
-            // Pass values from page 2 to the live planner on page 3
-            const raceDurationMinutes = parseInt(document.getElementById('race-duration-hours').value) * 60 + parseInt(document.getElementById('race-duration-minutes').value);
-            const avgLapTimeInSeconds = (parseInt(document.getElementById('avg-lap-time-minutes').value) * 60) + parseInt(document.getElementById('avg-lap-time-seconds').value);
-            const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input').value);
-            const tankCapacity = parseInt(document.getElementById('tank-capacity-display-input').value);
-
-            document.getElementById('overall-summary').classList.remove('hidden');
-            document.getElementById('live-fuel-tank-size').value = tankCapacity;
-
-            document.getElementById('live-lap-time-slider').value = avgLapTimeInSeconds;
-            document.getElementById('live-lap-time-value').textContent = avgLapTimeInSeconds;
-
-            document.getElementById('live-fuel-use-per-lap-slider').value = fuelPerLap;
-            document.getElementById('live-fuel-use-per-lap-value').textContent = fuelPerLap;
-
-            // Reset and start the new timer logic from here
-            stopRace(); // Ensure any previous timer is stopped
-            calculateLiveStints(liveRaceDurationSeconds || raceDurationMinutes * 60);
-        }
-
+	        function showPage3() {
+			    document.getElementById('planner-page').classList.add('hidden');
+			    document.getElementById('page-2').classList.add('hidden');
+			    document.getElementById('page-3').classList.remove('hidden');
+			    document.getElementById('admin-page').classList.add('hidden');
+			
+			    document.getElementById('overall-summary').classList.remove('hidden');
+			
+			    // Get values from the new user-entered boxes on Page 3
+			    const liveRaceDurationMinutes = parseInt(document.getElementById('live-race-duration').value) || 0;
+			    const liveRaceDurationSeconds = liveRaceDurationMinutes * 60;
+			    
+			    const liveAvgLapTimeMinutes = parseInt(document.getElementById('live-avg-lap-time-minutes').value) || 0;
+			    const liveAvgLapTimeSeconds = parseInt(document.getElementById('live-avg-lap-time-seconds').value) || 0;
+			    const liveAvgLapTimeInSeconds = (liveAvgLapTimeMinutes * 60) + liveAvgLapTimeSeconds;
+			    
+			    const liveFuelPerLap = parseFloat(document.getElementById('live-fuel-per-lap-input').value) || 0;
+			    const tankCapacity = parseInt(document.getElementById('tank-capacity-display-input').value);
+			
+			    // Update the values and sliders on page 3 using the new data
+			    document.getElementById('live-fuel-tank-size').value = tankCapacity;
+			
+			    document.getElementById('live-lap-time-slider').value = liveAvgLapTimeInSeconds;
+			    document.getElementById('live-lap-time-value').textContent = liveAvgLapTimeInSeconds;
+			
+			    document.getElementById('live-fuel-use-per-lap-slider').value = liveFuelPerLap;
+			    document.getElementById('live-fuel-use-per-lap-value').textContent = liveFuelPerLap;
+			
+			    // Reset and start the new timer logic
+			    stopRace(); // Ensure any previous timer is stopped
+			    calculateLiveStints(liveRaceDurationSeconds);
+			}
         // --- Core Logic ---
 
         function calculateAndShowPage2() {
@@ -1435,6 +1441,7 @@
     </script>
 </body>
 </html>
+
 
 
 
