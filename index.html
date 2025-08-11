@@ -454,19 +454,19 @@
 	                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Dynamic Adjustments</h3>
 	                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
 	                        <div class="flex-grow w-full">
-	                            <label for="fuel-slider" class="text-sm font-medium text-gray-700">Adjust Fuel per Lap</label>
-	                            <div class="flex items-center mt-1 space-x-2">
-	                                <input type="range" id="fuel-slider" min="-1.0" max="1.0" value="0" step="0.1" class="w-full">
-	                                <span id="fuel-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.0</span>
-	                            </div>
-	                        </div>
-	                        <div class="flex-grow w-full">
-	                            <label for="lap-time-slider" class="text-sm font-medium text-gray-700">Adjust Lap Time</label>
-	                            <div class="flex items-center mt-1 space-x-2">
-	                                <input type="range" id="lap-time-slider" min="-3" max="3" value="0" step="0.1" class="w-full">
-	                                <span id="lap-time-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0</span>
-	                            </div>
-	                        </div>
+						    <label for="fuel-slider" class="text-sm font-medium text-gray-700">Adjust Fuel per Lap</label>
+						    <div class="flex items-center mt-1 space-x-2">
+						        <input type="range" id="fuel-slider" min="-1.0" max="1.0" value="0" step="0.1" class="w-full" oninput="updateFuelFromSlider()">
+						        <span id="fuel-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.0</span>
+						    </div>
+						</div>
+						<div class="flex-grow w-full">
+						    <label for="lap-time-slider" class="text-sm font-medium text-gray-700">Adjust Lap Time</label>
+						    <div class="flex items-center mt-1 space-x-2">
+						        <input type="range" id="lap-time-slider" min="-3" max="3" value="0" step="0.1" class="w-full" oninput="updateLapTimeFromSlider()">
+						        <span id="lap-time-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0</span>
+						    </div>
+						</div>
 	                    </div>
 	                </div>
 
@@ -695,9 +695,13 @@
 			    
 			    const liveAvgLapTimeMinutes = parseInt(document.getElementById('live-avg-lap-time-minutes').value) || 0;
 			    const liveAvgLapTimeSeconds = parseInt(document.getElementById('live-avg-lap-time-seconds').value) || 0;
-			    const liveAvgLapTimeInSeconds = (liveAvgLapTimeMinutes * 60) + liveAvgLapTimeSeconds;
-			    
-			    const liveFuelPerLap = parseFloat(document.getElementById('live-fuel-per-lap-input').value) || 0;
+			    const liveAvgLapTimeInSeconds = (parseInt(document.getElementById('live-avg-lap-time-minutes').value) * 60) + parseInt(document.getElementById('live-avg-lap-time-seconds').value);
+				const liveFuelPerLap = parseFloat(document.getElementById('live-fuel-per-lap-input').value) || 0;
+				
+				// Store these values as your base for adjustments
+				let currentLiveFuelPerLap = liveFuelPerLap;
+				let currentLiveLapTimeInSeconds = liveAvgLapTimeInSeconds;
+
 			    const tankCapacity = parseInt(document.getElementById('tank-capacity-display-input').value);
 			
 			    // Update the values and sliders on page 3 using the new data
@@ -1430,12 +1434,22 @@
             document.getElementById('live-pit-exit-button').disabled = false;
         }
 
-		function updateLiveFuelAdjustment(value) {
-			document.getElementById('fuel-slider-value').textContent = parseFloat(value).toFixed(1);
+		function updateFuelFromSlider() {
+		    const fuelSliderAdjustment = parseFloat(document.getElementById('fuel-slider').value) || 0;
+		    // Update the fuel value by adding the adjustment
+		    currentLiveFuelPerLap = liveFuelPerLap + fuelSliderAdjustment;
+		
+		    // You will need to update your stint calculations here
+		    // For example: calculateLiveStints(liveRaceDurationSeconds);
 		}
 		
-		function updateLiveLapTimeAdjustment(value) {
-			document.getElementById('lap-time-slider-value').textContent = parseFloat(value).toFixed(1);
+		function updateLapTimeFromSlider() {
+		    const lapTimeSliderAdjustment = parseInt(document.getElementById('lap-time-slider').value) || 0;
+		    // Update the lap time value by adding the adjustment
+		    currentLiveLapTimeInSeconds = liveAvgLapTimeInSeconds + lapTimeSliderAdjustment;
+		
+		    // You will need to update your stint calculations here
+		    // For example: calculateLiveStints(liveRaceDurationSeconds);
 		}
 
         function stopRace() {
@@ -1470,6 +1484,7 @@
     </script>
 </body>
 </html>
+
 
 
 
