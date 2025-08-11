@@ -14,20 +14,6 @@
  		}
 	</script>
 	<script src="https://cdn.tailwindcss.com"></script>
-	<script>
-		  const toggle = document.getElementById('darkModeSwitch');
-		
-		  // Initialize state on load
-		  const saved = localStorage.getItem('darkMode') === 'true';
-		  toggle.checked = saved;
-		  document.documentElement.classList.toggle('dark', saved);
-		
-		  // Listen for user toggles
-		  toggle.addEventListener('change', () => {
-		    document.documentElement.classList.toggle('dark', toggle.checked);
-		    localStorage.setItem('darkMode', toggle.checked);
-		  });
-		</script>
 	<style>
         body {
    			 font-family: 'Inter', sans-serif;
@@ -1164,6 +1150,21 @@
             });
         });
     </script>
+	<script>
+		  const toggle = document.getElementById('darkModeSwitch');
+		
+		  // Initialize state on load
+		  const saved = localStorage.getItem('darkMode') === 'true';
+		  toggle.checked = saved;
+		  document.documentElement.classList.toggle('dark', saved);
+		
+		  // Listen for user toggles
+		  toggle.addEventListener('change', () => {
+		    document.documentElement.classList.toggle('dark', toggle.checked);
+		    localStorage.setItem('darkMode', toggle.checked);
+		  });
+		</script>
 </body>
 </html>
+
 
