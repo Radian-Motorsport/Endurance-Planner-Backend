@@ -605,8 +605,6 @@
                 document.getElementById('admin-page').classList.add('hidden');
 
                 // Populate the live planner with the calculated values from page 2
-                document.getElementById('live-race-duration').value = raceDurationSeconds / 60;
-                document.getElementById('live-time-remaining').value = raceDurationSeconds / 60;
                 document.getElementById('live-fuel-tank-size').value = document.getElementById('tank-capacity-display-input').value;
                 document.getElementById('live-fuel-use-per-lap-slider').value = document.getElementById('fuel-per-lap-display-input').value;
                 document.getElementById('live-fuel-use-per-lap-value').textContent = document.getElementById('fuel-per-lap-display-input').value;
@@ -614,8 +612,6 @@
                 const avgLapTimeInSeconds = (parseInt(document.getElementById('avg-lap-time-minutes').value) * 60) + parseInt(document.getElementById('avg-lap-time-seconds').value);
                 document.getElementById('live-lap-time-slider').value = avgLapTimeInSeconds;
                 document.getElementById('live-lap-time-value').textContent = avgLapTimeInSeconds;
-
-                liveRaceDurationSeconds = raceDurationSeconds;
 
                 // Reset and populate the live stint table
                 document.getElementById('live-stint-table-body').innerHTML = '';
@@ -1079,3 +1075,4 @@
     </script>
 </body>
 </html>
+
