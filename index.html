@@ -670,7 +670,7 @@
             const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input').value);
             const tankCapacity = parseInt(document.getElementById('tank-capacity-display-input').value);
 
-            
+            document.getElementById('overall-summary').classList.remove('hidden');
             document.getElementById('live-fuel-tank-size').value = tankCapacity;
 
             document.getElementById('live-lap-time-slider').value = avgLapTimeInSeconds;
@@ -1433,5 +1433,6 @@
     </script>
 </body>
 </html>
+
 
 
