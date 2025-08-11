@@ -401,19 +401,39 @@
                             <i class="fas fa-arrow-left mr-2"></i> Back
                         </button>
                     </div>
-					<div id="overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg">
+					<div id="live-overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg">
                     <h3 class="text-xl font- mb-4 text-blue-800 road-rage-font">Overall Strategy Summary</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-blue-800">
-                        <div><span class="font-semibold">Est. Laps:</span> <span id="est-laps-display"></span></div>
-                        <div><span class="font-semibold">Stint Duration:</span> <span id="stint-duration-display"></span></div>
-                        <div><span class="font-semibold">Laps per Stint:</span> <span id="laps-per-stint-display"></span></div>
-                        <div><span class="font-semibold">Pit Stops:</span> <span id="pit-stops-display"></span></div>
-                        <div><span class="font-semibold">Total Fuel:</span> <span id="total-fuel-display"></span></div>
-                        <div><span class="font-semibold">Fuel per Lap:</span> <span id="fuel-per-lap-display"></span></div>
-                        <div><span class="font-semibold">Lap Time:</span> <span id="lap-time-display"></span></div>
-                        <div><span class="font-semibold">Pit Stop Duration:</span> <span id="pit-stop-duration-display"></span></div>
+                        <div><span class="font-semibold">Est. Laps:</span> <span id="live-est-laps-display"></span></div>
+                        <div><span class="font-semibold">Stint Duration:</span> <span id="live-stint-duration-display"></span></div>
+                        <div><span class="font-semibold">Laps per Stint:</span> <span id="live-laps-per-stint-display"></span></div>
+                        <div><span class="font-semibold">Pit Stops:</span> <span id="live-pit-stops-display"></span></div>
+                        <div><span class="font-semibold">Total Fuel:</span> <span id="live-total-fuel-display"></span></div>
+                        <div><span class="font-semibold">Fuel per Lap:</span> <span id="live-fuel-per-lap-display"></span></div>
+                        <div><span class="font-semibold">Lap Time:</span> <span id="live-lap-time-display"></span></div>
+                        <div><span class="font-semibold">Pit Stop Duration:</span> <span id="live-pit-stop-duration-display"></span></div>
 						</div>
 					</div>
+
+					<div id="sliders-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg hidden">
+                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Dynamic Adjustments</h3>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                        <div class="flex-grow w-full">
+                            <label for="fuel-slider" class="text-sm font-medium text-gray-700">Adjust Fuel per Lap</label>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <input type="range" id="live-fuel-slider" min="-1.0" max="1.0" value="0" step="0.1" class="w-full">
+                                <span id="fuel-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.0</span>
+                            </div>
+                        </div>
+                        <div class="flex-grow w-full">
+                            <label for="lap-time-slider" class="text-sm font-medium text-gray-700">Adjust Lap Time</label>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <input type="range" id="live-lap-time-slider" min="-3" max="3" value="0" step="0.1" class="w-full">
+                                <span id="lap-time-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                     <div class="p-6 bg-green-100 border border-green-200 rounded-lg">
                         <h3 class="text-xl font- mb-4 text-green-800 road-rage-font">Live Stint Planner</h3>
                         <div class="live-planner-controls">
@@ -740,6 +760,50 @@
             // Show the button to go to the third page after calculation
             document.getElementById('page3-button-container').classList.remove('hidden');
         }
+
+		function calculateAndShowPage3() {
+		    const LiveraceDurationHours = parseInt(document.getElementById('live-race-duration-hours').value) || 0;
+		    const LiveraceDurationMinutes = parseInt(document.getElementById('live-race-duration-minutes').value) || 0;
+		    const LiveraceDurationSeconds = (LiveraceDurationHours * 3600) + (LiveraceDurationMinutes * 60);
+		
+		    const LiveavgLapTimeMinutes = parseInt(document.getElementById('live-avg-lap-time-minutes').value) || 0;
+		    const LiveavgLapTimeSeconds = parseInt(document.getElementById('live-avg-lap-time-seconds').value) || 0;
+		    let LiveavgLapTimeInSeconds = (LiveavgLapTimeMinutes * 60) + LiveavgLapTimeSeconds;
+		
+		    let LivefuelPerLap = parseFloat(document.getElementById('live-fuel-per-lap-display-input').value) || 0;
+		    const LivetankCapacity = parseInt(document.getElementById('live-tank-capacity-display-input').value) || 0;
+		    const LivepitStopTime = parseInt(document.getElementById('live-pit-stop-time').value) || 0;
+		    
+		    // Check if essential fields are filled
+		    if (LiveraceDurationSeconds === 0 || LiveavgLapTimeInSeconds === 0 || LivefuelPerLap <= 0 || LivetankCapacity <= 0) {
+		            alert("Please ensure all race inputs are filled and valid before calculating.");
+		            return;
+		    }
+		
+		    // Apply slider adjustments
+		    const LivefuelSliderAdjustment = parseFloat(document.getElementById('live-fuel-slider').value) || 0;
+		    LivefuelPerLap += LivefuelSliderAdjustment;
+		    
+		    const LivelapTimeSliderAdjustment = parseInt(document.getElementById('live-lap-time-slider').value) || 0;
+		    LiveavgLapTimeInSeconds += LivelapTimeSliderAdjustment;
+		
+		    const LivelapsPerTank = Math.floor(LivetankCapacity / LivefuelPerLap);
+		    const LivetotalLaps = Math.floor(LiveraceDurationSeconds / LiveavgLapTimeInSeconds);
+		    const LivestintDuration = LivelapsPerTank * LiveavgLapTimeInSeconds;
+		    
+		    const LivetotalStints = Math.floor(LivetotalLaps / LivelapsPerTank) + (LivetotalLaps % LivelapsPerTank > 0 ? 1 : 0);
+		    const LivelapsPerStint = LivelapsPerTank;
+		    const LivelapsInLastStint = LivetotalLaps % LivelapsPerStint;
+		
+		    document.getElementById('live-est-laps-display').textContent = LivetotalLaps;
+		    document.getElementById('live-stint-duration-display').textContent = formatDuration(LivestintDuration);
+		    document.getElementById('live-laps-per-stint-display').textContent = LivelapsPerStint;
+		    document.getElementById('live-pit-stops-display').textContent = LivetotalStints - 1;
+		    document.getElementById('live-total-fuel-display').textContent = (LivetotalLaps * LivefuelPerLap).toFixed(1) + ' L';
+		    document.getElementById('live-fuel-per-lap-display').textContent = LivefuelPerLap.toFixed(1) + ' L';
+		    document.getElementById('live-lap-time-display').textContent = `${Math.floor(LiveavgLapTimeInSeconds / 60)}:${(LiveavgLapTimeInSeconds % 60).toFixed(0).padStart(2, '0')}`;
+		    document.getElementById('live-pit-stop-duration-display').textContent = `${LivepitStopTime} sec`;
+		}
 
         
         function formatDuration(totalSeconds) {
@@ -1433,6 +1497,7 @@
     </script>
 </body>
 </html>
+
 
 
 
