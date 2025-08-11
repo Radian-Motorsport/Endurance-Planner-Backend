@@ -877,14 +877,8 @@ async function loadState() {
             document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
             document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
 
-            // This is the crucial part that ensures the page content is visible
-            // We'll explicitly show the results containers before running the calculation.
-            document.getElementById('planner-page').classList.add('hidden');
-            document.getElementById('admin-page').classList.add('hidden');
-            document.getElementById('page-3').classList.add('hidden');
-            document.getElementById('page-2').classList.remove('hidden');
-            
-            // Now, run the function that populates the page
+            // Navigate to page 2 and calculate
+            showPage2();
             calculateAndShowPage2();
 
             // Hide loading indicator
@@ -1172,6 +1166,7 @@ async function loadState() {
     </script>
 </body>
 </html>
+
 
 
 
