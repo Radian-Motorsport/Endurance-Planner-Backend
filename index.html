@@ -8,7 +8,27 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Road+Rage&display=swap" rel="stylesheet">
-    <style>
+    <script>
+  		tailwind.config = {
+    		darkMode: 'class'
+ 		}
+	</script>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script>
+		  const toggle = document.getElementById('darkModeSwitch');
+		
+		  // Initialize state on load
+		  const saved = localStorage.getItem('darkMode') === 'true';
+		  toggle.checked = saved;
+		  document.documentElement.classList.toggle('dark', saved);
+		
+		  // Listen for user toggles
+		  toggle.addEventListener('change', () => {
+		    document.documentElement.classList.toggle('dark', toggle.checked);
+		    localStorage.setItem('darkMode', toggle.checked);
+		  });
+		</script>
+	<style>
         body {
    			 font-family: 'Inter', sans-serif;
   			  transition: background-color 0.5s, color 0.5s;
@@ -1146,3 +1166,4 @@
     </script>
 </body>
 </html>
+
