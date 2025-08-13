@@ -162,65 +162,70 @@
         .dark #live-stint-table td { background-color: #1e1e1e; border-color: #4a4a4a; }
     </style>
 </head>
+
+
+
+
 <body class="p-4 md:p-8 bg-white text-black dark:bg-[#121212] dark:text-white">
-    <div class="toggle-switch-container">
-        <input type="checkbox" id="darkModeSwitch">
-        <label for="darkModeSwitch" class="toggle-label"></label>
-    </div>
+                    <div class="toggle-switch-container">
+                        <input type="checkbox" id="darkModeSwitch">
+                        <label for="darkModeSwitch" class="toggle-label"></label>
+                    </div>
 
     <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500">
-        <div class="text-center mb-6">
-            <img src="https://github.com/Radian-Motorsport/Endurance-Planner-Backend/blob/main/g457912.png?raw=true" alt="?" class="mx-auto w-100  h-auto">
-        </div>
-        <p class="text-center text-gray-600 mb-8"></p>
+                    <div class="text-center mb-6">
+                        <img src="https://github.com/Radian-Motorsport/Endurance-Planner-Backend/blob/main/g457912.png?raw=true" alt="?" class="mx-auto w-100  h-auto">
+                    </div>
+                    <p class="text-center text-gray-600 mb-8"></p>
 
         <div id="app-container">
-            <div class="flex justify-center space-x-4 mb-8">
-                <button id="race-details-btn" onclick="showPlannerPage()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
-                    <i class="fas fa-car-side"></i> <span>Race Details</span>
-                </button>
-                <button id="admin-btn" onclick="showAdminPage()" class="bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
-                    <i class="fas fa-user-shield"></i> <span>Admin</span>
-                </button>
-            </div>
-            
-            <div id="planner-page" class="">
-                    <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Drivers <span class="text-sm text-gray-500"></span></h3>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <select id="driver-select" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-black">
-                            <option value="">Select a Driver...</option>
-                        </select>
-                        <button onclick="addDriver()" class="bg-purple-600 hover:bg-purple-700 font- mb-4 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                            <i class="fas fa-plus"></i> Add
+                    <div class="flex justify-center space-x-4 mb-8">
+                        <button id="race-details-btn" onclick="showPlannerPage()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
+                            <i class="fas fa-car-side"></i> <span>Race Details</span>
+                        </button>
+                        <button id="admin-btn" onclick="showAdminPage()" class="bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
+                            <i class="fas fa-user-shield"></i> <span>Admin</span>
                         </button>
                     </div>
-                    <ul id="driver-list" class="space-y-2"></ul>
-                </div>
+            
+                    <div id="planner-page" class="">
+                        <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
+                            <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Drivers <span class="text-sm text-gray-500"></span></h3>
+                            <div class="flex items-center space-x-2 mb-4">
+                                <select id="driver-select" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-black">
+                                    <option value="">Select a Driver...</option>
+                                </select>
+                                <button onclick="addDriver()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                            <ul id="driver-list" class="space-y-2"></ul>
+                        </div>
 
-                                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
-                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Track & Car</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                        <div class="flex flex-col w-full">
-                            <select id="track-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-black">
-                                <option value="">Select a Track...</option>
-                            </select>
-                        </div>
-                        <div class="flex flex-col w-full">
-                            <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-black">
-                                <option value="">Select a Car...</option>
-                            </select>
-                        </div>
+                    <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
+                        <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Track & Car</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                                <div class="flex flex-col w-full">
+                                    <select id="track-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-black">
+                                        <option value="">Select a Track...</option>
+                                    </select>
+                                </div>
+                                <div class="flex flex-col w-full">
+                                    <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-black">
+                                        <option value="">Select a Car...</option>
+                                    </select>
+                                </div>
+                            </div>
                     </div>
-                </div>
+
                 <div class="mt-8">
                     <button onclick="showPage2()" id="continue-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                         Calculate <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                 </div>
-            </div>
+        </div>
 
-            <div id="page-2" class="space-y-6 hidden">
+        <div id="page-2" class="space-y-6 hidden">
                 <div class="flex items-center space-x-4 mb-6">
                     <button onclick="showPlannerPage()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-arrow-left mr-2"></i> Back
@@ -278,6 +283,7 @@
                             <input type="number" id="tank-capacity-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                     </div>
+
                     <div class="mt-4 flex justify-end">
                         <button id="calculate-page2-button" onclick="calculateAndShowPage2()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
                             Calculate
@@ -322,7 +328,7 @@
                   
                 <div id="stint-breakdown-display" class="p-6 bg-gray-50 border border-gray-200 rounded-lg overflow-x-auto hidden">
                     
-                            <div class="flex flex-col mb-4">
+                        <div class="flex flex-col mb-4">
                             <label class="text-sm font-medium text-gray-700">Race Start (UTC) & Qualifying</label>
                             <div class="flex items-center space-x-2">
                                 <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
@@ -390,11 +396,16 @@
                          </div>
                         </div>
                     </div>
+                </div>
+
+
                 <div class="mt-8 hidden" id="page3-button-container">
                     <button onclick="showPage3()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                         Go to Live Stint Planner <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                 </div>
+            </div>
+
                 <div id="page-3" class="hidden space-y-6">
                     <div class="flex items-center space-x-4 mb-6">
                         <button onclick="showPage2()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
