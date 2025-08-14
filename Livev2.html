@@ -3,22 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
+     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Road+Rage&display=swap" rel="stylesheet">
     <script>
-        tailwind.config = {
-            darkMode: 'class'
-        }
-    </script>
-    <style>
+  		tailwind.config = {
+    		darkMode: 'class'
+ 		}
+	</script>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style>
         body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.5s, color 0.5s;
-            background-color: #808080;
-        }
+   			 font-family: 'Inter', sans-serif;
+  			  transition: background-color 0.5s, color 0.5s;
+		}
+		body {
+   			 background-color: #808080;
+		}
         h1 {
             font-family: 'RoadRage', sans-serif;
         }
@@ -30,6 +33,7 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
+
         /* Dark Mode Switch CSS */
         .toggle-switch-container {
             position: fixed;
@@ -65,23 +69,37 @@
             left: calc(100% - 3px);
             transform: translateX(-100%);
         }
-        select, option, input, number, li {
-            color: #000000;
-            background-color: #FFFFFF;
-        }
+		select, option, input, number, li {
+    		color: #000000; /* Black text */
+			background-color: #FFFFFF;
+		}
         #darkModeSwitch {
             display: none;
         }
+
         /* --- Dark Mode Color Overrides --- */
+    
         .dark .max-w-4xl {
             background-color: #1e1e1e;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
         }
-        .dark h1, .dark h2, .dark h3, .dark .text-gray-800 { color: #ffffff; }
-        .dark p, .dark label, .dark .text-gray-600, .dark .text-gray-700 { color: #a0a0a0; }
-        .dark .bg-white { background-color: #1e1e1e; }
-        .dark .bg-gray-50, .dark .bg-gray-200 { background-color: #2a2a2a; border-color: #333333; }
-        .dark .bg-gray-300 { background-color: #a0a0a0; color: #1e1e1e; }
+        .dark h1, .dark h2, .dark h3, .dark .text-gray-800 {
+            color: #ffffff;
+        }
+        .dark p, .dark label, .dark .text-gray-600, .dark .text-gray-700 {
+            color: #a0a0a0;
+        }
+        .dark .bg-white {
+            background-color: #1e1e1e;
+        }
+        .dark .bg-gray-50, .dark .bg-gray-200 {
+            background-color: #2a2a2a;
+            border-color: #333333;
+        }
+        .dark .bg-gray-300 {
+            background-color: #a0a0a0;
+            color: #1e1e1e;
+        }
         .dark .bg-blue-600 { background-color: #2b6cb0; }
         .dark .bg-purple-600 { background-color: #6b46c1; }
         .dark .bg-green-600 { background-color: #2f855a; }
@@ -90,873 +108,1145 @@
         .dark .bg-purple-100 { background-color: #44337a; border-color: #553c9a; }
         .dark .text-purple-800 { color: #d6bcfa; }
         .dark .border-gray-200, .dark .border-gray-300 { border-color: #4a4a4a; }
-        .dark .text-gray-900 { color: #ffffff; }
+		.dark .text-gray-900 { color: #ffffff; }
+        
         .dark select, .dark input, .dark textarea, .dark li {
-            background-color: #2a2a2a;
-            font-weight: bold;
-            border-color: #4a4a4a;
-            color: #ffffff;
-        }
-        .dark option, .dark number {
-            background-color: #2a2a2a;
-            color: #ffffff;
-        }
-        .dark li {
-            background-color: #2a2a2a;
-            color: #ffffff;
-        }
-        @font-face {
-            font-family: 'RoadRage';
-            src: url('https://radian-motorsport.github.io/Endurance-Planner-Backend/RoadRage.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-        }
+		    background-color: #2a2a2a;
+		    font-weight: bold;
+		    border-color: #4a4a4a;
+		}
+		.dark option, .dark number {
+		 	background-color: #2a2a2a;
+			color: #ffffff;
+		}
+		.dark li {
+		    background-color: #2a2a2a;
+		    color: #ffffff;
+		}
+
+		
+
+
+             @font-face {
+    font-family: 'RoadRage';
+    src: url('https://radian-motorsport.github.io/Endurance-Planner-Backend/RoadRage.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
         .road-rage-font {
             font-family: 'RoadRage', sans-serif;
-        }
-        
-        .text-outline {
-            text-shadow:
-                -1px -1px 0 #000,
-                1px -1px 0 #000,
-                -1px 1px 0 #000,
-                1px 1px 0 #000;
         }
         select {
             max-width: 100%;
             box-sizing: border-box;
         }
-        /* Custom Styles for Live Planner */
-        .live-planner-controls {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .live-planner-controls label {
-            display: block;
-            font-size: 0.9em;
-            text-align: left;
-            margin-bottom: 2px;
-        }
-        .live-planner-controls div {
-            min-width: 150px;
-        }
-        .live-planner-info p { margin: 5px 0; }
-        #countdown-timer { font-size: 2em; font-weight: bold; color: rgb(255, 255, 255); }
-        .dark #countdown-timer { color: #48bb78; }
-        .dark #live-stint-table th { background-color: #333333; color: #a0a0a0; }
-        .dark #live-stint-table td { background-color: #1e1e1e; border-color: #4a4a4a; }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-8 bg-white text-black dark:bg-[#121212] dark:text-white">
+    <div class="toggle-switch-container">
+        <input type="checkbox" id="darkModeSwitch">
+        <label for="darkModeSwitch" class="toggle-label"></label>
+    </div>
 
-<div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500 space-y-6">
+    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500">
+        <div class="text-center mb-6">
+            <img src="https://github.com/Radian-Motorsport/Endurance-Planner-Backend/blob/main/g457912.png?raw=true" alt="?" class="mx-auto w-100  h-auto">
+        </div>
+        <p class="text-center text-gray-600 mb-8"></p>
 
-    
+        <div id="app-container">
+            <div class="flex justify-center space-x-4 mb-8">
+                <button id="race-details-btn" onclick="showPlannerPage()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
+                    <i class="fas fa-car-side"></i> <span>Race Details</span>
+                </button>
+                <button id="admin-btn" onclick="showAdminPage()" class="bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
+                    <i class="fas fa-user-shield"></i> <span>Admin</span>
+                </button>
+            <a href="LiveV2.html">
+            <button class="bg-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">LIVE</button>
+            </a>
+            </div>
 
-                    <div id="race-inputs-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl mb-4 text-gray-800 road-rage-font">Live Race Inputs</h3>
+            
+            <div id="planner-page" class="">
+                    <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
+                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Drivers <span class="text-sm text-gray-500"></span></h3>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <select id="driver-select" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-black">
+                            <option value="">Select a Driver...</option>
+                        </select>
+                        <button onclick="addDriver()" class="bg-purple-600 hover:bg-purple-700 font- mb-4 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <ul id="driver-list" class="space-y-2"></ul>
+                </div>
+
+                                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
+                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Track & Car</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                        <div class="flex flex-col w-full">
+                            <select id="track-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-black">
+                                <option value="">Select a Track...</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col w-full">
+                            <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-black">
+                                <option value="">Select a Car...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <button onclick="showPage2()" id="continue-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                        Calculate <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="page-2" class="space-y-6 hidden">
+                <div class="flex items-center space-x-4 mb-6">
+                    <button onclick="showPlannerPage()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                        <i class="fas fa-arrow-left mr-2"></i> Back
+                    </button>
+                </div>
+
+                <div class="p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div>
+                            <span class="text-blue-800 road-rage-font">TRACK:</span>
+                            <span id="page2-track" class="text-black"></span>
+                        </div>
+                        <div>
+                            <span class="text-blue-800 road-rage-font">CAR:</span>
+                            <span id="page2-car" class="text-black"></span>
+                        </div>
+                        <div>
+                            <span class="text-blue-800 road-rage-font">DRIVERS:</span>
+                            <span id="page2-drivers" class="text-black"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="race-inputs-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
+                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Race Inputs</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Live Race Remaining</label>
+                            <label class="text-sm font-medium text-gray-700">Race Duration</label>
                             <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="live-race-duration-hours" placeholder="Hours" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <input type="number" id="race-duration-hours" placeholder="Hours" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <span class="text-gray-600">h</span>
-                                <input type="number" id="live-race-duration-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <input type="number" id="race-duration-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <span class="text-gray-600">m</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Live Avg. Lap Time</label>
+                            <label class="text-sm font-medium text-gray-700">Avg. Lap Time</label>
                             <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="live-avg-lap-time-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <input type="number" id="avg-lap-time-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <span class="text-gray-600">min</span>
-                                <input type="number" id="live-avg-lap-time-seconds" placeholder="Seconds" class="p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <input type="number" id="avg-lap-time-seconds" placeholder="Seconds" class="p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <span class="text-gray-600">sec</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label for="live-fuel-per-lap-display-input" class="text-sm font-medium text-gray-700">Live Fuel Use per Lap (L)</label>
-                            <input type="number" id="live-fuel-per-lap-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <label for="pit-stop-time" class="text-sm font-medium text-gray-700">Avg. Pit Stop Time (sec)</label>
+                            <input type="number" id="pit-stop-time" value="30" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                         <div class="flex flex-col">
-                            <label for="live-tank-capacity-display-input" class="text-sm font-medium text-gray-700">Live Fuel Tank Size (L)</label>
-                            <input type="number" id="live-tank-capacity-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <label for="fuel-per-lap-display-input" class="text-sm font-medium text-gray-700">Fuel Use per Lap (L)</label>
+                            <input type="number" id="fuel-per-lap-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                         <div class="flex flex-col">
-                            <label for="live-pit-stop-time" class="text-sm font-medium text-gray-700 dark:text-gray-200">Standard Pit Stop Time (seconds)</label>
-                            <input type="number" id="live-pit-stop-time" value="30" min="0" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 mb-6">
+                            <label for="tank-capacity-display-input" class="text-sm font-medium text-gray-700">Fuel Tank Size (L)</label>
+                            <input type="number" id="tank-capacity-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                         <div class="mt-4 flex justify-end">
-                            <button id="calculate-page3-button" onclick="handleRecalculation()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mb-6">
+                            <button id="calculate-page2-button" onclick="calculateAndShowPage2()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
                                 Calculate
                             </button>
                         </div>
                     </div>
                 </div>
 
-    <div class="p-6 bg-gray-100 border border-gray-200 rounded-lg mb-6">
-        <h3 class="text-xl mb-4 text-gray-800 road-rage-font"></h3>
-        <div class="live-planner-controls">
-            <button id="live-start-stop-button" onclick="toggleRace()" class="flex-1 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">Start Race</button>
-            <button id="live-pit-exit-button" onclick="simulatePitExit()" class="flex-1 bg-orange-500 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105" disabled>Pit Exit</button>
-        </div>
-    </div>
 
-    <div id="live-overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg mb-6">
-    <h3 class="text-xl font- mb-4 text-blue-800 road-rage-font mb-8">Live Overall Strategy Summary</h3>
-    <div class="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-4 text-blue-800">
-        <div>
-            <div class="flex flex-col items-center">
-                <i class="fa-solid fa-flag-checkered fa-2xl text-blue-800 mb-4"></i>
-                <span id="live-est-laps-display" class="font-semibold text-lg text-blue-800"></span>
-                <span class="text-sm mb-4">Est. Laps</span>
-            </div>
-        </div>
-        <div>
-            <div class="flex flex-col items-center">
-                <i class="fa-solid fa-hourglass-half fa-2xl text-blue-800 mb-4"></i>
-                <span id="live-stint-duration-display" class="font-semibold text-lg text-blue-800"></span>
-                <span class="text-sm mb-4">Stint Duration</span>
-            </div>
-        </div>
-        <div>
-            <div class="flex flex-col items-center">
-                <i class="fa-solid fa-flag fa-2xl text-blue-800 mb-4"></i>
-                <span id="live-laps-per-stint-display" class="font-semibold text-lg text-blue-800"></span>
-                <span class="text-sm mb-4">Laps per Stint</span>
-            </div>
-        </div>
-        <div>
-            <div class="flex flex-col items-center">
-                <i class="fa-solid fa-hand fa-2xl text-blue-800 mb-4"></i>
-                <span id="live-pit-stops-display" class="font-semibold text-lg text-blue-800"></span>
-                <span class="text-sm mb-4">Pit Stops</span>
-            </div>
-        </div>
-        <div>
-            <div class="flex flex-col items-center">
-                <i class="fa-solid fa-gas-pump fa-2xl text-blue-800 mb-4"></i>
-                <span id="live-total-fuel-display" class="font-semibold text-lg text-blue-800"></span>
-                <span class="text-sm mb-4">Total Fuel</span>
-            </div>
-        </div>
-        <div>
-            <div class="flex flex-col items-center">
-                <i class="fa-solid fa-droplet fa-2xl text-blue-800 mb-4"></i>
-                <span id="live-fuel-per-lap-display" class="font-semibold text-lg text-blue-800"></span>
-                <span class="text-sm mb-4">Fuel per Lap</span>
-            </div>
-        </div>
-        <div>
-            <div class="flex flex-col items-center">
-                <i class="fa-solid fa-stopwatch fa-2xl text-blue-800 mb-4"></i>
-                <div class="flex items-baseline space-x-1">
-                    <span id="live-lap-time-minutes-display" class="font-semibold text-lg text-blue-800">00</span>
-                    <span class="text-sm">m</span>
-                    <span id="live-lap-time-seconds-display" class="font-semibold text-lg text-blue-800">00</span>
-                    <span class="text-sm">s</span>
-                </div>
-                <span class="text-sm mt-1">Lap Time</span>
-            </div>
-        </div>
-        <div>
-            <div class="flex flex-col items-center">
-                <i class="fa-solid fa-stopwatch fa-2xl text-blue-800 mb-4"></i>
-                <span id="live-pit-stop-duration-display" class="font-semibold text-lg text-blue-800"></span>
-                <span class="text-sm mb-4">Pit Stop Duration</span>
-            </div>
-        </div>
-    </div>
-</div>
-    
 
-    <div id="live-sliders-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg mb-6">
-    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Live Dynamic Adjustments</h3>
-    
-    <div class="flex flex-col space-y-4">
-        
-        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-            <div class="flex-grow w-full">
-                <label for="fuel-slider" class="text-sm font-medium text-gray-700">Adjust Fuel per Lap</label>
-                <div class="flex items-center mt-1 space-x-2">
-                    <button class="adjust-button text-gray-500 hover:text-gray-900" data-target="fuel-slider" data-step="-0.05">
-                        <i class="fa-solid fa-minus"></i>
-                    </button>
-                    <input type="range" id="fuel-slider" min="-2.0" max="2.0" value="0.0" step="0.05" class="w-full">
-                    <button class="adjust-button text-gray-500 hover:text-gray-900" data-target="fuel-slider" data-step="0.05">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-                    <span id="live-fuel-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.0</span>
-                </div>
-            </div>
-            
-            <div class="flex-grow w-full">
-                <label for="live-lap-time-adjustment-slider" class="text-sm font-medium text-gray-700">Adjust Lap Time</label>
-                <div class="flex items-center mt-1 space-x-2">
-                    <button class="adjust-button text-gray-500 hover:text-gray-900" data-target="live-lap-time-adjustment-slider" data-step="-0.1">
-                        <i class="fa-solid fa-minus"></i>
-                    </button>
-                    <input type="range" id="live-lap-time-adjustment-slider" min="-5" max="5" value="0.0" step="0.1" class="w-full">
-                    <button class="adjust-button text-gray-500 hover:text-gray-900" data-target="live-lap-time-adjustment-slider" data-step="0.1">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-                    <span id="live-lap-time-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.0</span>
-                </div>
-            </div>
-        </div>
 
-        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-            <div class="flex-grow w-full">
-                <label class="text-sm font-medium text-gray-700">Pit Stop Time</label>
-                <div class="flex items-center mt-1 space-x-2">
-                    <input type="number" id="live-pit-stop-time-minutes" placeholder="Minutes" value="0" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                    <span class="text-gray-600">min</span>
-                    <input type="number" id="live-pit-stop-time-seconds" placeholder="Seconds" value="30" class="p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                    <span class="text-gray-600">sec</span>
-                </div>
-            </div>
-
-            <div class="flex-grow w-full">
-                <label class="text-sm font-medium text-gray-700">Repair Time</label>
-                <div class="flex flex-col space-y-2 mt-1">
-                    <div class="flex items-center space-x-2">
-                        <input type="number" id="live-extra-pit-time-minutes" placeholder="Minutes" value="0" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                        <span class="text-gray-600">min</span>
-                        <input type="number" id="live-extra-pit-time-seconds" placeholder="Seconds" value="0" class="p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                        <span class="text-gray-600">sec</span>
+                
+                <div id="overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg hidden">
+                    <h3 class="text-xl text-blue-800 road-rage-font mb-8">Overall Strategy Summary</h3>
+                    <div class="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-4 text-blue-800">
+                        <div>
+                            <div class="flex flex-col items-center">
+                                <i class="fa-solid fa-flag-checkered fa-2xl text-blue-800 mb-4"></i>
+                                <span id="est-laps-display" class="font-semibold text-lg text-blue-800"></span>
+                                <span class="text-sm mb-4">Est. Laps</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex flex-col items-center">
+                                <i class="fa-solid fa-hourglass-half fa-2xl text-blue-800 mb-4"></i>
+                                <span id="stint-duration-display" class="font-semibold text-lg text-blue-800"></span>
+                                <span class="text-sm mb-4">Stint Duration</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex flex-col items-center">
+                                <i class="fa-solid fa-flag fa-2xl text-blue-800 mb-4"></i>
+                                <span id="laps-per-stint-display" class="font-semibold text-lg text-blue-800"></span>
+                                <span class="text-sm mb-4">Laps per Stint</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex flex-col items-center">
+                                <i class="fa-solid fa-hand fa-2xl text-blue-800 mb-4"></i>
+                                <span id="pit-stops-display" class="font-semibold text-lg text-blue-800"></span>
+                                <span class="text-sm mb-4">Pit Stops</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex flex-col items-center">
+                                <i class="fa-solid fa-gas-pump fa-2xl text-blue-800 mb-4"></i>
+                                <span id="total-fuel-display" class="font-semibold text-lg text-blue-800"></span>
+                                <span class="text-sm mb-4">Total Fuel</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex flex-col items-center">
+                                <i class="fa-solid fa-droplet fa-2xl text-blue-800 mb-4"></i>
+                                <span id="fuel-per-lap-display" class="font-semibold text-lg text-blue-800"></span>
+                                <span class="text-sm mb-4">Fuel per Lap</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex flex-col items-center">
+                                <i class="fa-solid fa-stopwatch fa-2xl text-blue-800 mb-4"></i>
+                                <span id="lap-time-display" class="font-semibold text-lg text-blue-800"></span>
+                                <span class="text-sm mt-1">Lap Time</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex flex-col items-center">
+                                <i class="fa-solid fa-stopwatch fa-2xl text-blue-800 mb-4"></i>
+                                <span id="pit-stop-duration-display" class="font-semibold text-lg text-blue-800"></span>
+                                <span class="text-sm mb-4">Pit Stop Duration</span>
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                <div id="sliders-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg !mb-6 hidden">
+                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Dynamic Adjustments</h3>
+                        <div class="flex-grow w-full">
+                            <label for="fuel-slider" class="text-sm font-medium text-gray-700">Adjust Fuel per Lap</label>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <button onclick="adjustSlider('fuel', -0.05)" class="p-1 rounded-full text-white bg-gray-400 hover:bg-gray-500 transition-colors duration-200">-</button>
+                                <input type="range" id="fuel-slider" min="-2.0" max="2.0" value="0" step="0.05" class="w-full">
+                                <button onclick="adjustSlider('fuel', 0.05)" class="p-1 rounded-full text-white bg-gray-400 hover:bg-gray-500 transition-colors duration-200">+</button>
+                                <span id="fuel-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.00</span>
+                            </div>
+                        </div>
+                        <div class="flex-grow w-full">
+                            <label for="lap-time-slider" class="text-sm font-medium text-gray-700">Adjust Lap Time</label>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <button onclick="adjustSlider('lapTime', -0.05)" class="p-1 rounded-full text-white bg-gray-400 hover:bg-gray-500 transition-colors duration-200">-</button>
+                                <input type="range" id="lap-time-slider" min="-3" max="3" value="0" step="0.05" class="w-full">
+                                <button onclick="adjustSlider('lapTime', 0.05)" class="p-1 rounded-full text-white bg-gray-400 hover:bg-gray-500 transition-colors duration-200">+</button>
+                                <span id="lap-time-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                  
+                <div id="stint-breakdown-display" class="p-6 bg-gray-50 border border-gray-200 rounded-lg overflow-x-auto hidden">
                     
-                </div>
-            </div>
-        
-        </div>
-        <div class="flex space-x-2 mt-2">
-            <button id="repair-complete-button" class="p-2 flex-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 text-xs">Repair Complete (Pitstop Over)</button>            
-            <button id="add-repair-time-button" class="p-2 flex-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-200 text-xs">Add Repair Time</button>
-                        
-        </div>
-    </div>
-</div>
-   
-   
-            <div id="timers" class="hidden">
-                    <div>
-                    <p class="flex justify-between items-center bg-gray-200 text-black py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6">
-                        <span>TIME REMAINING</span>
-                        <span id="countdown-timer" class="absolute left-1/2 -translate-x-1/2 !text-4xl !text-green-600">00:00:00</span>
-                    </p>
-                    <p class="flex justify-between items-center bg-gray-200 text-black text-sm py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6">
-                        <span>NEXT STOP</span>
-                        <span id="next-pitstop-time" class="absolute left-1/2 -translate-x-1/2 text-xl !text-orange-500">00:00:00</span>
-                    </p>
-                    <p id="in-pit-display" class="flex justify-between items-center bg-orange-500 text-black text-sm py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6 hidden">
-                        <span class="flex-grow text-center text-xl !text-white">IN PIT</span>
-                        <h2 id="pit-timer-countdown" class="hidden text-3xl font-bold text-center text-bg-orange-500"></h2>
-                    </p>
-                    <div id="pit-exit-banner" class="hidden text-2xl font-bold text-center bg-green-600 text-white p-4 rounded-lg z-50 shadow-lg">PIT EXIT</div>
-                </div>                    
-
-            </div> 
-
-            <div class="flex flex-col items-center mt-4 text-sm font-semibold text-gray-800">
-                    <div>
-                        Current Stint: <span id="current-stint-display">1</span>
-                    </div>
-                    <div>
-                        Active Pit Stop: <span id="current-pit-display">0</span>
-                    </div>
-                </div>
-                <div id="live-table" class="hidden">     
-                    <table id="live-stint-table" class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg mt-6">
+                            <div class="flex flex-col mb-4">
+                            <label class="text-sm font-medium text-gray-700">Race Start (UTC) & Qualifying</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-gray-700 font-bold">+</span>
+                                <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-sm font-medium text-gray-700">min (Qualifying)</span>
+                            </div>
+                            <div class="mt-4">
+                                <label for="timezone-select" class="text-sm font-medium text-gray-700">Display Time Zone</label>
+                                <select id="timezone-select" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-black">
+                                    <option value="UTC">UTC</option>
+                                    <option value="US/Samoa">SST (GMT-11)</option>
+                                    <option value="America/Adak">HAST (GMT-10)</option>
+                                    <option value="America/Los_Angeles">PST (GMT-8)</option>
+                                    <option value="America/Denver">MST (GMT-7)</option>
+                                    <option value="America/Chicago">CST (GMT-6)</option>
+                                    <option value="America/New_York">EST (GMT-5)</option>
+                                    <option value="America/Halifax">AST (GMT-4)</option>
+                                    <option value="America/Sao_Paulo">BRT (GMT-3)</option>
+                                    <option value="Atlantic/Azores">AZOT (GMT-1)</option>
+                                    <option value="Europe/London" selected>GMT</option>
+                                    <option value="Europe/Paris">CET (GMT+1)</option>
+                                    <option value="Europe/Athens">EET (GMT+2)</option>
+                                    <option value="Asia/Riyadh">AST (GMT+3)</option>
+                                    <option value="Asia/Dubai">GST (GMT+4)</option>
+                                    <option value="Asia/Karachi">PKT (GMT+5)</option>
+                                    <option value="Asia/Kolkata">IST (GMT+5:30)</option>
+                                    <option value="Asia/Bangkok">ICT (GMT+7)</option>
+                                    <option value="Asia/Shanghai">CST (GMT+8)</option>
+                                    <option value="Asia/Tokyo">JST (GMT+9)</option>
+                                    <option value="Australia/Sydney">AEST (GMT+10)</option>
+                                    <option value="Pacific/Auckland">NZST (GMT+12)</option>
+                                </select>
+                            </div>
+                                    <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="calculateAndShowPage2()">Update</button>
+                        </div>
+                    
+                    <table class= "min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg">
                         <thead class="bg-gray-200">
                             <tr>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Stint</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Time</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Time</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Stint Duration</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Stint Laps</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Fuel Per Stint (L)</th>
+                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Time</th>
+                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Time</th>
+                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Lap</th>
+                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Lap</th>
+                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Laps per Stint</th>
+								<th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Driver</th>
+								<th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Backup</th>
                             </tr>
                         </thead>
-                        <tbody id="live-stint-table-body" class="bg-white divide-y divide-gray-200">
+                        <tbody id="stint-table-body" class="bg-white divide-y divide-gray-200">
                         </tbody>
                     </table>
-                </div> 
-                  
-</div>
-<script>
-    
-// Global variables to manage the race state
-let liveTimerInterval = null;
-let liveRaceRemainingSeconds = 0;
-let liveStintStartTimestamp = 0;
-let liveStintDurationSeconds = 0;
-let isRaceRunning = false;
-let completedStints = [];
-let stintNumber = 1;
-let pitStopTime = 0;
-let isPitting = false;
-let currentStintActive = 1;
-let currentPitActive = 0; 
-let livePitRemainingSeconds = 0;
+                </div>
 
+                <div id="share-link-container" class="p-6 bg-purple-100 border border-purple-200 rounded-lg hidden">
+                    <h3 class="text-xl font- mb-4 text-purple-800 road-rage-font">Share/Save This Strategy</h3>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="generateShareLink()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-share-alt mr-2"></i> Generate Link
+                        </button>
+                        <input type="text" id="share-link-output" readonly class="flex-grow w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-copy" placeholder="Click 'Generate Link' to create a shareable URL">
+                        <button onclick="copyShareLink()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                         </div>
+                        </div>
+                    </div>
+                <div id="page-3" class="hidden space-y-6">
+                        <div class="flex items-center space-x-4 mb-6">
+                            <button onclick="showPage2()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                                <i class="fas fa-arrow-left mr-2"></i> Back
+                            </button>
+                        </div>
+                       
+                    </div> 
 
-// This function formats time from seconds into HH:MM:SS format
-function formatTime(totalSeconds) {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = Math.floor(totalSeconds % 60);
-    const pad = (num) => String(num).padStart(2, '0');
-    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-}
+            <div id="admin-page" class="hidden">
+                <button onclick="saveDataToServer()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                    Save All Changes
+                </button>
 
-// This function formats time from seconds into separate minutes and seconds, including decimals
-function formatLapTime(totalSeconds) {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = (totalSeconds % 60).toFixed(1); // Keep one decimal place
-    
-    const paddedMinutes = String(minutes).padStart(2, '0');
-    const paddedSeconds = String(seconds).padStart(2, '0');
+                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
+                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Manage Drivers</h3>
+                    <div class="space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
+                            <div class="flex-grow">
+                                <input type="text" id="new-driver-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="new-driver-number" class="text-sm font-medium text-gray-700">Driver Number</label>
+                                <input type="number" id="new-driver-number" class="mt-1 p-3 border border-gray-300 rounded-lg w-28 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <button id="add-driver-btn" onclick="addDriverAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                                Add Driver
+                            </button>
+                        </div>
+                        <ul id="admin-driver-list" class="space-y-2 mt-4"></ul>
+                    </div>
+                </div>
 
-    return {
-        minutes: paddedMinutes,
-        seconds: paddedSeconds
-    };
-}
-
-// This function starts the race timer
-function startRace() {
-    const hours = parseInt(document.getElementById('live-race-duration-hours').value) || 0;
-    const minutes = parseInt(document.getElementById('live-race-duration-minutes').value) || 0;
-    
-    liveRaceRemainingSeconds = (hours * 3600) + (minutes * 60);
-    
-    if (liveRaceRemainingSeconds <= 0) {
-        console.error("Please enter a valid race duration.");
-        return;
-    }
-
-    clearInterval(liveTimerInterval);
-    liveStintStartTimestamp = Date.now();
-    isRaceRunning = true;
-    isPitting = false;
-    
-    completedStints = [];
-    stintNumber = 1;
-    currentStintActive = 1;
-    currentPitActive = 0;
-    livePitRemainingSeconds = 0;
-
-    updateStatusDisplays(); 
-    
-    calculateStintDuration();
-    populateStintTableFromLiveInputs(liveRaceRemainingSeconds);
-
-    liveTimerInterval = setInterval(updateTimer, 1000);
-    
-    const startStopButton = document.getElementById('live-start-stop-button');
-    startStopButton.textContent = 'Stop Race';
-    startStopButton.classList.add('bg-red-600', 'hover:bg-red-700');
-    startStopButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-    
-    // The button is now always enabled, as requested
-    document.getElementById('live-pit-exit-button').disabled = false;
-    document.getElementById('race-inputs-container').classList.add('hidden');
-    document.getElementById('in-pit-display').classList.add('hidden');
-    document.getElementById('live-sliders-container').classList.remove('hidden');
-    document.getElementById('timers').classList.remove('hidden');
-
-    const pitTimerElement = document.getElementById('pit-timer-countdown');
-    if (pitTimerElement) {
-        pitTimerElement.classList.add('hidden');
-    }
-}
-
-// This function stops the race timer
-function stopRace() {
-    clearInterval(liveTimerInterval);
-    isRaceRunning = false;
-    isPitting = false;
-    const startStopButton = document.getElementById('live-start-stop-button');
-    startStopButton.textContent = 'Start Race';
-    startStopButton.classList.remove('bg-red-600', 'hover:bg-red-700');
-    startStopButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
-    
-    document.getElementById('live-pit-exit-button').disabled = true;
-    document.getElementById('race-inputs-container').classList.remove('hidden');
-    document.getElementById('in-pit-display').classList.add('hidden');
-    document.getElementById('live-sliders-container').classList.add('hidden');
-    document.getElementById('timers').classList.add('hidden');     
-
-    const pitTimerElement = document.getElementById('pit-timer-countdown');
-    if (pitTimerElement) {
-        pitTimerElement.classList.add('hidden');
-    }
-}
-
-// This function toggles between starting and stopping the race
-function toggleRace() {
-    const startStopButton = document.getElementById('live-start-stop-button');
-    if (startStopButton.textContent === 'Start Race') {
-        startRace();
-    } else {
-        stopRace();
-    }
-}
-
-// This function recalculates the stint duration based on inputs and sliders
-function calculateStintDuration() {
-    const fuelTankSize = parseFloat(document.getElementById('live-tank-capacity-display-input').value) || 0;
-    let fuelUsePerLap = parseFloat(document.getElementById('live-fuel-per-lap-display-input').value) || 0;
-    const avgLapTimeMinutes = parseInt(document.getElementById('live-avg-lap-time-minutes').value) || 0;
-    const avgLapTimeSeconds = parseFloat(document.getElementById('live-avg-lap-time-seconds').value) || 0;
-
-    const fuelSliderAdjustment = parseFloat(document.getElementById('fuel-slider').value) || 0;
-    fuelUsePerLap += fuelSliderAdjustment;
-    const lapTimeSliderAdjustment = parseFloat(document.getElementById('live-lap-time-adjustment-slider').value) || 0;
-    const avgLapTimeInSeconds = ((avgLapTimeMinutes * 60) + avgLapTimeSeconds) + lapTimeSliderAdjustment;
-
-    const pitStopMinutes = parseInt(document.getElementById('live-pit-stop-time-minutes').value) || 0;
-    const pitStopSeconds = parseInt(document.getElementById('live-pit-stop-time-seconds').value) || 0;
-    const extraPitMinutes = parseInt(document.getElementById('live-extra-pit-time-minutes').value) || 0;
-    const extraPitSeconds = parseInt(document.getElementById('live-extra-pit-time-seconds').value) || 0;
-    pitStopTime = (pitStopMinutes * 60) + pitStopSeconds + (extraPitMinutes * 60) + extraPitSeconds;
-
-    if (fuelTankSize > 0 && fuelUsePerLap > 0 && avgLapTimeInSeconds > 0) {
-        const lapsPerStint = Math.floor(fuelTankSize / fuelUsePerLap);
-        liveStintDurationSeconds = lapsPerStint * avgLapTimeInSeconds;
-    } else {
-        liveStintDurationSeconds = 0;
-    }
-}
-
-// NEW: This is the automatic pit entry function (can also be used for a "Pit Now" button)
-function simulateAutomaticPitEntry() {
-    // Record the completed stint
-    const currentStintDuration = Math.floor((Date.now() - liveStintStartTimestamp) / 1000);
-    const avgLapTimeInSeconds = (parseInt(document.getElementById('live-avg-lap-time-minutes').value) * 60) + (parseFloat(document.getElementById('live-avg-lap-time-seconds').value));
-    const currentStintLaps = avgLapTimeInSeconds > 0 ? Math.floor(currentStintDuration / avgLapTimeInSeconds) : 0;
-    const fuelUsePerLap = parseFloat(document.getElementById('live-fuel-per-lap-display-input').value) || 0;
-    const currentStintFuel = currentStintLaps * fuelUsePerLap;
-
-    completedStints.push({
-        stintNumber: stintNumber,
-        stintDuration: currentStintDuration,
-        stintLaps: currentStintLaps,
-        stintFuel: currentStintFuel
-    });
-
-    stintNumber++;
-    currentStintActive++;
-    
-    // Start the pit cycle
-    isPitting = true;
-    currentPitActive++; // Correctly increments the pit counter
-    livePitRemainingSeconds = pitStopTime;
-    
-    updateStatusDisplays();
-
-    document.getElementById('in-pit-display').classList.remove('hidden');
-    const pitTimerElement = document.getElementById('pit-timer-countdown');
-    if (pitTimerElement) {
-        pitTimerElement.classList.remove('hidden');
-    }
-    
-    // Recalculate and re-render the table
-    populateStintTableFromLiveInputs(liveRaceRemainingSeconds);
-}
-
-
-// NEW: This is the manual pit exit button function for unplanned stops
-function simulatePitExit() {
-    if (!isRaceRunning) return;
-
-    // Record the unplanned pit stop and recalculate the race
-    const currentStintDuration = Math.floor((Date.now() - liveStintStartTimestamp) / 1000);
-    const avgLapTimeInSeconds = (parseInt(document.getElementById('live-avg-lap-time-minutes').value) * 60) + (parseFloat(document.getElementById('live-avg-lap-time-seconds').value));
-    const currentStintLaps = avgLapTimeInSeconds > 0 ? Math.floor(currentStintDuration / avgLapTimeInSeconds) : 0;
-    const fuelUsePerLap = parseFloat(document.getElementById('live-fuel-per-lap-display-input').value) || 0;
-    const currentStintFuel = currentStintLaps * fuelUsePerLap;
-
-    completedStints.push({
-        stintNumber: stintNumber,
-        stintDuration: currentStintDuration,
-        stintLaps: currentStintLaps,
-        stintFuel: currentStintFuel
-    });
-    stintNumber++;
-    currentStintActive++;
-    currentPitActive++;
-    
-    // A manual pit stop means the on-track stint starts NOW
-    isPitting = false;
-    
-    // Show the new pit exit banner for 10 seconds
-    const pitExitBanner = document.getElementById('pit-exit-banner');
-    if (pitExitBanner) {
-        pitExitBanner.classList.remove('hidden');
-        setTimeout(() => {
-            pitExitBanner.classList.add('hidden');
-        }, 10000); // 10000 milliseconds = 10 seconds
-    }
-
-    // This line was removed: currentPitActive = 0;
-    liveStintStartTimestamp = Date.now();
-    
-    document.getElementById('in-pit-display').classList.add('hidden');
-    const pitTimerElement = document.getElementById('pit-timer-countdown');
-    if (pitTimerElement) {
-        pitTimerElement.classList.add('hidden');
-    }
-    
-    // Reset the repair time inputs when the pit stop ends
-    document.getElementById('live-extra-pit-time-minutes').value = 0;
-    document.getElementById('live-extra-pit-time-seconds').value = 0;
-    
-    // IMPORTANT: We now recalculate the entire plan based on the NEW remaining race time.
-    populateStintTableFromLiveInputs(liveRaceRemainingSeconds);
-    updateStatusDisplays();
-}
-
-
-// The core timer function
-function updateTimer() {
-    const now = Date.now();
-    
-    // The main race clock always runs
-    liveRaceRemainingSeconds = Math.max(0, liveRaceRemainingSeconds - 1);
-    document.getElementById('countdown-timer').textContent = formatTime(liveRaceRemainingSeconds);
-
-    if (isPitting) {
-        // Pit countdown logic for the automatic cycle
-        livePitRemainingSeconds = Math.max(0, livePitRemainingSeconds - 1);
-        const pitTimerElement = document.getElementById('pit-timer-countdown');
-        if (pitTimerElement) {
-            pitTimerElement.textContent = formatTime(livePitRemainingSeconds);
-        }
-
-        if (livePitRemainingSeconds <= 0) {
-            // Pit countdown is over, automatically start the next stint
-            isPitting = false;
-            document.getElementById('in-pit-display').classList.add('hidden');
-            if (pitTimerElement) {
-                pitTimerElement.classList.add('hidden');
-            }
-            liveStintStartTimestamp = Date.now();
-            populateStintTableFromLiveInputs(liveRaceRemainingSeconds);
-
-            // Reset the repair time inputs when the pit stop ends
-            document.getElementById('live-extra-pit-time-minutes').value = 0;
-            document.getElementById('live-extra-pit-time-seconds').value = 0;
-        }
-    } else {
-        // On-track stint countdown logic
-        const elapsed = Math.floor((now - liveStintStartTimestamp) / 1000);
-        const stintTimeRemaining = Math.max(0, liveStintDurationSeconds - elapsed);
-        document.getElementById('next-pitstop-time').textContent = formatTime(stintTimeRemaining);
-        
-        // Automatic pit trigger
-        if (stintTimeRemaining <= 0 && liveRaceRemainingSeconds > 0) {
-            simulateAutomaticPitEntry();
-        }
-    }
-    
-    if (liveRaceRemainingSeconds <= 0) {
-        clearInterval(liveTimerInterval);
-        document.getElementById('countdown-timer').textContent = "Race Finished!";
-        document.getElementById('live-pit-exit-button').disabled = true;
-        document.getElementById('race-inputs-container').classList.remove('hidden');
-        document.getElementById('in-pit-display').classList.add('hidden');
-        const pitTimerElement = document.getElementById('pit-timer-countdown');
-        if (pitTimerElement) {
-            pitTimerElement.classList.add('hidden');
-        }
-    }
-}
-
-// This function is the "brain" of the live planner, now with persistent stints.
-function populateStintTableFromLiveInputs(raceDurationInSeconds) {
-    const avgLapTimeMinutes = parseInt(document.getElementById('live-avg-lap-time-minutes').value) || 0;
-    const avgLapTimeSeconds = parseFloat(document.getElementById('live-avg-lap-time-seconds').value) || 0;
-    // Removed the incorrect pit stop time calculation here.
-    let fuelUsePerLap = parseFloat(document.getElementById('live-fuel-per-lap-display-input').value) || 0;
-    const fuelTankSize = parseFloat(document.getElementById('live-tank-capacity-display-input').value) || 0;
-
-    const fuelSliderAdjustment = parseFloat(document.getElementById('fuel-slider').value) || 0;
-    fuelUsePerLap += fuelSliderAdjustment;
-
-    const lapTimeSliderAdjustment = parseFloat(document.getElementById('live-lap-time-adjustment-slider').value) || 0;
-    const avgLapTimeInSeconds = ((avgLapTimeMinutes * 60) + avgLapTimeSeconds) + lapTimeSliderAdjustment;
-
-    if (raceDurationInSeconds <= 0 || avgLapTimeInSeconds <= 0 || fuelUsePerLap <= 0 || fuelTankSize <= 0) {
-        document.getElementById('live-overall-summary').classList.add('hidden');
-        document.getElementById('live-table').classList.add('hidden');
-        document.getElementById('live-sliders-container').classList.add('hidden');
-        document.getElementById('live-stint-table-body').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">Please enter valid positive values for all race inputs.</td></tr>';
-        return;
-    }
-
-    const lapsPerStint = Math.floor(fuelTankSize / fuelUsePerLap);
-    const stintDurationSeconds = lapsPerStint * avgLapTimeInSeconds;
-    const totalLaps = Math.floor(raceDurationInSeconds / avgLapTimeInSeconds);
-    const totalStints = Math.ceil(raceDurationInSeconds / (stintDurationSeconds + pitStopTime));
-    
-    if (totalStints <= 0) {
-        document.getElementById('live-stint-table-body').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">No stints to display. Please adjust inputs.</td></tr>';
-        document.getElementById('live-overall-summary').classList.add('hidden');
-        document.getElementById('live-table').classList.add('hidden');
-        document.getElementById('live-sliders-container').classList.add('hidden');
-        return;
-    }
-
-    document.getElementById('live-est-laps-display').textContent = totalLaps;
-    document.getElementById('live-stint-duration-display').textContent = formatTime(stintDurationSeconds);
-    document.getElementById('live-laps-per-stint-display').textContent = lapsPerStint;
-    document.getElementById('live-pit-stops-display').textContent = Math.max(0, totalStints - 1);
-    document.getElementById('live-total-fuel-display').textContent = (totalLaps * fuelUsePerLap).toFixed(2) + ' L';
-    document.getElementById('live-fuel-per-lap-display').textContent = fuelUsePerLap.toFixed(2) + ' L';
-    // Get the formatted minutes and seconds using the new helper function
-    const formattedLapTime = formatLapTime(avgLapTimeInSeconds);
-
-    // Update the new HTML elements with the correct values
-    document.getElementById('live-lap-time-minutes-display').textContent = formattedLapTime.minutes;
-    document.getElementById('live-lap-time-seconds-display').textContent = formattedLapTime.seconds;
-    document.getElementById('live-pit-stop-duration-display').textContent = pitStopTime + ' sec';
-    
-    const tbody = document.getElementById('live-stint-table-body');
-    tbody.innerHTML = '';
-    
-    let currentTimeSeconds = 0;
-    
-    completedStints.forEach((stint, index) => {
-        const stintStart = currentTimeSeconds;
-        const stintEnd = stintStart + stint.stintDuration;
-        const pitStart = stintEnd;
-        const pitEnd = pitStart + pitStopTime;
-        const pitNumberForTable = index + 1;
-
-        const stintRow = document.createElement('tr');
-        stintRow.innerHTML = `
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500 font-bold">${stint.stintNumber}</td>
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500">${formatTime(stintStart)}</td>
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500">${formatTime(stintEnd)}</td>
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500">${formatTime(stint.stintDuration)}</td>
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500">${stint.stintLaps}</td>
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500">${stint.stintFuel.toFixed(2)} L</td>
-        `;
-        tbody.appendChild(stintRow);
-
-        const pitRow = document.createElement('tr');
-        if (isPitting && pitNumberForTable === currentPitActive) {
-            pitRow.classList.add('bg-orange-200', 'dark:bg-orange-700');
-            pitRow.classList.remove('bg-gray-100', 'dark:bg-gray-700');
-        } else {
-            pitRow.classList.add('bg-gray-100', 'dark:bg-gray-700');
-        }
-
-        pitRow.classList.add('text-xs');
-        pitRow.innerHTML = `
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 road-rage-font text-gray-800 dark:text-white">PIT</td>
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${formatTime(pitStart)}</td>
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${formatTime(pitEnd)}</td>
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${formatTime(pitStopTime)}</td>
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">-</td>
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">-</td>
-        `;
-        tbody.appendChild(pitRow);
-
-        currentTimeSeconds = pitEnd;
-    });
-
-    const remainingStintsCount = Math.ceil(raceDurationInSeconds / (stintDurationSeconds + pitStopTime));
-    
-    for (let i = 0; i < remainingStintsCount; i++) {
-        const stintLaps = Math.min(lapsPerStint, totalLaps - (i * lapsPerStint));
-        const currentStintDuration = stintLaps * avgLapTimeInSeconds;
-        const stintFuel = stintLaps * fuelUsePerLap;
-
-        if (stintLaps <= 0) break;
-
-        const stintNumberForTable = i + completedStints.length + 1;
-        const startTimeFormatted = formatTime(currentTimeSeconds);
-        
-        currentTimeSeconds += currentStintDuration;
-        
-        const endTimeFormatted = formatTime(currentTimeSeconds);
-        
-        const stintRow = document.createElement('tr');
-        stintRow.classList.add('bg-white', 'dark:bg-gray-800');
-        
-        if (!isPitting && stintNumberForTable === currentStintActive) {
-            stintRow.classList.add('bg-yellow-100', 'dark:bg-yellow-800');
-        }
-        
-        stintRow.innerHTML = `
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500 font-bold">${stintNumberForTable}</td>
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500">${startTimeFormatted}</td>
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500">${endTimeFormatted}</td>
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500">${formatTime(currentStintDuration)}</td>
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500">${stintLaps}</td>
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500">${stintFuel.toFixed(2)} L</td>
-        `;
-        tbody.appendChild(stintRow);
-
-        if (i < remainingStintsCount - 1) {
-            const pitStartTimeFormatted = endTimeFormatted;
-            currentTimeSeconds += pitStopTime;
-            const pitEndTimeFormatted = formatTime(currentTimeSeconds);
-            
-            const pitRow = document.createElement('tr');
-            pitRow.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-sm');
-            
-            pitRow.innerHTML = `
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 road-rage-font text-gray-800 dark:text-white">PIT</td>
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${pitStartTimeFormatted}</td>
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${pitEndTimeFormatted}</td>
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${formatTime(pitStopTime)}</td>
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">-</td>
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">-</td>
-            `;
-            tbody.appendChild(pitRow);
-        }
-    }
-    
-    document.getElementById('live-overall-summary').classList.remove('hidden');
-    document.getElementById('live-sliders-container').classList.remove('hidden');
-    document.getElementById('live-table').classList.remove('hidden');
-}
-
-// Function to handle all recalculations
-function handleRecalculation() {
-    calculateStintDuration();
-    let raceDurationForCalculation = 0;
-    if (isRaceRunning) {
-        raceDurationForCalculation = liveRaceRemainingSeconds;
-    } else {
-        const hours = parseInt(document.getElementById('live-race-duration-hours').value) || 0;
-        const minutes = parseInt(document.getElementById('live-race-duration-minutes').value) || 0;
-        raceDurationForCalculation = (hours * 3600) + (minutes * 60);
-    }
-    populateStintTableFromLiveInputs(raceDurationForCalculation);
-}
-
-// Event handlers for inputs and sliders
-function setupEventHandlers() {
-    const liveFuelSlider = document.getElementById('fuel-slider');
-    const liveFuelSliderValue = document.getElementById('live-fuel-slider-value');
-    const liveLapTimeAdjustmentSlider = document.getElementById('live-lap-time-adjustment-slider');
-    const liveLapTimeAdjustmentSliderValue = document.getElementById('live-lap-time-slider-value');
-    const addRepairTimeButton = document.getElementById('add-repair-time-button');
-    const repairCompleteButton = document.getElementById('repair-complete-button');
-
-    document.getElementById('calculate-page3-button').addEventListener('click', handleRecalculation);
-
-    const otherInputs = document.querySelectorAll('#live-avg-lap-time-minutes, #live-avg-lap-time-seconds, #live-fuel-per-lap-display-input, #live-tank-capacity-display-input, #live-pit-stop-time-minutes, #live-pit-stop-time-seconds, #live-extra-pit-time-minutes, #live-extra-pit-time-seconds');
-    otherInputs.forEach(input => {
-        input.addEventListener('input', handleRecalculation);
-    });
-
-    if (liveFuelSlider) {
-        liveFuelSlider.addEventListener('input', () => {
-            liveFuelSliderValue.textContent = parseFloat(liveFuelSlider.value).toFixed(1);
-            handleRecalculation();
-        });
-    }
-
-    if (liveLapTimeAdjustmentSlider) {
-        liveLapTimeAdjustmentSlider.addEventListener('input', () => {
-            liveLapTimeAdjustmentSliderValue.textContent = liveLapTimeAdjustmentSlider.value;
-            handleRecalculation();
-        });
-    }
-
-    if (addRepairTimeButton) {
-        addRepairTimeButton.addEventListener('click', addRepairTime);
-    }
-    
-    // New event listener for the repair complete button
-    if (repairCompleteButton) {
-        repairCompleteButton.addEventListener('click', completeRepair);
-    }
-    
-    handleRecalculation();
-}
-
-document.addEventListener('DOMContentLoaded', setupEventHandlers);
-
-// Function to end the pit stop immediately
-function completeRepair() {
-    if (isRaceRunning && isPitting) {
-        livePitRemainingSeconds = 0;
-        console.log("Repair complete. Pit stop ended manually.");
-        alert("Repair complete. Pit stop will end in less than one second.");
-        document.getElementById('in-pit-display').classList.add('hidden');
-        const pitTimerElement = document.getElementById('pit-timer-countdown');
-        if (pitTimerElement) {
-            pitTimerElement.classList.add('hidden');
-        }
-        // Reset the repair time inputs when the pit stop ends
-        document.getElementById('live-extra-pit-time-minutes').value = 0;
-        document.getElementById('live-extra-pit-time-seconds').value = 0;
-    } else {
-        alert("Cannot complete repair: The race is not running or the car is not in the pit.");
-    }
-}
-
-// Function to add repair time to the live pit countdown
-function addRepairTime() {
-    // Get the minutes and seconds from the repair time inputs
-    const extraMinutes = parseInt(document.getElementById('live-extra-pit-time-minutes').value) || 0;
-    const extraSeconds = parseInt(document.getElementById('live-extra-pit-time-seconds').value) || 0;
-    
-    const repairTimeInSeconds = (extraMinutes * 60) + extraSeconds;
-
-    // Check if a race is running and the car is currently in the pit
-    if (isRaceRunning && isPitting) {
-        livePitRemainingSeconds += repairTimeInSeconds;
-        console.log(`Added ${repairTimeInSeconds} seconds to the pit timer.`);
-        alert(`Added ${repairTimeInSeconds} seconds to the pit timer.`);
-    } else {
-        alert("Cannot add repair time: The race is not running or the car is not in the pit.");
-    }
-}
-
-// Function to update the visual displays
-function updateStatusDisplays() {
-    document.getElementById('current-stint-display').textContent = currentStintActive;
-    document.getElementById('current-pit-display').textContent = currentPitActive;
-}
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    const adjustButtons = document.querySelectorAll('.adjust-button');
-
-    adjustButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const sliderId = button.dataset.target;
-            const step = parseFloat(button.dataset.step);
-            const slider = document.getElementById(sliderId);
-
-            if (slider) {
-                let currentValue = parseFloat(slider.value);
-                let newValue = currentValue + step;
-
-                // Clamp the new value to stay within the slider's min/max range
-                newValue = Math.max(parseFloat(slider.min), Math.min(parseFloat(slider.max), newValue));
-
-                slider.value = newValue;
+                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
+                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Manage Cars</h3>
+                    <div class="space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
+                            <div class="flex-grow">
+                                <input type="text" id="new-car-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <button id="add-car-btn" onclick="addCarAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                                Add Car
+                            </button>
+                        </div>
+                        <ul id="admin-car-list" class="space-y-2 mt-4"></ul>
+                    </div>
+                </div>
                 
-                // Manually trigger an input event to update the display
-                const event = new Event('input', { bubbles: true });
-                slider.dispatchEvent(event);
-            }
-        });
-    });
-});
+                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
+                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Manage Tracks</h3>
+                    <div class="space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
+                            <div class="flex-grow">
+                                <input type="text" id="new-track-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <button id="add-track-btn" onclick="addTrackAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                                Add Track
+                            </button>
+                        </div>
+                        <ul id="admin-track-list" class="space-y-2 mt-4"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Global state
+        let drivers = [];
+        let cars = [];
+        let tracks = [];
+        let selectedDrivers = [];
+        let totalStints = 0;
+        let raceDurationSeconds = 0;
+        let lapsPerStint = 0;
+        let lapsInLastStint = 0;
 
-</script>
+        // On initial page load
+        window.onload = function() {
+            fetchDataAndPopulate();
+            // Event listeners for dynamic sliders
+            const fuelSlider = document.getElementById('fuel-slider');
+            const fuelSliderValue = document.getElementById('fuel-slider-value');
+            const lapTimeSlider = document.getElementById('lap-time-slider');
+            const lapTimeSliderValue = document.getElementById('lap-time-slider-value');
+            
+            if (fuelSlider) {
+                fuelSlider.addEventListener('input', () => {
+                    fuelSliderValue.textContent = parseFloat(fuelSlider.value).toFixed(1);
+                    calculateAndShowPage2();
+                });
+            }
+            if (lapTimeSlider) {
+                lapTimeSlider.addEventListener('input', () => {
+                    lapTimeSliderValue.textContent = lapTimeSlider.value;
+                    calculateAndShowPage2();
+                });
+            }
+        };
+
+        // Function to fetch data from the server
+        async function fetchDataAndPopulate() {
+            try {
+                // First, fetch the global data (drivers, cars, tracks)
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                drivers = data.drivers;
+                cars = data.cars;
+                tracks = data.tracks;
+                
+                // Populate the dropdowns
+                populateDrivers();
+                populateCars();
+                populateTracks();
+
+                // Now, check for a shared strategy link with an ID
+                const urlParams = new URLSearchParams(window.location.search);
+                const strategyId = urlParams.get('id');
+
+                if (strategyId) {
+                    // If an ID exists, fetch the specific strategy from the server
+                    const strategyResponse = await fetch(`/api/strategies/${strategyId}`);
+                    if (!strategyResponse.ok) {
+                        throw new Error('Failed to load shared strategy.');
+                    }
+                    const state = await strategyResponse.json();
+                    loadState(state);
+                } else {
+                    // If no ID is in the URL, show the first page as normal
+                    showPlannerPage();
+                }
+
+            } catch (error) {
+                console.error('Failed to fetch data or load strategy:', error);
+                alert('Could not load data from the server. Please check the server status.');
+            }
+        }
+
+        // Helper function to show pages
+        function showPlannerPage() {
+            document.getElementById('planner-page').classList.remove('hidden');
+            document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
+            document.getElementById('race-details-btn').classList.add('bg-blue-600', 'text-white');
+            document.getElementById('race-details-btn').classList.remove('bg-gray-300', 'text-gray-800');
+            document.getElementById('admin-btn').classList.add('bg-gray-300', 'text-gray-800');
+            document.getElementById('admin-btn').classList.remove('bg-blue-600', 'text-white');
+        }
+        function showAdminPage() {
+            document.getElementById('planner-page').classList.add('hidden');
+            document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('admin-page').classList.remove('hidden');
+            document.getElementById('admin-btn').classList.add('bg-blue-600', 'text-white');
+            document.getElementById('admin-btn').classList.remove('bg-gray-300', 'text-gray-800');
+            document.getElementById('race-details-btn').classList.add('bg-gray-300', 'text-gray-800');
+            document.getElementById('race-details-btn').classList.remove('bg-blue-600', 'text-white');
+            renderAdminLists();
+            resetDriverAdminForm();
+            resetCarAdminForm();
+            resetTrackAdminForm();
+        }
+        function showPage2() {
+                    // Comment out this block for testing:
+             //const carSelect = document.getElementById('car-select');
+             //const trackSelect = document.getElementById('track-select');
+             //if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+             //    alert("Please select at least one driver, a car, and a track before continuing.");
+             //    return;
+             //}
+            document.getElementById('planner-page').classList.add('hidden');
+            document.getElementById('page-2').classList.remove('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
+            
+            // Re-hide results sections until calculation is run on page 2
+            document.getElementById('overall-summary').classList.add('hidden');
+            document.getElementById('stint-breakdown-display').classList.add('hidden');
+            document.getElementById('sliders-container').classList.add('hidden');
+            document.getElementById('share-link-container').classList.add('hidden');
+
+            // Populate the new display elements with the selected data
+            document.getElementById('page2-track').textContent = trackSelect.value;
+            document.getElementById('page2-car').textContent = carSelect.value;
+            const driverNames = selectedDrivers.map(d => d.name).join(', ');
+            document.getElementById('page2-drivers').textContent = driverNames;
+        }
+        function showPage3() {
+            document.getElementById('planner-page').classList.add('hidden');
+            document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('page-3').classList.remove('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
+        }
+
+        // --- Core Logic ---
+
+        function calculateAndShowPage2() {
+            const raceDurationHours = parseInt(document.getElementById('race-duration-hours').value) || 0;
+            const raceDurationMinutes = parseInt(document.getElementById('race-duration-minutes').value) || 0;
+            raceDurationSeconds = (raceDurationHours * 3600) + (raceDurationMinutes * 60);
+
+            const avgLapTimeMinutes = parseInt(document.getElementById('avg-lap-time-minutes').value) || 0;
+            const avgLapTimeSeconds = parseInt(document.getElementById('avg-lap-time-seconds').value) || 0;
+            let avgLapTimeInSeconds = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+
+            let fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input').value) || 0;
+            const tankCapacity = parseInt(document.getElementById('tank-capacity-display-input').value) || 0;
+            const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
+            
+            // Check if essential fields are filled
+            if (raceDurationSeconds === 0 || avgLapTimeInSeconds === 0 || fuelPerLap <= 0 || tankCapacity <= 0) {
+                 alert("Please ensure all race inputs are filled and valid before calculating.");
+                 return;
+            }
+
+            // Apply slider adjustments
+            const fuelSliderAdjustment = parseFloat(document.getElementById('fuel-slider').value) || 0;
+            fuelPerLap += fuelSliderAdjustment;
+            
+            const lapTimeSliderAdjustment = parseInt(document.getElementById('lap-time-slider').value) || 0;
+            avgLapTimeInSeconds += lapTimeSliderAdjustment;
+
+            const lapsPerTank = Math.floor(tankCapacity / fuelPerLap);
+            const totalLaps = Math.floor(raceDurationSeconds / avgLapTimeInSeconds);
+            const stintDuration = lapsPerTank * avgLapTimeInSeconds;
+            
+            totalStints = Math.floor(totalLaps / lapsPerTank) + (totalLaps % lapsPerTank > 0 ? 1 : 0);
+            lapsPerStint = lapsPerTank;
+            lapsInLastStint = totalLaps % lapsPerStint;
+
+            document.getElementById('est-laps-display').textContent = totalLaps;
+            document.getElementById('stint-duration-display').textContent = formatDuration(stintDuration);
+            document.getElementById('laps-per-stint-display').textContent = lapsPerStint;
+            document.getElementById('pit-stops-display').textContent = totalStints - 1;
+            document.getElementById('total-fuel-display').textContent = (totalLaps * fuelPerLap).toFixed(1) + ' L';
+            document.getElementById('fuel-per-lap-display').textContent = fuelPerLap.toFixed(1) + ' L';
+            document.getElementById('lap-time-display').textContent = `${Math.floor(avgLapTimeInSeconds / 60)}:${(avgLapTimeInSeconds % 60).toFixed(0).padStart(2, '0')}`;
+            document.getElementById('pit-stop-duration-display').textContent = `${pitStopTime} sec`;
+
+            populateStintTable(avgLapTimeInSeconds);
+            
+            // Show results sections after successful calculation
+            document.getElementById('overall-summary').classList.remove('hidden');
+            document.getElementById('stint-breakdown-display').classList.remove('hidden');
+            document.getElementById('sliders-container').classList.remove('hidden');
+            document.getElementById('share-link-container').classList.remove('hidden');
+       
+            // Show the button to go to the third page after calculation
+            document.getElementById('page3-button-container').classList.remove('hidden');
+        }
+
+        
+        function formatDuration(totalSeconds) {
+            if (totalSeconds <= 0) return '0s';
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = Math.floor(totalSeconds % 60);
+            
+            const parts = [];
+            if (hours > 0) parts.push(`${hours}h`);
+            if (minutes > 0) parts.push(`${minutes}m`);
+            if (seconds > 0) parts.push(`${seconds}s`);
+            
+            return parts.length > 0 ? parts.join(' ') : '0s';
+        }
+
+        function formatTime(date) {
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // --- Populating Dropdowns and Lists ---
+
+        function populateDrivers() {
+            const select = document.getElementById('driver-select');
+            select.innerHTML = '<option value="">Select a Driver...</option>';
+            drivers.forEach(driver => {
+                const option = document.createElement('option');
+                option.value = driver.name;
+                option.textContent = `${driver.name} ${driver.drivernumber}`;
+                select.appendChild(option);
+            });
+        }
+        function populateCars() {
+            const select = document.getElementById('car-select');
+            select.innerHTML = '<option value="">Select a Car...</option>';
+            cars.forEach(car => {
+                const option = document.createElement('option');
+                option.value = car.name;
+                option.textContent = car.name;
+                select.appendChild(option);
+            });
+        }
+        function populateTracks() {
+            const select = document.getElementById('track-select');
+            select.innerHTML = '<option value="">Select a Track...</option>';
+            tracks.forEach(track => {
+                const option = document.createElement('option');
+                option.value = track.name;
+                option.textContent = track.name;
+                select.appendChild(option);
+            });
+        }
+        function addDriver() {
+            const select = document.getElementById('driver-select');
+            const driverName = select.value;
+            if (driverName && selectedDrivers.length < 6) {
+                const driver = drivers.find(d => d.name === driverName);
+                if (driver && !selectedDrivers.includes(driver)) {
+                    selectedDrivers.push(driver);
+                    renderDriverList();
+                    select.value = '';
+                }
+            }
+        }
+        function removeDriver(name) {
+            selectedDrivers = selectedDrivers.filter(driver => driver.name !== name);
+            renderDriverList();
+        }
+        function renderDriverList() {
+            const list = document.getElementById('driver-list');
+            list.innerHTML = '';
+            selectedDrivers.forEach(driver => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.innerHTML = `<span>${driver.name}</span> <button onclick="removeDriver('${driver.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>`;
+                list.appendChild(li);
+            });
+        }
+        function populateStintTable(avgLapTimeInSeconds) {
+				    const tbody = document.getElementById('stint-table-body');
+				    tbody.innerHTML = '';
+				    
+				    const raceStartTimeInput = document.getElementById('race-start-time-page2').value;
+				    const qualifyingMinutesInput = parseInt(document.getElementById('qualifying-minutes-page2').value) || 0;
+				    const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
+				    const selectedTimeZone = document.getElementById('timezone-select').value; // Get the selected time zone
+				    
+				    const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
+				    
+				    const raceDate = new Date();
+				    // Set the race start time in UTC
+				    raceDate.setUTCHours(hours, minutes, 0, 0); 
+				    
+				    let currentTime = new Date(raceDate.getTime());
+				    
+				    currentTime.setMinutes(currentTime.getMinutes() + qualifyingMinutesInput);
+				    
+				    let currentLap = 1;
+				    let driverIndex = 0;
+				    
+				    for (let i = 0; i < totalStints; i++) {
+				        const stintLaps = (i === totalStints - 1) && (lapsInLastStint !== 0) ? lapsInLastStint : lapsPerStint;
+				        if (stintLaps <= 0) break;
+				    
+				        // Format the start time for the selected timezone
+				        const startTimeString = formatTimeWithTimezone(currentTime, selectedTimeZone);
+				        
+				        const stintDurationSeconds = stintLaps * avgLapTimeInSeconds;
+				        currentTime.setSeconds(currentTime.getSeconds() + stintDurationSeconds);
+				    
+				        // Format the end time for the selected timezone
+				        const endTimeString = formatTimeWithTimezone(currentTime, selectedTimeZone);
+				    
+				        const startLap = currentLap;
+				        const endLap = startLap + stintLaps - 1;
+				        
+				        const tr = document.createElement('tr');
+				        tr.innerHTML = `
+				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${startTimeString}</td>
+				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${endTimeString}</td>
+				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${startLap}</td>
+				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${endLap}</td>
+				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${stintLaps}</td>
+				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">
+				                <select id="stint-driver-${i}" class="w-auto bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-3 rounded-md border border-gray-300 dark:border-gray-500"></select>
+				            </td>
+				            <td class="px-1 py-4 text-center text-sm text-gray-500">
+				                <select id="stint-backup-driver-${i}" class="w-auto bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-3 rounded-md border border-gray-300 dark:border-gray-500"></select>
+				            </td>
+				        `;
+				        tbody.appendChild(tr);
+				    
+				        populateStintDrivers(i, selectedDrivers);
+				    
+				        currentLap = endLap + 1;
+				        driverIndex = (driverIndex + 1) % selectedDrivers.length;
+				        
+				        if (i < totalStints - 1) {
+				            currentTime.setSeconds(currentTime.getSeconds() + pitStopTime);
+				        }
+				    }
+				}
+        
+        async function generateShareLink() {
+		    const state = {
+		        drivers: selectedDrivers.map(d => d.name),
+		        car: document.getElementById('car-select').value,
+		        track: document.getElementById('track-select').value,
+		        raceDurationHours: document.getElementById('race-duration-hours').value,
+		        raceDurationMinutes: document.getElementById('race-duration-minutes').value,
+		        avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes').value,
+		        avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds').value,
+		        pitStopTime: document.getElementById('pit-stop-time').value,
+		        fuelPerLapInput: document.getElementById('fuel-per-lap-display-input').value,
+		        tankCapacityInput: document.getElementById('tank-capacity-display-input').value,
+		        fuelSlider: document.getElementById('fuel-slider').value,
+		        lapTimeSlider: document.getElementById('lap-time-slider').value,
+		        raceStartTime: document.getElementById('race-start-time-page2').value,
+		        qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
+		        timezone: document.getElementById('timezone-select').value, // Add the time zone
+		    };
+		
+		    try {
+		        const response = await fetch('/api/strategies', {
+		            method: 'POST',
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		            body: JSON.stringify(state),
+		        });
+		
+		        if (!response.ok) {
+		            throw new Error('Failed to save strategy.');
+		        }
+		
+		        const data = await response.json();
+		        const shareLink = `${window.location.origin}${window.location.pathname}?id=${data.id}`;
+		        document.getElementById('share-link-output').value = shareLink;
+		
+		    } catch (error) {
+		        console.error('Error saving strategy:', error);
+		        alert('Could not save strategy. Please try again.');
+		    }
+		}
+
+        function copyShareLink() {
+            const shareLinkOutput = document.getElementById('share-link-output');
+            if (shareLinkOutput.value) {
+                shareLinkOutput.select();
+                navigator.clipboard.writeText(shareLinkOutput.value);
+                alert('Share link copied to clipboard!');
+            } else {
+                alert('Please generate a link first.');
+            }
+        }
+
+        async function loadState() {
+		    const urlParams = new URLSearchParams(window.location.search);
+		    const strategyId = urlParams.get('id');
+		
+		    if (strategyId) {
+		        try {
+		            const response = await fetch(`/api/strategies/${strategyId}`);
+		            if (!response.ok) {
+		                throw new Error('Failed to load strategy.');
+		            }
+		            
+		            const state = await response.json();
+		
+		            // Restore selections
+		            selectedDrivers = [];
+		            state.drivers.forEach(driverName => {
+		                const driver = drivers.find(d => d.name === driverName);
+		                if (driver) selectedDrivers.push(driver);
+		            });
+		            renderDriverList();
+		            
+		            document.getElementById('car-select').value = state.car;
+		            document.getElementById('track-select').value = state.track;
+		
+		            // Restore inputs on page 2
+		            document.getElementById('race-duration-hours').value = state.raceDurationHours;
+		            document.getElementById('race-duration-minutes').value = state.raceDurationMinutes;
+		            document.getElementById('avg-lap-time-minutes').value = state.avgLapTimeMinutes;
+		            document.getElementById('avg-lap-time-seconds').value = state.avgLapTimeSeconds;
+		            document.getElementById('pit-stop-time').value = state.pitStopTime;
+		            document.getElementById('fuel-per-lap-display-input').value = state.fuelPerLapInput;
+		            document.getElementById('tank-capacity-display-input').value = state.tankCapacityInput;
+		            
+		            document.getElementById('fuel-slider').value = state.fuelSlider;
+		            document.getElementById('lap-time-slider').value = state.lapTimeSlider;
+		            document.getElementById('race-start-time-page2').value = state.raceStartTime;
+		            document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes;
+		            
+		            // Restore the timezone from the shared link
+		            document.getElementById('timezone-select').value = state.timezone || 'UTC';
+		            
+		            document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
+		            document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
+		
+		            // Navigate to page 2 and calculate
+		            showPage2();
+		            calculateAndShowPage2();
+		
+		        } catch (error) {
+		            console.error('Error loading strategy:', error);
+		            alert('Could not load strategy from the provided link.');
+		        }
+		    } else {
+		        // If no ID is in the URL, initialize the page as normal
+		        showPage1();
+		    }
+		}
+        // --- Admin Functions ---
+
+        async function saveDataToServer() {
+            try {
+                await fetch('/api/data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ drivers, cars, tracks })
+                });
+                alert('Data saved successfully!');
+            } catch (error) {
+                console.error('Failed to save data:', error);
+                alert('Could not save data to the server.');
+            }
+        }
+        
+        function renderAdminLists() {
+            const driverList = document.getElementById('admin-driver-list');
+            const carList = document.getElementById('admin-car-list');
+            const trackList = document.getElementById('admin-track-list');
+            
+            driverList.innerHTML = '';
+            carList.innerHTML = '';
+            trackList.innerHTML = '';
+
+            drivers.forEach(driver => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.innerHTML = `
+                    <span>${driver.name} (#${driver.drivernumber})</span>
+                    <div class="space-x-2">
+                        <button onclick="editDriverAdmin('${driver.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
+                        <button onclick="removeDriverAdmin('${driver.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                `;
+                driverList.appendChild(li);
+            });
+
+            cars.forEach(car => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.innerHTML = `
+                    <span>${car.name}</span>
+                    <div class="space-x-2">
+                        <button onclick="editCarAdmin('${car.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
+                        <button onclick="removeCarAdmin('${car.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                `;
+                carList.appendChild(li);
+            });
+
+            tracks.forEach(track => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.innerHTML = `
+                    <span>${track.name}</span>
+                    <div class="space-x-2">
+                        <button onclick="editTrackAdmin('${track.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
+                        <button onclick="removeTrackAdmin('${track.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                `;
+                trackList.appendChild(li);
+            });
+        }
+        function resetDriverAdminForm() {
+            document.getElementById('new-driver-name').value = '';
+            document.getElementById('new-driver-number').value = '';
+            document.getElementById('add-driver-btn').textContent = 'Add Driver';
+            document.getElementById('add-driver-btn').onclick = addDriverAdmin;
+        }
+        async function addDriverAdmin() {
+            const name = document.getElementById('new-driver-name').value;
+            const drivernumber = parseInt(document.getElementById('new-driver-number').value);
+            if (name && !isNaN(drivernumber)) {
+                drivers.push({ name, drivernumber });
+                await saveDataToServer();
+                renderAdminLists();
+                populateDrivers();
+                resetDriverAdminForm();
+            }
+        }
+        function editDriverAdmin(name) {
+            const driver = drivers.find(d => d.name === name);
+            if (driver) {
+                document.getElementById('new-driver-name').value = driver.name;
+                document.getElementById('new-driver-number').value = driver.drivernumber;
+                document.getElementById('add-driver-btn').textContent = 'Update Driver';
+                document.getElementById('add-driver-btn').onclick = () => updateDriverAdmin(name);
+            }
+        }
+        async function updateDriverAdmin(originalName) {
+            const name = document.getElementById('new-driver-name').value;
+            const drivernumber = parseInt(document.getElementById('new-driver-number').value);
+            if (name && !isNaN(drivernumber)) {
+                const index = drivers.findIndex(d => d.name === originalName);
+                if (index !== -1) {
+                    drivers[index] = { name, drivernumber };
+                    await saveDataToServer();
+                    renderAdminLists();
+                    populateDrivers();
+                    resetDriverAdminForm();
+                }
+            }
+        }
+        async function removeDriverAdmin(name) {
+            if (confirm(`Are you sure you want to remove ${name}?`)) {
+                drivers = drivers.filter(d => d.name !== name);
+                await saveDataToServer();
+                renderAdminLists();
+                populateDrivers();
+            }
+        }
+        function resetCarAdminForm() {
+            document.getElementById('new-car-name').value = '';
+            document.getElementById('new-car-fuel').value = '';
+            document.getElementById('new-car-tank').value = '';
+            document.getElementById('add-car-btn').textContent = 'Add Car';
+            document.getElementById('add-car-btn').onclick = addCarAdmin;
+        }
+        async function addCarAdmin() {
+            const name = document.getElementById('new-car-name').value;
+            
+            if (name && fuelPerLap && tankCapacity) {
+                cars.push({ name, fuel_per_lap: fuelPerLap, tank_capacity: tankCapacity });
+                await saveDataToServer();
+                renderAdminLists();
+                populateCars();
+                resetCarAdminForm();
+            }
+        }
+        function editCarAdmin(name) {
+            const car = cars.find(c => c.name === name);
+            if (car) {
+                document.getElementById('new-car-name').value = car.name;
+                document.getElementById('add-car-btn').textContent = 'Update Car';
+                document.getElementById('add-car-btn').onclick = () => updateCarAdmin(name);
+            }
+        }
+        async function updateCarAdmin(originalName) {
+            const name = document.getElementById('new-car-name').value;
+            const fuelPerLap = parseFloat(document.getElementById('new-car-fuel').value);
+            const tankCapacity = parseInt(document.getElementById('new-car-tank').value);
+            if (name && fuelPerLap && tankCapacity) {
+                const index = cars.findIndex(c => c.name === originalName);
+                if (index !== -1) {
+                    cars[index] = { name };
+                    await saveDataToServer();
+                    renderAdminLists();
+                    populateCars();
+                    resetCarAdminForm();
+                }
+            }
+        }
+        async function removeCarAdmin(name) {
+            if (confirm(`Are you sure you want to remove ${name}?`)) {
+                cars = cars.filter(c => c.name !== name);
+                await saveDataToServer();
+                renderAdminLists();
+                populateCars();
+            }
+        }
+        function resetTrackAdminForm() {
+            document.getElementById('new-track-name').value = '';
+            document.getElementById('add-track-btn').textContent = 'Add Track';
+            document.getElementById('add-track-btn').onclick = addTrackAdmin;
+        }
+        async function addTrackAdmin() {
+            const name = document.getElementById('new-track-name').value;
+            if (name) {
+                tracks.push({ name });
+                await saveDataToServer();
+                renderAdminLists();
+                populateTracks();
+                resetTrackAdminForm();
+            }
+        }
+        function editTrackAdmin(name) {
+            const track = tracks.find(t => t.name === name);
+            if (track) {
+                document.getElementById('new-track-name').value = track.name;
+                document.getElementById('add-track-btn').textContent = 'Update Track';
+                document.getElementById('add-track-btn').onclick = () => updateTrackAdmin(name);
+            }
+        }
+        async function updateTrackAdmin(originalName) {
+            const name = document.getElementById('new-track-name').value;
+            if (name) {
+                const index = tracks.findIndex(t => t.name === originalName);
+                if (index !== -1) {
+                    tracks[index] = { name };
+                    await saveDataToServer();
+                    renderAdminLists();
+                    populateTracks();
+                    resetTrackAdminForm();
+                }
+            }
+        }
+        async function removeTrackAdmin(name) {
+            if (confirm(`Are you sure you want to remove ${name}?`)) {
+                tracks = tracks.filter(t => t.name !== name);
+                await saveDataToServer();
+                renderAdminLists();
+                populateTracks();
+            }
+        }
+
+		// Function to handle time formatting based on the selected time zone
+		function formatTimeWithTimezone(date, timeZone) {
+			    const options = {
+			        timeZone: timeZone,
+			        hour: '2-digit',
+			        minute: '2-digit',
+			        second: '2-digit',
+			        hour12: false
+			    };
+			    return date.toLocaleString('en-GB', options);
+		}
+
+		R
+		
+		// Function to populate the driver dropdowns for each stint
+		function populateStintDrivers(stintIndex, drivers) {
+			    const driverSelect = document.getElementById(`stint-driver-${stintIndex}`);
+			    const backupDriverSelect = document.getElementById(`stint-backup-driver-${stintIndex}`);
+			
+			    // Clear existing options
+			    driverSelect.innerHTML = '';
+			    backupDriverSelect.innerHTML = '';
+			
+			    // Add a default option
+			    const defaultOption = document.createElement('option');
+			    defaultOption.textContent = "Select...";
+			    defaultOption.value = "";
+			    driverSelect.appendChild(defaultOption.cloneNode(true));
+			    backupDriverSelect.appendChild(defaultOption.cloneNode(true));
+			
+			    // Add new options from the selected drivers
+			    drivers.forEach(driver => {
+			        const option = document.createElement('option');
+			        option.value = driver.name;
+			        option.textContent = driver.name;
+			        driverSelect.appendChild(option);
+			        backupDriverSelect.appendChild(option.cloneNode(true)); // Create a copy for the backup
+			    });
+		}
+
+        function adjustSlider(type, value) {
+            let sliderId;
+            let displayId;
+            let step;
+
+            if (type === 'fuel') {
+                sliderId = 'fuel-slider';
+                displayId = 'fuel-slider-value';
+                step = 0.05;
+            } else if (type === 'lapTime') {
+                sliderId = 'lap-time-slider';
+                displayId = 'lap-time-slider-value';
+                step = 0.05;
+            } else {
+                return;
+            }
+
+            const slider = document.getElementById(sliderId);
+            let currentValue = parseFloat(slider.value);
+            let newValue = currentValue + value;
+
+            // Clamp the new value to the slider's min and max to prevent it from going out of bounds
+            newValue = Math.min(Math.max(newValue, parseFloat(slider.min)), parseFloat(slider.max));
+            slider.value = newValue;
+
+            // Update the display value
+            document.getElementById(displayId).textContent = newValue.toFixed(2);
+
+            // Trigger the calculation to update the strategy
+            calculateAndShowPage2();
+        }
+		document.addEventListener('DOMContentLoaded', () => {
+            const darkModeSwitch = document.getElementById('darkModeSwitch');
+            const body = document.body;
+
+            // Check for saved user preference
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                body.classList.add('dark');
+                darkModeSwitch.checked = true;
+            }
+
+            // Listen for toggle switch change
+            darkModeSwitch.addEventListener('change', () => {
+                if (darkModeSwitch.checked) {
+                    body.classList.add('dark');
+                    localStorage.setItem('darkMode', 'true');
+                } else {
+                    body.classList.remove('dark');
+                    localStorage.setItem('darkMode', 'false');
+                }
+            });
+        });
+    </script>
+	<script>
+		  const toggle = document.getElementById('darkModeSwitch');
+		
+		  // Initialize state on load
+		  const saved = localStorage.getItem('darkMode') === 'true';
+		  toggle.checked = saved;
+		  document.documentElement.classList.toggle('dark', saved);
+		
+		  // Listen for user toggles
+		  toggle.addEventListener('change', () => {
+		    document.documentElement.classList.toggle('dark', toggle.checked);
+		    localStorage.setItem('darkMode', toggle.checked);
+		  });
+		</script>
 </body>
 </html>
+
+
