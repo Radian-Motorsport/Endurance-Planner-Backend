@@ -65,6 +65,11 @@ app.get('/livev2.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'livev2.html'));
 });
 
+// And back to index
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // API endpoint to get all data from the database
 app.get('/api/data', async (req, res) => {
     try {
@@ -151,3 +156,4 @@ app.get('/api/strategies/:id', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
