@@ -66,7 +66,7 @@ app.get('/livev2.html', (req, res) => {
 });
 
 // And back to index
-app.get('/', (req, res) => {
+app.get('/index.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -156,4 +156,5 @@ app.get('/api/strategies/:id', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
 
