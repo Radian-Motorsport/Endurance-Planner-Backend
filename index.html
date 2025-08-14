@@ -8,7 +8,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Road+Rage&display=swap" rel="stylesheet">
-    <style>
+    <script>
+  		tailwind.config = {
+    		darkMode: 'class'
+ 		}
+	</script>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style>
         body {
    			 font-family: 'Inter', sans-serif;
   			  transition: background-color 0.5s, color 0.5s;
@@ -103,8 +109,7 @@
         .dark .text-purple-800 { color: #d6bcfa; }
         .dark .border-gray-200, .dark .border-gray-300 { border-color: #4a4a4a; }
 		.dark .text-gray-900 { color: #ffffff; }
-    
-
+        
         .dark select, .dark input, .dark textarea, .dark li {
 		    background-color: #2a2a2a;
 		    font-weight: bold;
@@ -535,40 +540,28 @@
             resetTrackAdminForm();
         }
         function showPage2() {
-            const carSelect = document.getElementById('car-select');
-            const trackSelect = document.getElementById('track-select');
-            if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
-                alert("Please select at least one driver, a car, and a track before continuing.");
-                return;
-            }
-            
+                    // Comment out this block for testing:
+             const carSelect = document.getElementById('car-select');
+             const trackSelect = document.getElementById('track-select');
+             if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+                 alert("Please select at least one driver, a car, and a track before continuing.");
+                 return;
+             }
             document.getElementById('planner-page').classList.add('hidden');
             document.getElementById('page-2').classList.remove('hidden');
-            document.getElementById('page-3').classList.add('hidden');
             document.getElementById('admin-page').classList.add('hidden');
+            
+            // Re-hide results sections until calculation is run on page 2
+            document.getElementById('overall-summary').classList.add('hidden');
+            document.getElementById('stint-breakdown-display').classList.add('hidden');
+            document.getElementById('sliders-container').classList.add('hidden');
+            document.getElementById('share-link-container').classList.add('hidden');
 
             // Populate the new display elements with the selected data
             document.getElementById('page2-track').textContent = trackSelect.value;
             document.getElementById('page2-car').textContent = carSelect.value;
             const driverNames = selectedDrivers.map(d => d.name).join(', ');
             document.getElementById('page2-drivers').textContent = driverNames;
-            
-            // Check if a calculation has been done and show the results if so.
-            // The totalLaps variable is a good indicator of a completed calculation.
-            if (totalLaps > 0) {
-                document.getElementById('overall-summary').classList.remove('hidden');
-                document.getElementById('stint-breakdown-display').classList.remove('hidden');
-                document.getElementById('sliders-container').classList.remove('hidden');
-                document.getElementById('share-link-container').classList.remove('hidden');
-                document.getElementById('page3-button-container').classList.remove('hidden');
-            } else {
-                // If no calculation has been done, ensure results are hidden
-                document.getElementById('overall-summary').classList.add('hidden');
-                document.getElementById('stint-breakdown-display').classList.add('hidden');
-                document.getElementById('sliders-container').classList.add('hidden');
-                document.getElementById('share-link-container').classList.add('hidden');
-                document.getElementById('page3-button-container').classList.add('hidden');
-            }
         }
         function showPage3() {
             document.getElementById('planner-page').classList.add('hidden');
@@ -1157,60 +1150,21 @@
             });
         });
     </script>
+	<script>
+		  const toggle = document.getElementById('darkModeSwitch');
+		
+		  // Initialize state on load
+		  const saved = localStorage.getItem('darkMode') === 'true';
+		  toggle.checked = saved;
+		  document.documentElement.classList.toggle('dark', saved);
+		
+		  // Listen for user toggles
+		  toggle.addEventListener('change', () => {
+		    document.documentElement.classList.toggle('dark', toggle.checked);
+		    localStorage.setItem('darkMode', toggle.checked);
+		  });
+		</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
