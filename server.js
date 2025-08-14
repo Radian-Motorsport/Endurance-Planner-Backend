@@ -54,9 +54,15 @@ async function createTables() {
 // Call the function on server start
 createTables();
 
+
 // Serve the main HTML file
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Add this new route to serve the livev2.html file
+app.get('/livev2.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'livev2.html'));
 });
 
 // API endpoint to get all data from the database
