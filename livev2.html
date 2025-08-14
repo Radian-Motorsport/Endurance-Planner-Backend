@@ -79,7 +79,7 @@
         }
         .dark h1, .dark h2, .dark h3, .dark .text-gray-800 { color: #ffffff; }
         .dark p, .dark label, .dark .text-gray-600, .dark .text-gray-700 { color: #a0a0a0; }
-        .dark .bg-white { background-color: #1e1e1e; }
+        
         .dark .bg-gray-50, .dark .bg-gray-200 { background-color: #2a2a2a; border-color: #333333; }
         .dark .bg-gray-300 { background-color: #a0a0a0; color: #1e1e1e; }
         .dark .bg-blue-600 { background-color: #2b6cb0; }
@@ -146,20 +146,30 @@
         .live-planner-info p { margin: 5px 0; }
         #countdown-timer { font-size: 2em; font-weight: bold; color: rgb(255, 255, 255); }
         .dark #countdown-timer { color: #48bb78; }
-        .dark #live-stint-table th { background-color: #333333; color: #a0a0a0; }
-        .dark #live-stint-table td { background-color: #1e1e1e; border-color: #4a4a4a; }
+        
     </style>
 </head>
 <body>
 
+    <div class="toggle-switch-container">
+        <input type="checkbox" id="darkModeSwitch">
+        <label for="darkModeSwitch" class="toggle-label"></label>
+    </div>
+
 <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500 space-y-6">
     
+ <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500">
+        <div class="text-center mb-6">
+            <img src="https://github.com/Radian-Motorsport/Endurance-Planner-Backend/blob/main/g457912.png?raw=true" alt="?" class="mx-auto w-100  h-auto">
+        </div>
+        <p class="text-center text-gray-600 mb-8"></p>
+
             <div><a href="index.html">
-            <button class="bg-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">BACK</button>
+            <button class="bg-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2 mb-6">BACK</button>
             </a>
             </div>
 
-                    <div id="race-inputs-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div id="race-inputs-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg mb-6">
                     <h3 class="text-xl mb-4 text-gray-800 road-rage-font">Live Race Inputs</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="flex flex-col">
@@ -200,7 +210,7 @@
                     </div>
                 </div>
 
-    <div class="p-6 bg-gray-100 border border-gray-200 rounded-lg mb-6">
+    <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mb-6">
         <h3 class="text-xl mb-4 text-gray-800 road-rage-font"></h3>
         <div class="live-planner-controls">
             <button id="live-start-stop-button" onclick="toggleRace()" class="flex-1 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">Start Race</button>
@@ -357,32 +367,33 @@
                     </p>
                     <p id="in-pit-display" class="flex justify-between items-center bg-orange-500 text-black text-sm py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6 hidden">
                         <span class="flex-grow text-center text-xl !text-white">IN PIT</span>
-                        <h2 id="pit-timer-countdown" class="hidden text-3xl font-bold text-center text-bg-orange-500"></h2>
+                        <h2 id="pit-timer-countdown" class="hidden text-3xl font-bold text-center text-bg-orange-500 mb-6"></h2>
                     </p>
-                    <div id="pit-exit-banner" class="hidden text-2xl font-bold text-center bg-green-600 text-white p-4 rounded-lg z-50 shadow-lg">PIT EXIT</div>
+                    <div id="pit-exit-banner" class="hidden text-2xl font-bold text-center bg-green-600 text-white p-4 rounded-lg z-50 shadow-lg mb-6">PIT EXIT</div>
                 </div>                    
 
             </div> 
 
-            <div id="stint-trackers" class="flex justify-end mt-4 text-xs font-semibold text-gray-800 hidden">
-                    <div class="bg-gray-200 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mb-6">   Current Stint: <span id="current-stint-display">1</span>
+            <div id="stint-trackers" class="flex justify-end px-4 font-semibold text-gray-800 gap-x-4 hidden">
+                    <div class="bg-gray-200 hover:bg-yellow-500 text-white dark:text-black font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mb-6">   Current Stint: <span id="current-stint-display">1</span>
                     </div>
-                    <div class="bg-gray-200 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mb-6">   Active Pit Stop: <span id="current-pit-display">0</span>
+                    <div class="bg-gray-200 hover:bg-orange-500 text-white dark:text-black font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mb-6">   Active Pit Stop: <span id="current-pit-display">0</span>
                     </div>
                 </div>
-                <div id="live-table" class="hidden">     
-                    <table id="live-stint-table" class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg mt-6">
+                <div id="live-table" class="hidden class=bg-gray-50 p-4 rounded-lg">     
+                    <table id="live-stint-table" class="min-w-full rounded-lg mt-6">
                         <thead class="bg-gray-200">
                             <tr>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Stint</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Time</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Time</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Stint Duration</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Stint Laps</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Fuel Per Stint (L)</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 border-r border-gray-300 uppercase tracking-wider">Stint</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 border-r border-gray-300 uppercase tracking-wider">Start Time</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 border-r border-gray-300 uppercase tracking-wider">End Time</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 border-r border-gray-300 uppercase tracking-wider">Stint Duration</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 border-r border-gray-300 uppercase tracking-wider">Stint Laps</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-gray-700 uppercase tracking-wider">Fuel Per Stint (L)</th>
                             </tr>
                         </thead>
-                        <tbody id="live-stint-table-body" class="bg-white divide-y divide-gray-200">
+                        <tbody id="live-stint-table-body">
+                            <!-- Stint rows will be dynamically added here -->
                         </tbody>
                     </table>
                 </div> 
@@ -742,31 +753,31 @@ function populateStintTableFromLiveInputs(raceDurationInSeconds) {
 
         const stintRow = document.createElement('tr');
         stintRow.innerHTML = `
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500 font-bold">${stint.stintNumber}</td>
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500">${formatTime(stintStart)}</td>
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500">${formatTime(stintEnd)}</td>
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500">${formatTime(stint.stintDuration)}</td>
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500">${stint.stintLaps}</td>
-            <td class="px-1 py-4 text-center text-l text-gray-500 border-r border-gray-300 dark:border-gray-500">${stint.stintFuel.toFixed(2)} L</td>
+            <td class="px-1 py-4 text-center text-l text-gray-500  dark:text-white font-bold">${stint.stintNumber}</td>
+            <td class="px-1 py-4 text-center text-l text-gray-500 ">${formatTime(stintStart)}</td>
+            <td class="px-1 py-4 text-center text-l text-gray-500 ">${formatTime(stintEnd)}</td>
+            <td class="px-1 py-4 text-center text-l text-gray-500 ">${formatTime(stint.stintDuration)}</td>
+            <td class="px-1 py-4 text-center text-l text-gray-500 ">${stint.stintLaps}</td>
+            <td class="px-1 py-4 text-center text-l text-gray-500 ">${stint.stintFuel.toFixed(2)} L</td>
         `;
         tbody.appendChild(stintRow);
 
         const pitRow = document.createElement('tr');
         if (isPitting && pitNumberForTable === currentPitActive) {
-            pitRow.classList.add('bg-orange-200', 'dark:bg-orange-700');
-            pitRow.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+            pitRow.classList.add('bg-orange-200', 'dark:bg-orange-600');
+            pitRow.classList.remove('bg-gray-100', 'dark:bg-gray-100');
         } else {
-            pitRow.classList.add('bg-gray-100', 'dark:bg-gray-700');
+            pitRow.classList.add('bg-gray-100', 'dark:bg-gray-800');
         }
 
         pitRow.classList.add('text-xs');
         pitRow.innerHTML = `
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 road-rage-font text-gray-800 dark:text-white">PIT</td>
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${formatTime(pitStart)}</td>
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${formatTime(pitEnd)}</td>
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${formatTime(pitStopTime)}</td>
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">-</td>
-            <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">-</td>
+            <td class="px-1 py-2 text-center road-rage-font text-gray-800 dark:text-white">PIT</td>
+            <td class="px-1 py-2 text-center text-gray-800 dark:text-white">${formatTime(pitStart)}</td>
+            <td class="px-1 py-2 text-center text-gray-800 dark:text-white">${formatTime(pitEnd)}</td>
+            <td class="px-1 py-2 text-center text-gray-800 dark:text-white">${formatTime(pitStopTime)}</td>
+            <td class="px-1 py-2 text-center text-gray-800 dark:text-white">-</td>
+            <td class="px-1 py-2 text-center text-gray-800 dark:text-white">-</td>
         `;
         tbody.appendChild(pitRow);
 
@@ -790,19 +801,24 @@ function populateStintTableFromLiveInputs(raceDurationInSeconds) {
         const endTimeFormatted = formatTime(currentTimeSeconds);
         
         const stintRow = document.createElement('tr');
-        stintRow.classList.add('bg-white', 'dark:bg-gray-800');
-        
+
         if (!isPitting && stintNumberForTable === currentStintActive) {
-            stintRow.classList.add('bg-yellow-100', 'dark:bg-yellow-800');
+            // Apply yellow highlight if it's the current stint
+            stintRow.classList.add('bg-yellow-200', 'dark:bg-yellow-600');
+        } else {
+            // Apply default background for all other stints
+            stintRow.classList.add('bg-white', 'dark:bg-gray-700');
         }
+
+        
         
         stintRow.innerHTML = `
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500 font-bold">${stintNumberForTable}</td>
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500">${startTimeFormatted}</td>
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500">${endTimeFormatted}</td>
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500">${formatTime(currentStintDuration)}</td>
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500">${stintLaps}</td>
-            <td class="px-1 py-4 text-center text-m text-gray-500 border-r border-gray-300 dark:border-gray-500">${stintFuel.toFixed(2)} L</td>
+            <td class="px-1 py-4 text-center text-m text-gray-500 dark:text-white font-bold">${stintNumberForTable}</td>
+            <td class="px-1 py-4 text-center text-m text-gray-500 dark:text-white">${startTimeFormatted}</td>
+            <td class="px-1 py-4 text-center text-m text-gray-500 dark:text-white">${endTimeFormatted}</td>
+            <td class="px-1 py-4 text-center text-m text-gray-500 dark:text-white">${formatTime(currentStintDuration)}</td>
+            <td class="px-1 py-4 text-center text-m text-gray-500 dark:text-white">${stintLaps}</td>
+            <td class="px-1 py-4 text-center text-m text-gray-500 dark:text-white">${stintFuel.toFixed(2)} L</td>
         `;
         tbody.appendChild(stintRow);
 
@@ -812,15 +828,15 @@ function populateStintTableFromLiveInputs(raceDurationInSeconds) {
             const pitEndTimeFormatted = formatTime(currentTimeSeconds);
             
             const pitRow = document.createElement('tr');
-            pitRow.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-sm');
+            pitRow.classList.add('bg-gray-100', 'dark:bg-gray-800', 'text-sm');
             
             pitRow.innerHTML = `
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 road-rage-font text-gray-800 dark:text-white">PIT</td>
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${pitStartTimeFormatted}</td>
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${pitEndTimeFormatted}</td>
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">${formatTime(pitStopTime)}</td>
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">-</td>
-                <td class="px-1 py-2 text-center border-r border-gray-300 dark:border-gray-500 text-gray-800 dark:text-white">-</td>
+                <td class="px-1 py-2 text-center road-rage-font text-gray-800 dark:text-gray-400">PIT</td>
+                <td class="px-1 py-2 text-center text-gray-800 dark:text-gray-400">${pitStartTimeFormatted}</td>
+                <td class="px-1 py-2 text-center text-gray-800 dark:text-gray-400">${pitEndTimeFormatted}</td>
+                <td class="px-1 py-2 text-center text-gray-800 dark:text-gray-400">${formatTime(pitStopTime)}</td>
+                <td class="px-1 py-2 text-center text-gray-800 dark:text-gray-400">-</td>
+                <td class="px-1 py-2 text-center text-gray-800 dark:text-gray-400">-</td>
             `;
             tbody.appendChild(pitRow);
         }
@@ -931,6 +947,29 @@ function updateStatusDisplays() {
     document.getElementById('current-stint-display').textContent = currentStintActive;
     document.getElementById('current-pit-display').textContent = currentPitActive;
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+            const darkModeSwitch = document.getElementById('darkModeSwitch');
+            const body = document.body;
+
+            // Check for saved user preference
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                body.classList.add('dark');
+                darkModeSwitch.checked = true;
+            }
+
+            // Listen for toggle switch change
+            darkModeSwitch.addEventListener('change', () => {
+                if (darkModeSwitch.checked) {
+                    body.classList.add('dark');
+                    localStorage.setItem('darkMode', 'true');
+                } else {
+                    body.classList.remove('dark');
+                    localStorage.setItem('darkMode', 'false');
+                }
+            });
+        });
 
 
 document.addEventListener('DOMContentLoaded', () => {
