@@ -65,6 +65,11 @@ app.get('/livev2.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'livev2.html'));
 });
 
+// Add this new route to serve the Championship.html file
+app.get('/championship-tracker v6.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'championship-tracker v6.html'));
+});
+
 // And back to index
 app.get('/index.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
