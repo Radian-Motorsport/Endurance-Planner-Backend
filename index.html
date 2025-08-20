@@ -499,11 +499,14 @@
                 if (strategyId) {
                     // If an ID exists, fetch the specific strategy from the server
                     const strategyResponse = await fetch(`/api/strategies/${strategyId}`);
-                    if (!strategyResponse.ok) {
-                        //throw new Error('Failed to load shared strategy.');
-                    }
-                    const state = await strategyResponse.json();
-                    loadState(state);
+                     // Replace your old if-statement with this one to handle the 304 status
+                            if (!strategyResponse.ok && strategyResponse.status !== 304) {
+                                throw new Error('Failed to load shared strategy.');
+                            }
+                            
+                            // This code will now execute because a 304 status is allowed
+                            const state = await strategyResponse.json();
+                            loadState(state);
                 } else {
                     // If no ID is in the URL, show the first page as normal
                     showPlannerPage();
@@ -1099,8 +1102,7 @@
 			    return date.toLocaleString('en-GB', options);
 		}
 
-		R
-		
+				
 		// Function to populate the driver dropdowns for each stint
 		function populateStintDrivers(stintIndex, drivers) {
 			    const driverSelect = document.getElementById(`stint-driver-${stintIndex}`);
@@ -1158,43 +1160,9 @@
             // Trigger the calculation to update the strategy
             calculateAndShowPage2();
         }
-		document.addEventListener('DOMContentLoaded', () => {
-            const darkModeSwitch = document.getElementById('darkModeSwitch');
-            const body = document.body;
-
-            // Check for saved user preference
-            const isDarkMode = localStorage.getItem('darkMode') === 'true';
-            if (isDarkMode) {
-                body.classList.add('dark');
-                darkModeSwitch.checked = true;
-            }
-
-            // Listen for toggle switch change
-            darkModeSwitch.addEventListener('change', () => {
-                if (darkModeSwitch.checked) {
-                    body.classList.add('dark');
-                    localStorage.setItem('darkMode', 'true');
-                } else {
-                    body.classList.remove('dark');
-                    localStorage.setItem('darkMode', 'false');
-                }
-            });
-        });
+		
     </script>
-	<script>
-		  const toggle = document.getElementById('darkModeSwitch');
-		
-		  // Initialize state on load
-		  const saved = localStorage.getItem('darkMode') === 'true';
-		  toggle.checked = saved;
-		  document.documentElement.classList.toggle('dark', saved);
-		
-		  // Listen for user toggles
-		  toggle.addEventListener('change', () => {
-		    document.documentElement.classList.toggle('dark', toggle.checked);
-		    localStorage.setItem('darkMode', toggle.checked);
-		  });
-		</script>
+	
 </body>
 </html>
 
