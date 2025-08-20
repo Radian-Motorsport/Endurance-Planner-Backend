@@ -155,7 +155,7 @@
 
             <div id="page-2" class="space-y-6 hidden">
                 <div class="flex items-center space-x-4 mb-6">
-                    <button onclick="showPlannerPage()" class="bg-neutral-300 hover:bg-neutral-400 text-neutral-500 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                    <button onclick="showPlannerPage()" class="bg-neutral-800 hover:bg-red-500 text-black font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-arrow-left mr-2"></i> Back
                     </button>
                 </div>
@@ -512,6 +512,7 @@
             document.getElementById('planner-page').classList.remove('hidden');
             document.getElementById('page-2').classList.add('hidden');
             document.getElementById('admin-page').classList.add('hidden');
+            document.getElementById('stint-breakdown-display').classList.add('hidden');
             //document.getElementById('race-details-btn').classList.add('bg-blue-600');
             //document.getElementById('race-details-btn').classList.remove('bg-neutral-300', 'text-neutral-500');
             //document.getElementById('admin-btn').classList.add('bg-neutral-300', 'text-neutral-500');
@@ -521,6 +522,8 @@
             document.getElementById('planner-page').classList.add('hidden');
             document.getElementById('page-2').classList.add('hidden');
             document.getElementById('admin-page').classList.remove('hidden');
+            document.getElementById('stint-breakdown-display').classList.add('hidden');
+
             //document.getElementById('admin-btn').classList.add('bg-blue-600', 'text-white');
             //document.getElementById('admin-btn').classList.remove('bg-neutral-300', 'text-neutral-500');
             //document.getElementById('race-details-btn').classList.add('bg-neutral-300', 'text-neutral-500');
@@ -1154,7 +1157,6 @@
 	
 </body>
 </html>
-
 
 
 
