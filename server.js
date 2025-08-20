@@ -66,8 +66,8 @@ app.get('/livev2.html', (req, res) => {
 });
 
 // Add this new route to serve the Championship.html file
-app.get('/championship-tracker v6.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'championship-tracker v6.html'));
+app.get('/championship-tracker-v6.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'championship-tracker-v6.html'));
 });
 
 // And back to index
@@ -161,5 +161,6 @@ app.get('/api/strategies/:id', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
 
 
