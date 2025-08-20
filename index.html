@@ -34,105 +34,55 @@
             -moz-appearance: textfield;
         }
 
-        /* Dark Mode Switch CSS */
-        .toggle-switch-container {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 100;
+        .icon-shadow {
+            filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.5));
         }
-        .toggle-label {
-            width: 50px;
-            height: 26px;
-            background-color: #ccc;
-            display: block;
-            border-radius: 9999px;
-            position: relative;
-            cursor: pointer;
-            transition: background-color 0.4s;
-        }
-        .toggle-label:after {
-            content: '';
-            width: 20px;
-            height: 20px;
-            background-color: white;
-            border-radius: 9999px;
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            transition: all 0.4s;
-        }
-        input:checked + .toggle-label {
-            background-color: #2196F3;
-        }
-        input:checked + .toggle-label:after {
-            left: calc(100% - 3px);
-            transform: translateX(-100%);
-        }
-		select, option, input, number, li {
-    		color: #000000; /* Black text */
-			background-color: #FFFFFF;
-		}
-        #darkModeSwitch {
-            display: none;
+        .text-shadow {
+            filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.5));
         }
 
-        /* --- Dark Mode Color Overrides --- */
-    
-        .dark .max-w-4xl {
-            background-color: #1e1e1e;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+        h1 {
+            color: #ffffff; /* A dark color for the text */
+            text-shadow: 3px 3px 0px #000000; /* The text-shadow property */
+
         }
-        .dark h1, .dark h2, .dark h3, .dark .text-gray-800 {
-            color: #ffffff;
+        h3 {
+            color: #ffffff; /* A dark color for the text */
+            text-shadow: 3px 3px 0px #000000; /* The text-shadow property *//* Gradient text for h3 */
+
         }
-        .dark p, .dark label, .dark .text-gray-600, .dark .text-gray-700 {
-            color: #a0a0a0;
+        h4 {
+            color: #ffffff; /* A dark color for the text */
+            text-shadow: 3px 3px 0px #000000; /* The text-shadow property *//* Gradient text for h2 *//* Gradient text for h4 */
         }
-        .dark .bg-white {
-            background-color: #1e1e1e;
-        }
-        .dark .bg-gray-50, .dark .bg-gray-200 {
-            background-color: #2a2a2a;
-            border-color: #333333;
-        }
-        .dark .bg-gray-300 {
-            background-color: #a0a0a0;
-            color: #1e1e1e;
-        }
-        .dark .bg-blue-600 { background-color: #2b6cb0; }
-        .dark .bg-purple-600 { background-color: #6b46c1; }
-        .dark .bg-green-600 { background-color: #2f855a; }
-        .dark .bg-blue-50, .dark .bg-blue-100 { background-color: #2a4365; border-color: #2c5282; }
-        .dark .text-blue-800 { color: #90cdf4; }
-        .dark .bg-purple-100 { background-color: #44337a; border-color: #553c9a; }
-        .dark .text-purple-800 { color: #d6bcfa; }
-        .dark .border-gray-200, .dark .border-gray-300 { border-color: #4a4a4a; }
-		.dark .text-gray-900 { color: #ffffff; }
         
-        .dark select, .dark input, .dark textarea, .dark li {
-		    background-color: #2a2a2a;
-		    font-weight: bold;
-		    border-color: #4a4a4a;
-		}
-		.dark option, .dark number {
-		 	background-color: #2a2a2a;
-			color: #ffffff;
-		}
-		.dark li {
-		    background-color: #2a2a2a;
-		    color: #ffffff;
-		}
-
-		
-
+        h2 {
+            font-size: 4em;
+            font-weight: SEMIbold;
+            
+            /* Apply the gradient to the background */
+            background-image: linear-gradient(to right, #00ffff, #d400ff);
+            
+            /* Clip the background to the text */
+            -webkit-background-clip: text;
+            
+            /* Make the text color transparent */
+            -webkit-text-fill-color: transparent;
+            
+            /* This is a fallback for browsers that don't support the above */
+            color: #4a90e2; 
+        
+            /*text-shadow: 3px 3px 0px #ffffff; /* The shadow property */
+            
+        }
+        
 
              @font-face {
-    font-family: 'RoadRage';
-    src: url('https://radian-motorsport.github.io/Endurance-Planner-Backend/RoadRage.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}
+            font-family: 'RoadRage';
+            src: url('https://radian-motorsport.github.io/Endurance-Planner-Backend/RoadRage.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
         .road-rage-font {
             font-family: 'RoadRage', sans-serif;
         }
@@ -142,24 +92,20 @@
         }
     </style>
 </head>
-<body class="p-4 md:p-8 bg-white text-black dark:bg-[#121212] dark:text-white">
-    <div class="toggle-switch-container">
-        <input type="checkbox" id="darkModeSwitch">
-        <label for="darkModeSwitch" class="toggle-label"></label>
-    </div>
-
-    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500">
-        <div class="text-center mb-6">
+<body class="bg-neutral-900 text-neutral-100 p-4">
+    
+    <div class="max-w-4xl mx-auto bg-neutral-00 p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500">
+    <div class="text-center mb-6">
             <img src="https://github.com/Radian-Motorsport/Endurance-Planner-Backend/blob/main/g457912.png?raw=true" alt="?" class="mx-auto w-100  h-auto">
         </div>
-        <p class="text-center text-gray-600 mb-8"></p>
+    <div class="container mx-auto max-w-4xl p-8 bg-neutral-800 rounded-2xl shadow-lg border border-neutral-700">
 
         <div id="app-container">
             <div class="flex justify-center space-x-4 mb-8">
-                <button id="race-details-btn" onclick="showPlannerPage()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
+                <button id="race-details-btn" onclick="showPlannerPage()" class="bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
                     <i class="fas fa-car-side"></i> <span>Race Details</span>
                 </button>
-                <button id="admin-btn" onclick="showAdminPage()" class="bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
+                <button id="admin-btn" onclick="showAdminPage()" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
                     <i class="fas fa-user-shield"></i> <span>Admin</span>
                 </button>
             <a href="livev2.html">
@@ -172,97 +118,97 @@
 
             
             <div id="planner-page" class="">
-                    <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Drivers <span class="text-sm text-gray-500"></span></h3>
+                    <div class="p-6 bg-neutral-700 border border-neutral-700 rounded-lg">
+                    <h1 class="text-xl mb-4 road-rage-font">Drivers <span class="text-sm text-neutral-500"></span></h1>
                     <div class="flex items-center space-x-2 mb-4">
-                        <select id="driver-select" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-black">
+                        <select id="driver-select" class="p-3 border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full bg-neutral-800 text-neutral-100">
                             <option value="">Select a Driver...</option>
                         </select>
-                        <button onclick="addDriver()" class="bg-purple-600 hover:bg-purple-700 font- mb-4 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                        <button onclick="addDriver()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-plus"></i> Add
                         </button>
                     </div>
                     <ul id="driver-list" class="space-y-2"></ul>
                 </div>
 
-                                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
-                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Track & Car</h3>
+                                <div class="p-6 bg-neutral-700 border border-neutral-700 rounded-lg mt-6">
+                    <h1 class="text-xl mb-4 road-rage-font">Track & Car</h1>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                         <div class="flex flex-col w-full">
-                            <select id="track-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-black">
+                            <select id="track-select" class="mt-1 p-3 border border-neutral-600 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-800 text-neutral-100">
                                 <option value="">Select a Track...</option>
                             </select>
                         </div>
                         <div class="flex flex-col w-full">
-                            <select id="car-select" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-black">
+                            <select id="car-select" class="mt-1 p-3 border border-neutral-600 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-800 text-neutral-100">
                                 <option value="">Select a Car...</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="mt-8">
-                    <button onclick="showPage2()" id="continue-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                    <button onclick="showPage2()" id="continue-button" class="w-full bg-blue-700 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                         Calculate <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                 </div>
             </div>
 
-            <div id="page-2" class="space-y-6 hidden">
+            <div id="page-2" class="space-y-6 hidd">
                 <div class="flex items-center space-x-4 mb-6">
-                    <button onclick="showPlannerPage()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                    <button onclick="showPlannerPage()" class="bg-neutral-300 hover:bg-neutral-400 text-neutral-500 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-arrow-left mr-2"></i> Back
                     </button>
                 </div>
 
-                <div class="p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg">
                     <div class="grid md:grid-cols-3 gap-4">
                         <div>
-                            <span class="text-blue-800 road-rage-font">TRACK:</span>
-                            <span id="page2-track" class="text-black"></span>
+                            <span class="text-white text-shadow road-rage-font">TRACK:</span>
+                            <span id="page2-track" class="text-neutral-100"></span>
                         </div>
                         <div>
-                            <span class="text-blue-800 road-rage-font">CAR:</span>
-                            <span id="page2-car" class="text-black"></span>
+                            <span class="text-white text-shadow road-rage-font">CAR:</span>
+                            <span id="page2-car" class="text-neutral-100"></span>
                         </div>
                         <div>
-                            <span class="text-blue-800 road-rage-font">DRIVERS:</span>
-                            <span id="page2-drivers" class="text-black"></span>
+                            <span class="text-white text-shadow road-rage-font">DRIVERS:</span>
+                            <span id="page2-drivers" class="text-neutral-100"></span>
                         </div>
                     </div>
                 </div>
 
-                <div id="race-inputs-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Race Inputs</h3>
+                <div id="race-inputs-container" class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg">
+                    <h1 class="text-xl mb-4  road-rage-font">Race Inputs</h1>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Race Duration</label>
+                            <label class="text-sm font-medium text-neutral-500">Race Duration</label>
                             <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="race-duration-hours" placeholder="Hours" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">h</span>
-                                <input type="number" id="race-duration-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">m</span>
+                                <input type="number" id="race-duration-hours" placeholder="" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-neutral-500">hr</span>
+                                <input type="number" id="race-duration-minutes" placeholder="" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-neutral-500">min</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-sm font-medium text-gray-700">Avg. Lap Time</label>
+                            <label class="text-sm font-medium text-neutral-500">Avg. Lap Time</label>
                             <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="avg-lap-time-minutes" placeholder="Minutes" class="p-2 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">min</span>
-                                <input type="number" id="avg-lap-time-seconds" placeholder="Seconds" class="p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-600">sec</span>
+                                <input type="number" id="avg-lap-time-minutes" placeholder="" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-neutral-500">min</span>
+                                <input type="number" id="avg-lap-time-seconds" placeholder="" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-neutral-500">sec</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label for="pit-stop-time" class="text-sm font-medium text-gray-700">Avg. Pit Stop Time (sec)</label>
-                            <input type="number" id="pit-stop-time" value="30" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <label for="pit-stop-time" class="text-sm font-medium text-neutral-500">Avg. Pit Stop Time (sec)</label>
+                            <input type="number" id="pit-stop-time" value="" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                         <div class="flex flex-col">
-                            <label for="fuel-per-lap-display-input" class="text-sm font-medium text-gray-700">Fuel Use per Lap (L)</label>
-                            <input type="number" id="fuel-per-lap-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <label for="fuel-per-lap-display-input" class="text-sm font-medium text-neutral-500">Fuel Use per Lap (L)</label>
+                            <input type="number" id="fuel-per-lap-display-input" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                         <div class="flex flex-col">
-                            <label for="tank-capacity-display-input" class="text-sm font-medium text-gray-700">Fuel Tank Size (L)</label>
-                            <input type="number" id="tank-capacity-display-input" class="mt-1 p-2 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <label for="tank-capacity-display-input" class="text-sm font-medium text-neutral-500">Fuel Tank Size (L)</label>
+                            <input type="number" id="tank-capacity-display-input" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                         <div class="mt-4 flex justify-end">
                             <button id="calculate-page2-button" onclick="calculateAndShowPage2()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
@@ -276,105 +222,105 @@
 
 
                 
-                <div id="overall-summary" class="p-6 bg-blue-100 border border-blue-200 rounded-lg hidden">
-                    <h3 class="text-xl text-blue-800 road-rage-font mb-8">Overall Strategy Summary</h3>
-                    <div class="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-4 text-blue-800">
+                <div id="overall-summary" class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mb-6">
+                            <h3 class="text-xl font- mb-4 road-rage-font mb-8">Live Overall Strategy Summary</h3>
+                            <div class="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-4 text-neutral-100">
                         <div>
                             <div class="flex flex-col items-center">
-                                <i class="fa-solid fa-flag-checkered fa-2xl text-blue-800 mb-4"></i>
-                                <span id="est-laps-display" class="font-semibold text-lg text-blue-800"></span>
-                                <span class="text-sm mb-4">Est. Laps</span>
+                                <i class="fa-solid fa-flag-checkered fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                <span id="est-laps-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                <span class="text-sm mb-4 text-neutral-500">Est. Laps</span>
                             </div>
                         </div>
                         <div>
                             <div class="flex flex-col items-center">
-                                <i class="fa-solid fa-hourglass-half fa-2xl text-blue-800 mb-4"></i>
-                                <span id="stint-duration-display" class="font-semibold text-lg text-blue-800"></span>
-                                <span class="text-sm mb-4">Stint Duration</span>
+                                <i class="fa-solid fa-hourglass-half fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                <span id="stint-duration-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                <span class="text-sm mb-4 text-neutral-500">Stint Duration</span>
                             </div>
                         </div>
                         <div>
                             <div class="flex flex-col items-center">
-                                <i class="fa-solid fa-flag fa-2xl text-blue-800 mb-4"></i>
-                                <span id="laps-per-stint-display" class="font-semibold text-lg text-blue-800"></span>
-                                <span class="text-sm mb-4">Laps per Stint</span>
+                                <i class="fa-solid fa-flag fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                <span id="laps-per-stint-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                <span class="text-sm mb-4 text-neutral-500">Laps per Stint</span>
                             </div>
                         </div>
                         <div>
                             <div class="flex flex-col items-center">
-                                <i class="fa-solid fa-hand fa-2xl text-blue-800 mb-4"></i>
-                                <span id="pit-stops-display" class="font-semibold text-lg text-blue-800"></span>
-                                <span class="text-sm mb-4">Pit Stops</span>
+                                <i class="fa-solid fa-hand fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                <span id="pit-stops-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                <span class="text-sm mb-4 text-neutral-500">Pit Stops</span>
                             </div>
                         </div>
                         <div>
                             <div class="flex flex-col items-center">
-                                <i class="fa-solid fa-gas-pump fa-2xl text-blue-800 mb-4"></i>
-                                <span id="total-fuel-display" class="font-semibold text-lg text-blue-800"></span>
-                                <span class="text-sm mb-4">Total Fuel</span>
+                                <i class="fa-solid fa-gas-pump fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                <span id="total-fuel-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                <span class="text-sm mb-4 text-neutral-500">Total Fuel</span>
                             </div>
                         </div>
                         <div>
                             <div class="flex flex-col items-center">
-                                <i class="fa-solid fa-droplet fa-2xl text-blue-800 mb-4"></i>
-                                <span id="fuel-per-lap-display" class="font-semibold text-lg text-blue-800"></span>
-                                <span class="text-sm mb-4">Fuel per Lap</span>
+                                <i class="fa-solid fa-droplet fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                <span id="fuel-per-lap-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                <span class="text-sm mb-4 text-neutral-500">Fuel per Lap</span>
                             </div>
                         </div>
                         <div>
                             <div class="flex flex-col items-center">
-                                <i class="fa-solid fa-stopwatch fa-2xl text-blue-800 mb-4"></i>
-                                <span id="lap-time-display" class="font-semibold text-lg text-blue-800"></span>
-                                <span class="text-sm mt-1">Lap Time</span>
+                                <i class="fa-solid fa-stopwatch fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                <span id="lap-time-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                <span class="text-sm mt-1 text-neutral-500">Lap Time</span>
                             </div>
                         </div>
                         <div>
                             <div class="flex flex-col items-center">
-                                <i class="fa-solid fa-stopwatch fa-2xl text-blue-800 mb-4"></i>
-                                <span id="pit-stop-duration-display" class="font-semibold text-lg text-blue-800"></span>
-                                <span class="text-sm mb-4">Pit Stop Duration</span>
+                                <i class="fa-solid fa-stopwatch fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                <span id="pit-stop-duration-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                <span class="text-sm mb-4 text-neutral-500">Pit Stop Duration</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="sliders-container" class="p-6 bg-gray-50 border border-gray-200 rounded-lg !mb-6 hidden">
-                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Dynamic Adjustments</h3>
+                <div id="sliders-container" class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg !mb-6 hidd">
+                    <h1 class="text-xl mb-4 road-rage-font">Dynamic Adjustments</h1>
                         <div class="flex-grow w-full">
-                            <label for="fuel-slider" class="text-sm font-medium text-gray-700">Adjust Fuel per Lap</label>
+                            <label for="fuel-slider" class="text-sm font-medium text-neutral-500">Adjust Fuel per Lap</label>
                             <div class="flex items-center mt-1 space-x-2">
-                                <button onclick="adjustSlider('fuel', -0.05)" class="p-1 rounded-full text-white bg-gray-400 hover:bg-gray-500 transition-colors duration-200">-</button>
+                                <button onclick="adjustSlider('fuel', -0.05)" class="p-1 rounded-full text-white bg-neutral-800 hover:bg-neutral-500 transition-colors duration-200">-</button>
                                 <input type="range" id="fuel-slider" min="-2.0" max="2.0" value="0" step="0.05" class="w-full">
-                                <button onclick="adjustSlider('fuel', 0.05)" class="p-1 rounded-full text-white bg-gray-400 hover:bg-gray-500 transition-colors duration-200">+</button>
-                                <span id="fuel-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.00</span>
+                                <button onclick="adjustSlider('fuel', 0.05)" class="p-1 rounded-full text-white bg-neutral-800 hover:bg-neutral-500 transition-colors duration-200">+</button>
+                                <span id="fuel-slider-value" class="text-neutral-100 font-mono text-sm w-12 text-right">0.00</span>
                             </div>
                         </div>
                         <div class="flex-grow w-full">
-                            <label for="lap-time-slider" class="text-sm font-medium text-gray-700">Adjust Lap Time</label>
+                            <label for="lap-time-slider" class="text-sm font-medium text-neutral-500">Adjust Lap Time</label>
                             <div class="flex items-center mt-1 space-x-2">
-                                <button onclick="adjustSlider('lapTime', -0.05)" class="p-1 rounded-full text-white bg-gray-400 hover:bg-gray-500 transition-colors duration-200">-</button>
+                                <button onclick="adjustSlider('lapTime', -0.05)" class="p-1 rounded-full text-white bg-neutral-800 hover:bg-neutral-500 transition-colors duration-200">-</button>
                                 <input type="range" id="lap-time-slider" min="-3" max="3" value="0" step="0.05" class="w-full">
-                                <button onclick="adjustSlider('lapTime', 0.05)" class="p-1 rounded-full text-white bg-gray-400 hover:bg-gray-500 transition-colors duration-200">+</button>
-                                <span id="lap-time-slider-value" class="text-gray-900 font-mono text-sm w-12 text-right">0.00</span>
+                                <button onclick="adjustSlider('lapTime', 0.05)" class="p-1 rounded-full text-white bg-neutral-800 hover:bg-neutral-500 transition-colors duration-200">+</button>
+                                <span id="lap-time-slider-value" class="text-neutral-100 font-mono text-sm w-12 text-right">0.00</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                   
-                <div id="stint-breakdown-display" class="p-6 bg-gray-50 border border-gray-200 rounded-lg overflow-x-auto hidden">
-                    
+                <div id="stint-breakdown-display" class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg overflow-x-auto hidd">
+                    <h1 class="text-xl font- mb-4  road-rage-font">Stints</h1>
                             <div class="flex flex-col mb-4">
-                            <label class="text-sm font-medium text-gray-700">Race Start (UTC) & Qualifying</label>
+                            <label class="text-sm font-medium text-neutral-500">Race Start (UTC) & Qualifying</label>
                             <div class="flex items-center space-x-2">
-                                <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-gray-700 font-bold">+</span>
-                                <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-3 border border-gray-300 rounded-lg text-gray-800 bg-white w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-sm font-medium text-gray-700">min (Qualifying)</span>
+                                <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-neutral-500 font-bold">+</span>
+                                <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-sm font-medium text-neutral-500">min (Qualifying)</span>
                             </div>
                             <div class="mt-4">
-                                <label for="timezone-select" class="text-sm font-medium text-gray-700">Display Time Zone</label>
-                                <select id="timezone-select" class="mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-black">
+                                <label for="timezone-select" class="text-sm font-medium text-neutral-500">Time Zone</label>
+                                <select id="timezone-select" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-neutral-100">
                                     <option value="UTC">UTC</option>
                                     <option value="US/Samoa">SST (GMT-11)</option>
                                     <option value="America/Adak">HAST (GMT-10)</option>
@@ -402,31 +348,31 @@
                                     <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="calculateAndShowPage2()">Update</button>
                         </div>
                     
-                    <table class= "min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg">
-                        <thead class="bg-gray-200">
+                    <table class= "min-w-full divide-y divide-neutral-600 border border-neutral-700 rounded-lg">
+                        <thead class="bg-neutral-900">
                             <tr>
-                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Time</th>
-                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Time</th>
-                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Start Lap</th>
-                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">End Lap</th>
-                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Laps per Stint</th>
-								<th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Driver</th>
-								<th class="w-20 px-1 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-gray-300">Backup</th>
+                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">Start Time</th>
+                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">End Time</th>
+                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">Start Lap</th>
+                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">End Lap</th>
+                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">Laps per Stint</th>
+								<th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">Driver</th>
+								<th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">Backup</th>
                             </tr>
                         </thead>
-                        <tbody id="stint-table-body" class="bg-white divide-y divide-gray-200">
+                        <tbody id="stint-table-body" class="bg-neutral-800 divide-y divide-neutral-600">
                         </tbody>
                     </table>
                 </div>
 
-                <div id="share-link-container" class="p-6 bg-purple-100 border border-purple-200 rounded-lg hidden">
-                    <h3 class="text-xl font- mb-4 text-purple-800 road-rage-font">Share/Save This Strategy</h3>
+                <div id="share-link-container" class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg hidd">
+                    <h1 class="text-xl font- mb-4  road-rage-font">Share/Save This Strategy</h1>
                     <div class="flex items-center space-x-2">
-                        <button onclick="generateShareLink()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                        <button onclick="generateShareLink()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-share-alt mr-2"></i> Generate Link
                         </button>
-                        <input type="text" id="share-link-output" readonly class="flex-grow w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-copy" placeholder="Click 'Generate Link' to create a shareable URL">
-                        <button onclick="copyShareLink()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                        <input type="text" id="share-link-output" readonly class="flex-grow w-full p-2 border border-neutral-600 rounded-lg bg-neutral-800 text-neutral-100 cursor-copy" placeholder="Click 'Generate Link' to create a shareable URL">
+                        <button onclick="copyShareLink()" class="bg-neutral-800 hover:bg-cyan-400 text-neutral-500 hover:text-black font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-copy"></i>
                         </button>
                          </div>
@@ -434,28 +380,28 @@
                     </div>
                 <div id="page-3" class="hidden space-y-6">
                         <div class="flex items-center space-x-4 mb-6">
-                            <button onclick="showPage2()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                            <button onclick="showPage2()" class="bg-neutral-900 hover:bg-fuchsia-500 hover:text-black text-neutral-500 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                                 <i class="fas fa-arrow-left mr-2"></i> Back
                             </button>
                         </div>
                        
                     </div> 
 
-            <div id="admin-page" class="hidden">
+            <div id="admin-page" class="hidd">
                 <button onclick="saveDataToServer()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                     Save All Changes
                 </button>
 
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
-                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Manage Drivers</h3>
+                <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mt-6">
+                    <h1 class="text-xl font- mb-4  road-rage-font">Manage Drivers</h1>
                     <div class="space-y-4">
                         <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
                             <div class="flex-grow">
-                                <input type="text" id="new-driver-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="text" id="new-driver-name" placeholder="Driver Name" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             <div>
-                                <label for="new-driver-number" class="text-sm font-medium text-gray-700">Driver Number</label>
-                                <input type="number" id="new-driver-number" class="mt-1 p-3 border border-gray-300 rounded-lg w-28 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <label for="new-driver-number" class="text-sm font-medium text-neutral-500">Driver Number</label>
+                                <input type="number" id="new-driver-number" placeholder="IR Number"class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-28 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             <button id="add-driver-btn" onclick="addDriverAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                                 Add Driver
@@ -465,12 +411,12 @@
                     </div>
                 </div>
 
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
-                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Manage Cars</h3>
+                <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mt-6">
+                    <h1 class="text-xl font- mb-4  road-rage-font">Manage Cars</h1>
                     <div class="space-y-4">
                         <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
                             <div class="flex-grow">
-                                <input type="text" id="new-car-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="text" id="new-car-name" placeholder="Car Name" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             <button id="add-car-btn" onclick="addCarAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                                 Add Car
@@ -480,12 +426,12 @@
                     </div>
                 </div>
                 
-                <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg mt-6">
-                    <h3 class="text-xl font- mb-4 text-gray-800 road-rage-font">Manage Tracks</h3>
+                <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mt-6">
+                    <h1 class="text-xl font- mb-4  road-rage-font">Manage Tracks</h1>
                     <div class="space-y-4">
                         <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
                             <div class="flex-grow">
-                                <input type="text" id="new-track-name" class="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="text" id="new-track-name" placeholder="Track Name" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             <button id="add-track-btn" onclick="addTrackAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                                 Add Track
@@ -575,8 +521,8 @@
             document.getElementById('page-2').classList.add('hidden');
             document.getElementById('admin-page').classList.add('hidden');
             document.getElementById('race-details-btn').classList.add('bg-blue-600', 'text-white');
-            document.getElementById('race-details-btn').classList.remove('bg-gray-300', 'text-gray-800');
-            document.getElementById('admin-btn').classList.add('bg-gray-300', 'text-gray-800');
+            document.getElementById('race-details-btn').classList.remove('bg-neutral-300', 'text-neutral-500');
+            document.getElementById('admin-btn').classList.add('bg-neutral-300', 'text-neutral-500');
             document.getElementById('admin-btn').classList.remove('bg-blue-600', 'text-white');
         }
         function showAdminPage() {
@@ -584,8 +530,8 @@
             document.getElementById('page-2').classList.add('hidden');
             document.getElementById('admin-page').classList.remove('hidden');
             document.getElementById('admin-btn').classList.add('bg-blue-600', 'text-white');
-            document.getElementById('admin-btn').classList.remove('bg-gray-300', 'text-gray-800');
-            document.getElementById('race-details-btn').classList.add('bg-gray-300', 'text-gray-800');
+            document.getElementById('admin-btn').classList.remove('bg-neutral-300', 'text-neutral-500');
+            document.getElementById('race-details-btn').classList.add('bg-neutral-300', 'text-neutral-500');
             document.getElementById('race-details-btn').classList.remove('bg-blue-600', 'text-white');
             renderAdminLists();
             resetDriverAdminForm();
@@ -755,7 +701,7 @@
             list.innerHTML = '';
             selectedDrivers.forEach(driver => {
                 const li = document.createElement('li');
-                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.className = 'flex items-center justify-between bg-neutral-800 p-3 rounded-lg shadow-sm';
                 li.innerHTML = `<span>${driver.name}</span> <button onclick="removeDriver('${driver.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>`;
                 list.appendChild(li);
             });
@@ -800,16 +746,16 @@
 				        
 				        const tr = document.createElement('tr');
 				        tr.innerHTML = `
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${startTimeString}</td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${endTimeString}</td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${startLap}</td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${endLap}</td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">${stintLaps}</td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500 border-r border-gray-300 dark:border-gray-500">
-				                <select id="stint-driver-${i}" class="w-auto bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-3 rounded-md border border-gray-300 dark:border-gray-500"></select>
+				            <td class="px-1 py-4 text-center text-s text-neutral-100 border-r border-neutral-700">${startTimeString}</td>
+				            <td class="px-1 py-4 text-center text-s text-neutral-100 border-r border-neutral-700">${endTimeString}</td>
+				            <td class="px-1 py-4 text-center text-s text-neutral-100 border-r border-neutral-700">${startLap}</td>
+				            <td class="px-1 py-4 text-center text-s text-neutral-100 border-r border-neutral-700">${endLap}</td>
+				            <td class="px-1 py-4 text-center text-s text-neutral-100 border-r border-neutral-700">${stintLaps}</td>
+				            <td class="px-1 py-4 text-center text-s text-neutral-100 border-r border-neutral-700">
+				                <select id="stint-driver-${i}" class="w-auto bg-neutral-800 text-neutral-100 p-3 rounded-md border border-neutral-700"></select>
 				            </td>
-				            <td class="px-1 py-4 text-center text-sm text-gray-500">
-				                <select id="stint-backup-driver-${i}" class="w-auto bg-white dark:bg-[#2a2a2a] text-black dark:text-white p-3 rounded-md border border-gray-300 dark:border-gray-500"></select>
+				            <td class="px-1 py-4 text-center text-s text-neutral-100">
+				                <select id="stint-backup-driver-${i}" class="w-auto bg-neutral-800 text-neutral-100 p-3 rounded-md border border-neutral-700"></select>
 				            </td>
 				        `;
 				        tbody.appendChild(tr);
@@ -962,7 +908,7 @@
 
             drivers.forEach(driver => {
                 const li = document.createElement('li');
-                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.className = 'flex items-center justify-between bg-neutral-800 p-3 rounded-lg shadow-sm';
                 li.innerHTML = `
                     <span>${driver.name} (#${driver.drivernumber})</span>
                     <div class="space-x-2">
@@ -975,7 +921,7 @@
 
             cars.forEach(car => {
                 const li = document.createElement('li');
-                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.className = 'flex items-center justify-between bg-neutral-800 p-3 rounded-lg shadow-sm';
                 li.innerHTML = `
                     <span>${car.name}</span>
                     <div class="space-x-2">
@@ -988,7 +934,7 @@
 
             tracks.forEach(track => {
                 const li = document.createElement('li');
-                li.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
+                li.className = 'flex items-center justify-between bg-neutral-800 p-3 rounded-lg shadow-sm';
                 li.innerHTML = `
                     <span>${track.name}</span>
                     <div class="space-x-2">
