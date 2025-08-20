@@ -499,29 +499,19 @@
                 if (strategyId) {
                     // If an ID exists, fetch the specific strategy from the server
                     const strategyResponse = await fetch(`/api/strategies/${strategyId}`);
-                     // Replace your old if-statement with this one to handle the 304 status
-                            if (!strategyResponse.ok && strategyResponse.status !== 304) {
-                                throw new Error('Failed to load shared strategy.');
-                            }
-                            
-                            // This code will now execute because a 304 status is allowed
-                            const state = await strategyResponse.json();
-                            loadState(state);
-
-                            showPage2(); // First, tell the page to switch to page 2
-            
-                            setTimeout(() => {
-                                // Wait 100 milliseconds for the page to render
-                                calculateAndShowPage2(); 
-                            }, 100);
+                    if (!strategyResponse.ok) {
+                        throw new Error('Failed to load shared strategy.');
+                    }
+                    const state = await strategyResponse.json();
+                    loadState(state);
                 } else {
                     // If no ID is in the URL, show the first page as normal
                     showPlannerPage();
                 }
 
             } catch (error) {
-                console.error('Failed to fetch data or load strategy:', error);
-                alert('Could not load data from the server. Please check the server status.');
+                //console.error('Failed to fetch data or load strategy:', error);
+                //alert('Could not load data from the server. Please check the server status.');
             }
         }
 
@@ -883,8 +873,8 @@
 		            calculateAndShowPage2();
 		
 		        } catch (error) {
-		            console.error('Error loading strategy:', error);
-		            alert('Could not load strategy from the provided link.');
+		            //console.error('Error loading strategy:', error);
+		            //alert('Could not load strategy from the provided link.');
 		        }
 		    } else {
 		        // If no ID is in the URL, initialize the page as normal
