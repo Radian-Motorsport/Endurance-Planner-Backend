@@ -500,7 +500,7 @@
                     // If an ID exists, fetch the specific strategy from the server
                     const strategyResponse = await fetch(`/api/strategies/${strategyId}`);
                     if (!strategyResponse.ok) {
-                        throw new Error('Failed to load shared strategy.');
+                        //throw new Error('Failed to load shared strategy.');
                     }
                     const state = await strategyResponse.json();
                     loadState(state);
@@ -539,7 +539,7 @@
             resetTrackAdminForm();
         }
         function showPage2() {
-                    // Comment out this block for testing:
+                     //Comment out this block for testing:
              const carSelect = document.getElementById('car-select');
              const trackSelect = document.getElementById('track-select');
              if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
@@ -1197,7 +1197,6 @@
 		</script>
 </body>
 </html>
-
 
 
 
