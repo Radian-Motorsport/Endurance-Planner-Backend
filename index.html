@@ -94,10 +94,14 @@
 </head>
 <body class="bg-neutral-900 text-neutral-100 p-4">
     
-    <div class="max-w-4xl mx-auto bg-neutral-00 p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500">
-    <div class="text-center mb-6">
+    <div class="max-w-4xl mx-auto bg-neutral-900 p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500">
+        <div class="text-center mb-6">
             <img src="https://github.com/Radian-Motorsport/Endurance-Planner-Backend/blob/main/g457912.png?raw=true" alt="?" class="mx-auto w-100  h-auto">
         </div>
+    
+        <button id="admin-btn" onclick="showAdminPage()" class="bg-neutral-900 hover:bg-green-600 text-black font-bold py-1 px-1 rounded-lg  transition-all duration-200 transform hover:scale-105 space-x-2 mt-12">
+        </button>  
+        
     <div class="container mx-auto max-w-4xl p-8 bg-neutral-800 rounded-2xl shadow-lg border border-neutral-700">
 
         <div id="app-container">
@@ -105,9 +109,7 @@
                 <button id="race-details-btn" onclick="showPlannerPage()" class="bg-neutral-800 hover:bg-blue-700 text-black font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
                     <i class="fas fa-car-side text-black"></i> <span>Race Details</span>
                 </button>
-                <button id="admin-btn" onclick="showAdminPage()" class="bg-neutral-800 hover:bg-green-600 text-black font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
-                    <i class="fas fa-user-shield text-black"></i> <span>Admin</span>
-                </button>
+                
             <a href="livev2.html">
             <button class="bg-neutral-800 hover:bg-red-500 text-black font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">LIVE</button>
             </a>
@@ -435,6 +437,8 @@
             </div>
         </div>
     </div>
+                    
+                </button>
     <script>
         // Global state
         let drivers = [];
