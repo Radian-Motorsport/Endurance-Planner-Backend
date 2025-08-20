@@ -53,7 +53,12 @@
         .road-rage-font {
             font-family: 'RoadRage', sans-serif;
         }
-        
+        .icon-shadow {
+            filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.5));
+        }
+        .text-shadow {
+            filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.5));
+        }
         
         select {
             max-width: 100%;
@@ -166,7 +171,7 @@
                             <input type="number" id="live-pit-stop-time" value="" min="0" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 mb-6">
                         </div>
                         <div class="mt-4 flex justify-end">
-                            <button id="calculate-page3-button" onclick="handleRecalculation()" class="bg-neutral-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mb-6">
+                            <button id="calculate-page3-button" onclick="handleRecalculation()" class="bg-neutral-800 hover:bg-blue-700 text-neutral-100 font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mb-6">
                                 Calculate
                             </button>
                         </div>
@@ -186,53 +191,53 @@
     <div class="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-4 text-neutral-100">
         <div>
             <div class="flex flex-col items-center">
-                <i class="fa-solid fa-flag-checkered fa-2xl text-neutral-200 mb-4"></i>
-                <span id="live-est-laps-display" class="font-semibold text-lg text-neutral-100"></span>
+                <i class="fa-solid fa-flag-checkered fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                <span id="live-est-laps-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
                 <span class="text-sm mb-4 text-neutral-500">Est. Laps</span>
             </div>
         </div>
         <div>
             <div class="flex flex-col items-center">
-                <i class="fa-solid fa-hourglass-half fa-2xl text-neutral-200 mb-4"></i>
-                <span id="live-stint-duration-display" class="font-semibold text-lg text-neutral-100"></span>
+                <i class="fa-solid fa-hourglass-half fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                <span id="live-stint-duration-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
                 <span class="text-sm mb-4 text-neutral-500">Stint Duration</span>
             </div>
         </div>
         <div>
             <div class="flex flex-col items-center">
-                <i class="fa-solid fa-flag fa-2xl text-neutral-200 mb-4"></i>
-                <span id="live-laps-per-stint-display" class="font-semibold text-lg text-neutral-100"></span>
+                <i class="fa-solid fa-flag fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                <span id="live-laps-per-stint-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
                 <span class="text-sm mb-4 text-neutral-500">Laps per Stint</span>
             </div>
         </div>
         <div>
             <div class="flex flex-col items-center">
-                <i class="fa-solid fa-hand fa-2xl text-neutral-200 mb-4"></i>
-                <span id="live-pit-stops-display" class="font-semibold text-lg text-neutral-100"></span>
+                <i class="fa-solid fa-hand fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                <span id="live-pit-stops-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
                 <span class="text-sm mb-4 text-neutral-500">Pit Stops</span>
             </div>
         </div>
         <div>
             <div class="flex flex-col items-center">
-                <i class="fa-solid fa-gas-pump fa-2xl text-neutral-200 mb-4"></i>
-                <span id="live-total-fuel-display" class="font-semibold text-lg text-neutral-100"></span>
+                <i class="fa-solid fa-gas-pump fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                <span id="live-total-fuel-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
                 <span class="text-sm mb-4 text-neutral-500">Total Fuel</span>
             </div>
         </div>
         <div>
             <div class="flex flex-col items-center">
-                <i class="fa-solid fa-droplet fa-2xl text-neutral-200 mb-4"></i>
-                <span id="live-fuel-per-lap-display" class="font-semibold text-lg text-neutral-100"></span>
+                <i class="fa-solid fa-droplet fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                <span id="live-fuel-per-lap-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
                 <span class="text-sm mb-4 text-neutral-500">Fuel per Lap</span>
             </div>
         </div>
         <div>
             <div class="flex flex-col items-center">
-                <i class="fa-solid fa-stopwatch fa-2xl text-neutral-200 mb-4"></i>
+                <i class="fa-solid fa-stopwatch fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
                 <div class="flex items-baseline space-x-1">
-                    <span id="live-lap-time-minutes-display" class="font-semibold text-lg text-neutral-100">00</span>
+                    <span id="live-lap-time-minutes-display" class="font-semibold text-lg text-neutral-100 text-shadow">00</span>
                     <span class="text-sm">m</span>
-                    <span id="live-lap-time-seconds-display" class="font-semibold text-lg text-neutral-100">00</span>
+                    <span id="live-lap-time-seconds-display" class="font-semibold text-lg text-neutral-100 text-shadow">00</span>
                     <span class="text-sm">s</span>
                 </div>
                 <span class="text-sm mt-1 text-neutral-500">Lap Time</span>
@@ -240,8 +245,8 @@
         </div>
         <div>
             <div class="flex flex-col items-center">
-                <i class="fa-solid fa-stopwatch fa-2xl text-neutral-200 mb-4"></i>
-                <span id="live-pit-stop-duration-display" class="font-semibold text-lg text-neutral-100"></span>
+                <i class="fa-solid fa-stopwatch fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                <span id="live-pit-stop-duration-display" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
                 <span class="text-sm mb-4 text-neutral-500">Pit Stop Duration</span>
             </div>
         </div>
@@ -320,15 +325,15 @@
    
             <div id="timers" class="hidden">
                     <div>
-                    <p class="flex justify-between items-center bg-neutral-200 text-black py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6">
+                    <p class="flex justify-between items-center bg-neutral-900 text-neutral-600 py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6">
                         <span>TIME REMAINING</span>
                         <span id="countdown-timer" class="absolute left-1/2 -translate-x-1/2 !text-4xl !text-green-600">00:00:00</span>
                     </p>
-                    <p class="flex justify-between items-center bg-neutral-200 text-black text-sm py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6">
+                    <p class="flex justify-between items-center bg-neutral-900 text-neutral-600 text-sm py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6">
                         <span>NEXT STOP</span>
                         <span id="next-pitstop-time" class="absolute left-1/2 -translate-x-1/2 text-xl !text-orange-500">00:00:00</span>
                     </p>
-                    <p id="in-pit-display" class="flex justify-between items-center bg-orange-500 text-black text-sm py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6 hidden">
+                    <p id="in-pit-display" class="flex justify-between items-center bg-orange-500 text-neutral-200 text-sm py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 mb-6 hidden">
                         <span class="flex-grow text-center text-xl !text-white">IN PIT</span>
                         <h2 id="pit-timer-countdown" class="hidden text-3xl font-bold text-center text-bg-orange-500 mb-6"></h2>
                     </p>
@@ -338,21 +343,21 @@
             </div> 
 
             <div id="stint-trackers" class="flex justify-end px-4 font-semibold text-neutral-800 gap-x-4 hidden">
-                    <div class="bg-neutral-200 hover:bg-yellow-500 text-white dark:text-black font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mb-6">   Current Stint: <span id="current-stint-display">1</span>
+                    <div class="bg-neutral-800 hover:bg-yellow-500 text-black py-2 text-sm px-4 rounded-md transition-all duration-200 transform hover:scale-105 mb-4">   Current Stint: <span id="current-stint-display">1</span>
                     </div>
-                    <div class="bg-neutral-200 hover:bg-orange-500 text-white dark:text-black font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mb-6">   Active Pit Stop: <span id="current-pit-display">0</span>
+                    <div class="bg-neutral-800 hover:bg-orange-500 text-black py-2 text-sm px-4 rounded-md transition-all duration-200 transform hover:scale-105 mb-4">   Active Pit Stop: <span id="current-pit-display">0</span>
                     </div>
                 </div>
-                <div id="live-table" class="hidden class=bg-neutral-50 p-4 rounded-lg">     
+                <div id="live-table" class="hidden class=bg-neutral-700 p-4 rounded-lg">     
                     <table id="live-stint-table" class="min-w-full rounded-lg mt-6">
-                        <thead class="bg-neutral-200">
+                        <thead class="bg-neutral-700">
                             <tr>
-                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-700 border-r border-neutral-600 uppercase tracking-wider">Stint</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-700 border-r border-neutral-600 uppercase tracking-wider">Start Time</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-700 border-r border-neutral-600 uppercase tracking-wider">End Time</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-700 border-r border-neutral-600 uppercase tracking-wider">Stint Duration</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-700 border-r border-neutral-600 uppercase tracking-wider">Stint Laps</th>
-                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-700 uppercase tracking-wider">Fuel Per Stint (L)</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-200 border-r border-neutral-600 uppercase tracking-wider">Stint</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-200 border-r border-neutral-600 uppercase tracking-wider">Start Time</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-200 border-r border-neutral-600 uppercase tracking-wider">End Time</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-200 border-r border-neutral-600 uppercase tracking-wider">Stint Duration</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-200 border-r border-neutral-600 uppercase tracking-wider">Stint Laps</th>
+                                <th class="px-1 py-3 text-center text-m font-medium text-neutral-200 uppercase tracking-wider">Fuel Per Stint (L)</th>
                             </tr>
                         </thead>
                         <tbody id="live-stint-table-body">
