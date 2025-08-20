@@ -109,7 +109,7 @@
                     <i class="fas fa-user-shield"></i> <span>Admin</span>
                 </button>
             <a href="livev2.html">
-            <button class="bg-neutral-800 :bg-red-500 text-black font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">LIVE</button>
+            <button class="bg-neutral-800 hover:bg-red-500 text-black font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">LIVE</button>
             </a>
             <a href="championship-tracker-v6.html">
             <button class="bg-neutral-800 hover:bg-orange-500 text-black font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">MX5 Results</button>
@@ -539,13 +539,13 @@
             resetTrackAdminForm();
         }
         function showPage2() {
-                    // Comment out this block for testing:
-             //const carSelect = document.getElementById('car-select');
-             //const trackSelect = document.getElementById('track-select');
-             //if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
-             //    alert("Please select at least one driver, a car, and a track before continuing.");
-             //    return;
-             //}
+                     Comment out this block for testing:
+             const carSelect = document.getElementById('car-select');
+             const trackSelect = document.getElementById('track-select');
+             if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+                 alert("Please select at least one driver, a car, and a track before continuing.");
+                 return;
+             }
             document.getElementById('planner-page').classList.add('hidden');
             document.getElementById('page-2').classList.remove('hidden');
             document.getElementById('admin-page').classList.add('hidden');
