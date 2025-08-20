@@ -168,10 +168,6 @@
                             <label for="live-tank-capacity-display-input" class="text-sm font-medium text-neutral-500">Live Fuel Tank Size (ltr)</label>
                             <input type="number" id="live-tank-capacity-display-input" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
-                        <div class="flex flex-col">
-                            <label for="live-pit-stop-time" class="text-sm font-medium text-neutral-500">Standard Pit Stop Time (s)</label>
-                            <input type="number" id="live-pit-stop-time" value="" min="0" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 mb-6">
-                        </div>
                         <div class="mt-4 flex justify-end">
                             <button id="calculate-page3-button" onclick="handleRecalculation()" class="bg-neutral-800 hover:bg-blue-700 text-neutral-100 font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mb-6">
                                 Calculate
@@ -293,7 +289,7 @@
 
         <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
             <div class="flex-grow w-full">
-                <label class="text-sm font-medium text-neutral-700">Pit Stop Time</label>
+                <label class="text-sm font-medium text-neutral-100">Pit Stop Time</label>
                 <div class="flex items-center mt-1 space-x-2">
                     <input type="number" id="live-pit-stop-time-minutes" placeholder="Minutes" value="0" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                     <span class="text-neutral-600">min</span>
@@ -303,7 +299,7 @@
             </div>
 
             <div class="flex-grow w-full">
-                <label class="text-sm font-medium text-neutral-700">Repair Time</label>
+                <label class="text-sm font-medium text-neutral-100">Repair Time</label>
                 <div class="flex flex-col space-y-2 mt-1">
                     <div class="flex items-center space-x-2">
                         <input type="number" id="live-extra-pit-time-minutes" placeholder="Minutes" value="0" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
