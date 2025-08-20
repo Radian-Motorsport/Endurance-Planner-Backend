@@ -507,6 +507,13 @@
                             // This code will now execute because a 304 status is allowed
                             const state = await strategyResponse.json();
                             loadState(state);
+
+                            showPage2(); // First, tell the page to switch to page 2
+            
+                            setTimeout(() => {
+                                // Wait 100 milliseconds for the page to render
+                                calculateAndShowPage2(); 
+                            }, 100);
                 } else {
                     // If no ID is in the URL, show the first page as normal
                     showPlannerPage();
