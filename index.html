@@ -516,7 +516,17 @@
 
         // On initial page load
         window.onload = function() {
+            console.log('🚀 Page loaded, initializing data...');
             fetchDataAndPopulate();
+            
+            // Fallback: If dropdowns are still empty after 2 seconds, try again
+            setTimeout(() => {
+                if (drivers.length === 0 || cars.length === 0 || tracks.length === 0) {
+                    console.log('⚠️ Dropdowns still empty, retrying data fetch...');
+                    fetchDataAndPopulate();
+                }
+            }, 2000);
+            
             // Event listeners for dynamic sliders
             const fuelSlider = document.getElementById('fuel-slider');
             const fuelSliderValue = document.getElementById('fuel-slider-value');
@@ -540,23 +550,38 @@
         // Function to fetch data from the server
         async function fetchDataAndPopulate() {
             try {
-                // First, fetch the global data (drivers, cars, tracks)
-                const response = await fetch('/api/data');
-                const data = await response.json();
-                drivers = data.drivers;
-                cars = data.cars;
-                tracks = data.tracks;
+                console.log('🔄 Starting to fetch data from API...');
+                
+                // Fetch data from individual endpoints
+                const [driversResponse, carsResponse, tracksResponse] = await Promise.all([
+                    fetch('/api/drivers'),
+                    fetch('/api/cars'),
+                    fetch('/api/tracks')
+                ]);
+
+                if (!driversResponse.ok || !carsResponse.ok || !tracksResponse.ok) {
+                    throw new Error('One or more API endpoints failed');
+                }
+
+                drivers = await driversResponse.json();
+                cars = await carsResponse.json();
+                tracks = await tracksResponse.json();
+                
+                console.log(`✅ Data loaded: ${drivers.length} drivers, ${cars.length} cars, ${tracks.length} tracks`);
                 
                 // Populate the dropdowns
                 populateDrivers();
                 populateCars();
                 populateTracks();
+                
+                console.log('✅ Dropdowns populated successfully');
 
                 // Now, check for a shared strategy link with an ID
                 const urlParams = new URLSearchParams(window.location.search);
                 const strategyId = urlParams.get('id');
 
                 if (strategyId) {
+                    console.log(`🔗 Loading shared strategy: ${strategyId}`);
                     // If an ID exists, fetch the specific strategy from the server
                     const strategyResponse = await fetch(`/api/strategies/${strategyId}`);
                     if (!strategyResponse.ok) {
@@ -570,8 +595,13 @@
                 }
 
             } catch (error) {
-                //console.error('Failed to fetch data or load strategy:', error);
-                //alert('Could not load data from the server. Please check the server status.');
+                console.error('❌ Failed to fetch data:', error);
+                alert('Could not load dropdown data from the server. Please refresh the page or check the server status.');
+                
+                // Set empty arrays to prevent further errors
+                drivers = [];
+                cars = [];
+                tracks = [];
             }
         }
 
@@ -816,33 +846,63 @@
 
         function populateDrivers() {
             const select = document.getElementById('driver-select');
+            if (!select) {
+                console.error('❌ Driver select element not found');
+                return;
+            }
             select.innerHTML = '<option value="">Select a Driver...</option>';
+            if (!drivers || drivers.length === 0) {
+                console.warn('⚠️ No drivers data available');
+                select.innerHTML = '<option value="">No drivers available</option>';
+                return;
+            }
             drivers.forEach(driver => {
                 const option = document.createElement('option');
                 option.value = driver.name;
                 option.textContent = driver.name;
                 select.appendChild(option);
             });
+            console.log(`✅ Populated ${drivers.length} drivers`);
         }
         function populateCars() {
             const select = document.getElementById('car-select');
+            if (!select) {
+                console.error('❌ Car select element not found');
+                return;
+            }
             select.innerHTML = '<option value="">Select a Car...</option>';
+            if (!cars || cars.length === 0) {
+                console.warn('⚠️ No cars data available');
+                select.innerHTML = '<option value="">No cars available</option>';
+                return;
+            }
             cars.forEach(car => {
                 const option = document.createElement('option');
                 option.value = car.name;
                 option.textContent = car.name;
                 select.appendChild(option);
             });
+            console.log(`✅ Populated ${cars.length} cars`);
         }
         function populateTracks() {
             const select = document.getElementById('track-select');
+            if (!select) {
+                console.error('❌ Track select element not found');
+                return;
+            }
             select.innerHTML = '<option value="">Select a Track...</option>';
+            if (!tracks || tracks.length === 0) {
+                console.warn('⚠️ No tracks data available');
+                select.innerHTML = '<option value="">No tracks available</option>';
+                return;
+            }
             tracks.forEach(track => {
                 const option = document.createElement('option');
                 option.value = track.name;
                 option.textContent = track.name;
                 select.appendChild(option);
             });
+            console.log(`✅ Populated ${tracks.length} tracks`);
         }
         function addDriver() {
             const select = document.getElementById('driver-select');
