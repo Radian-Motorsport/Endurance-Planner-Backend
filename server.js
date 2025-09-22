@@ -334,6 +334,27 @@ app.get('/api/strategies/:id', async (req, res) => {
     }
 });
 
+// Test endpoint to check Garage61 token permissions
+app.get('/api/garage61/me', async (req, res) => {
+    try {
+        const token = process.env.GARAGE61_TOKEN || 'MWVKZTRMOGETNDCZOS0ZMJUZLTK2ODITNJBJZMQ5NMU4M2I5';
+        const response = await axios.get('https://garage61.net/api/v1/me', {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 10000
+        });
+        
+        console.log('🔑 Garage61 token permissions:', response.data);
+        return res.status(200).json(response.data);
+    } catch (err) {
+        console.error('❌ Token verification failed:', err.response?.status, err.response?.data);
+        return res.status(500).json({ 
+            error: 'Token verification failed',
+            status: err.response?.status,
+            details: err.response?.data 
+        });
+    }
+});
+
 // --- Proxy to Garage61 to avoid CORS and keep token server-side ---
 app.get('/api/garage61/laps', async (req, res) => {
     try {
