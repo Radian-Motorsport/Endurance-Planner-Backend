@@ -128,7 +128,7 @@ app.post('/api/data', async (req, res) => {
     // Insert new drivers
     for (const driver of drivers) {
       await pool.query('INSERT INTO drivers (name, drivernumber, garage61_slug, firstName, lastName) VALUES ($1, $2, $3, $4, $5)', 
-        [driver.name, parseInt(driver.driverNumber) || null, driver.garage61_slug, driver.firstName, driver.lastName]);
+        [driver.name, driver.driverNumber, driver.garage61_slug, driver.firstName, driver.lastName]);
     }
 
     // Insert new cars
