@@ -789,16 +789,41 @@
                 console.log(`✅ Received ${data?.items?.length || 0} laps for ${driverSlug}`);
                 
                 if (data && data.items && data.items.length > 0) {
-                    // Sort by lap time to get the best (fastest) lap
-                    const sortedLaps = data.items.sort((a, b) => parseFloat(a.lapTime) - parseFloat(b.lapTime));
-                    const bestLap = sortedLaps[0];
+                    console.log(`📊 Processing ${data.items.length} laps for driver ${driverSlug}`);
                     
-                    console.log(`🏆 Best lap for ${driverSlug}: ${bestLap.lapTime}s, fuel: ${bestLap.fuelUsed}L`);
+                    // Filter laps by the specific driver first
+                    const driverLaps = data.items.filter(lap => {
+                        if (!lap.driver) return false;
+                        const driverName = `${lap.driver.firstName || ''} ${lap.driver.lastName || ''}`.trim();
+                        const driverUsername = lap.driver.username || '';
+                        console.log(`🔍 Lap by: ${driverName} (${driverUsername}) vs looking for: ${driverSlug}`);
+                        return driverUsername === driverSlug;
+                    });
                     
-                    return {
-                        lapTime: formatLapTime(parseFloat(bestLap.lapTime)),
-                        fuelUsed: bestLap.fuelUsed ? `${parseFloat(bestLap.fuelUsed).toFixed(2)}` : 'N/A'
-                    };
+                    console.log(`🎯 Found ${driverLaps.length} laps specifically for driver ${driverSlug}`);
+                    
+                    if (driverLaps.length > 0) {
+                        // Sort driver's laps by lap time to get their best (fastest) lap
+                        const sortedLaps = driverLaps.sort((a, b) => parseFloat(a.lapTime) - parseFloat(b.lapTime));
+                        const bestLap = sortedLaps[0];
+                        
+                        console.log(`🏆 Best lap for ${driverSlug}: ${bestLap.lapTime}s, fuel: ${bestLap.fuelUsed}L by ${bestLap.driver.firstName} ${bestLap.driver.lastName}`);
+                        
+                        return {
+                            lapTime: formatLapTime(parseFloat(bestLap.lapTime)),
+                            fuelUsed: bestLap.fuelUsed ? `${parseFloat(bestLap.fuelUsed).toFixed(2)}` : 'N/A'
+                        };
+                    } else {
+                        console.log(`❌ No laps found for specific driver ${driverSlug}, falling back to team best`);
+                        // Fallback: if no laps found for specific driver, get the overall best from team
+                        const sortedLaps = data.items.sort((a, b) => parseFloat(a.lapTime) - parseFloat(b.lapTime));
+                        const bestLap = sortedLaps[0];
+                        
+                        return {
+                            lapTime: formatLapTime(parseFloat(bestLap.lapTime)),
+                            fuelUsed: bestLap.fuelUsed ? `${parseFloat(bestLap.fuelUsed).toFixed(2)}` : 'N/A'
+                        };
+                    }
                 } else {
                     return {
                         lapTime: 'No lap data',
