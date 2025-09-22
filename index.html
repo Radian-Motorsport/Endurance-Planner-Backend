@@ -699,7 +699,7 @@
             try {
                 console.log(`🏁 Fetching lap time for driver:${driverSlug}, car:${carId}, track:${trackId}`);
                 // Call our server-side proxy to avoid CORS and keep token secret
-                const apiUrl = `/api/garage61/laps?cars=${encodeURIComponent(carId)}&tracks=${encodeURIComponent(trackId)}`;
+                const apiUrl = `/api/garage61/laps?cars=${encodeURIComponent(carId)}&tracks=${encodeURIComponent(trackId)}&driver=${encodeURIComponent(driverSlug)}`;
                 const response = await fetch(apiUrl, { method: 'GET' });
                 
                 if (!response.ok) {

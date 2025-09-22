@@ -337,7 +337,7 @@ app.get('/api/strategies/:id', async (req, res) => {
 // --- Proxy to Garage61 to avoid CORS and keep token server-side ---
 app.get('/api/garage61/laps', async (req, res) => {
     try {
-        const { cars, tracks } = req.query;
+        const { cars, tracks, driver } = req.query;
         if (!cars || !tracks) {
             return res.status(400).json({ error: 'Missing required query params: cars, tracks' });
         }
@@ -351,9 +351,9 @@ app.get('/api/garage61/laps', async (req, res) => {
         // Use the correct Garage61 /laps endpoint with proper parameter format
         const url = 'https://garage61.net/api/v1/laps';
         
-        // For your own laps, use 'drivers=me' instead of extraDrivers
+        // Use the actual driver parameter from the request, fallback to 'me' if not provided
         const params = {
-            drivers: ['me'],                          // Get your own laps
+            drivers: driver ? [driver] : ['me'],      // Use selected driver or fallback to 'me'
             cars: [parseInt(cars)],                   // Car IDs as array of numbers
             tracks: [parseInt(tracks)],               // Track IDs as array of numbers  
             group: 'none',                            // Return all laps (not just personal best)
