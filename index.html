@@ -641,6 +641,32 @@
                  alert("Please select at least one driver, a car, and a track before continuing.");
                  return;
              }
+             
+            // Debug: Check what data we have
+            console.log(`🎯 Moving to Page 2 with:`);
+            console.log(`   - Selected Car: "${carSelect.value}"`);
+            console.log(`   - Selected Track: "${trackSelect.value}"`);
+            console.log(`   - Drivers: ${selectedDrivers.length} selected`);
+            console.log(`   - Global Arrays: ${drivers.length} drivers, ${cars.length} cars, ${tracks.length} tracks`);
+            
+            // Find the selected car and track data
+            const selectedCar = cars.find(car => car.name === carSelect.value);
+            const selectedTrack = tracks.find(track => track.name === trackSelect.value);
+            
+            console.log(`   - Selected Car Data:`, selectedCar);
+            console.log(`   - Selected Track Data:`, selectedTrack);
+            
+            if (!selectedCar) {
+                console.error(`❌ Car "${carSelect.value}" not found in cars array`);
+                alert(`Car data not found: "${carSelect.value}". Please try refreshing the page.`);
+                return;
+            }
+            
+            if (!selectedTrack) {
+                console.error(`❌ Track "${trackSelect.value}" not found in tracks array`);
+                alert(`Track data not found: "${trackSelect.value}". Please try refreshing the page.`);
+                return;
+            }
             document.getElementById('planner-page').classList.add('hidden');
             document.getElementById('page-2').classList.remove('hidden');
             document.getElementById('admin-page').classList.add('hidden');
@@ -731,25 +757,35 @@
             const selectedCarName = carSelect.value;
             const selectedTrackName = trackSelect.value;
             
-            // Find the garage61_id from our data
+            // Find the garage61_id from our global data arrays
             let carId = null;
             let trackId = null;
             
             try {
-                // Fetch car ID
-                const carsResponse = await fetch('/api/cars');
-                const cars = await carsResponse.json();
+                // Use global cars array (already loaded)
+                if (!cars || cars.length === 0) {
+                    console.error('❌ Cars array is empty, attempting to reload...');
+                    const carsResponse = await fetch('/api/cars');
+                    cars = await carsResponse.json();
+                }
                 const selectedCar = cars.find(car => car.name === selectedCarName);
                 carId = selectedCar ? selectedCar.garage61_id : null;
                 
-                // Fetch track ID
-                const tracksResponse = await fetch('/api/tracks');
-                const tracks = await tracksResponse.json();
+                // Use global tracks array (already loaded)
+                if (!tracks || tracks.length === 0) {
+                    console.error('❌ Tracks array is empty, attempting to reload...');
+                    const tracksResponse = await fetch('/api/tracks');
+                    tracks = await tracksResponse.json();
+                }
                 const selectedTrack = tracks.find(track => track.name === selectedTrackName);
                 trackId = selectedTrack ? selectedTrack.garage61_id : null;
                 
+                console.log(`🔍 Lookup results: Car "${selectedCarName}" → ID ${carId}, Track "${selectedTrackName}" → ID ${trackId}`);
+                
                 if (!carId || !trackId) {
-                    bestLapElement.textContent = 'Missing car or track data';
+                    const errorMsg = `Missing data: ${!carId ? 'car ID' : ''} ${!trackId ? 'track ID' : ''}`;
+                    console.error(`❌ ${errorMsg}`);
+                    bestLapElement.textContent = errorMsg;
                     return;
                 }
                 
