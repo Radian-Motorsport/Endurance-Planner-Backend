@@ -717,7 +717,7 @@
             drivers.forEach(driver => {
                 const option = document.createElement('option');
                 option.value = driver.name;
-                option.textContent = `${driver.name} ${driver.drivernumber}`;
+                option.textContent = driver.name;
                 select.appendChild(option);
             });
         }
@@ -971,7 +971,7 @@
                 const li = document.createElement('li');
                 li.className = 'flex items-center justify-between bg-neutral-800 p-3 rounded-lg shadow-sm';
                 li.innerHTML = `
-                    <span>${driver.name} (#${driver.drivernumber})</span>
+                    <span>${driver.name}</span>
                     <div class="space-x-2">
                         <button onclick="editDriverAdmin('${driver.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
                         <button onclick="removeDriverAdmin('${driver.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
