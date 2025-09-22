@@ -337,9 +337,9 @@ app.get('/api/strategies/:id', async (req, res) => {
 // --- Proxy to Garage61 to avoid CORS and keep token server-side ---
 app.get('/api/garage61/laps', async (req, res) => {
     try {
-        const { driver, car, track } = req.query;
-        if (!driver || !car || !track) {
-            return res.status(400).json({ error: 'Missing required query params: driver, car, track' });
+        const { cars, tracks } = req.query;
+        if (!cars || !tracks) {
+            return res.status(400).json({ error: 'Missing required query params: cars, tracks' });
         }
 
         // Prefer env var; fallback to legacy token (kept for continuity)
@@ -353,11 +353,11 @@ app.get('/api/garage61/laps', async (req, res) => {
         
         // For your own laps, use 'drivers=me' instead of extraDrivers
         const params = {
-            drivers: ['me'],                 // Get your own laps
-            cars: [parseInt(car)],           // Car IDs as array of numbers
-            tracks: [parseInt(track)],       // Track IDs as array of numbers  
-            group: 'none',                   // Return all laps (not just personal best)
-            limit: 100                       // More results to find best lap
+            drivers: ['me'],                          // Get your own laps
+            cars: [parseInt(cars)],                   // Car IDs as array of numbers
+            tracks: [parseInt(tracks)],               // Track IDs as array of numbers  
+            group: 'none',                            // Return all laps (not just personal best)
+            limit: 100                                // More results to find best lap
         };
         
         console.log(`🔗 Proxying to Garage61: ${url}`, JSON.stringify(params));
@@ -389,8 +389,8 @@ app.get('/api/garage61/laps', async (req, res) => {
             try {
                 console.log('🔄 Retrying without driver filter...');
                 const fallbackParams = {
-                    cars: [parseInt(car)],
-                    tracks: [parseInt(track)],
+                    cars: [parseInt(cars)],
+                    tracks: [parseInt(tracks)],
                     group: 'none',
                     limit: 100
                 };
