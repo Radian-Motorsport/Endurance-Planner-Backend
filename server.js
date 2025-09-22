@@ -1,20 +1,9 @@
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
-const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Garage61 API Configuration
-const garage61Config = {
-  baseUrl: 'https://garage61.net/api/v1',
-  token: process.env.GARAGE61_TOKEN || 'MWVKZTRMOGETNDCZOS0ZMJUZLTK2ODITNJBJZMQ5NMU4M2I5',
-  headers: {
-    'Authorization': `Bearer ${process.env.GARAGE61_TOKEN || 'MWVKZTRMOGETNDCZOS0ZMJUZLTK2ODITNJBJZMQ5NMU4M2I5'}`,
-    'Content-Type': 'application/json'
-  }
-};
 
 // Use the DATABASE_URL environment variable from Render
 const pool = new Pool({
@@ -168,220 +157,154 @@ app.get('/api/strategies/:id', async (req, res) => {
     }
 });
 
-// --- GARAGE61 API INTEGRATION FOR TEAM TELEMETRY ---
-
-// Helper function to make Garage61 API calls
-async function callGarage61API(endpoint) {
-    try {
-        const response = await fetch(`${garage61Config.baseUrl}${endpoint}`, {
-            method: 'GET',
-            headers: garage61Config.headers
-        });
-
-        if (!response.ok) {
-            throw new Error(`Garage61 API error: ${response.status} ${response.statusText}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Garage61 API call failed:', error);
-        throw error;
-    }
-}
-
-// Get team performance data for endurance planning
-async function getTeamPerformanceData(trackName, carClass = null, lastNSessions = 10) {
-    try {
-        console.log(`🏁 Fetching team performance data for ${trackName}...`);
-        
-        // Get recent sessions for the track
-        let endpoint = `/sessions?track=${encodeURIComponent(trackName)}&limit=${lastNSessions}`;
-        if (carClass) {
-            endpoint += `&car=${encodeURIComponent(carClass)}`;
-        }
-        
-        const sessions = await callGarage61API(endpoint);
-        
-        if (!sessions || sessions.length === 0) {
-            return {
-                success: false,
-                message: `No recent sessions found for ${trackName}`,
-                fallbackData: {
-                    avgFuelPerLap: 2.8,
-                    avgLapTime: 90,
-                    sessionCount: 0
-                }
-            };
-        }
-
-        // Aggregate data from sessions
-        const performanceData = await aggregateSessionData(sessions, trackName);
-        
-        console.log(`✅ Found ${sessions.length} sessions for ${trackName}`);
-        return {
-            success: true,
-            trackName,
-            sessionCount: sessions.length,
-            ...performanceData
-        };
-
-    } catch (error) {
-        console.error('Error fetching team performance:', error);
-        return {
-            success: false,
-            error: error.message,
-            fallbackData: {
-                avgFuelPerLap: 2.8,
-                avgLapTime: 90,
-                sessionCount: 0
-            }
-        };
-    }
-}
-
-// Aggregate telemetry data from multiple sessions
-async function aggregateSessionData(sessions, trackName) {
-    let totalFuelUsage = 0;
-    let totalLapTime = 0;
-    let lapCount = 0;
-    let driverStats = {};
-
-    for (const session of sessions) {
-        try {
-            // Get detailed session data including laps
-            const sessionDetail = await callGarage61API(`/sessions/${session.id}`);
-            
-            if (sessionDetail && sessionDetail.laps) {
-                for (const lap of sessionDetail.laps) {
-                    // Only include clean, representative laps
-                    if (lap.lapTime && lap.lapTime > 30 && lap.lapTime < 300) { // Reasonable lap time range
-                        totalLapTime += lap.lapTime;
-                        lapCount++;
-                        
-                        // Track per-driver stats
-                        const driverName = lap.driverName || 'Unknown';
-                        if (!driverStats[driverName]) {
-                            driverStats[driverName] = {
-                                lapCount: 0,
-                                totalLapTime: 0,
-                                totalFuelUsage: 0,
-                                bestLap: lap.lapTime
-                            };
-                        }
-                        
-                        driverStats[driverName].lapCount++;
-                        driverStats[driverName].totalLapTime += lap.lapTime;
-                        if (lap.lapTime < driverStats[driverName].bestLap) {
-                            driverStats[driverName].bestLap = lap.lapTime;
-                        }
-                        
-                        // Estimate fuel usage (if not available directly)
-                        if (lap.fuelUsed) {
-                            totalFuelUsage += lap.fuelUsed;
-                            driverStats[driverName].totalFuelUsage += lap.fuelUsed;
-                        }
-                    }
-                }
-            }
-        } catch (error) {
-            console.warn(`Skipping session ${session.id} due to error:`, error.message);
-        }
-    }
-
-    // Calculate averages
-    const avgLapTime = lapCount > 0 ? totalLapTime / lapCount : 90;
-    const avgFuelPerLap = lapCount > 0 && totalFuelUsage > 0 ? totalFuelUsage / lapCount : 2.8;
-
-    // Calculate per-driver averages
-    const driverAverages = {};
-    for (const [driverName, stats] of Object.entries(driverStats)) {
-        if (stats.lapCount > 2) { // Only include drivers with meaningful data
-            driverAverages[driverName] = {
-                avgLapTime: stats.totalLapTime / stats.lapCount,
-                avgFuelPerLap: stats.totalFuelUsage > 0 ? stats.totalFuelUsage / stats.lapCount : avgFuelPerLap,
-                bestLap: stats.bestLap,
-                lapCount: stats.lapCount
-            };
-        }
-    }
-
-    return {
-        avgFuelPerLap: parseFloat(avgFuelPerLap.toFixed(2)),
-        avgLapTime: parseFloat(avgLapTime.toFixed(1)),
-        totalLaps: lapCount,
-        driverAverages,
-        driverCount: Object.keys(driverAverages).length
-    };
-}
-
-// --- NEW API ENDPOINTS FOR GARAGE61 INTEGRATION ---
-
-// Get team performance data for a specific track
-app.get('/api/garage61/team-performance/:track', async (req, res) => {
-    try {
-        const { track } = req.params;
-        const { car, sessions = 10 } = req.query;
-        
-        const performanceData = await getTeamPerformanceData(track, car, parseInt(sessions));
-        res.json(performanceData);
-        
-    } catch (error) {
-        console.error('Error in team-performance endpoint:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to fetch team performance data',
-            fallbackData: { avgFuelPerLap: 2.8, avgLapTime: 90 }
-        });
-    }
-});
-
-// Get available tracks from recent sessions
-app.get('/api/garage61/tracks', async (req, res) => {
-    try {
-        const sessions = await callGarage61API('/sessions?limit=50');
-        const tracks = [...new Set(sessions.map(s => s.track))].filter(Boolean);
-        
-        res.json({
-            success: true,
-            tracks: tracks.sort(),
-            sessionCount: sessions.length
-        });
-        
-    } catch (error) {
-        console.error('Error fetching tracks:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to fetch track list',
-            tracks: []
-        });
-    }
-});
-
-// Test Garage61 connection
-app.get('/api/garage61/test', async (req, res) => {
-    try {
-        const userInfo = await callGarage61API('/me');
-        res.json({
-            success: true,
-            message: 'Garage61 connection successful',
-            user: userInfo.name || 'Unknown',
-            tokenValid: true
-        });
-        
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: 'Garage61 connection failed',
-            message: error.message,
-            tokenValid: false
-        });
-    }
-});
-
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
+const express = require('express');
+const WebSocket = require('ws');
+const http = require('http');
 
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+// Use a port provided by Render, or default to 3000 for local testing
+const PORT = process.env.PORT || 3000;
+
+// Serve static files from the 'public' directory
+app.use(express.static('public'));
+
+// --- The Race State: This is the single source of truth for all clients ---
+let raceState = {
+    raceTimeRemaining: 0,
+    avgLapTime: 0,
+    fuelPerLap: 0,
+    tankCapacity: 0,
+    estLaps: 0,
+    stintDuration: 0,
+    lapsPerStint: 0,
+    totalPitStops: 0,
+    totalFuel: 0,
+    nextPitStop: 0,
+    raceIsRunning: false,
+    stintData: [], // To store details of each completed stint
+    lastUpdateTime: Date.now()
+};
+
+// --- Race Timer and Update Logic ---
+setInterval(() => {
+    if (raceState.raceIsRunning) {
+        const now = Date.now();
+        const elapsedTime = (now - raceState.lastUpdateTime) / 1000;
+        raceState.raceTimeRemaining -= elapsedTime;
+        raceState.nextPitStop -= elapsedTime;
+        raceState.lastUpdateTime = now;
+
+        // Check for race finish
+        if (raceState.raceTimeRemaining <= 0) {
+            raceState.raceTimeRemaining = 0;
+            raceState.raceIsRunning = false;
+        }
+
+        // Check for pit stop
+        if (raceState.nextPitStop <= 0 && raceState.raceTimeRemaining > 0) {
+            // A pit stop is needed, add new stint data to the list
+            raceState.stintData.push({
+                stintNumber: raceState.stintData.length + 1,
+                startTime: raceState.nextPitStop + raceState.stintDuration,
+                endTime: 0, // Placeholder
+                duration: raceState.stintDuration,
+                laps: raceState.lapsPerStint,
+                fuel: raceState.tankCapacity
+            });
+            // Reset the next pit stop timer
+            raceState.nextPitStop = raceState.stintDuration;
+        }
+
+        // Broadcast the updated state to all connected clients
+        const stateMessage = JSON.stringify(raceState);
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(stateMessage);
+            }
+        });
+    }
+}, 1000); // Update every second
+
+// --- WebSocket Event Handlers ---
+wss.on('connection', ws => {
+    console.log('New client connected');
+
+    // Send the current race state to the newly connected client
+    ws.send(JSON.stringify(raceState));
+
+    ws.on('message', message => {
+        const data = JSON.parse(message);
+        console.log(`Received message: ${JSON.stringify(data)}`);
+
+        if (data.type === 'recalculate') {
+            const { raceDuration, avgLapTime, fuelPerLap, tankCapacity } = data.data;
+
+            // Recalculate all strategy metrics
+            raceState.raceTimeRemaining = raceDuration;
+            raceState.avgLapTime = avgLapTime;
+            raceState.fuelPerLap = fuelPerLap;
+            raceState.tankCapacity = tankCapacity;
+            
+            // Perform the calculations and update raceState
+            raceState.estLaps = raceDuration / avgLapTime;
+            raceState.stintDuration = (tankCapacity / fuelPerLap) * avgLapTime;
+            raceState.lapsPerStint = Math.floor(tankCapacity / fuelPerLap);
+            raceState.totalPitStops = Math.floor(raceDuration / raceState.stintDuration);
+            raceState.totalFuel = raceState.fuelPerLap * raceState.estLaps;
+            raceState.nextPitStop = raceState.stintDuration;
+
+            // Reset stint data for a new race
+            raceState.stintData = [];
+
+            // Broadcast the new strategy to all clients
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(raceState));
+                }
+            });
+
+        } else if (data.type === 'toggleRace') {
+            raceState.raceIsRunning = !raceState.raceIsRunning;
+            // When starting, reset the update time
+            if (raceState.raceIsRunning) {
+                raceState.lastUpdateTime = Date.now();
+            }
+
+        } else if (data.type === 'pitExit') {
+            // Logic for pit exit
+            // You can add more complex logic here later, like adding fuel
+            raceState.nextPitStop = raceState.stintDuration;
+
+        } else if (data.type === 'adjustFuel') {
+            // Adjust the fuel consumption
+            // Note: This needs to be more complex to affect the next pit stop time properly
+            raceState.fuelPerLap = raceState.fuelPerLap + data.value;
+            // Recalculate stints and next pit stop based on new fuel usage
+            // This is an advanced topic; for now, the timer will just keep counting down
+        
+        } else if (data.type === 'adjustLapTime') {
+            // Adjust the lap time
+            // Note: This needs to be more complex to affect all calculations properly
+            raceState.avgLapTime = raceState.avgLapTime + data.value;
+            // Recalculate all metrics
+        }
+    });
+
+    ws.on('close', () => {
+        console.log('Client has disconnected');
+    });
+});
+
+// Start the server
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 
