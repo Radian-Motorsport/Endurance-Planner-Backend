@@ -418,13 +418,36 @@
                 <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mt-6">
                     <h1 class="text-xl font- mb-4  road-rage-font">Manage Cars</h1>
                     <div class="space-y-4">
-                        <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
-                            <div class="flex-grow">
-                                <input type="text" id="new-car-name" placeholder="Car Name" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="flex flex-col space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="new-car-name" class="text-sm font-medium text-neutral-500">Car Name</label>
+                                    <input type="text" id="new-car-name" placeholder="Acura ARX-06 GTP" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="new-car-garage61-id" class="text-sm font-medium text-neutral-500">Garage 61 ID</label>
+                                    <input type="number" id="new-car-garage61-id" placeholder="153" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
                             </div>
-                            <button id="add-car-btn" onclick="addCarAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                                Add Car
-                            </button>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="new-car-platform" class="text-sm font-medium text-neutral-500">Platform</label>
+                                    <select id="new-car-platform" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="iracing">iRacing</option>
+                                        <option value="acc">Assetto Corsa Competizione</option>
+                                        <option value="rf2">rFactor 2</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="new-car-platform-id" class="text-sm font-medium text-neutral-500">Platform ID</label>
+                                    <input type="text" id="new-car-platform-id" placeholder="170" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                            <div class="flex justify-center">
+                                <button id="add-car-btn" onclick="addCarAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                                    Add Car
+                                </button>
+                            </div>
                         </div>
                         <ul id="admin-car-list" class="space-y-2 mt-4"></ul>
                     </div>
@@ -433,13 +456,40 @@
                 <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mt-6">
                     <h1 class="text-xl font- mb-4  road-rage-font">Manage Tracks</h1>
                     <div class="space-y-4">
-                        <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
-                            <div class="flex-grow">
-                                <input type="text" id="new-track-name" placeholder="Track Name" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="flex flex-col space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="new-track-name" class="text-sm font-medium text-neutral-500">Track Name</label>
+                                    <input type="text" id="new-track-name" placeholder="Autodromo Nazionale Monza - Combined" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="new-track-garage61-id" class="text-sm font-medium text-neutral-500">Garage 61 ID</label>
+                                    <input type="number" id="new-track-garage61-id" placeholder="232" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
                             </div>
-                            <button id="add-track-btn" onclick="addTrackAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                                Add Track
-                            </button>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="new-track-base-name" class="text-sm font-medium text-neutral-500">Base Name</label>
+                                    <input type="text" id="new-track-base-name" placeholder="Autodromo Nazionale Monza" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="new-track-variant" class="text-sm font-medium text-neutral-500">Variant</label>
+                                    <input type="text" id="new-track-variant" placeholder="Combined" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="new-track-platform" class="text-sm font-medium text-neutral-500">Platform</label>
+                                    <select id="new-track-platform" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="iracing">iRacing</option>
+                                        <option value="acc">Assetto Corsa Competizione</option>
+                                        <option value="rf2">rFactor 2</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex justify-center">
+                                <button id="add-track-btn" onclick="addTrackAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                                    Add Track
+                                </button>
+                            </div>
                         </div>
                         <ul id="admin-track-list" class="space-y-2 mt-4"></ul>
                     </div>
@@ -1020,43 +1070,56 @@
         }
         function resetCarAdminForm() {
             document.getElementById('new-car-name').value = '';
-            document.getElementById('new-car-fuel').value = '';
-            document.getElementById('new-car-tank').value = '';
+            document.getElementById('new-car-garage61-id').value = '';
+            document.getElementById('new-car-platform').value = 'iracing';
+            document.getElementById('new-car-platform-id').value = '';
             document.getElementById('add-car-btn').textContent = 'Add Car';
             document.getElementById('add-car-btn').onclick = addCarAdmin;
         }
         async function addCarAdmin() {
             const name = document.getElementById('new-car-name').value;
+            const garage61_id = parseInt(document.getElementById('new-car-garage61-id').value);
+            const platform = document.getElementById('new-car-platform').value;
+            const platform_id = document.getElementById('new-car-platform-id').value;
             
-            if (name && fuelPerLap && tankCapacity) {
-                cars.push({ name, fuel_per_lap: fuelPerLap, tank_capacity: tankCapacity });
+            if (name && garage61_id && platform && platform_id) {
+                cars.push({ name, garage61_id, platform, platform_id });
                 await saveDataToServer();
                 renderAdminLists();
                 populateCars();
                 resetCarAdminForm();
+            } else {
+                alert('Please fill in all car fields');
             }
         }
         function editCarAdmin(name) {
             const car = cars.find(c => c.name === name);
             if (car) {
                 document.getElementById('new-car-name').value = car.name;
+                document.getElementById('new-car-garage61-id').value = car.garage61_id || '';
+                document.getElementById('new-car-platform').value = car.platform || 'iracing';
+                document.getElementById('new-car-platform-id').value = car.platform_id || '';
                 document.getElementById('add-car-btn').textContent = 'Update Car';
                 document.getElementById('add-car-btn').onclick = () => updateCarAdmin(name);
             }
         }
         async function updateCarAdmin(originalName) {
             const name = document.getElementById('new-car-name').value;
-            const fuelPerLap = parseFloat(document.getElementById('new-car-fuel').value);
-            const tankCapacity = parseInt(document.getElementById('new-car-tank').value);
-            if (name && fuelPerLap && tankCapacity) {
+            const garage61_id = parseInt(document.getElementById('new-car-garage61-id').value);
+            const platform = document.getElementById('new-car-platform').value;
+            const platform_id = document.getElementById('new-car-platform-id').value;
+            
+            if (name && garage61_id && platform && platform_id) {
                 const index = cars.findIndex(c => c.name === originalName);
                 if (index !== -1) {
-                    cars[index] = { name };
+                    cars[index] = { name, garage61_id, platform, platform_id };
                     await saveDataToServer();
                     renderAdminLists();
                     populateCars();
                     resetCarAdminForm();
                 }
+            } else {
+                alert('Please fill in all car fields');
             }
         }
         async function removeCarAdmin(name) {
@@ -1069,38 +1132,60 @@
         }
         function resetTrackAdminForm() {
             document.getElementById('new-track-name').value = '';
+            document.getElementById('new-track-garage61-id').value = '';
+            document.getElementById('new-track-base-name').value = '';
+            document.getElementById('new-track-variant').value = '';
+            document.getElementById('new-track-platform').value = 'iracing';
             document.getElementById('add-track-btn').textContent = 'Add Track';
             document.getElementById('add-track-btn').onclick = addTrackAdmin;
         }
         async function addTrackAdmin() {
             const name = document.getElementById('new-track-name').value;
-            if (name) {
-                tracks.push({ name });
+            const garage61_id = parseInt(document.getElementById('new-track-garage61-id').value);
+            const base_name = document.getElementById('new-track-base-name').value;
+            const variant = document.getElementById('new-track-variant').value;
+            const platform = document.getElementById('new-track-platform').value;
+            
+            if (name && garage61_id && base_name && variant && platform) {
+                tracks.push({ name, garage61_id, base_name, variant, platform });
                 await saveDataToServer();
                 renderAdminLists();
                 populateTracks();
                 resetTrackAdminForm();
+            } else {
+                alert('Please fill in all track fields');
             }
         }
         function editTrackAdmin(name) {
             const track = tracks.find(t => t.name === name);
             if (track) {
                 document.getElementById('new-track-name').value = track.name;
+                document.getElementById('new-track-garage61-id').value = track.garage61_id || '';
+                document.getElementById('new-track-base-name').value = track.base_name || '';
+                document.getElementById('new-track-variant').value = track.variant || '';
+                document.getElementById('new-track-platform').value = track.platform || 'iracing';
                 document.getElementById('add-track-btn').textContent = 'Update Track';
                 document.getElementById('add-track-btn').onclick = () => updateTrackAdmin(name);
             }
         }
         async function updateTrackAdmin(originalName) {
             const name = document.getElementById('new-track-name').value;
-            if (name) {
+            const garage61_id = parseInt(document.getElementById('new-track-garage61-id').value);
+            const base_name = document.getElementById('new-track-base-name').value;
+            const variant = document.getElementById('new-track-variant').value;
+            const platform = document.getElementById('new-track-platform').value;
+            
+            if (name && garage61_id && base_name && variant && platform) {
                 const index = tracks.findIndex(t => t.name === originalName);
                 if (index !== -1) {
-                    tracks[index] = { name };
+                    tracks[index] = { name, garage61_id, base_name, variant, platform };
                     await saveDataToServer();
                     renderAdminLists();
                     populateTracks();
                     resetTrackAdminForm();
                 }
+            } else {
+                alert('Please fill in all track fields');
             }
         }
         async function removeTrackAdmin(name) {
