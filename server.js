@@ -33,17 +33,27 @@ async function createTables() {
         const createDriversTable = `
             CREATE TABLE IF NOT EXISTS drivers (
                 name VARCHAR(255) PRIMARY KEY,
-                drivernumber INT
+                drivernumber INT,
+                garage61_slug VARCHAR(255),
+                firstName VARCHAR(255),
+                lastName VARCHAR(255)
             );
         `;
         const createCarsTable = `
             CREATE TABLE IF NOT EXISTS cars (
-                name VARCHAR(255) PRIMARY KEY
+                name VARCHAR(255) PRIMARY KEY,
+                garage61_id INT,
+                platform VARCHAR(100),
+                platform_id VARCHAR(100)
             );
         `;
         const createTracksTable = `
             CREATE TABLE IF NOT EXISTS tracks (
-                name VARCHAR(255) PRIMARY KEY
+                name VARCHAR(255) PRIMARY KEY,
+                garage61_id INT,
+                base_name VARCHAR(255),
+                variant VARCHAR(255),
+                platform VARCHAR(100)
             );
         `;
         const createStrategiesTable = `
@@ -117,17 +127,20 @@ app.post('/api/data', async (req, res) => {
 
     // Insert new drivers
     for (const driver of drivers) {
-      await pool.query('INSERT INTO drivers (name, drivernumber) VALUES ($1, $2)', [driver.name, parseInt(driver.driverNumber)]);
+      await pool.query('INSERT INTO drivers (name, drivernumber, garage61_slug, firstName, lastName) VALUES ($1, $2, $3, $4, $5)', 
+        [driver.name, parseInt(driver.driverNumber) || null, driver.garage61_slug, driver.firstName, driver.lastName]);
     }
 
     // Insert new cars
     for (const car of cars) {
-      await pool.query('INSERT INTO cars (name) VALUES ($1)', [car.name]);
+      await pool.query('INSERT INTO cars (name, garage61_id, platform, platform_id) VALUES ($1, $2, $3, $4)', 
+        [car.name, car.garage61_id, car.platform, car.platform_id]);
     }
 
     // Insert new tracks
     for (const track of tracks) {
-      await pool.query('INSERT INTO tracks (name) VALUES ($1)', [track.name]);
+      await pool.query('INSERT INTO tracks (name, garage61_id, base_name, variant, platform) VALUES ($1, $2, $3, $4, $5)', 
+        [track.name, track.garage61_id, track.base_name, track.variant, track.platform]);
     }
 
     res.status(200).send('Data saved successfully');
