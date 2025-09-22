@@ -30,6 +30,13 @@ async function createTables() {
     }
     
     try {
+        // Drop existing tables to reset everything
+        await pool.query('DROP TABLE IF EXISTS strategies CASCADE');
+        await pool.query('DROP TABLE IF EXISTS drivers CASCADE');
+        await pool.query('DROP TABLE IF EXISTS cars CASCADE');
+        await pool.query('DROP TABLE IF EXISTS tracks CASCADE');
+        console.log('Old tables dropped successfully.');
+        
         const createDriversTable = `
             CREATE TABLE IF NOT EXISTS drivers (
                 name VARCHAR(255) PRIMARY KEY,
@@ -65,7 +72,7 @@ async function createTables() {
         await pool.query(createCarsTable);
         await pool.query(createTracksTable);
         await pool.query(createStrategiesTable);
-        console.log('Database tables checked/created successfully.');
+        console.log('New database tables created successfully.');
     } catch (err) {
         console.error('Error creating database tables:', err);
         console.log('Continuing without database features.');
@@ -118,11 +125,6 @@ app.get('/api/data', async (req, res) => {
 app.post('/api/data', async (req, res) => {
   try {
     const { drivers, cars, tracks } = req.body;
-
-    // Clear existing data
-    await pool.query('TRUNCATE TABLE drivers RESTART IDENTITY');
-    await pool.query('TRUNCATE TABLE cars RESTART IDENTITY');
-    await pool.query('TRUNCATE TABLE tracks RESTART IDENTITY');
 
     // Insert new drivers
     for (const driver of drivers) {
