@@ -351,14 +351,26 @@ app.get('/api/garage61/laps', async (req, res) => {
         // Use the correct Garage61 /laps endpoint with proper parameter format
         const url = 'https://garage61.net/api/v1/laps';
         
-        // Use extraDrivers for user slugs, drivers is for special values like "me"
+        // Build parameters according to Garage61 API documentation:
+        // - drivers: only accepts "me" or "following"  
+        // - extraDrivers: accepts user slugs like "john-sowerby"
+        // - If no driver params given, returns yourself and all teammates
         const params = {
-            extraDrivers: driver ? [driver] : [],     // Use selected driver slug in extraDrivers
             cars: [parseInt(cars)],                   // Car IDs as array of numbers
             tracks: [parseInt(tracks)],               // Track IDs as array of numbers  
             group: 'none',                            // Return all laps (not just personal best)
             limit: 100                                // More results to find best lap
         };
+        
+        // Add driver filtering only if a specific driver is requested
+        if (driver && driver !== 'all') {
+            if (driver === 'me') {
+                params.drivers = ['me'];              // Special case for current user
+            } else {
+                params.extraDrivers = [driver];       // User slug for specific driver
+            }
+        }
+        // If no driver specified, API returns all team laps automatically
         
         console.log(`🔗 Proxying to Garage61: ${url}`, JSON.stringify(params));
         
