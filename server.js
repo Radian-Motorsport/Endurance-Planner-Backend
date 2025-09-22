@@ -30,14 +30,7 @@ async function createTables() {
     }
     
     try {
-        // DROP and recreate tables to apply schema changes
-        await pool.query('DROP TABLE IF EXISTS strategies CASCADE');
-        await pool.query('DROP TABLE IF EXISTS drivers CASCADE');
-        await pool.query('DROP TABLE IF EXISTS cars CASCADE');
-        await pool.query('DROP TABLE IF EXISTS tracks CASCADE');
-        console.log('Old tables dropped for schema update.');
-        
-        console.log('Creating database tables with new schema...');
+        console.log('Creating database tables if they do not exist...');
         
         const createDriversTable = `
             CREATE TABLE IF NOT EXISTS drivers (
@@ -77,7 +70,7 @@ async function createTables() {
         await pool.query(createCarsTable);
         await pool.query(createTracksTable);
         await pool.query(createStrategiesTable);
-        console.log('New database tables created successfully.');
+        console.log('Database tables created/verified successfully.');
     } catch (err) {
         console.error('Error creating database tables:', err);
         console.log('Continuing without database features.');
