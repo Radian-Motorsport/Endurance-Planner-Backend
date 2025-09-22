@@ -215,15 +215,43 @@ if ($allDrivers.Count -eq 33 -and $allCars.Count -eq 32 -and $allTracks.Count -e
 
 ### Schema Reset (NUCLEAR OPTION)
 
-Only use if database is completely corrupted:
+Only use if database is completely corrupted. The endpoint is protected.
 
 ```powershell
-# Reset database schema (THIS WILL DELETE ALL DATA!)
+# Server must have env vars set:
+#   ALLOW_SCHEMA_RESET=true
+#   RESET_SECRET=<long secret>
+
+$headers = @{ 'x-reset-secret' = '<long secret>' }
 $resetPayload = @{ resetSchema = $true } | ConvertTo-Json
-Invoke-RestMethod -Uri "https://endurance-planner-api.onrender.com/api/reset" -Method Post -Body $resetPayload -ContentType "application/json"
+Invoke-RestMethod -Uri "https://endurance-planner-api.onrender.com/api/reset" -Headers $headers -Method Post -Body $resetPayload -ContentType "application/json"
 
 # Then re-import everything using the disaster recovery steps above
 ```
+
+## Admin Editing Guide (Do-it-yourself)
+
+The admin page lets you add, update, and remove items. Edits now persist because the backend performs upserts.
+
+- Add or edit entries in Admin and click Save (calls POST /api/data).
+- Upsert behavior:
+    - Drivers: unique by `name` → updates slug/first/last name.
+    - Cars: unique by `garage61_id` → updates name, platform, platform_id.
+    - Tracks: unique by `garage61_id` → updates name, base_name, variant, platform.
+- Optional delete endpoints (use with care):
+    - DELETE /api/drivers/:name
+    - DELETE /api/cars/:garage61_id
+    - DELETE /api/tracks/:garage61_id
+
+Tips
+- After a change, refresh the page to repopulate dropdowns.
+- If a POST returns partial status, some rows failed—check errors array and fix fields.
+
+## Persistence Notes
+
+- Server no longer drops tables on startup. Data persists across redeploys.
+- Import endpoint accepts partial payloads (drivers-only, cars-only, tracks-only).
+- JSON body limit increased to 2 MB.
 
 ## Known Issues & Solutions
 
