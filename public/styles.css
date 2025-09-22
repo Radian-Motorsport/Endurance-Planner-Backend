@@ -1,0 +1,322 @@
+/* === RADIAN PLANNER STYLESHEET === */
+
+/* === RESET & BASE === */
+* {
+    box-sizing: border-box;
+}
+
+/* === FONTS === */
+@font-face {
+    font-family: 'RoadRage';
+    src: url('https://radian-motorsport.github.io/Endurance-Planner-Backend/RoadRage.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* === BODY & LAYOUT === */
+body {
+    font-family: 'Inter', sans-serif;
+    transition: background-color 0.5s, color 0.5s;
+    background-color: #808080;
+}
+
+/* === TYPOGRAPHY === */
+.road-rage-font {
+    font-family: 'RoadRage', sans-serif;
+}
+
+h1 {
+    font-family: 'RoadRage', sans-serif;
+    color: #ffffff;
+    text-shadow: 3px 3px 0px #000000;
+}
+
+h2 {
+    font-size: 4em;
+    font-weight: 600;
+    background-image: linear-gradient(to right, #00ffff, #d400ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #4a90e2; /* Fallback for unsupported browsers */
+}
+
+h3 {
+    color: #ffffff;
+    text-shadow: 3px 3px 0px #000000;
+}
+
+h4 {
+    color: #ffffff;
+    text-shadow: 3px 3px 0px #000000;
+}
+
+/* === UTILITY CLASSES === */
+.icon-shadow {
+    filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.5));
+}
+
+.text-shadow {
+    filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.5));
+}
+
+/* === FORM ELEMENTS === */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+select, 
+option, 
+input, 
+input[type="number"], 
+li {
+    color: #000000;
+    background-color: #FFFFFF;
+}
+
+select {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* === TOGGLE SWITCHES === */
+input:checked + .toggle-label {
+    background-color: #2196F3;
+}
+
+input:checked + .toggle-label:after {
+    left: calc(100% - 3px);
+    transform: translateX(-100%);
+}
+
+/* === LIVE PLANNER COMPONENTS === */
+
+/* Live Planner Controls */
+.live-planner-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.live-planner-controls label {
+    display: block;
+    font-size: 0.9em;
+    text-align: left;
+    margin-bottom: 2px;
+}
+
+.live-planner-controls div {
+    min-width: 150px;
+}
+
+/* Live Planner Info */
+.live-planner-info p { 
+    margin: 5px 0; 
+}
+
+/* === TIMERS === */
+#countdown-timer { 
+    font-size: 2em; 
+    font-weight: bold; 
+    color: rgb(255, 255, 255); 
+}
+
+.dark #countdown-timer { 
+    color: #48bb78; 
+}
+
+/* === LAYOUT CONTAINERS === */
+
+/* Main Container */
+.main-container {
+    max-width: 64rem;
+    margin: 0 auto;
+    background-color: rgba(23, 23, 23, 0);
+    padding: 1.5rem 2.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transition: all 0.5s ease;
+}
+
+/* Inner Container */
+.inner-container {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #262626;
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid #404040;
+}
+
+/* === CONTENT SECTIONS === */
+
+/* Race Inputs Container */
+#race-inputs-container {
+    padding: 1.5rem;
+    background-color: #404040;
+    border: 1px solid #404040;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Live Overall Summary */
+#live-overall-summary {
+    padding: 1.5rem;
+    background-color: #404040;
+    border: 1px solid #525252;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Live Sliders Container */
+#live-sliders-container {
+    padding: 1.5rem;
+    background-color: #404040;
+    border: 1px solid #525252;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Live Table */
+#live-table {
+    background-color: #404040;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+/* === BANNER ELEMENTS === */
+#pit-exit-banner {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    background-color: #059669;
+    color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    z-index: 50;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    margin-bottom: 1.5rem;
+}
+
+/* === STINT TRACKERS === */
+#stint-trackers {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 1rem;
+    font-weight: 600;
+    color: #262626;
+    gap: 1rem;
+}
+
+/* === BUTTONS === */
+.btn-back {
+    background-color: #262626;
+    color: black;
+    font-weight: bold;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    transform: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-back:hover {
+    background-color: #dc2626;
+    transform: scale(1.05);
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 1rem;
+    }
+    
+    .inner-container {
+        padding: 1rem;
+    }
+    
+    .live-planner-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .live-planner-controls div {
+        min-width: 100%;
+    }
+    
+    h2 {
+        font-size: 2.5em;
+    }
+}
+
+/* === HIDDEN UTILITY === */
+.hidden {
+    display: none !important;
+}
+
+/* === SHOW UTILITY === */
+.show {
+    display: block !important;
+}
+
+/* === GRID LAYOUTS === */
+.grid-cols-responsive {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .grid-cols-responsive {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .grid-cols-responsive {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* === FOCUS STATES === */
+input:focus,
+select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #3b82f6;
+    transition: all 0.2s ease;
+}
+
+/* === DARK MODE SUPPORT === */
+.dark .btn-back {
+    background-color: #1f2937;
+    color: white;
+}
+
+.dark input,
+.dark select {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+}
+
+.dark #race-inputs-container,
+.dark #live-overall-summary,
+.dark #live-sliders-container,
+.dark #live-table {
+    background-color: #374151;
+    border-color: #4b5563;
+}

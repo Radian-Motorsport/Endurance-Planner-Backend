@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radian Planner - Race Setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Road+Rage&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+</head>
+<body class="bg-neutral-900 text-neutral-100 p-4">
+
+<div class="main-container">
+    <div class="text-center mb-6">
+        <img src="https://github.com/Radian-Motorsport/Endurance-Planner-Backend/blob/main/g457912.png?raw=true" alt="?" class="mx-auto w-100 h-auto">
+    </div>
+    
+    <div class="inner-container">
+        <!-- Navigation -->
+        <nav class="flex justify-between items-center mb-6">
+            <a href="index.html" class="btn-back">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div class="flex space-x-4">
+                <a href="race-setup.html" class="text-cyan-400 font-semibold">Setup</a>
+                <a href="live-timing.html" class="text-neutral-400 hover:text-cyan-400">Live Timing</a>
+                <a href="strategy-analysis.html" class="text-neutral-400 hover:text-cyan-400">Analysis</a>
+            </div>
+        </nav>
+
+        <h2 class="text-5xl road-rage-font text-center mb-8">RACE SETUP</h2>
+
+        <!-- Race Configuration -->
+        <div id="race-inputs-container">
+            <h1 class="text-xl mb-4 road-rage-font">Race Configuration</h1>
+            <div class="grid-cols-responsive">
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-neutral-300">Race Duration</label>
+                    <div class="flex items-center mt-1 space-x-2">
+                        <input type="number" id="race-duration-hours" placeholder="Hours" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                        <span class="text-neutral-400">hr</span>
+                        <input type="number" id="race-duration-minutes" placeholder="Minutes" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                        <span class="text-neutral-400">min</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-neutral-300">Average Lap Time</label>
+                    <div class="flex items-center mt-1 space-x-2">
+                        <input type="number" id="lap-time-minutes" placeholder="Min" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                        <span class="text-neutral-400">:</span>
+                        <input type="number" id="lap-time-seconds" placeholder="Sec" step="0.1" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-neutral-300">Fuel per Lap (L)</label>
+                    <input type="number" id="fuel-per-lap" placeholder="Liters" step="0.1" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-neutral-300">Tank Capacity (L)</label>
+                    <input type="number" id="tank-capacity" placeholder="Liters" step="1" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-neutral-300">Pit Stop Time</label>
+                    <div class="flex items-center mt-1 space-x-2">
+                        <input type="number" id="pit-stop-minutes" placeholder="Min" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                        <span class="text-neutral-400">:</span>
+                        <input type="number" id="pit-stop-seconds" placeholder="Sec" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-neutral-300">Starting Fuel (L)</label>
+                    <input type="number" id="starting-fuel" placeholder="Liters" step="1" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-center space-x-4 mt-8">
+            <button id="save-setup" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-200 transform hover:scale-105">
+                <i class="fa-solid fa-save mr-2"></i>Save Configuration
+            </button>
+            <a href="live-timing.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-200 transform hover:scale-105 inline-flex items-center">
+                <i class="fa-solid fa-play mr-2"></i>Start Live Session
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Race setup functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Load saved configuration
+    loadConfiguration();
+    
+    // Setup event handlers
+    document.getElementById('save-setup').addEventListener('click', saveConfiguration);
+    
+    // Auto-save on input changes
+    const inputs = document.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+        input.addEventListener('input', debounce(saveConfiguration, 500));
+    });
+});
+
+function saveConfiguration() {
+    const config = {
+        raceDurationHours: document.getElementById('race-duration-hours').value,
+        raceDurationMinutes: document.getElementById('race-duration-minutes').value,
+        lapTimeMinutes: document.getElementById('lap-time-minutes').value,
+        lapTimeSeconds: document.getElementById('lap-time-seconds').value,
+        fuelPerLap: document.getElementById('fuel-per-lap').value,
+        tankCapacity: document.getElementById('tank-capacity').value,
+        pitStopMinutes: document.getElementById('pit-stop-minutes').value,
+        pitStopSeconds: document.getElementById('pit-stop-seconds').value,
+        startingFuel: document.getElementById('starting-fuel').value
+    };
+    
+    localStorage.setItem('radianPlannerConfig', JSON.stringify(config));
+    
+    // Show success message
+    const saveBtn = document.getElementById('save-setup');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Saved!';
+    saveBtn.classList.add('bg-green-800');
+    
+    setTimeout(() => {
+        saveBtn.innerHTML = originalText;
+        saveBtn.classList.remove('bg-green-800');
+    }, 2000);
+}
+
+function loadConfiguration() {
+    const config = localStorage.getItem('radianPlannerConfig');
+    if (config) {
+        const data = JSON.parse(config);
+        
+        document.getElementById('race-duration-hours').value = data.raceDurationHours || '';
+        document.getElementById('race-duration-minutes').value = data.raceDurationMinutes || '';
+        document.getElementById('lap-time-minutes').value = data.lapTimeMinutes || '';
+        document.getElementById('lap-time-seconds').value = data.lapTimeSeconds || '';
+        document.getElementById('fuel-per-lap').value = data.fuelPerLap || '';
+        document.getElementById('tank-capacity').value = data.tankCapacity || '';
+        document.getElementById('pit-stop-minutes').value = data.pitStopMinutes || '';
+        document.getElementById('pit-stop-seconds').value = data.pitStopSeconds || '';
+        document.getElementById('starting-fuel').value = data.startingFuel || '';
+    }
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+</script>
+
+</body>
+</html>

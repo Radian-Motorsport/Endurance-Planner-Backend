@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radian Planner - Endurance Racing Strategy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Road+Rage&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+</head>
+<body class="bg-neutral-900 text-neutral-100 p-4">
+
+<div class="main-container">
+    <div class="text-center mb-8">
+        <img src="https://github.com/Radian-Motorsport/Endurance-Planner-Backend/blob/main/g457912.png?raw=true" alt="Radian Motorsport Logo" class="mx-auto w-100 h-auto">
+    </div>
+    
+    <div class="inner-container">
+        <div class="text-center mb-12">
+            <h1 class="text-6xl road-rage-font mb-4">RADIAN PLANNER</h1>
+            <p class="text-xl text-neutral-400 mb-2">Professional Endurance Racing Strategy</p>
+            <p class="text-sm text-neutral-500">Powered by Garage61 Team Telemetry</p>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <!-- Race Setup Card -->
+            <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl shadow-lg hover:transform hover:scale-105 transition-all duration-300">
+                <div class="text-center">
+                    <i class="fa-solid fa-cog text-4xl text-white mb-4"></i>
+                    <h3 class="text-xl font-bold text-white mb-3">Race Setup</h3>
+                    <p class="text-blue-100 text-sm mb-6">Configure race parameters, fuel consumption, lap times, and pit stop strategies.</p>
+                    <a href="race-setup.html" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 inline-flex items-center">
+                        <i class="fa-solid fa-arrow-right mr-2"></i>Configure Race
+                    </a>
+                </div>
+            </div>
+
+            <!-- Live Timing Card -->
+            <div class="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl shadow-lg hover:transform hover:scale-105 transition-all duration-300">
+                <div class="text-center">
+                    <i class="fa-solid fa-stopwatch text-4xl text-white mb-4"></i>
+                    <h3 class="text-xl font-bold text-white mb-3">Live Timing</h3>
+                    <p class="text-green-100 text-sm mb-6">Real-time race management with dynamic strategy adjustments and pit timing.</p>
+                    <a href="live-timing.html" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 inline-flex items-center">
+                        <i class="fa-solid fa-play mr-2"></i>Start Session
+                    </a>
+                </div>
+            </div>
+
+            <!-- Strategy Analysis Card -->
+            <div class="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl shadow-lg hover:transform hover:scale-105 transition-all duration-300">
+                <div class="text-center">
+                    <i class="fa-solid fa-chart-line text-4xl text-white mb-4"></i>
+                    <h3 class="text-xl font-bold text-white mb-3">Strategy Analysis</h3>
+                    <p class="text-purple-100 text-sm mb-6">Analyze team performance data and get AI-powered strategy recommendations.</p>
+                    <a href="strategy-analysis.html" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 inline-flex items-center">
+                        <i class="fa-solid fa-chart-bar mr-2"></i>View Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Access Section -->
+        <div class="bg-neutral-700 p-8 rounded-xl mb-8">
+            <h2 class="text-2xl road-rage-font text-center mb-6">Quick Access</h2>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button id="quick-setup" class="bg-neutral-600 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200">
+                    <i class="fa-solid fa-rocket mr-2"></i>Quick Setup
+                </button>
+                <a href="liveupdating.html" class="bg-neutral-600 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 inline-flex items-center">
+                    <i class="fa-solid fa-bolt mr-2"></i>Legacy Live Planner
+                </a>
+                <button id="load-session" class="bg-neutral-600 hover:bg-yellow-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200">
+                    <i class="fa-solid fa-folder-open mr-2"></i>Load Saved Session
+                </button>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="bg-neutral-800 p-6 rounded-xl">
+            <h3 class="text-lg font-semibold mb-4 road-rage-font">System Status</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-neutral-300">Garage61 API</span>
+                    <div id="api-status" class="flex items-center">
+                        <div class="w-3 h-3 rounded-full bg-yellow-400 mr-2"></div>
+                        <span class="text-sm">Checking...</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-neutral-300">Local Storage</span>
+                    <div id="storage-status" class="flex items-center">
+                        <div class="w-3 h-3 rounded-full bg-green-400 mr-2"></div>
+                        <span class="text-sm">Available</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-neutral-300">Saved Configurations</span>
+                    <div id="config-status" class="flex items-center">
+                        <span id="config-count" class="text-sm">0</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-neutral-300">Browser Compatibility</span>
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 rounded-full bg-green-400 mr-2"></div>
+                        <span class="text-sm">Supported</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-neutral-500 text-sm">
+            <p>&copy; 2025 Radian Motorsport. Professional Endurance Racing Strategy Platform.</p>
+            <p class="mt-2">
+                <i class="fa-solid fa-database mr-1"></i>Powered by Garage61 Telemetry API
+                <span class="mx-2">•</span>
+                <i class="fa-solid fa-code mr-1"></i>Built for iRacing Team Endurance
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Setup Modal -->
+<div id="quick-setup-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+    <div class="bg-neutral-800 p-8 rounded-xl shadow-2xl max-w-md w-full mx-4">
+        <h3 class="text-2xl road-rage-font mb-6 text-center">Quick Setup</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-neutral-300 mb-1">Race Type</label>
+                <select id="quick-race-type" class="w-full p-2 border border-neutral-600 rounded-lg bg-neutral-700 text-neutral-100">
+                    <option value="6h">6 Hour Endurance</option>
+                    <option value="12h">12 Hour Endurance</option>
+                    <option value="24h">24 Hour Endurance</option>
+                    <option value="custom">Custom Duration</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-neutral-300 mb-1">Car Class</label>
+                <select id="quick-car-class" class="w-full p-2 border border-neutral-600 rounded-lg bg-neutral-700 text-neutral-100">
+                    <option value="gt3">GT3</option>
+                    <option value="gt4">GT4</option>
+                    <option value="lmp2">LMP2</option>
+                    <option value="lmp3">LMP3</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex space-x-4 mt-8">
+            <button id="quick-setup-cancel" class="flex-1 bg-neutral-600 hover:bg-neutral-700 text-white font-bold py-3 rounded-lg transition-all duration-200">
+                Cancel
+            </button>
+            <button id="quick-setup-apply" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all duration-200">
+                Apply & Continue
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    checkSystemStatus();
+    setupEventHandlers();
+});
+
+function setupEventHandlers() {
+    document.getElementById('quick-setup').addEventListener('click', showQuickSetupModal);
+    document.getElementById('quick-setup-cancel').addEventListener('click', hideQuickSetupModal);
+    document.getElementById('quick-setup-apply').addEventListener('click', applyQuickSetup);
+    document.getElementById('load-session').addEventListener('click', loadSavedSession);
+}
+
+function checkSystemStatus() {
+    // Check Garage61 API
+    fetch('/api/garage61/test')
+        .then(response => response.json())
+        .then(result => {
+            const statusElement = document.getElementById('api-status');
+            if (result.success) {
+                statusElement.innerHTML = '<div class="w-3 h-3 rounded-full bg-green-400 mr-2"></div><span class="text-sm">Connected</span>';
+            } else {
+                statusElement.innerHTML = '<div class="w-3 h-3 rounded-full bg-red-400 mr-2"></div><span class="text-sm">Offline</span>';
+            }
+        })
+        .catch(() => {
+            const statusElement = document.getElementById('api-status');
+            statusElement.innerHTML = '<div class="w-3 h-3 rounded-full bg-red-400 mr-2"></div><span class="text-sm">Error</span>';
+        });
+
+    // Check saved configurations
+    const savedConfigs = localStorage.getItem('radianPlannerConfig');
+    const configCount = savedConfigs ? 1 : 0;
+    document.getElementById('config-count').textContent = configCount;
+}
+
+function showQuickSetupModal() {
+    document.getElementById('quick-setup-modal').classList.remove('hidden');
+}
+
+function hideQuickSetupModal() {
+    document.getElementById('quick-setup-modal').classList.add('hidden');
+}
+
+function applyQuickSetup() {
+    const raceType = document.getElementById('quick-race-type').value;
+    const carClass = document.getElementById('quick-car-class').value;
+    
+    // Define presets
+    const presets = {
+        '6h': { hours: 6, minutes: 0 },
+        '12h': { hours: 12, minutes: 0 },
+        '24h': { hours: 24, minutes: 0 },
+        'custom': { hours: 2, minutes: 0 }
+    };
+    
+    const carPresets = {
+        'gt3': { fuelPerLap: 3.8, tankCapacity: 120, lapTimeMinutes: 1, lapTimeSeconds: 45.0 },
+        'gt4': { fuelPerLap: 3.2, tankCapacity: 95, lapTimeMinutes: 1, lapTimeSeconds: 55.0 },
+        'lmp2': { fuelPerLap: 4.5, tankCapacity: 75, lapTimeMinutes: 1, lapTimeSeconds: 35.0 },
+        'lmp3': { fuelPerLap: 3.0, tankCapacity: 65, lapTimeMinutes: 1, lapTimeSeconds: 48.0 },
+        'custom': { fuelPerLap: 3.5, tankCapacity: 100, lapTimeMinutes: 2, lapTimeSeconds: 0.0 }
+    };
+    
+    const racePreset = presets[raceType];
+    const carPreset = carPresets[carClass];
+    
+    const config = {
+        raceDurationHours: racePreset.hours,
+        raceDurationMinutes: racePreset.minutes,
+        lapTimeMinutes: carPreset.lapTimeMinutes,
+        lapTimeSeconds: carPreset.lapTimeSeconds,
+        fuelPerLap: carPreset.fuelPerLap,
+        tankCapacity: carPreset.tankCapacity,
+        pitStopMinutes: 0,
+        pitStopSeconds: 45,
+        startingFuel: carPreset.tankCapacity
+    };
+    
+    localStorage.setItem('radianPlannerConfig', JSON.stringify(config));
+    
+    hideQuickSetupModal();
+    
+    // Show success message and redirect
+    alert(`Quick setup applied for ${raceType.toUpperCase()} ${carClass.toUpperCase()} race! Redirecting to setup page...`);
+    window.location.href = 'race-setup.html';
+}
+
+function loadSavedSession() {
+    const savedConfig = localStorage.getItem('radianPlannerConfig');
+    if (savedConfig) {
+        alert('Saved configuration found! Redirecting to setup page...');
+        window.location.href = 'race-setup.html';
+    } else {
+        alert('No saved configuration found. Please create a new race setup first.');
+        window.location.href = 'race-setup.html';
+    }
+}
+</script>
+
+</body>
+</html>
