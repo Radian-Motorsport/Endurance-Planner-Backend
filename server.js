@@ -19,7 +19,8 @@ if (process.env.DATABASE_URL) {
     console.log('No database URL provided. Running without database features.');
 }
 
-app.use(express.json());
+// Increase JSON body size to handle full data imports
+app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Function to create all necessary tables if they don't exist
@@ -152,43 +153,106 @@ app.get('/api/tracks', async (req, res) => {
 
 // API endpoint to save all data to the database
 app.post('/api/data', async (req, res) => {
-  try {
-    const { drivers, cars, tracks } = req.body;
+    // Accept partial payloads; default to empty arrays so batch imports (drivers-only, etc.) work
+    const drivers = Array.isArray(req.body?.drivers) ? req.body.drivers : [];
+    const cars = Array.isArray(req.body?.cars) ? req.body.cars : [];
+    const tracks = Array.isArray(req.body?.tracks) ? req.body.tracks : [];
+
+    const result = {
+        inserted: { drivers: 0, cars: 0, tracks: 0 },
+        errors: []
+    };
 
     // Insert new drivers (with conflict handling)
     for (const driver of drivers) {
-      await pool.query(`INSERT INTO drivers (name, garage61_slug, firstName, lastName) 
-                       VALUES ($1, $2, $3, $4) 
-                       ON CONFLICT (name) DO NOTHING`, 
-        [driver.name, driver.garage61_slug, driver.firstName, driver.lastName]);
+        if (!driver || !driver.name) continue;
+        try {
+            await pool.query(
+                `INSERT INTO drivers (name, garage61_slug, firstName, lastName)
+                 VALUES ($1, $2, $3, $4)
+                 ON CONFLICT (name) DO NOTHING`,
+                [driver.name, driver.garage61_slug || null, driver.firstName || null, driver.lastName || null]
+            );
+            result.inserted.drivers++;
+        } catch (e) {
+            console.error('Driver insert failed:', driver, e.message);
+            result.errors.push({ type: 'driver', name: driver.name, error: e.message, code: e.code, detail: e.detail });
+        }
     }
 
     // Insert new cars (with conflict handling)
     for (const car of cars) {
-      await pool.query(`INSERT INTO cars (name, garage61_id, platform, platform_id) 
-                       VALUES ($1, $2, $3, $4) 
-                       ON CONFLICT (garage61_id) DO NOTHING`, 
-        [car.name, car.garage61_id, car.platform, car.platform_id]);
+        if (!car || !car.name) continue;
+        try {
+            await pool.query(
+                `INSERT INTO cars (name, garage61_id, platform, platform_id)
+                 VALUES ($1, $2, $3, $4)
+                 ON CONFLICT (garage61_id) DO NOTHING`,
+                [car.name, car.garage61_id ?? null, car.platform || null, car.platform_id != null ? String(car.platform_id) : null]
+            );
+            result.inserted.cars++;
+        } catch (e) {
+            console.error('Car insert failed:', car, e.message);
+            result.errors.push({ type: 'car', name: car.name, error: e.message, code: e.code, detail: e.detail });
+        }
     }
 
     // Insert new tracks (with conflict handling)
     for (const track of tracks) {
-      await pool.query(`INSERT INTO tracks (name, garage61_id, base_name, variant, platform) 
-                       VALUES ($1, $2, $3, $4, $5) 
-                       ON CONFLICT (garage61_id) DO NOTHING`, 
-        [track.name, track.garage61_id, track.base_name, track.variant, track.platform]);
+        if (!track || !track.name) continue;
+        try {
+            await pool.query(
+                `INSERT INTO tracks (name, garage61_id, base_name, variant, platform)
+                 VALUES ($1, $2, $3, $4, $5)
+                 ON CONFLICT (garage61_id) DO NOTHING`,
+                [track.name, track.garage61_id ?? null, track.base_name || null, track.variant || null, track.platform || null]
+            );
+            result.inserted.tracks++;
+        } catch (e) {
+            console.error('Track insert failed:', track, e.message);
+            result.errors.push({ type: 'track', name: track.name, error: e.message, code: e.code, detail: e.detail });
+        }
     }
 
-    res.status(200).send('Data saved successfully');
-  } catch (err) {
-    console.error('Error saving data:', err);
-    console.error('Error details:', {
-      message: err.message,
-      code: err.code,
-      detail: err.detail
-    });
-    res.status(500).json({ error: 'Internal Server Error', details: err.message });
-  }
+    // Respond with detailed outcome
+    if (result.errors.length > 0) {
+        return res.status(200).json({ status: 'partial', ...result });
+    }
+    return res.status(200).json({ status: 'ok', ...result });
+});
+
+// Optional: explicit reset endpoint (nuclear option) – drops and recreates tables on demand
+app.post('/api/reset', async (req, res) => {
+    try {
+        const { resetSchema } = req.body || {};
+        if (!resetSchema) {
+            return res.status(400).json({ error: 'resetSchema=true required' });
+        }
+        if (!pool) {
+            return res.status(500).json({ error: 'No database connection' });
+        }
+
+        // Require explicit env flag and secret for safety
+        if (process.env.ALLOW_SCHEMA_RESET !== 'true') {
+            return res.status(403).json({ error: 'Reset disabled' });
+        }
+        const provided = req.headers['x-reset-secret'] || req.query.secret;
+        if (!process.env.RESET_SECRET || provided !== process.env.RESET_SECRET) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        console.warn('⚠️ NUCLEAR RESET: Dropping all tables by request...');
+        await pool.query('DROP TABLE IF EXISTS strategies CASCADE');
+        await pool.query('DROP TABLE IF EXISTS drivers CASCADE');
+        await pool.query('DROP TABLE IF EXISTS cars CASCADE');
+        await pool.query('DROP TABLE IF EXISTS tracks CASCADE');
+
+        await createTables();
+        return res.status(200).json({ status: 'reset-complete' });
+    } catch (err) {
+        console.error('Error resetting schema:', err);
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
+    }
 });
 
 // --- NEW API ENDPOINTS FOR STRATEGY SHARING ---
