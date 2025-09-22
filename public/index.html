@@ -8,140 +8,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Road+Rage&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <script>
         tailwind.config = {
             darkMode: 'class'
         }
     </script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.5s, color 0.5s;
-            background-color: #808080;
-        }
-        h1 {
-            font-family: 'RoadRage', sans-serif;
-        }
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-        
-        input:checked + .toggle-label {
-            background-color: #2196F3;
-        }
-        input:checked + .toggle-label:after {
-            left: calc(100% - 3px);
-            transform: translateX(-100%);
-        }
-        select, option, input, number, li {
-            color: #000000;
-            background-color: #FFFFFF;
-        }
-       
-        
-        @font-face {
-            font-family: 'RoadRage';
-            src: url('https://radian-motorsport.github.io/Endurance-Planner-Backend/RoadRage.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-        }
-        .road-rage-font {
-            font-family: 'RoadRage', sans-serif;
-        }
-        .icon-shadow {
-            filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.5));
-        }
-        .text-shadow {
-            filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.5));
-        }
-        
-        select {
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-
-        
-        h1 {
-            color: #ffffff; /* A dark color for the text */
-            text-shadow: 3px 3px 0px #000000; /* The text-shadow property */
-
-        }
-        h3 {
-            color: #ffffff; /* A dark color for the text */
-            text-shadow: 3px 3px 0px #000000; /* The text-shadow property *//* Gradient text for h3 */
-
-        }
-        h4 {
-            color: #ffffff; /* A dark color for the text */
-            text-shadow: 3px 3px 0px #000000; /* The text-shadow property *//* Gradient text for h2 *//* Gradient text for h4 */
-        }
-        
-        h2 {
-            font-size: 4em;
-            font-weight: SEMIbold;
-            
-            /* Apply the gradient to the background */
-            background-image: linear-gradient(to right, #00ffff, #d400ff);
-            
-            /* Clip the background to the text */
-            -webkit-background-clip: text;
-            
-            /* Make the text color transparent */
-            -webkit-text-fill-color: transparent;
-            
-            /* This is a fallback for browsers that don't support the above */
-            color: #4a90e2; 
-        
-            /*text-shadow: 3px 3px 0px #ffffff; /* The shadow property */
-            
-        }
-
-        /* The pseudo-element for the shadow */
-        
-        /* Custom Styles for Live Planner */
-        .live-planner-controls {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .live-planner-controls label {
-            display: block;
-            font-size: 0.9em;
-            text-align: left;
-            margin-bottom: 2px;
-        }
-        .live-planner-controls div {
-            min-width: 150px;
-        }
-        .live-planner-info p { margin: 5px 0; }
-        #countdown-timer { font-size: 2em; font-weight: bold; color: rgb(255, 255, 255); }
-        .dark #countdown-timer { color: #48bb78; }
-        
-    </style>
 </head>
 <body class="bg-neutral-900 text-neutral-100 p-4">
 
-<div class="max-w-4xl mx-auto bg-neutral-00 p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500">
+<div class="main-container">
     <div class="text-center mb-6">
             <img src="https://github.com/Radian-Motorsport/Endurance-Planner-Backend/blob/main/g457912.png?raw=true" alt="?" class="mx-auto w-100  h-auto">
         </div>
-    <div class="container mx-auto max-w-4xl p-8 bg-neutral-800 rounded-2xl shadow-lg border border-neutral-700">
-        <a href="index.html" class="bg-neutral-800 hover:bg-red-500 text-black font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 space-x-2">
+    <div class="inner-container">
+        <a href="index.html" class="btn-back">
             <i class="fa-solid fa-arrow-left"></i>
         </a>
-        <h2 class="text-5xl road-rage-font text-center  mb-2">LIVE RACE PLANNER</h1>
+        <h2 class="text-5xl road-rage-font text-center  mb-2">LIVE RACE PLANNER</h2>
         <p class="text-center text-neutral-400 mb-8"></p>
 
                     <div id="race-inputs-container" class="p-6 bg-neutral-700 border border-neutral-700 rounded-lg mb-6">
                     <h1 class="text-xl mb-4  road-rage-font">Live Race Inputs</h1>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="grid-cols-responsive">
                         <div class="flex flex-col">
                             <label class="text-sm font-medium text-neutral-500">Live Race Remaining</label>
                             <div class="flex items-center mt-1 space-x-2">
