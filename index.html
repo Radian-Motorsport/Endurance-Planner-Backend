@@ -697,26 +697,13 @@
         
         async function fetchBestLapTime(driverSlug, carId, trackId) {
             try {
-                // Your Garage 61 API token
-                const apiToken = 'MWVKZTRMOGETNDCZOS0ZMJUZLTK2ODITNJBJZMQ5NMU4M2I5';
-                
-                // Construct the API URL for lap times using the correct Garage 61 endpoint
-                const apiUrl = `https://garage61.net/api/v1/laps?driver=${driverSlug}&car=${carId}&track=${trackId}`;
-                
-                const response = await fetch(apiUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${apiToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
+                // Call our server-side proxy to avoid CORS and keep token secret
+                const apiUrl = `/api/garage61/laps?driver=${encodeURIComponent(driverSlug)}&car=${encodeURIComponent(carId)}&track=${encodeURIComponent(trackId)}`;
+                const response = await fetch(apiUrl, { method: 'GET' });
                 if (!response.ok) {
                     throw new Error(`API Error: ${response.status}`);
                 }
-                
                 const data = await response.json();
-                
                 // Find the best (fastest) lap time from the response
                 if (data && data.length > 0) {
                     // Sort laps by lap time to find the fastest
@@ -726,7 +713,6 @@
                 } else {
                     return 'No lap data found';
                 }
-                
             } catch (error) {
                 console.error('Error fetching best lap time:', error);
                 return `API Error: ${error.message}`;

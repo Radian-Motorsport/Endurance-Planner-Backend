@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
+const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -330,6 +331,40 @@ app.get('/api/strategies/:id', async (req, res) => {
     } catch (err) {
         console.error('Error fetching strategy:', err);
         res.status(500).send('Internal Server Error');
+    }
+});
+
+// --- Proxy to Garage61 to avoid CORS and keep token server-side ---
+app.get('/api/garage61/laps', async (req, res) => {
+    try {
+        const { driver, car, track } = req.query;
+        if (!driver || !car || !track) {
+            return res.status(400).json({ error: 'Missing required query params: driver, car, track' });
+        }
+
+        // Prefer env var; fallback to legacy token (kept for continuity)
+        const token = process.env.GARAGE61_TOKEN || 'MWVKZTRMOGETNDCZOS0ZMJUZLTK2ODITNJBJZMQ5NMU4M2I5';
+        if (!token) {
+            return res.status(500).json({ error: 'Garage61 token not configured' });
+        }
+
+        const url = 'https://garage61.net/api/v1/laps';
+        const response = await axios.get(url, {
+            params: { driver, car, track },
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 10000
+        });
+        return res.status(200).json(response.data);
+    } catch (err) {
+        // Axios error handling
+        if (err.response) {
+            // Upstream responded with error status
+            return res.status(err.response.status).json({ error: 'Upstream error', status: err.response.status, data: err.response.data });
+        }
+        if (err.code === 'ECONNABORTED') {
+            return res.status(504).json({ error: 'Garage61 request timed out' });
+        }
+        return res.status(502).json({ error: 'Failed to reach Garage61', details: err.message });
     }
 });
 
