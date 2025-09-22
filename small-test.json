@@ -1,0 +1,14 @@
+{
+  "drivers": [
+    { "name": "Stephan Brezden", "driverNumber": "369475" },
+    { "name": "Mitchell Warrenburg", "driverNumber": "234379" }
+  ],
+  "cars": [
+    { "name": "GT3 - Acura NSX GT3 EVO 22" },
+    { "name": "GT3 - Audi R8 LMS EVO II GT3" }
+  ],
+  "tracks": [
+    "Daytona International Speedway",
+    "Indianapolis Motor Speedway"
+  ]
+}
