@@ -151,6 +151,40 @@ app.get('/api/tracks', async (req, res) => {
     }
 });
 
+// Minimal admin DELETE endpoints (no auth yet). Use with care.
+app.delete('/api/drivers/:name', async (req, res) => {
+    try {
+        const { name } = req.params;
+        await pool.query('DELETE FROM drivers WHERE name = $1', [name]);
+        res.status(204).send();
+    } catch (err) {
+        console.error('Error deleting driver:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.delete('/api/cars/:garage61_id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.garage61_id, 10);
+        await pool.query('DELETE FROM cars WHERE garage61_id = $1', [id]);
+        res.status(204).send();
+    } catch (err) {
+        console.error('Error deleting car:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.delete('/api/tracks/:garage61_id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.garage61_id, 10);
+        await pool.query('DELETE FROM tracks WHERE garage61_id = $1', [id]);
+        res.status(204).send();
+    } catch (err) {
+        console.error('Error deleting track:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // API endpoint to save all data to the database
 app.post('/api/data', async (req, res) => {
     // Accept partial payloads; default to empty arrays so batch imports (drivers-only, etc.) work
@@ -163,14 +197,17 @@ app.post('/api/data', async (req, res) => {
         errors: []
     };
 
-    // Insert new drivers (with conflict handling)
+        // Insert/update drivers (upsert on unique name)
     for (const driver of drivers) {
         if (!driver || !driver.name) continue;
         try {
             await pool.query(
-                `INSERT INTO drivers (name, garage61_slug, firstName, lastName)
-                 VALUES ($1, $2, $3, $4)
-                 ON CONFLICT (name) DO NOTHING`,
+                    `INSERT INTO drivers (name, garage61_slug, firstName, lastName)
+                     VALUES ($1, $2, $3, $4)
+                     ON CONFLICT (name) DO UPDATE SET
+                         garage61_slug = EXCLUDED.garage61_slug,
+                         firstName = EXCLUDED.firstName,
+                         lastName = EXCLUDED.lastName`,
                 [driver.name, driver.garage61_slug || null, driver.firstName || null, driver.lastName || null]
             );
             result.inserted.drivers++;
@@ -180,14 +217,17 @@ app.post('/api/data', async (req, res) => {
         }
     }
 
-    // Insert new cars (with conflict handling)
+        // Insert/update cars (upsert on unique garage61_id)
     for (const car of cars) {
         if (!car || !car.name) continue;
         try {
             await pool.query(
-                `INSERT INTO cars (name, garage61_id, platform, platform_id)
-                 VALUES ($1, $2, $3, $4)
-                 ON CONFLICT (garage61_id) DO NOTHING`,
+                    `INSERT INTO cars (name, garage61_id, platform, platform_id)
+                     VALUES ($1, $2, $3, $4)
+                     ON CONFLICT (garage61_id) DO UPDATE SET
+                         name = EXCLUDED.name,
+                         platform = EXCLUDED.platform,
+                         platform_id = EXCLUDED.platform_id`,
                 [car.name, car.garage61_id ?? null, car.platform || null, car.platform_id != null ? String(car.platform_id) : null]
             );
             result.inserted.cars++;
@@ -197,14 +237,18 @@ app.post('/api/data', async (req, res) => {
         }
     }
 
-    // Insert new tracks (with conflict handling)
+        // Insert/update tracks (upsert on unique garage61_id)
     for (const track of tracks) {
         if (!track || !track.name) continue;
         try {
             await pool.query(
-                `INSERT INTO tracks (name, garage61_id, base_name, variant, platform)
-                 VALUES ($1, $2, $3, $4, $5)
-                 ON CONFLICT (garage61_id) DO NOTHING`,
+                    `INSERT INTO tracks (name, garage61_id, base_name, variant, platform)
+                     VALUES ($1, $2, $3, $4, $5)
+                     ON CONFLICT (garage61_id) DO UPDATE SET
+                         name = EXCLUDED.name,
+                         base_name = EXCLUDED.base_name,
+                         variant = EXCLUDED.variant,
+                         platform = EXCLUDED.platform`,
                 [track.name, track.garage61_id ?? null, track.base_name || null, track.variant || null, track.platform || null]
             );
             result.inserted.tracks++;
