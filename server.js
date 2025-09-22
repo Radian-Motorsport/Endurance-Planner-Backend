@@ -360,7 +360,6 @@ app.get('/api/garage61/laps', async (req, res) => {
             tracks: [parseInt(tracks)],               // Track IDs as array of numbers  
             group: 'none',                            // Return all laps (not just personal best)
             limit: 100,                               // More results to find best lap
-            lapTypes: [1, 2, 3, 4],                  // Include ALL lap types: normal, joker, out, in laps
             age: 30                                   // Include laps from last 30 days
         };
         
