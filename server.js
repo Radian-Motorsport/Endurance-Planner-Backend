@@ -33,7 +33,6 @@ async function createTables() {
         const createDriversTable = `
             CREATE TABLE IF NOT EXISTS drivers (
                 name VARCHAR(255) PRIMARY KEY,
-                drivernumber INT,
                 garage61_slug VARCHAR(255),
                 firstName VARCHAR(255),
                 lastName VARCHAR(255)
@@ -127,8 +126,8 @@ app.post('/api/data', async (req, res) => {
 
     // Insert new drivers
     for (const driver of drivers) {
-      await pool.query('INSERT INTO drivers (name, drivernumber, garage61_slug, firstName, lastName) VALUES ($1, $2, $3, $4, $5)', 
-        [driver.name, driver.driverNumber, driver.garage61_slug, driver.firstName, driver.lastName]);
+      await pool.query('INSERT INTO drivers (name, garage61_slug, firstName, lastName) VALUES ($1, $2, $3, $4)', 
+        [driver.name, driver.garage61_slug, driver.firstName, driver.lastName]);
     }
 
     // Insert new cars
@@ -146,7 +145,12 @@ app.post('/api/data', async (req, res) => {
     res.status(200).send('Data saved successfully');
   } catch (err) {
     console.error('Error saving data:', err);
-    res.status(500).send('Internal Server Error');
+    console.error('Error details:', {
+      message: err.message,
+      code: err.code,
+      detail: err.detail
+    });
+    res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
 });
 
