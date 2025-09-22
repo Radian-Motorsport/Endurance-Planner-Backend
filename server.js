@@ -351,21 +351,32 @@ app.get('/api/garage61/laps', async (req, res) => {
         // Use the correct Garage61 /laps endpoint with proper parameter format
         const url = 'https://garage61.net/api/v1/laps';
         
-        // Convert single values to arrays and use correct parameter names
+        // For your own laps, use 'drivers=me' instead of extraDrivers
         const params = {
+            drivers: ['me'],                 // Get your own laps
             cars: [parseInt(car)],           // Car IDs as array of numbers
             tracks: [parseInt(track)],       // Track IDs as array of numbers  
-            extraDrivers: [driver],          // Driver slugs as array of strings
-            group: 'driver',                 // Get personal best per driver
-            limit: 10                        // Limit results
+            group: 'none',                   // Return all laps (not just personal best)
+            limit: 100                       // More results to find best lap
         };
         
-        console.log(`🔗 Proxying to Garage61: ${url}`, params);
+        console.log(`🔗 Proxying to Garage61: ${url}`, JSON.stringify(params));
         
         const response = await axios.get(url, {
             params: params,
             headers: { Authorization: `Bearer ${token}` },
-            timeout: 15000
+            timeout: 15000,
+            paramsSerializer: params => {
+                // Properly serialize arrays for Garage61 API
+                return Object.entries(params)
+                    .map(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            return value.map(v => `${key}=${encodeURIComponent(v)}`).join('&');
+                        }
+                        return `${key}=${encodeURIComponent(value)}`;
+                    })
+                    .join('&');
+            }
         });
         
         console.log(`✅ Garage61 response: ${response.status}, ${response.data?.length || 0} laps`);
@@ -373,9 +384,42 @@ app.get('/api/garage61/laps', async (req, res) => {
     } catch (err) {
         console.error('❌ Garage61 proxy error:', err.response?.status, err.response?.statusText, err.message);
         
-        // Axios error handling with more details
+        // If the first request fails, try without driver filter (just car/track)
+        if (err.response?.status === 404 || err.response?.status === 400) {
+            try {
+                console.log('🔄 Retrying without driver filter...');
+                const fallbackParams = {
+                    cars: [parseInt(car)],
+                    tracks: [parseInt(track)],
+                    group: 'none',
+                    limit: 100
+                };
+                
+                const fallbackResponse = await axios.get(url, {
+                    params: fallbackParams,
+                    headers: { Authorization: `Bearer ${token}` },
+                    timeout: 15000,
+                    paramsSerializer: params => {
+                        return Object.entries(params)
+                            .map(([key, value]) => {
+                                if (Array.isArray(value)) {
+                                    return value.map(v => `${key}=${encodeURIComponent(v)}`).join('&');
+                                }
+                                return `${key}=${encodeURIComponent(value)}`;
+                            })
+                            .join('&');
+                    }
+                });
+                
+                console.log(`✅ Fallback success: ${fallbackResponse.data?.length || 0} laps`);
+                return res.status(200).json(fallbackResponse.data);
+            } catch (fallbackErr) {
+                console.error('❌ Fallback also failed:', fallbackErr.response?.status);
+            }
+        }
+        
+        // Original error handling
         if (err.response) {
-            // Upstream responded with error status
             const errorData = {
                 error: 'Garage61 API error',
                 status: err.response.status,

@@ -1,0 +1,487 @@
+GET /api/v1/laps
+Find laps and lap records.
+
+Required permissions:
+driving_data
+Search for laps or lap records.
+
+This method takes a lot of parameters and allows you to find laps or lap records. To get a good idea at the kind of filtering you can do, read the documentation on lap filtering first.
+
+You will always need to supply at least a track, a car or a user.
+
+To map the filtering capabilities of the app on the parameters below, here's an overview on which parameters are used for each filter in the app:
+
+Group laps: group
+Drivers / teams: drivers, teams, extraDrivers
+Session type: sessionTypes
+Setup: sessionSetupTypes
+Related data: seeTelemetry, seeGhostLap, seeSetup
+Lap type: lapTypes
+Date driven: age, after
+Lap time: minLapTime, maxLapTime
+Driver Rating: minRating, maxRating
+Fuel level: minFuel, maxFuel, minFuelUsed, maxFuelUsed
+Track conditions: minConditionsTrackUsage, maxConditionsTrackUsage, minConditionsTrackWetness, maxConditionsTrackWetness, minConditionsTrackTemp, maxConditionsTrackTemp, minConditionsAirTemp, maxConditionsAirTemp, minConditionsWindVel, maxConditionsWindVel, minConditionsRelativeHumidity, maxConditionsRelativeHumidity, minConditionsFogLevel, maxConditionsFogLevel, minConditionsPrecipitation, maxConditionsPrecipitation, minConditionsCloud, maxConditionsCloud, conditionsWindDir
+Limitations
+This method only returns laps driven yourself or your team mates. Use the relevant parameters to choose the desired selection of laps. For privacy reasons, no global lap search is available.
+
+Data returned adheres to the defined privacy settings and is thus specific to the user linked to the API token.
+
+Query parameters
+cars
+optional array<number>
+Car IDs to search for.
+
+This can be a combination of car and car category IDs, where the car category IDs are supplied as negative number.
+
+For instance, to search for car 3 or category 4, use cars=3,-4.
+
+tracks
+optional array<number>
+Track IDs to search for.
+
+seasons
+optional array<number>
+Season IDs to search for.
+
+Seasons (and their IDs) can be found in the platforms.
+
+drivers
+optional array<string>
+Drivers to include.
+
+Available values:
+
+me: Laps driven yourself
+following: Laps by drivers you're following
+The drivers selected by this parameter are combined with those from the teams and extraDrivers parameters. If none of these parameters are given, yourself and all teammates will be selected.
+
+teams
+optional array<string>
+Teams to include (by team slug).
+
+Teammates from the given teams will be included in the results.
+
+The drivers selected by this parameter are combined with those from the drivers and extraDrivers parameters. If none of these parameters are given, yourself and all teammates will be selected.
+
+extraDrivers
+optional array<string>
+Extra drivers to include (by user slug).
+
+The drivers selected by this parameter are combined with those from the drivers and teams parameters. If none of these parameters are given, yourself and all teammates will be selected.
+
+age
+optional number
+Maximum lap age.
+
+Any positive number represents the maximum number of days ago (e.g. 7 would restrict the search to all laps driven in the past week).
+
+A negative value is interpretered as follows:
+
+-1: Current season
+-2: Current and previous season
+-3: Last 3 seasons
+-4: Last 4 seasons
+after
+optional datetime
+Laps driven after given date.
+
+sessionTypes
+optional array<number>
+Filter by session type (default = all).
+
+Available values:
+
+1: Practice
+2: Qualifying
+3: Race
+sessionSetupTypes
+optional array<number>
+Filter by session setup type (default = all).
+
+Available values:
+
+1: Open setup
+2: Fixed setup
+seeTelemetry
+optional boolean
+Require the telemetry of each lap to be visible.
+
+Requires the calling user to have a Pro plan.
+
+seeGhostLap
+optional boolean
+Require the ghost lap of each lap to be visible.
+
+Only selects laps that have a ghost lap available.
+
+Requires the calling user to have a Pro plan.
+
+seeSetup
+optional boolean
+Require the setup of each lap to be visible.
+
+Only selects laps that have a setup available.
+
+Requires the calling user to have a Pro plan.
+
+lapTypes
+optional array<number>
+Filter by lap type (default = normal laps only).
+
+Available values:
+
+1: Normal (full) laps
+2: Joker laps
+3: Out laps (exiting the pitlane)
+4: In laps (entering the pitlane)
+event
+optional string
+Laps for given event ID.
+
+unclean
+optional boolean
+Allow returning unclean (and potentially incomplete) laps.
+
+minRating
+optional number
+Minimum driver rating (e.g. iRating for iRacing).
+
+maxRating
+optional number
+Maximum driver rating (e.g. iRating for iRacing).
+
+minFuel
+optional number
+Minimum fuel level.
+
+maxFuel
+optional number
+Maximum fuel level.
+
+minFuelUsed
+optional number
+Minimum fuel used in lap.
+
+maxFuelUsed
+optional number
+Maximum fuel used in lap.
+
+minLapTime
+optional number
+Minimum lap time.
+
+maxLapTime
+optional number
+Maximum lap time.
+
+minConditionsTrackUsage
+optional number
+Minimum track usage, as a percentage (0 = clean track, 100 = fully rubbered in).
+
+maxConditionsTrackUsage
+optional number
+Maximum track usage, as a percentage (0 = clean track, 100 = fully rubbered in).
+
+minConditionsTrackWetness
+optional number
+Minimum track wetness, as a percentage (0 = dry, 100 = fully wet).
+
+maxConditionsTrackWetness
+optional number
+Maximum track wetness, as a percentage (0 = dry, 100 = fully wet).
+
+minConditionsTrackTemp
+optional number
+Minimum track temperature (℃).
+
+maxConditionsTrackTemp
+optional number
+Maximum track temperature (℃).
+
+minConditionsAirTemp
+optional number
+Minimum air temperature (℃).
+
+maxConditionsAirTemp
+optional number
+Maximum air temperature (℃).
+
+minConditionsWindVel
+optional number
+Minimum wind velocity (m/s).
+
+maxConditionsWindVel
+optional number
+Maximum wind velocity (m/s).
+
+minConditionsRelativeHumidity
+optional number
+Minimum relative humidity.
+
+maxConditionsRelativeHumidity
+optional number
+Maximum relative humidity.
+
+minConditionsFogLevel
+optional number
+Minimum fog level.
+
+maxConditionsFogLevel
+optional number
+Maximum fog level.
+
+minConditionsPrecipitation
+optional number
+Minimum precipitation.
+
+maxConditionsPrecipitation
+optional number
+Maximum precipitation.
+
+minConditionsCloud
+optional number
+Minimum cloud cover.
+
+Available values:
+
+1: Clear skies
+2: Partly cloudy
+3: Mostly cloudy
+4: Overcast
+maxConditionsCloud
+optional number
+Maximum cloud cover.
+
+Available values:
+
+1: Clear skies
+2: Partly cloudy
+3: Mostly cloudy
+4: Overcast
+conditionsWindDir
+optional array<number>
+Allowed wind directions.
+
+Available values:
+
+1: North
+2: East
+3: South
+4: West
+round
+optional string
+Correct parameters for rounding.
+
+When using the web app, lap searches are adjusted slightly to compensate for the fact that values are rounded for display. Supply the desired display units to apply rounding correction on your lap search.
+
+Available values: metric, englishStandard.
+
+group
+optional string
+Grouping of results, determines which laps will be returned (default: driver).
+
+Available values:
+
+driver: Personal best laps per driver.
+driver-car: Personal best laps per driver/car combination.
+none: Return all laps.
+limit
+optional number
+Limit results to the given amount of laps (maximum and default is 1000).
+
+offset
+optional number
+Start results at given offset.
+
+Returns
+200 Laps
+application/json
+total
+integer
+Total number of available laps, across all pages.
+
+items
+array<object>
+canViewSetup
+boolean
+Can you view the setup?
+
+canViewTelemetry
+boolean
+Can you view the telemetry data?
+
+ghostAvailable
+boolean
+Is a ghost lap available for this lap?
+
+tireCompound
+number
+Tire compound
+
+fuelAdded
+number
+Fuel added
+
+fuelUsed
+number
+Fuel used
+
+fuelLevel
+number
+Fuel level
+
+sectors
+array<object>
+Sector times
+
+precipitation
+number
+Precipitation
+
+fogLevel
+number
+Fog level
+
+relativeHumidity
+number
+Relative humidity
+
+windDir
+number
+Wind direction
+
+windVel
+number
+Wind velocity (m/s)
+
+airPressure
+number
+Air pressure
+
+airDensity
+number
+Air density
+
+clouds
+number
+Cloud cover.
+
+Available values:
+
+1: Clear skies
+2: Partly cloudy
+3: Mostly cloudy
+4: Overcast
+airTemp
+number
+Air temperature (℃)
+
+trackWetness
+number
+Track wetness, as a percentage (0 = dry, 100 = fully wet).
+
+trackUsage
+number
+Track usage, as a percentage (0 = clean track, 100 = fully rubbered in).
+
+trackTemp
+number
+Track temperature (℃)
+
+pitOut
+boolean
+Did the car exit the pit lane on this lap?
+
+pitIn
+boolean
+Did the car enter the pit lane on this lap?
+
+pitlane
+boolean
+Did the car travel through pit lane on this lap?
+
+offtrack
+boolean
+Did the driver go off track during this lap?
+
+incomplete
+boolean
+Is this an incomplete lap?
+
+A lap might be incomplete if a tow occured. A full complete lap starts and ends at the start/finish line.
+
+missing
+boolean
+Is data for this lap missing?
+
+discontinuity
+boolean
+Whether this lap had a discontinuity, which is usually a gap in the recording of telemetry.
+
+joker
+boolean
+Is this a joker lap?
+
+clean
+boolean
+Is this a clean, complete lap?
+
+lapTime
+number
+Lap time, in seconds
+
+lapNumber
+number
+Lap number, as assigned by race control.
+
+startTime
+datetime
+Start time
+
+track
+object
+Track information
+
+car
+object
+Car information
+
+season
+nullable object
+Season
+
+run
+number
+Run number
+
+sessionType
+number
+Session type
+
+Available values:
+
+1: Practice
+2: Qualifying
+3: Race
+session
+number
+Session number
+
+event
+string
+Event ID in which the lap was driven.
+
+driverRating
+number
+Driver rating at the time of driving, if known.
+
+driver
+nullable object
+Driver information.
+
+Can be empty if the driver for a lap is unknown.
+
+id
+string
+Lap ID

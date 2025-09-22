@@ -1,0 +1,202 @@
+GET /api/v1/laps/{id}
+Get information about a specific lap.
+
+Required permissions:
+driving_data
+Returns all info about a specific lap.
+
+Limitations
+This method only returns laps driven yourself or your team mates.
+
+Data returned adheres to the defined privacy settings and is thus specific to the user linked to the API token.
+
+Query parameters
+id
+string
+Lap ID
+
+Returns
+200 Lap info
+application/json
+canViewSetup
+boolean
+Can you view the setup?
+
+canViewTelemetry
+boolean
+Can you view the telemetry data?
+
+ghostAvailable
+boolean
+Is a ghost lap available for this lap?
+
+tireCompound
+number
+Tire compound
+
+fuelAdded
+number
+Fuel added
+
+fuelUsed
+number
+Fuel used
+
+fuelLevel
+number
+Fuel level
+
+sectors
+array<object>
+Sector times
+
+precipitation
+number
+Precipitation
+
+fogLevel
+number
+Fog level
+
+relativeHumidity
+number
+Relative humidity
+
+windDir
+number
+Wind direction
+
+windVel
+number
+Wind velocity (m/s)
+
+airPressure
+number
+Air pressure
+
+airDensity
+number
+Air density
+
+clouds
+number
+Cloud cover.
+
+Available values:
+
+1: Clear skies
+2: Partly cloudy
+3: Mostly cloudy
+4: Overcast
+airTemp
+number
+Air temperature (℃)
+
+trackWetness
+number
+Track wetness, as a percentage (0 = dry, 100 = fully wet).
+
+trackUsage
+number
+Track usage, as a percentage (0 = clean track, 100 = fully rubbered in).
+
+trackTemp
+number
+Track temperature (℃)
+
+pitOut
+boolean
+Did the car exit the pit lane on this lap?
+
+pitIn
+boolean
+Did the car enter the pit lane on this lap?
+
+pitlane
+boolean
+Did the car travel through pit lane on this lap?
+
+offtrack
+boolean
+Did the driver go off track during this lap?
+
+incomplete
+boolean
+Is this an incomplete lap?
+
+A lap might be incomplete if a tow occured. A full complete lap starts and ends at the start/finish line.
+
+missing
+boolean
+Is data for this lap missing?
+
+discontinuity
+boolean
+Whether this lap had a discontinuity, which is usually a gap in the recording of telemetry.
+
+joker
+boolean
+Is this a joker lap?
+
+clean
+boolean
+Is this a clean, complete lap?
+
+lapTime
+number
+Lap time, in seconds
+
+lapNumber
+number
+Lap number, as assigned by race control.
+
+startTime
+datetime
+Start time
+
+track
+object
+Track information
+
+car
+object
+Car information
+
+season
+nullable object
+Season
+
+run
+number
+Run number
+
+sessionType
+number
+Session type
+
+Available values:
+
+1: Practice
+2: Qualifying
+3: Race
+session
+number
+Session number
+
+event
+string
+Event ID in which the lap was driven.
+
+driverRating
+number
+Driver rating at the time of driving, if known.
+
+driver
+nullable object
+Driver information.
+
+Can be empty if the driver for a lap is unknown.
+
+id
+string
+Lap ID
