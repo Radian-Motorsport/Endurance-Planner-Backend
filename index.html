@@ -718,15 +718,15 @@
                 }
                 
                 const data = await response.json();
-                console.log(`✅ Received ${data?.length || 0} laps from Garage61`);
+                console.log(`✅ Received ${data?.items?.length || 0} laps from Garage61`);
                 
                 // Find the best (fastest) lap time from the response  
-                if (data && data.length > 0) {
-                    // Garage61 returns lap objects with lap_time property
-                    const sortedLaps = data.sort((a, b) => parseFloat(a.lap_time) - parseFloat(b.lap_time));
+                if (data && data.items && data.items.length > 0) {
+                    // Garage61 returns data.items array with lap objects that have lapTime property
+                    const sortedLaps = data.items.sort((a, b) => parseFloat(a.lapTime) - parseFloat(b.lapTime));
                     const bestLap = sortedLaps[0];
-                    console.log(`🏆 Best lap: ${bestLap.lap_time}s`);
-                    return formatLapTime(parseFloat(bestLap.lap_time));
+                    console.log(`🏆 Best lap: ${bestLap.lapTime}s by ${bestLap.driver.firstName} ${bestLap.driver.lastName}`);
+                    return formatLapTime(parseFloat(bestLap.lapTime));
                 } else {
                     return 'No lap data available';
                 }
