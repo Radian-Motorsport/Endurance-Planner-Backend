@@ -30,12 +30,7 @@ async function createTables() {
     }
     
     try {
-        // Drop existing tables to reset everything
-        await pool.query('DROP TABLE IF EXISTS strategies CASCADE');
-        await pool.query('DROP TABLE IF EXISTS drivers CASCADE');
-        await pool.query('DROP TABLE IF EXISTS cars CASCADE');
-        await pool.query('DROP TABLE IF EXISTS tracks CASCADE');
-        console.log('Old tables dropped successfully.');
+        console.log('Creating database tables if they do not exist...');
         
         const createDriversTable = `
             CREATE TABLE IF NOT EXISTS drivers (
