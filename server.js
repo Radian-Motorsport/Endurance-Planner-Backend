@@ -156,3 +156,11 @@ app.get('/api/strategies/:id', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+
+
