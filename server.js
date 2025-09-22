@@ -111,11 +111,13 @@ app.post('/api/data', async (req, res) => {
     const { drivers, cars, tracks } = req.body;
 
     // Clear existing data
-    await pool.query('TRUNCATE TABLE drivers, cars, tracks RESTART IDENTITY');
+    await pool.query('TRUNCATE TABLE drivers RESTART IDENTITY');
+    await pool.query('TRUNCATE TABLE cars RESTART IDENTITY');
+    await pool.query('TRUNCATE TABLE tracks RESTART IDENTITY');
 
     // Insert new drivers
     for (const driver of drivers) {
-      await pool.query('INSERT INTO drivers (name, drivernumber) VALUES ($1, $2)', [driver.name, driver.drivernumber]);
+      await pool.query('INSERT INTO drivers (name, drivernumber) VALUES ($1, $2)', [driver.name, driver.driverNumber]);
     }
 
     // Insert new cars

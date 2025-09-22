@@ -1,0 +1,11 @@
+{
+  "drivers": [
+    { "name": "Test Driver", "driverNumber": "12345" }
+  ],
+  "cars": [
+    { "name": "Test Car" }
+  ],
+  "tracks": [
+    "Test Track"
+  ]
+}
