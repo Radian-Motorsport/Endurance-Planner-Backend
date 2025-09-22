@@ -121,6 +121,37 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
+// Individual API endpoints for frontend dropdown population
+app.get('/api/drivers', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM drivers');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching drivers:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/api/cars', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM cars');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching cars:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/api/tracks', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM tracks');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching tracks:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // API endpoint to save all data to the database
 app.post('/api/data', async (req, res) => {
   try {
