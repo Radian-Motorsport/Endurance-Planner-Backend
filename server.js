@@ -34,7 +34,8 @@ async function createTables() {
         
         const createDriversTable = `
             CREATE TABLE IF NOT EXISTS drivers (
-                name VARCHAR(255) PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL UNIQUE,
                 garage61_slug VARCHAR(255),
                 firstName VARCHAR(255),
                 lastName VARCHAR(255)
@@ -42,16 +43,18 @@ async function createTables() {
         `;
         const createCarsTable = `
             CREATE TABLE IF NOT EXISTS cars (
-                name VARCHAR(255) PRIMARY KEY,
-                garage61_id INT,
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                garage61_id INTEGER UNIQUE,
                 platform VARCHAR(100),
                 platform_id VARCHAR(100)
             );
         `;
         const createTracksTable = `
             CREATE TABLE IF NOT EXISTS tracks (
-                name VARCHAR(255) PRIMARY KEY,
-                garage61_id INT,
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                garage61_id INTEGER UNIQUE,
                 base_name VARCHAR(255),
                 variant VARCHAR(255),
                 platform VARCHAR(100)
