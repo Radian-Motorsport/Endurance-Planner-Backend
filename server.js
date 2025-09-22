@@ -22,7 +22,13 @@ if (process.env.DATABASE_URL) {
 
 // Increase JSON body size to handle full data imports
 app.use(express.json({ limit: '2mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files including test page
+app.use(express.static('.'));
+
+// Test page route
+app.get('/test', (req, res) => {
+    res.sendFile(path.join(__dirname, 'garage61-test.html'));
+});
 
 // Function to create all necessary tables if they don't exist
 async function createTables() {
