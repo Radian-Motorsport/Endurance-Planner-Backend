@@ -177,16 +177,17 @@
                             <span class="text-white text-shadow road-rage-font">BEST LAP TIMES:</span>
                             <br>
                             <div id="page2-best-lap-table" class="mt-2">
-                                <table class="w-full text-neutral-100">
+                                <table class="w-full text-neutral-100 border-separate border-spacing-0">
                                     <thead>
-                                        <tr class="text-left border-b border-neutral-600">
-                                            <th class="py-1 text-neutral-300">Driver</th>
-                                            <th class="py-1 text-neutral-300">Lap Time</th>
+                                        <tr class="text-left border-b border-neutral-600 bg-neutral-800">
+                                            <th class="py-3 px-4 text-neutral-300 font-semibold border-r border-neutral-600">Driver</th>
+                                            <th class="py-3 px-4 text-neutral-300 font-semibold border-r border-neutral-600">Lap Time</th>
+                                            <th class="py-3 px-4 text-neutral-300 font-semibold">Fuel Used (L)</th>
                                         </tr>
                                     </thead>
                                     <tbody id="lap-times-tbody">
                                         <tr>
-                                            <td colspan="2" class="py-2 text-neutral-400">Loading...</td>
+                                            <td colspan="3" class="py-4 px-4 text-neutral-400 text-center">Click "Next" to load lap times...</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -757,6 +758,62 @@
             return `${minutes}:${seconds.padStart(6, '0')}`;
         }
         
+        // Fetch lap data for a specific driver including fuel information
+        async function fetchDriverLapData(driverSlug, carId, trackId) {
+            try {
+                console.log(`🔍 Fetching data for driver: ${driverSlug}, car: ${carId}, track: ${trackId}`);
+                
+                if (!carId || !trackId) {
+                    return {
+                        lapTime: 'Missing car/track data',
+                        fuelUsed: 'N/A'
+                    };
+                }
+                
+                const url = `/api/garage61/laps?extraDrivers=${encodeURIComponent(driverSlug)}&cars=${carId}&tracks=${trackId}`;
+                console.log(`🌐 Requesting: ${url}`);
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error(`❌ Garage61 API error ${response.status}:`, errorData);
+                    
+                    return {
+                        lapTime: response.status === 504 ? 'Timeout' : `Error ${response.status}`,
+                        fuelUsed: 'N/A'
+                    };
+                }
+                
+                const data = await response.json();
+                console.log(`✅ Received ${data?.items?.length || 0} laps for ${driverSlug}`);
+                
+                if (data && data.items && data.items.length > 0) {
+                    // Sort by lap time to get the best (fastest) lap
+                    const sortedLaps = data.items.sort((a, b) => parseFloat(a.lapTime) - parseFloat(b.lapTime));
+                    const bestLap = sortedLaps[0];
+                    
+                    console.log(`🏆 Best lap for ${driverSlug}: ${bestLap.lapTime}s, fuel: ${bestLap.fuelUsed}L`);
+                    
+                    return {
+                        lapTime: formatLapTime(parseFloat(bestLap.lapTime)),
+                        fuelUsed: bestLap.fuelUsed ? `${parseFloat(bestLap.fuelUsed).toFixed(2)}` : 'N/A'
+                    };
+                } else {
+                    return {
+                        lapTime: 'No lap data',
+                        fuelUsed: 'N/A'
+                    };
+                }
+            } catch (error) {
+                console.error(`Error fetching data for ${driverSlug}:`, error);
+                return {
+                    lapTime: 'Connection Error',
+                    fuelUsed: 'N/A'
+                };
+            }
+        }
+        
         async function updateBestLapDisplay() {
             const tbody = document.getElementById('lap-times-tbody');
             tbody.innerHTML = '<tr><td colspan="2" class="py-2 text-neutral-400">Loading...</td></tr>';
@@ -817,37 +874,64 @@
 
         async function fetchAllDriverLapTimes(drivers, carId, trackId) {
             const tbody = document.getElementById('lap-times-tbody');
-            const rows = [];
+            tbody.innerHTML = '';
 
+            // Show loading state for all drivers
             for (const driver of drivers) {
+                const row = tbody.insertRow();
+                row.className = "hover:bg-neutral-800 transition-colors";
+                row.innerHTML = `
+                    <td class="py-3 px-4 border-r border-neutral-700 text-neutral-300 font-medium">${driver.name}</td>
+                    <td class="py-3 px-4 border-r border-neutral-700 text-yellow-400">Loading...</td>
+                    <td class="py-3 px-4 text-yellow-400">Loading...</td>
+                `;
+            }
+
+            // Fetch data for each driver individually
+            for (let i = 0; i < drivers.length; i++) {
+                const driver = drivers[i];
+                
                 if (!driver.garage61_slug) {
-                    rows.push(`<tr>
-                        <td class="py-1">${driver.name}</td>
-                        <td class="py-1 text-red-400">No Garage61 slug</td>
-                    </tr>`);
+                    const rows = tbody.querySelectorAll('tr');
+                    if (rows[i]) {
+                        rows[i].innerHTML = `
+                            <td class="py-3 px-4 border-r border-neutral-700 text-neutral-300 font-medium">${driver.name}</td>
+                            <td class="py-3 px-4 border-r border-neutral-700 text-red-400">No Garage61 slug</td>
+                            <td class="py-3 px-4 text-red-400">N/A</td>
+                        `;
+                    }
                     continue;
                 }
 
                 try {
-                    console.log(`🏁 Fetching lap time for ${driver.name} (${driver.garage61_slug})`);
-                    const lapTime = await fetchBestLapTime(driver.garage61_slug, carId, trackId);
+                    console.log(`🏁 Fetching data for ${driver.name} (${driver.garage61_slug})`);
+                    const data = await fetchDriverLapData(driver.garage61_slug, carId, trackId);
                     
-                    const timeClass = lapTime.includes('No lap') || lapTime.includes('Error') || lapTime.includes('timeout') ? 'text-red-400' : 'text-green-400';
+                    // Determine styling based on data validity
+                    const lapTimeClass = data.lapTime.includes('No lap') || data.lapTime.includes('Error') || data.lapTime.includes('timeout') || data.lapTime.includes('Timeout') ? 'text-red-400' : 'text-green-400 font-mono';
+                    const fuelClass = data.fuelUsed === 'N/A' ? 'text-red-400' : 'text-blue-400 font-mono';
                     
-                    rows.push(`<tr>
-                        <td class="py-1">${driver.name}</td>
-                        <td class="py-1 ${timeClass}">${lapTime}</td>
-                    </tr>`);
+                    // Update the corresponding row
+                    const rows = tbody.querySelectorAll('tr');
+                    if (rows[i]) {
+                        rows[i].innerHTML = `
+                            <td class="py-3 px-4 border-r border-neutral-700 text-neutral-300 font-medium">${driver.name}</td>
+                            <td class="py-3 px-4 border-r border-neutral-700 ${lapTimeClass}">${data.lapTime}</td>
+                            <td class="py-3 px-4 ${fuelClass}">${data.fuelUsed}</td>
+                        `;
+                    }
                 } catch (error) {
-                    console.error(`Error fetching lap time for ${driver.name}:`, error);
-                    rows.push(`<tr>
-                        <td class="py-1">${driver.name}</td>
-                        <td class="py-1 text-red-400">Error loading</td>
-                    </tr>`);
+                    console.error(`Error fetching data for ${driver.name}:`, error);
+                    const rows = tbody.querySelectorAll('tr');
+                    if (rows[i]) {
+                        rows[i].innerHTML = `
+                            <td class="py-3 px-4 border-r border-neutral-700 text-neutral-300 font-medium">${driver.name}</td>
+                            <td class="py-3 px-4 border-r border-neutral-700 text-red-400">Error loading</td>
+                            <td class="py-3 px-4 text-red-400">N/A</td>
+                        `;
+                    }
                 }
             }
-
-            tbody.innerHTML = rows.join('');
         }
 
         // --- Core Logic ---
