@@ -1,310 +1,365 @@
-const express = require('express');
-const path = require('path');
-const { Pool } = require('pg');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Use the DATABASE_URL environment variable from Render
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
-
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Function to create all necessary tables if they don't exist
-async function createTables() {
-    try {
-        const createDriversTable = `
-            CREATE TABLE IF NOT EXISTS drivers (
-                name VARCHAR(255) PRIMARY KEY,
-                drivernumber INT
-            );
-        `;
-        const createCarsTable = `
-            CREATE TABLE IF NOT EXISTS cars (
-                name VARCHAR(255) PRIMARY KEY
-            );
-        `;
-        const createTracksTable = `
-            CREATE TABLE IF NOT EXISTS tracks (
-                name VARCHAR(255) PRIMARY KEY
-            );
-        `;
-        const createStrategiesTable = `
-            CREATE TABLE IF NOT EXISTS strategies (
-                id VARCHAR(36) PRIMARY KEY,
-                strategy_data JSONB NOT NULL
-            );
-        `;
-        await pool.query(createDriversTable);
-        await pool.query(createCarsTable);
-        await pool.query(createTracksTable);
-        await pool.query(createStrategiesTable);
-        console.log('Database tables checked/created successfully.');
-    } catch (err) {
-        console.error('Error creating database tables:', err);
-    }
-}
-
-// Call the function on server start
-createTables();
-
-
-// Serve the main HTML file
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Add this new route to serve the livev2.html file
-app.get('/livev2.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'livev2.html'));
-});
-
-// Add this new route to serve the Championship.html file
-app.get('/championship-tracker-v6.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'championship-tracker-v6.html'));
-});
-
-// And back to index
-app.get('/index.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// API endpoint to get all data from the database
-app.get('/api/data', async (req, res) => {
-    try {
-        const driversResult = await pool.query('SELECT * FROM drivers');
-        const carsResult = await pool.query('SELECT * FROM cars');
-        const tracksResult = await pool.query('SELECT * FROM tracks');
-
-        res.json({
-            drivers: driversResult.rows,
-            cars: carsResult.rows,
-            tracks: tracksResult.rows
-        });
-    } catch (err) {
-        console.error('Error fetching data:', err);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-// API endpoint to save all data to the database
-app.post('/api/data', async (req, res) => {
-  try {
-    const { drivers, cars, tracks } = req.body;
-
-    // Clear existing data
-    await pool.query('TRUNCATE TABLE drivers, cars, tracks RESTART IDENTITY');
-
-    // Insert new drivers
-    for (const driver of drivers) {
-      await pool.query('INSERT INTO drivers (name, drivernumber) VALUES ($1, $2)', [driver.name, driver.drivernumber]);
-    }
-
-    // Insert new cars
-    for (const car of cars) {
-      await pool.query('INSERT INTO cars (name) VALUES ($1)', [car.name]);
-    }
-
-    // Insert new tracks
-    for (const track of tracks) {
-      await pool.query('INSERT INTO tracks (name) VALUES ($1)', [track.name]);
-    }
-
-    res.status(200).send('Data saved successfully');
-  } catch (err) {
-    console.error('Error saving data:', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-// --- NEW API ENDPOINTS FOR STRATEGY SHARING ---
-
-// API endpoint to save a strategy to the database
-app.post('/api/strategies', async (req, res) => {
-    try {
-        const strategyData = req.body;
-        const uniqueId = require('crypto').randomUUID(); // Generate a unique ID
-
-        await pool.query('INSERT INTO strategies (id, strategy_data) VALUES ($1, $2)', [uniqueId, strategyData]);
-        
-        res.status(201).json({ id: uniqueId });
-    } catch (err) {
-        console.error('Error saving strategy:', err);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-// API endpoint to retrieve a saved strategy by its ID
-app.get('/api/strategies/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const result = await pool.query('SELECT strategy_data FROM strategies WHERE id = $1', [id]);
-        
-        if (result.rows.length > 0) {
-            res.json(result.rows[0].strategy_data);
-        } else {
-            res.status(404).send('Strategy not found');
-        }
-    } catch (err) {
-        console.error('Error fetching strategy:', err);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
-
-const express = require('express');
 const WebSocket = require('ws');
+const express = require('express');
 const http = require('http');
+const path = require('path');
 
-const app = express();
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
-
-// Use a port provided by Render, or default to 3000 for local testing
-const PORT = process.env.PORT || 3000;
-
-// Serve static files from the 'public' directory
-app.use(express.static('public'));
-
-// --- The Race State: This is the single source of truth for all clients ---
+// Global state for the race
 let raceState = {
+    isRaceRunning: false,
     raceTimeRemaining: 0,
-    avgLapTime: 0,
-    fuelPerLap: 0,
-    tankCapacity: 0,
-    estLaps: 0,
-    stintDuration: 0,
-    lapsPerStint: 0,
+    stintNumber: 1,
     totalPitStops: 0,
-    totalFuel: 0,
+    isPitting: false,
+    pitTimeRemaining: 0,
     nextPitStop: 0,
-    raceIsRunning: false,
-    stintData: [], // To store details of each completed stint
-    lastUpdateTime: Date.now()
+    stintData: [],
+    completedStints: [],
+    lapsPerStint: 0,
+    stintDuration: 0,
+    fuelPerLap: 0,
+    avgLapTime: 0,
+    estLaps: 0,
+    fuelAdjustment: 0,
+    lapTimeAdjustment: 0,
+    pitStopTime: 0
 };
 
-// --- Race Timer and Update Logic ---
-setInterval(() => {
-    if (raceState.raceIsRunning) {
-        const now = Date.now();
-        const elapsedTime = (now - raceState.lastUpdateTime) / 1000;
-        raceState.raceTimeRemaining -= elapsedTime;
-        raceState.nextPitStop -= elapsedTime;
-        raceState.lastUpdateTime = now;
+let raceInterval = null;
+let stintStartTimestamp = 0;
 
-        // Check for race finish
-        if (raceState.raceTimeRemaining <= 0) {
-            raceState.raceTimeRemaining = 0;
-            raceState.raceIsRunning = false;
-        }
+// Set up the Express app to serve your static files
+const app = express();
+const server = http.createServer(app);
 
-        // Check for pit stop
-        if (raceState.nextPitStop <= 0 && raceState.raceTimeRemaining > 0) {
-            // A pit stop is needed, add new stint data to the list
-            raceState.stintData.push({
-                stintNumber: raceState.stintData.length + 1,
-                startTime: raceState.nextPitStop + raceState.stintDuration,
-                endTime: 0, // Placeholder
-                duration: raceState.stintDuration,
-                laps: raceState.lapsPerStint,
-                fuel: raceState.tankCapacity
-            });
-            // Reset the next pit stop timer
-            raceState.nextPitStop = raceState.stintDuration;
-        }
+// Serve static files from the root directory
+app.use(express.static(path.join(__dirname, '.')));
 
-        // Broadcast the updated state to all connected clients
-        const stateMessage = JSON.stringify(raceState);
-        wss.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(stateMessage);
-            }
-        });
-    }
-}, 1000); // Update every second
+// Set up the WebSocket server
+const wss = new WebSocket.Server({ server });
 
-// --- WebSocket Event Handlers ---
 wss.on('connection', ws => {
-    console.log('New client connected');
-
-    // Send the current race state to the newly connected client
+    console.log('Client connected');
+    
+    // Send the current state to the new client immediately
     ws.send(JSON.stringify(raceState));
 
     ws.on('message', message => {
-        const data = JSON.parse(message);
-        console.log(`Received message: ${JSON.stringify(data)}`);
+        const msg = JSON.parse(message);
+        console.log('Received message:', msg);
 
-        if (data.type === 'recalculate') {
-            const { raceDuration, avgLapTime, fuelPerLap, tankCapacity } = data.data;
-
-            // Recalculate all strategy metrics
-            raceState.raceTimeRemaining = raceDuration;
-            raceState.avgLapTime = avgLapTime;
-            raceState.fuelPerLap = fuelPerLap;
-            raceState.tankCapacity = tankCapacity;
-            
-            // Perform the calculations and update raceState
-            raceState.estLaps = raceDuration / avgLapTime;
-            raceState.stintDuration = (tankCapacity / fuelPerLap) * avgLapTime;
-            raceState.lapsPerStint = Math.floor(tankCapacity / fuelPerLap);
-            raceState.totalPitStops = Math.floor(raceDuration / raceState.stintDuration);
-            raceState.totalFuel = raceState.fuelPerLap * raceState.estLaps;
-            raceState.nextPitStop = raceState.stintDuration;
-
-            // Reset stint data for a new race
-            raceState.stintData = [];
-
-            // Broadcast the new strategy to all clients
-            wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify(raceState));
-                }
-            });
-
-        } else if (data.type === 'toggleRace') {
-            raceState.raceIsRunning = !raceState.raceIsRunning;
-            // When starting, reset the update time
-            if (raceState.raceIsRunning) {
-                raceState.lastUpdateTime = Date.now();
-            }
-
-        } else if (data.type === 'pitExit') {
-            // Logic for pit exit
-            // You can add more complex logic here later, like adding fuel
-            raceState.nextPitStop = raceState.stintDuration;
-
-        } else if (data.type === 'adjustFuel') {
-            // Adjust the fuel consumption
-            // Note: This needs to be more complex to affect the next pit stop time properly
-            raceState.fuelPerLap = raceState.fuelPerLap + data.value;
-            // Recalculate stints and next pit stop based on new fuel usage
-            // This is an advanced topic; for now, the timer will just keep counting down
-        
-        } else if (data.type === 'adjustLapTime') {
-            // Adjust the lap time
-            // Note: This needs to be more complex to affect all calculations properly
-            raceState.avgLapTime = raceState.avgLapTime + data.value;
-            // Recalculate all metrics
+        switch (msg.type) {
+            case 'recalculate':
+                handleRecalculation(msg.inputs);
+                break;
+            case 'toggleRace':
+                toggleRace();
+                break;
+            case 'pitExit':
+                handlePitExit();
+                break;
+            case 'liveAdjustments':
+                handleLiveAdjustments(msg.data);
+                break;
+            case 'addRepairTime':
+                handleAddRepairTime(msg.data);
+                break;
+            case 'completeRepair':
+                handleCompleteRepair();
+                break;
         }
+
+        // After every action, send the updated state back to all clients
+        broadcastState();
     });
 
     ws.on('close', () => {
-        console.log('Client has disconnected');
+        console.log('Client disconnected');
     });
 });
 
 // Start the server
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server listening on port ${PORT}`);
 });
+
+// --- Core Race Logic Functions ---
+function toggleRace() {
+    if (raceState.isRaceRunning) {
+        stopRace();
+    } else {
+        startRace();
+    }
+}
+
+function startRace() {
+    // Prevent starting if a race is already running
+    if (raceState.isRaceRunning) return;
+
+    // Set initial race state from the last known inputs
+    // Assuming a 'recalculate' has been run at least once
+    raceState.isRaceRunning = true;
+    raceState.stintNumber = 1;
+    raceState.totalPitStops = 0;
+    raceState.completedStints = [];
+    stintStartTimestamp = Date.now();
+    
+    // Start the race timer
+    raceInterval = setInterval(updateRaceTime, 1000);
+}
+
+function stopRace() {
+    clearInterval(raceInterval);
+    raceState.isRaceRunning = false;
+    raceState.isPitting = false;
+    // Reset state for a new race
+    raceState.raceTimeRemaining = 0; 
+    raceState.stintNumber = 1;
+    raceState.totalPitStops = 0;
+    raceState.completedStints = [];
+    raceState.stintData = [];
+}
+
+function updateRaceTime() {
+    if (!raceState.isRaceRunning) return;
+
+    raceState.raceTimeRemaining = Math.max(0, raceState.raceTimeRemaining - 1);
+    
+    if (raceState.isPitting) {
+        raceState.pitTimeRemaining = Math.max(0, raceState.pitTimeRemaining - 1);
+        if (raceState.pitTimeRemaining <= 0) {
+            raceState.isPitting = false;
+            stintStartTimestamp = Date.now();
+            // Re-calculate the stint plan from the current race state
+            handleRecalculation({
+                raceDuration: raceState.raceTimeRemaining,
+                avgLapTime: raceState.avgLapTime,
+                fuelPerLap: raceState.fuelPerLap,
+                tankCapacity: raceState.tankCapacity,
+                pitStopSeconds: raceState.pitStopTime,
+                isLive: true
+            });
+        }
+    } else {
+        const elapsedStintTime = Math.floor((Date.now() - stintStartTimestamp) / 1000);
+        raceState.nextPitStop = Math.max(0, raceState.stintDuration - elapsedStintTime);
+        if (raceState.nextPitStop <= 0 && raceState.raceTimeRemaining > 0) {
+            // End of stint, trigger a pit stop
+            handlePitEntry();
+        }
+    }
+    
+    // Race has ended
+    if (raceState.raceTimeRemaining <= 0) {
+        stopRace();
+    }
+    
+    broadcastState();
+}
+
+function handleRecalculation(data) {
+    const { raceDuration, avgLapTime, fuelPerLap, tankCapacity, pitStopSeconds } = data;
+    
+    // Update global state with the new values
+    raceState.raceTimeRemaining = raceDuration;
+    raceState.avgLapTime = avgLapTime;
+    raceState.fuelPerLap = fuelPerLap;
+    raceState.tankCapacity = tankCapacity;
+    raceState.pitStopTime = pitStopSeconds;
+    
+    const actualFuelPerLap = raceState.fuelPerLap + raceState.fuelAdjustment;
+    const actualAvgLapTime = raceState.avgLapTime + raceState.lapTimeAdjustment;
+
+    if (raceDuration <= 0 || actualAvgLapTime <= 0 || actualFuelPerLap <= 0 || tankCapacity <= 0) {
+        raceState.stintData = [];
+        return;
+    }
+
+    const lapsPerStint = Math.floor(tankCapacity / actualFuelPerLap);
+    const stintDurationSeconds = lapsPerStint * actualAvgLapTime;
+    
+    raceState.lapsPerStint = lapsPerStint;
+    raceState.stintDuration = stintDurationSeconds;
+    raceState.estLaps = Math.floor(raceDuration / actualAvgLapTime);
+
+    // Rebuild the stint plan from scratch
+    let stintData = [];
+    let currentTimeSeconds = 0;
+    
+    // Add completed stints from the state
+    raceState.completedStints.forEach((stint, index) => {
+        const stintEnd = currentTimeSeconds + stint.stintDuration;
+        stintData.push({
+            stintNumber: stint.stintNumber,
+            startTime: currentTimeSeconds,
+            endTime: stintEnd,
+            stintDuration: stint.stintDuration,
+            laps: stint.stintLaps,
+            fuel: stint.stintFuel,
+            isCurrent: false,
+            isPit: false
+        });
+        currentTimeSeconds = stintEnd;
+        
+        const pitEnd = currentTimeSeconds + raceState.pitStopTime;
+        stintData.push({
+            stintNumber: `PIT ${index + 1}`,
+            startTime: currentTimeSeconds,
+            endTime: pitEnd,
+            stintDuration: raceState.pitStopTime,
+            laps: '-',
+            fuel: '-',
+            isCurrent: false,
+            isPit: true
+        });
+        currentTimeSeconds = pitEnd;
+    });
+
+    // Add future stints
+    let remainingRaceTime = raceDuration - currentTimeSeconds;
+    let nextStintNumber = raceState.completedStints.length + 1;
+    let totalLaps = 0; // Total laps from the plan
+    
+    while (remainingRaceTime > 0) {
+        const stintStart = currentTimeSeconds;
+        let currentStintDuration = Math.min(stintDurationSeconds, remainingRaceTime);
+        let lapsInStint = Math.floor(currentStintDuration / actualAvgLapTime);
+
+        // Adjust last stint to match remaining time
+        if (remainingRaceTime < stintDurationSeconds) {
+            currentStintDuration = remainingRaceTime;
+            lapsInStint = Math.floor(currentStintDuration / actualAvgLapTime);
+        }
+        
+        const stintEnd = stintStart + currentStintDuration;
+        const stintFuel = lapsInStint * actualFuelPerLap;
+        
+        stintData.push({
+            stintNumber: nextStintNumber,
+            startTime: stintStart,
+            endTime: stintEnd,
+            stintDuration: currentStintDuration,
+            laps: lapsInStint,
+            fuel: stintFuel,
+            isCurrent: nextStintNumber === raceState.stintNumber && !raceState.isPitting,
+            isPit: false
+        });
+        
+        currentTimeSeconds = stintEnd;
+        remainingRaceTime -= currentStintDuration;
+        totalLaps += lapsInStint;
+        nextStintNumber++;
+        
+        // Add a pit stop if there's more time left
+        if (remainingRaceTime > 0) {
+            const pitStart = currentTimeSeconds;
+            const pitEnd = pitStart + raceState.pitStopTime;
+            stintData.push({
+                stintNumber: `PIT ${nextStintNumber - 1}`,
+                startTime: pitStart,
+                endTime: pitEnd,
+                stintDuration: raceState.pitStopTime,
+                laps: '-',
+                fuel: '-',
+                isCurrent: nextStintNumber - 1 === raceState.totalPitStops + 1 && raceState.isPitting,
+                isPit: true
+            });
+            currentTimeSeconds = pitEnd;
+            remainingRaceTime -= raceState.pitStopTime;
+        }
+    }
+    
+    raceState.stintData = stintData;
+    broadcastState();
+}
+
+function handlePitEntry() {
+    // Record the completed stint data
+    const elapsedStintTime = Math.floor((Date.now() - stintStartTimestamp) / 1000);
+    const lapsInStint = Math.floor(elapsedStintTime / (raceState.avgLapTime + raceState.lapTimeAdjustment));
+    const fuelUsed = lapsInStint * (raceState.fuelPerLap + raceState.fuelAdjustment);
+    
+    raceState.completedStints.push({
+        stintNumber: raceState.stintNumber,
+        stintDuration: elapsedStintTime,
+        stintLaps: lapsInStint,
+        stintFuel: fuelUsed
+    });
+    
+    raceState.stintNumber++;
+    raceState.totalPitStops++;
+    raceState.isPitting = true;
+    raceState.pitTimeRemaining = raceState.pitStopTime;
+    
+    broadcastState();
+}
+
+function handlePitExit() {
+    // Record the completed stint data before the unplanned stop
+    const elapsedStintTime = Math.floor((Date.now() - stintStartTimestamp) / 1000);
+    const lapsInStint = Math.floor(elapsedStintTime / (raceState.avgLapTime + raceState.lapTimeAdjustment));
+    const fuelUsed = lapsInStint * (raceState.fuelPerLap + raceState.fuelAdjustment);
+    
+    raceState.completedStints.push({
+        stintNumber: raceState.stintNumber,
+        stintDuration: elapsedStintTime,
+        stintLaps: lapsInStint,
+        stintFuel: fuelUsed
+    });
+    
+    raceState.stintNumber++;
+    raceState.totalPitStops++;
+
+    // Immediately start the new stint
+    raceState.isPitting = false;
+    stintStartTimestamp = Date.now();
+    
+    // Reset repair time inputs on the client side (handled by client)
+    
+    // Recalculate plan based on new remaining time
+    handleRecalculation({
+        raceDuration: raceState.raceTimeRemaining,
+        avgLapTime: raceState.avgLapTime,
+        fuelPerLap: raceState.fuelPerLap,
+        tankCapacity: raceState.tankCapacity,
+        pitStopSeconds: raceState.pitStopTime,
+        isLive: true
+    });
+}
+
+function handleLiveAdjustments(data) {
+    raceState.fuelAdjustment = data.fuelAdjustment;
+    raceState.lapTimeAdjustment = data.lapTimeAdjustment;
+    // Re-calculate the plan with the new slider values
+    handleRecalculation({
+        raceDuration: raceState.raceTimeRemaining,
+        avgLapTime: raceState.avgLapTime,
+        fuelPerLap: raceState.fuelPerLap,
+        tankCapacity: raceState.tankCapacity,
+        pitStopSeconds: raceState.pitStopTime,
+        isLive: true
+    });
+}
+
+function handleAddRepairTime(data) {
+    if (raceState.isPitting) {
+        raceState.pitTimeRemaining += data.repairTimeInSeconds;
+    }
+}
+
+function handleCompleteRepair() {
+    if (raceState.isPitting) {
+        raceState.pitTimeRemaining = 0;
+    }
+}
+
+// Function to broadcast the current race state to all connected clients
+function broadcastState() {
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(raceState));
+        }
+    });
+}
+
 
