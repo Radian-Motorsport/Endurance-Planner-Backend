@@ -697,13 +697,29 @@
         
         async function fetchBestLapTime(driverSlug, carId, trackId) {
             try {
+                console.log(`🏁 Fetching lap time for driver:${driverSlug}, car:${carId}, track:${trackId}`);
                 // Call our server-side proxy to avoid CORS and keep token secret
                 const apiUrl = `/api/garage61/laps?driver=${encodeURIComponent(driverSlug)}&car=${encodeURIComponent(carId)}&track=${encodeURIComponent(trackId)}`;
                 const response = await fetch(apiUrl, { method: 'GET' });
+                
                 if (!response.ok) {
-                    throw new Error(`API Error: ${response.status}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error(`❌ Garage61 API error ${response.status}:`, errorData);
+                    
+                    if (response.status === 504) {
+                        return 'Garage61 timeout - try again';
+                    } else if (response.status === 404) {
+                        return 'No lap data found';
+                    } else if (response.status >= 500) {
+                        return 'Garage61 service unavailable';
+                    } else {
+                        return `API Error: ${response.status}`;
+                    }
                 }
+                
                 const data = await response.json();
+                console.log(`✅ Received ${data?.length || 0} laps from Garage61`);
+                
                 // Find the best (fastest) lap time from the response
                 if (data && data.length > 0) {
                     // Sort laps by lap time to find the fastest
@@ -715,7 +731,7 @@
                 }
             } catch (error) {
                 console.error('Error fetching best lap time:', error);
-                return `API Error: ${error.message}`;
+                return `Connection Error: ${error.message}`;
             }
         }
         

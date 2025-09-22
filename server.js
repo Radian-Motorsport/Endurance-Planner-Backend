@@ -348,21 +348,35 @@ app.get('/api/garage61/laps', async (req, res) => {
             return res.status(500).json({ error: 'Garage61 token not configured' });
         }
 
-        const url = 'https://garage61.net/api/v1/laps';
+        // Try the correct Garage61 findLaps endpoint
+        const url = 'https://garage61.net/api/v1/findLaps';
+        console.log(`🔗 Proxying to Garage61: ${url}?driver=${driver}&car=${car}&track=${track}`);
+        
         const response = await axios.get(url, {
             params: { driver, car, track },
             headers: { Authorization: `Bearer ${token}` },
-            timeout: 10000
+            timeout: 15000  // Increased timeout
         });
+        
+        console.log(`✅ Garage61 response: ${response.status}, ${response.data?.length || 0} laps`);
         return res.status(200).json(response.data);
     } catch (err) {
-        // Axios error handling
+        console.error('❌ Garage61 proxy error:', err.response?.status, err.response?.statusText, err.message);
+        
+        // Axios error handling with more details
         if (err.response) {
             // Upstream responded with error status
-            return res.status(err.response.status).json({ error: 'Upstream error', status: err.response.status, data: err.response.data });
+            const errorData = {
+                error: 'Garage61 API error',
+                status: err.response.status,
+                statusText: err.response.statusText,
+                data: err.response.data
+            };
+            console.error('Garage61 error details:', errorData);
+            return res.status(err.response.status).json(errorData);
         }
         if (err.code === 'ECONNABORTED') {
-            return res.status(504).json({ error: 'Garage61 request timed out' });
+            return res.status(504).json({ error: 'Garage61 request timed out after 15 seconds' });
         }
         return res.status(502).json({ error: 'Failed to reach Garage61', details: err.message });
     }
