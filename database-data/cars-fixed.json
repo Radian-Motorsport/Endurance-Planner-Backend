@@ -1,0 +1,194 @@
+[
+    {
+        "name":  "Acura ARX-06 GTP",
+        "garage61_id":  153,
+        "platform":  "iracing",
+        "platform_id":  170
+    },
+    {
+        "name":  "Acura NSX GT3 EVO 22",
+        "garage61_id":  178,
+        "platform":  "iracing",
+        "platform_id":  194
+    },
+    {
+        "name":  "Aston Martin Vantage GT3 EVO",
+        "garage61_id":  192,
+        "platform":  "iracing",
+        "platform_id":  206
+    },
+    {
+        "name":  "Aston Martin Vantage GT4",
+        "garage61_id":  130,
+        "platform":  "iracing",
+        "platform_id":  150
+    },
+    {
+        "name":  "Audi R8 LMS EVO II GT3",
+        "garage61_id":  160,
+        "platform":  "iracing",
+        "platform_id":  176
+    },
+    {
+        "name":  "Audi R8 LMS GT3",
+        "garage61_id":  45,
+        "platform":  "iracing",
+        "platform_id":  73
+    },
+    {
+        "name":  "BMW M4 F82 GT4 - 2018",
+        "garage61_id":  21,
+        "platform":  "iracing",
+        "platform_id":  122
+    },
+    {
+        "name":  "BMW M4 G82 GT4 Evo",
+        "garage61_id":  172,
+        "platform":  "iracing",
+        "platform_id":  189
+    },
+    {
+        "name":  "BMW M4 GT3 EVO",
+        "garage61_id":  33,
+        "platform":  "iracing",
+        "platform_id":  132
+    },
+    {
+        "name":  "BMW Z4 GT3",
+        "garage61_id":  18,
+        "platform":  "iracing",
+        "platform_id":  55
+    },
+    {
+        "name":  "Cadillac V-Series.R GTP",
+        "garage61_id":  151,
+        "platform":  "iracing",
+        "platform_id":  168
+    },
+    {
+        "name":  "Chevrolet Corvette Z06 GT3.R",
+        "garage61_id":  168,
+        "platform":  "iracing",
+        "platform_id":  184
+    },
+    {
+        "name":  "Ferrari 296 GT3",
+        "garage61_id":  155,
+        "platform":  "iracing",
+        "platform_id":  173
+    },
+    {
+        "name":  "Ferrari 488 GT3",
+        "garage61_id":  20,
+        "platform":  "iracing",
+        "platform_id":  94
+    },
+    {
+        "name":  "Ferrari 488 GT3 Evo 2020",
+        "garage61_id":  122,
+        "platform":  "iracing",
+        "platform_id":  144
+    },
+    {
+        "name":  "Ford GT GT3",
+        "garage61_id":  85,
+        "platform":  "iracing",
+        "platform_id":  59
+    },
+    {
+        "name":  "Ford Mustang GT3",
+        "garage61_id":  169,
+        "platform":  "iracing",
+        "platform_id":  185
+    },
+    {
+        "name":  "Ford Mustang GT4",
+        "garage61_id":  190,
+        "platform":  "iracing",
+        "platform_id":  204
+    },
+    {
+        "name":  "Lamborghini Huracán GT3 EVO",
+        "garage61_id":  34,
+        "platform":  "iracing",
+        "platform_id":  133
+    },
+    {
+        "name":  "McLaren 570S GT4",
+        "garage61_id":  81,
+        "platform":  "iracing",
+        "platform_id":  135
+    },
+    {
+        "name":  "McLaren 720S GT3 EVO",
+        "garage61_id":  175,
+        "platform":  "iracing",
+        "platform_id":  188
+    },
+    {
+        "name":  "McLaren MP4-12C GT3",
+        "garage61_id":  39,
+        "platform":  "iracing",
+        "platform_id":  43
+    },
+    {
+        "name":  "Mercedes-AMG GT3",
+        "garage61_id":  24,
+        "platform":  "iracing",
+        "platform_id":  72
+    },
+    {
+        "name":  "Mercedes-AMG GT3 2020",
+        "garage61_id":  135,
+        "platform":  "iracing",
+        "platform_id":  156
+    },
+    {
+        "name":  "Mercedes-AMG GT4",
+        "garage61_id":  136,
+        "platform":  "iracing",
+        "platform_id":  157
+    },
+    {
+        "name":  "Nissan GTP ZX-T",
+        "garage61_id":  27,
+        "platform":  "iracing",
+        "platform_id":  77
+    },
+    {
+        "name":  "Porsche 718 Cayman GT4 Clubsport MR",
+        "garage61_id":  1,
+        "platform":  "iracing",
+        "platform_id":  119
+    },
+    {
+        "name":  "Porsche 911 GT3 Cup (991)",
+        "garage61_id":  11,
+        "platform":  "iracing",
+        "platform_id":  88
+    },
+    {
+        "name":  "Porsche 911 GT3 Cup (992)",
+        "garage61_id":  121,
+        "platform":  "iracing",
+        "platform_id":  143
+    },
+    {
+        "name":  "Porsche 911 GT3 R",
+        "garage61_id":  108,
+        "platform":  "iracing",
+        "platform_id":  137
+    },
+    {
+        "name":  "Porsche 911 GT3 R (992)",
+        "garage61_id":  152,
+        "platform":  "iracing",
+        "platform_id":  169
+    },
+    {
+        "name":  "Porsche 963 GTP",
+        "garage61_id":  156,
+        "platform":  "iracing",
+        "platform_id":  174
+    }
+]

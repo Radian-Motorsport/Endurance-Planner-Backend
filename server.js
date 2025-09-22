@@ -152,26 +152,27 @@ app.post('/api/data', async (req, res) => {
   try {
     const { drivers, cars, tracks } = req.body;
 
-    // Clear existing data first
-    await pool.query('DELETE FROM drivers');
-    await pool.query('DELETE FROM cars');
-    await pool.query('DELETE FROM tracks');
-
-    // Insert new drivers
+    // Insert new drivers (with conflict handling)
     for (const driver of drivers) {
-      await pool.query('INSERT INTO drivers (name, garage61_slug, firstName, lastName) VALUES ($1, $2, $3, $4)', 
+      await pool.query(`INSERT INTO drivers (name, garage61_slug, firstName, lastName) 
+                       VALUES ($1, $2, $3, $4) 
+                       ON CONFLICT (name) DO NOTHING`, 
         [driver.name, driver.garage61_slug, driver.firstName, driver.lastName]);
     }
 
-    // Insert new cars
+    // Insert new cars (with conflict handling)
     for (const car of cars) {
-      await pool.query('INSERT INTO cars (name, garage61_id, platform, platform_id) VALUES ($1, $2, $3, $4)', 
+      await pool.query(`INSERT INTO cars (name, garage61_id, platform, platform_id) 
+                       VALUES ($1, $2, $3, $4) 
+                       ON CONFLICT (garage61_id) DO NOTHING`, 
         [car.name, car.garage61_id, car.platform, car.platform_id]);
     }
 
-    // Insert new tracks
+    // Insert new tracks (with conflict handling)
     for (const track of tracks) {
-      await pool.query('INSERT INTO tracks (name, garage61_id, base_name, variant, platform) VALUES ($1, $2, $3, $4, $5)', 
+      await pool.query(`INSERT INTO tracks (name, garage61_id, base_name, variant, platform) 
+                       VALUES ($1, $2, $3, $4, $5) 
+                       ON CONFLICT (garage61_id) DO NOTHING`, 
         [track.name, track.garage61_id, track.base_name, track.variant, track.platform]);
     }
 

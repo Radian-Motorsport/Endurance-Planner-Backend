@@ -1,0 +1,184 @@
+[
+    {
+        "name":  "Autodromo Nazionale Monza",
+        "garage61_id":  232,
+        "base_name":  "Autodromo",
+        "variant":  "Combined",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Autodromo Nazionale Monza",
+        "garage61_id":  77,
+        "base_name":  "Autodromo",
+        "variant":  "Grand Prix",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Brands Hatch Circuit",
+        "garage61_id":  36,
+        "base_name":  "Brands",
+        "variant":  "Grand Prix",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Circuit de Spa-Francorchamps",
+        "garage61_id":  446,
+        "base_name":  "Circuit",
+        "variant":  "Endurance",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Circuit de Spa-Francorchamps",
+        "garage61_id":  444,
+        "base_name":  "Circuit",
+        "variant":  "Grand Prix Pits",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Circuit of the Americas",
+        "garage61_id":  175,
+        "base_name":  "Circuit",
+        "variant":  "Grand Prix",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Circuit Zandvoort",
+        "garage61_id":  409,
+        "base_name":  "Circuit",
+        "variant":  "Grand Prix",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Hungaroring",
+        "garage61_id":  291,
+        "base_name":  "Hungaroring",
+        "variant":  "Standard",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Mount Panorama Circuit",
+        "garage61_id":  79,
+        "base_name":  "Mount",
+        "variant":  "Standard",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Nürburgring Combined",
+        "garage61_id":  93,
+        "base_name":  "Nürburgring",
+        "variant":  "Gesamtstrecke 24h",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Nürburgring Combined",
+        "garage61_id":  92,
+        "base_name":  "Nürburgring",
+        "variant":  "Gesamtstrecke Long",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Nürburgring Combined",
+        "garage61_id":  183,
+        "base_name":  "Nürburgring",
+        "variant":  "Gesamtstrecke Short w/out Arena",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Nürburgring Combined",
+        "garage61_id":  94,
+        "base_name":  "Nürburgring",
+        "variant":  "Gesamtstrecke VLN",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Nürburgring Grand-Prix-Strecke",
+        "garage61_id":  100,
+        "base_name":  "Nürburgring",
+        "variant":  "BES/WEC",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Nürburgring Nordschleife",
+        "garage61_id":  75,
+        "base_name":  "Nürburgring",
+        "variant":  "Industriefahrten",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Nürburgring Nordschleife",
+        "garage61_id":  68,
+        "base_name":  "Nürburgring",
+        "variant":  "Touristenfahrten",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Red Bull Ring",
+        "garage61_id":  253,
+        "base_name":  "Red",
+        "variant":  "Grand Prix",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Road America",
+        "garage61_id":  49,
+        "base_name":  "Road",
+        "variant":  "Full Course",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Road Atlanta",
+        "garage61_id":  40,
+        "base_name":  "Road",
+        "variant":  "Full Course",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Sebring International Raceway",
+        "garage61_id":  35,
+        "base_name":  "Sebring",
+        "variant":  "International",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Silverstone Circuit",
+        "garage61_id":  80,
+        "base_name":  "Silverstone",
+        "variant":  "Grand Prix",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Silverstone Circuit",
+        "garage61_id":  292,
+        "base_name":  "Silverstone",
+        "variant":  "International",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Suzuka International Racing Course",
+        "garage61_id":  57,
+        "base_name":  "Suzuka",
+        "variant":  "Grand Prix",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Virginia International Raceway",
+        "garage61_id":  393,
+        "base_name":  "Virginia",
+        "variant":  "Full Course",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "Watkins Glen International",
+        "garage61_id":  324,
+        "base_name":  "Watkins",
+        "variant":  "Boot",
+        "platform":  "iracing"
+    },
+    {
+        "name":  "WeatherTech Raceway at Laguna Seca",
+        "garage61_id":  34,
+        "base_name":  "WeatherTech",
+        "variant":  "Full Course",
+        "platform":  "iracing"
+    }
+]
