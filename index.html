@@ -160,7 +160,7 @@
                 </div>
 
                 <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg">
-                    <div class="grid md:grid-cols-3 gap-4">
+                    <div class="grid md:grid-cols-4 gap-4">
                         <div>
                             <span class="text-white text-shadow road-rage-font">TRACK:</span>
                             <br> <span id="page2-track" class="text-neutral-100"></span>
@@ -172,6 +172,10 @@
                         <div>
                             <span class="text-white text-shadow road-rage-font">DRIVERS:</span>
                             <br> <span id="page2-drivers" class="text-neutral-100"></span>
+                        </div>
+                        <div>
+                            <span class="text-white text-shadow road-rage-font">BEST LAP:</span>
+                            <br> <span id="page2-best-lap" class="text-neutral-100">Loading...</span>
                         </div>
                     </div>
                 </div>
@@ -622,12 +626,111 @@
             document.getElementById('page2-car').textContent = carSelect.value;
             const driverNames = selectedDrivers.map(d => d.name).join(', ');
             document.getElementById('page2-drivers').textContent = driverNames;
+            
+            // Fetch and display best lap time from Garage 61
+            updateBestLapDisplay();
         }
         function showPage3() {
             document.getElementById('planner-page').classList.add('hidden');
             document.getElementById('page-2').classList.add('hidden');
             document.getElementById('page-3').classList.remove('hidden');
             document.getElementById('admin-page').classList.add('hidden');
+        }
+
+        // --- Garage 61 API Integration ---
+        
+        async function fetchBestLapTime(driverSlug, carId, trackId) {
+            try {
+                // Your Garage 61 API token
+                const apiToken = 'MWVKZTRMOGETNDCZOS0ZMJUZLTK2ODITNJBJZMQ5NMU4M2I5';
+                
+                // Construct the API URL for lap times using the correct Garage 61 endpoint
+                const apiUrl = `https://garage61.net/api/v1/laps?driver=${driverSlug}&car=${carId}&track=${trackId}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Find the best (fastest) lap time from the response
+                if (data && data.length > 0) {
+                    // Sort laps by lap time to find the fastest
+                    const sortedLaps = data.sort((a, b) => a.lap_time - b.lap_time);
+                    const bestLap = sortedLaps[0];
+                    return formatLapTime(bestLap.lap_time);
+                } else {
+                    return 'No lap data found';
+                }
+                
+            } catch (error) {
+                console.error('Error fetching best lap time:', error);
+                return `API Error: ${error.message}`;
+            }
+        }
+        
+        function formatLapTime(timeInSeconds) {
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = (timeInSeconds % 60).toFixed(3);
+            return `${minutes}:${seconds.padStart(6, '0')}`;
+        }
+        
+        async function updateBestLapDisplay() {
+            const bestLapElement = document.getElementById('page2-best-lap');
+            bestLapElement.textContent = 'Loading...';
+            
+            // Get selected driver data
+            const selectedDriver = selectedDrivers[0]; // Use first selected driver
+            if (!selectedDriver || !selectedDriver.garage61_slug) {
+                bestLapElement.textContent = 'Driver data unavailable';
+                return;
+            }
+            
+            // Get selected car and track garage61_id
+            const carSelect = document.getElementById('car-select');
+            const trackSelect = document.getElementById('track-select');
+            
+            const selectedCarName = carSelect.value;
+            const selectedTrackName = trackSelect.value;
+            
+            // Find the garage61_id from our data
+            let carId = null;
+            let trackId = null;
+            
+            try {
+                // Fetch car ID
+                const carsResponse = await fetch('/api/cars');
+                const cars = await carsResponse.json();
+                const selectedCar = cars.find(car => car.name === selectedCarName);
+                carId = selectedCar ? selectedCar.garage61_id : null;
+                
+                // Fetch track ID
+                const tracksResponse = await fetch('/api/tracks');
+                const tracks = await tracksResponse.json();
+                const selectedTrack = tracks.find(track => track.name === selectedTrackName);
+                trackId = selectedTrack ? selectedTrack.garage61_id : null;
+                
+                if (!carId || !trackId) {
+                    bestLapElement.textContent = 'Missing car or track data';
+                    return;
+                }
+                
+                // Fetch best lap time
+                const bestLapTime = await fetchBestLapTime(selectedDriver.garage61_slug, carId, trackId);
+                bestLapElement.textContent = bestLapTime;
+                
+            } catch (error) {
+                console.error('Error updating best lap display:', error);
+                bestLapElement.textContent = 'Error loading data';
+            }
         }
 
         // --- Core Logic ---
