@@ -177,20 +177,30 @@
                             <span class="text-white text-shadow road-rage-font">BEST LAP TIMES:</span>
                             <br>
                             <div id="page2-best-lap-table" class="mt-2">
-                                <table class="w-full text-neutral-100 border-separate border-spacing-0">
-                                    <thead>
-                                        <tr class="text-left border-b border-neutral-600 bg-neutral-800">
-                                            <th class="py-3 px-4 text-neutral-300 font-semibold border-r border-neutral-600">Driver</th>
-                                            <th class="py-3 px-4 text-neutral-300 font-semibold border-r border-neutral-600">Lap Time</th>
-                                            <th class="py-3 px-4 text-neutral-300 font-semibold">Fuel Used (L)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="lap-times-tbody">
-                                        <tr>
-                                            <td colspan="3" class="py-4 px-4 text-neutral-400 text-center">Click "Next" to load lap times...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="bg-neutral-800 rounded-lg border border-neutral-600 overflow-hidden shadow-lg">
+                                    <table class="w-full text-neutral-100">
+                                        <thead class="bg-gradient-to-r from-neutral-700 to-neutral-600 border-b border-neutral-500">
+                                            <tr>
+                                                <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">
+                                                    Driver
+                                                </th>
+                                                <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">
+                                                    Best Lap Time
+                                                </th>
+                                                <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider">
+                                                    Fuel Used (L)
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lap-times-tbody" class="divide-y divide-neutral-600">
+                                            <tr class="bg-neutral-750 hover:bg-neutral-700 transition-colors duration-200">
+                                                <td colspan="3" class="py-6 px-6 text-center text-neutral-400 italic">
+                                                    Click "Next" to load lap times...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -904,11 +914,11 @@
             // Show loading state for all drivers
             for (const driver of drivers) {
                 const row = tbody.insertRow();
-                row.className = "hover:bg-neutral-800 transition-colors";
+                row.className = "bg-neutral-750 hover:bg-neutral-700 transition-colors duration-200";
                 row.innerHTML = `
-                    <td class="py-3 px-4 border-r border-neutral-700 text-neutral-300 font-medium">${driver.name}</td>
-                    <td class="py-3 px-4 border-r border-neutral-700 text-yellow-400">Loading...</td>
-                    <td class="py-3 px-4 text-yellow-400">Loading...</td>
+                    <td class="py-4 px-6 border-r border-neutral-600 text-neutral-200 font-medium">${driver.name}</td>
+                    <td class="py-4 px-6 border-r border-neutral-600 text-yellow-400 animate-pulse">● Loading...</td>
+                    <td class="py-4 px-6 text-yellow-400 animate-pulse">● Loading...</td>
                 `;
             }
 
@@ -919,10 +929,11 @@
                 if (!driver.garage61_slug) {
                     const rows = tbody.querySelectorAll('tr');
                     if (rows[i]) {
+                        rows[i].className = "bg-neutral-750 hover:bg-neutral-700 transition-colors duration-200";
                         rows[i].innerHTML = `
-                            <td class="py-3 px-4 border-r border-neutral-700 text-neutral-300 font-medium">${driver.name}</td>
-                            <td class="py-3 px-4 border-r border-neutral-700 text-red-400">No Garage61 slug</td>
-                            <td class="py-3 px-4 text-red-400">N/A</td>
+                            <td class="py-4 px-6 border-r border-neutral-600 text-neutral-200 font-medium">${driver.name}</td>
+                            <td class="py-4 px-6 border-r border-neutral-600 text-red-400 font-medium">⚠ No Garage61 account</td>
+                            <td class="py-4 px-6 text-red-400 font-medium">N/A</td>
                         `;
                     }
                     continue;
@@ -933,26 +944,32 @@
                     const data = await fetchDriverLapData(driver.garage61_slug, carId, trackId);
                     
                     // Determine styling based on data validity
-                    const lapTimeClass = data.lapTime.includes('No lap') || data.lapTime.includes('Error') || data.lapTime.includes('timeout') || data.lapTime.includes('Timeout') ? 'text-red-400' : 'text-green-400 font-mono';
-                    const fuelClass = data.fuelUsed === 'N/A' ? 'text-red-400' : 'text-blue-400 font-mono';
+                    const lapTimeClass = data.lapTime.includes('No lap') || data.lapTime.includes('Error') || data.lapTime.includes('timeout') || data.lapTime.includes('Timeout') 
+                        ? 'text-red-400 font-medium' 
+                        : 'text-green-400 font-mono text-lg font-bold';
+                    const fuelClass = data.fuelUsed === 'N/A' 
+                        ? 'text-red-400 font-medium' 
+                        : 'text-blue-400 font-mono text-lg font-semibold';
                     
                     // Update the corresponding row
                     const rows = tbody.querySelectorAll('tr');
                     if (rows[i]) {
+                        rows[i].className = "bg-neutral-750 hover:bg-neutral-700 transition-colors duration-200";
                         rows[i].innerHTML = `
-                            <td class="py-3 px-4 border-r border-neutral-700 text-neutral-300 font-medium">${driver.name}</td>
-                            <td class="py-3 px-4 border-r border-neutral-700 ${lapTimeClass}">${data.lapTime}</td>
-                            <td class="py-3 px-4 ${fuelClass}">${data.fuelUsed}</td>
+                            <td class="py-4 px-6 border-r border-neutral-600 text-neutral-200 font-medium">${driver.name}</td>
+                            <td class="py-4 px-6 border-r border-neutral-600 ${lapTimeClass}">${data.lapTime}</td>
+                            <td class="py-4 px-6 ${fuelClass}">${data.fuelUsed}</td>
                         `;
                     }
                 } catch (error) {
                     console.error(`Error fetching data for ${driver.name}:`, error);
                     const rows = tbody.querySelectorAll('tr');
                     if (rows[i]) {
+                        rows[i].className = "bg-neutral-750 hover:bg-neutral-700 transition-colors duration-200";
                         rows[i].innerHTML = `
-                            <td class="py-3 px-4 border-r border-neutral-700 text-neutral-300 font-medium">${driver.name}</td>
-                            <td class="py-3 px-4 border-r border-neutral-700 text-red-400">Error loading</td>
-                            <td class="py-3 px-4 text-red-400">N/A</td>
+                            <td class="py-4 px-6 border-r border-neutral-600 text-neutral-200 font-medium">${driver.name}</td>
+                            <td class="py-4 px-6 border-r border-neutral-600 text-red-400 font-medium">⚠ Error loading</td>
+                            <td class="py-4 px-6 text-red-400 font-medium">N/A</td>
                         `;
                     }
                 }

@@ -364,7 +364,7 @@ app.get('/api/garage61/me', async (req, res) => {
 // --- Proxy to Garage61 to avoid CORS and keep token server-side ---
 app.get('/api/garage61/laps', async (req, res) => {
     try {
-        const { cars, tracks, driver } = req.query;
+        const { cars, tracks, extraDrivers, driver } = req.query;
         if (!cars || !tracks) {
             return res.status(400).json({ error: 'Missing required query params: cars, tracks' });
         }
@@ -379,7 +379,6 @@ app.get('/api/garage61/laps', async (req, res) => {
         const url = 'https://garage61.net/api/v1/laps';
         
         // Build parameters according to Garage61 API documentation:
-        // Test: Get ALL team laps without driver filtering first
         const params = {
             cars: [parseInt(cars)],                   // Car IDs as array of numbers
             tracks: [parseInt(tracks)],               // Track IDs as array of numbers  
@@ -387,8 +386,16 @@ app.get('/api/garage61/laps', async (req, res) => {
             limit: 100                                // More results to find best lap
         };
         
-        // Don't add any driver filtering - should return all team laps
-        console.log('🧪 Testing without driver filter to get ALL team laps...');
+        // Add driver filtering if provided
+        if (extraDrivers) {
+            params.extraDrivers = [extraDrivers];    // Driver slugs as array
+            console.log(`🎯 Filtering for specific driver: ${extraDrivers}`);
+        } else if (driver) {
+            params.extraDrivers = [driver];          // Fallback to 'driver' param
+            console.log(`🎯 Filtering for specific driver (fallback): ${driver}`);
+        } else {
+            console.log('🧪 No driver filter - getting ALL team laps');
+        }
         
         console.log(`🔗 Proxying to Garage61: ${url}`, JSON.stringify(params));
         
@@ -409,7 +416,7 @@ app.get('/api/garage61/laps', async (req, res) => {
             }
         });
         
-        console.log(`✅ Garage61 response: ${response.status}, ${response.data?.length || 0} laps`);
+        console.log(`✅ Garage61 response: ${response.status}, ${response.data?.items?.length || 0} laps`);
         return res.status(200).json(response.data);
     } catch (err) {
         console.error('❌ Garage61 proxy error:', err.response?.status, err.response?.statusText, err.message);
