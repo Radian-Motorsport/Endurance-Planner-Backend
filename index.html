@@ -1260,12 +1260,20 @@
             }
         }
         async function removeDriverAdmin(name) {
-            if (confirm(`Are you sure you want to remove ${name}?`)) {
-                drivers = drivers.filter(d => d.name !== name);
-                await saveDataToServer();
-                renderAdminLists();
-                populateDrivers();
+            if (!confirm(`Are you sure you want to remove ${name}?`)) return;
+            try {
+                const resp = await fetch(`/api/drivers/${encodeURIComponent(name)}`, { method: 'DELETE' });
+                if (!resp.ok && resp.status !== 204) {
+                    console.error('Failed to delete driver on server:', resp.status);
+                    alert('Server delete failed');
+                }
+            } catch (e) {
+                console.error('Error deleting driver:', e);
             }
+            // Update local state and UI
+            drivers = drivers.filter(d => d.name !== name);
+            renderAdminLists();
+            populateDrivers();
         }
         function resetCarAdminForm() {
             document.getElementById('new-car-name').value = '';
@@ -1322,12 +1330,25 @@
             }
         }
         async function removeCarAdmin(name) {
-            if (confirm(`Are you sure you want to remove ${name}?`)) {
-                cars = cars.filter(c => c.name !== name);
-                await saveDataToServer();
-                renderAdminLists();
-                populateCars();
+            if (!confirm(`Are you sure you want to remove ${name}?`)) return;
+            const car = cars.find(c => c.name === name);
+            if (!car || !car.garage61_id) {
+                alert('Cannot delete car: missing garage61_id');
+                return;
             }
+            try {
+                const resp = await fetch(`/api/cars/${encodeURIComponent(car.garage61_id)}`, { method: 'DELETE' });
+                if (!resp.ok && resp.status !== 204) {
+                    console.error('Failed to delete car on server:', resp.status);
+                    alert('Server delete failed');
+                }
+            } catch (e) {
+                console.error('Error deleting car:', e);
+            }
+            // Update local state and UI
+            cars = cars.filter(c => c.name !== name);
+            renderAdminLists();
+            populateCars();
         }
         function resetTrackAdminForm() {
             document.getElementById('new-track-name').value = '';
@@ -1388,12 +1409,25 @@
             }
         }
         async function removeTrackAdmin(name) {
-            if (confirm(`Are you sure you want to remove ${name}?`)) {
-                tracks = tracks.filter(t => t.name !== name);
-                await saveDataToServer();
-                renderAdminLists();
-                populateTracks();
+            if (!confirm(`Are you sure you want to remove ${name}?`)) return;
+            const track = tracks.find(t => t.name === name);
+            if (!track || !track.garage61_id) {
+                alert('Cannot delete track: missing garage61_id');
+                return;
             }
+            try {
+                const resp = await fetch(`/api/tracks/${encodeURIComponent(track.garage61_id)}`, { method: 'DELETE' });
+                if (!resp.ok && resp.status !== 204) {
+                    console.error('Failed to delete track on server:', resp.status);
+                    alert('Server delete failed');
+                }
+            } catch (e) {
+                console.error('Error deleting track:', e);
+            }
+            // Update local state and UI
+            tracks = tracks.filter(t => t.name !== name);
+            renderAdminLists();
+            populateTracks();
         }
 
 		// Function to handle time formatting based on the selected time zone
