@@ -126,6 +126,11 @@ app.post('/api/data', async (req, res) => {
   try {
     const { drivers, cars, tracks } = req.body;
 
+    // Clear existing data first
+    await pool.query('DELETE FROM drivers');
+    await pool.query('DELETE FROM cars');
+    await pool.query('DELETE FROM tracks');
+
     // Insert new drivers
     for (const driver of drivers) {
       await pool.query('INSERT INTO drivers (name, garage61_slug, firstName, lastName) VALUES ($1, $2, $3, $4)', 
