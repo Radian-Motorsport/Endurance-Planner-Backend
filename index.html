@@ -720,14 +720,15 @@
                 const data = await response.json();
                 console.log(`✅ Received ${data?.length || 0} laps from Garage61`);
                 
-                // Find the best (fastest) lap time from the response
+                // Find the best (fastest) lap time from the response  
                 if (data && data.length > 0) {
-                    // Sort laps by lap time to find the fastest
-                    const sortedLaps = data.sort((a, b) => a.lap_time - b.lap_time);
+                    // Garage61 returns lap objects with lap_time property
+                    const sortedLaps = data.sort((a, b) => parseFloat(a.lap_time) - parseFloat(b.lap_time));
                     const bestLap = sortedLaps[0];
-                    return formatLapTime(bestLap.lap_time);
+                    console.log(`🏆 Best lap: ${bestLap.lap_time}s`);
+                    return formatLapTime(parseFloat(bestLap.lap_time));
                 } else {
-                    return 'No lap data found';
+                    return 'No lap data available';
                 }
             } catch (error) {
                 console.error('Error fetching best lap time:', error);

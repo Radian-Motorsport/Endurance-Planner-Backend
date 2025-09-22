@@ -348,14 +348,24 @@ app.get('/api/garage61/laps', async (req, res) => {
             return res.status(500).json({ error: 'Garage61 token not configured' });
         }
 
-        // Try the correct Garage61 findLaps endpoint
-        const url = 'https://garage61.net/api/v1/findLaps';
-        console.log(`🔗 Proxying to Garage61: ${url}?driver=${driver}&car=${car}&track=${track}`);
+        // Use the correct Garage61 /laps endpoint with proper parameter format
+        const url = 'https://garage61.net/api/v1/laps';
+        
+        // Convert single values to arrays and use correct parameter names
+        const params = {
+            cars: [parseInt(car)],           // Car IDs as array of numbers
+            tracks: [parseInt(track)],       // Track IDs as array of numbers  
+            extraDrivers: [driver],          // Driver slugs as array of strings
+            group: 'driver',                 // Get personal best per driver
+            limit: 10                        // Limit results
+        };
+        
+        console.log(`🔗 Proxying to Garage61: ${url}`, params);
         
         const response = await axios.get(url, {
-            params: { driver, car, track },
+            params: params,
             headers: { Authorization: `Bearer ${token}` },
-            timeout: 15000  // Increased timeout
+            timeout: 15000
         });
         
         console.log(`✅ Garage61 response: ${response.status}, ${response.data?.length || 0} laps`);
