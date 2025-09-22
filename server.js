@@ -351,9 +351,9 @@ app.get('/api/garage61/laps', async (req, res) => {
         // Use the correct Garage61 /laps endpoint with proper parameter format
         const url = 'https://garage61.net/api/v1/laps';
         
-        // Use the actual driver parameter from the request, fallback to 'me' if not provided
+        // Use extraDrivers for user slugs, drivers is for special values like "me"
         const params = {
-            drivers: driver ? [driver] : ['me'],      // Use selected driver or fallback to 'me'
+            extraDrivers: driver ? [driver] : [],     // Use selected driver slug in extraDrivers
             cars: [parseInt(cars)],                   // Car IDs as array of numbers
             tracks: [parseInt(tracks)],               // Track IDs as array of numbers  
             group: 'none',                            // Return all laps (not just personal best)
