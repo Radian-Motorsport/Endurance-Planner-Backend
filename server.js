@@ -5,19 +5,30 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Use the DATABASE_URL environment variable from Render
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+// Use the DATABASE_URL environment variable from Render (optional)
+let pool = null;
+if (process.env.DATABASE_URL) {
+    pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+            rejectUnauthorized: false
+        }
+    });
+    console.log('Database connection configured.');
+} else {
+    console.log('No database URL provided. Running without database features.');
+}
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Function to create all necessary tables if they don't exist
 async function createTables() {
+    if (!pool) {
+        console.log('Skipping database table creation - no database connection.');
+        return;
+    }
+    
     try {
         const createDriversTable = `
             CREATE TABLE IF NOT EXISTS drivers (
@@ -48,6 +59,7 @@ async function createTables() {
         console.log('Database tables checked/created successfully.');
     } catch (err) {
         console.error('Error creating database tables:', err);
+        console.log('Continuing without database features.');
     }
 }
 
