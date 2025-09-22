@@ -386,17 +386,30 @@
                 <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mt-6">
                     <h1 class="text-xl font- mb-4  road-rage-font">Manage Drivers</h1>
                     <div class="space-y-4">
-                        <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
-                            <div class="flex-grow">
-                                <input type="text" id="new-driver-name" placeholder="Driver Name" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="flex flex-col space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="new-driver-name" class="text-sm font-medium text-neutral-500">Full Name</label>
+                                    <input type="text" id="new-driver-name" placeholder="Adam Economu" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="new-driver-first-name" class="text-sm font-medium text-neutral-500">First Name</label>
+                                    <input type="text" id="new-driver-first-name" placeholder="Adam" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="new-driver-last-name" class="text-sm font-medium text-neutral-500">Last Name</label>
+                                    <input type="text" id="new-driver-last-name" placeholder="Economu" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
                             </div>
                             <div>
-                                <label for="new-driver-number" class="text-sm font-medium text-neutral-500">Driver Number</label>
-                                <input type="number" id="new-driver-number" placeholder="IR Number"class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-28 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <label for="new-driver-garage61-slug" class="text-sm font-medium text-neutral-500">Garage 61 Slug</label>
+                                <input type="text" id="new-driver-garage61-slug" placeholder="adam-economu" class="mt-1 p-3 border border-neutral-600 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
-                            <button id="add-driver-btn" onclick="addDriverAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                                Add Driver
-                            </button>
+                            <div class="flex justify-center">
+                                <button id="add-driver-btn" onclick="addDriverAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                                    Add Driver
+                                </button>
+                            </div>
                         </div>
                         <ul id="admin-driver-list" class="space-y-2 mt-4"></ul>
                     </div>
@@ -945,42 +958,56 @@
         }
         function resetDriverAdminForm() {
             document.getElementById('new-driver-name').value = '';
-            document.getElementById('new-driver-number').value = '';
+            document.getElementById('new-driver-first-name').value = '';
+            document.getElementById('new-driver-last-name').value = '';
+            document.getElementById('new-driver-garage61-slug').value = '';
             document.getElementById('add-driver-btn').textContent = 'Add Driver';
             document.getElementById('add-driver-btn').onclick = addDriverAdmin;
         }
         async function addDriverAdmin() {
             const name = document.getElementById('new-driver-name').value;
-            const drivernumber = parseInt(document.getElementById('new-driver-number').value);
-            if (name && !isNaN(drivernumber)) {
-                drivers.push({ name, drivernumber });
+            const firstName = document.getElementById('new-driver-first-name').value;
+            const lastName = document.getElementById('new-driver-last-name').value;
+            const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
+            
+            if (name && firstName && lastName && garage61_slug) {
+                drivers.push({ name, firstName, lastName, garage61_slug });
                 await saveDataToServer();
                 renderAdminLists();
                 populateDrivers();
                 resetDriverAdminForm();
+            } else {
+                alert('Please fill in all driver fields');
             }
         }
         function editDriverAdmin(name) {
             const driver = drivers.find(d => d.name === name);
             if (driver) {
                 document.getElementById('new-driver-name').value = driver.name;
-                document.getElementById('new-driver-number').value = driver.drivernumber;
+                document.getElementById('new-driver-first-name').value = driver.firstName || '';
+                document.getElementById('new-driver-last-name').value = driver.lastName || '';
+                document.getElementById('new-driver-garage61-slug').value = driver.garage61_slug || '';
                 document.getElementById('add-driver-btn').textContent = 'Update Driver';
                 document.getElementById('add-driver-btn').onclick = () => updateDriverAdmin(name);
             }
         }
         async function updateDriverAdmin(originalName) {
             const name = document.getElementById('new-driver-name').value;
-            const drivernumber = parseInt(document.getElementById('new-driver-number').value);
-            if (name && !isNaN(drivernumber)) {
+            const firstName = document.getElementById('new-driver-first-name').value;
+            const lastName = document.getElementById('new-driver-last-name').value;
+            const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
+            
+            if (name && firstName && lastName && garage61_slug) {
                 const index = drivers.findIndex(d => d.name === originalName);
                 if (index !== -1) {
-                    drivers[index] = { name, drivernumber };
+                    drivers[index] = { name, firstName, lastName, garage61_slug };
                     await saveDataToServer();
                     renderAdminLists();
                     populateDrivers();
                     resetDriverAdminForm();
                 }
+            } else {
+                alert('Please fill in all driver fields');
             }
         }
         async function removeDriverAdmin(name) {
