@@ -711,11 +711,17 @@
             }
 
             // Call Garage61 API if we have the required IDs
-            console.log('🔍 DEBUG: Car garage61_id:', selectedCar.garage61_id);
-            console.log('🔍 DEBUG: Track garage61_id:', selectedTrack.garage61_id);
+            console.log('🏁 GARAGE61 IDs BEING USED:');
+            console.log('   🚗 Car ID:', selectedCar.garage61_id, '(for car:', selectedCar.name + ')');
+            console.log('   🏟️  Track ID:', selectedTrack.garage61_id, '(for track:', selectedTrack.name + ')');
+            console.log('   👥 Driver Slugs:');
+            selectedDrivers.forEach(driverName => {
+                const driver = drivers.find(d => d.name === driverName);
+                console.log('      -', driverName, '→', driver ? driver.garage61_slug : 'NOT FOUND');
+            });
             
             if (selectedCar.garage61_id && selectedTrack.garage61_id) {
-                console.log('🚀 Calling Garage61 API...');
+                console.log('🚀 Calling Garage61 API with IDs:', selectedCar.garage61_id, 'and', selectedTrack.garage61_id);
                 await fetchGarage61Data(selectedCar.garage61_id, selectedTrack.garage61_id);
             } else {
                 console.warn('⚠️ Missing Garage61 IDs - skipping API call');
@@ -852,6 +858,9 @@
             
             const url = `${GARAGE61_API_URL}?${params.toString()}`;
             
+            console.log('🌐 GARAGE61 API URL:', url);
+            console.log('🔑 Using token:', GARAGE61_TOKEN.substring(0, 8) + '...');
+            
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -861,11 +870,19 @@
                 }
             });
 
+            console.log('📡 API Response status:', response.status, response.statusText);
+
             if (!response.ok) {
                 throw new Error(`Garage61 API Error: ${response.status} ${response.statusText}`);
             }
 
             const data = await response.json();
+            
+            console.log('📦 Raw API data received:', {
+                total: data.total,
+                itemsCount: data.items ? data.items.length : 0,
+                firstItem: data.items && data.items.length > 0 ? data.items[0] : null
+            });
             
             return {
                 success: true,
