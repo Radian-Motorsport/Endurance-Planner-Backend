@@ -629,6 +629,21 @@
             resetTrackAdminForm();
         }
         function showPage2() {
+            console.log('🔥🔥🔥 FIRST CALCULATE BUTTON PRESSED - showPage2() 🔥🔥🔥');
+            
+            // IMMEDIATE API CALL TEST
+            fetch('/api/garage61/laps?cars=1&tracks=1&teams=radian-motorsport')
+                .then(response => {
+                    console.log('API Response Status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API Response Data:', data);
+                })
+                .catch(error => {
+                    console.log('API Error:', error);
+                });
+                     
                      //Comment out this block for testing:
              const carSelect = document.getElementById('car-select');
              const trackSelect = document.getElementById('track-select');
