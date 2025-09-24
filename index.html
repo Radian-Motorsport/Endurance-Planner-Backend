@@ -176,6 +176,36 @@
                     </div>
                 </div>
 
+                <!-- Garage61 Lap Times Section - MOVED ABOVE RACE INPUTS -->
+                <div id="garage61-lap-times" class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mb-6 hidden">
+                    <h1 class="text-xl mb-4 road-rage-font">GARAGE61 LAP TIMES</h1>
+                    <div id="lap-times-loading" class="text-center py-4 hidden">
+                        <i class="fas fa-spinner fa-spin text-2xl text-blue-400 mb-2"></i>
+                        <p class="text-neutral-400">Fetching lap data from Garage61...</p>
+                    </div>
+                    <div id="lap-times-error" class="text-center py-4 text-red-400 hidden">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p id="lap-times-error-message">Error loading lap data</p>
+                    </div>
+                    <div id="lap-times-content" class="hidden">
+                        <div class="bg-neutral-800 rounded-lg border border-neutral-600 overflow-hidden shadow-lg">
+                            <table class="w-full text-neutral-100 text-xs">
+                                <thead class="bg-gradient-to-r from-neutral-700 to-neutral-600 border-b border-neutral-500">
+                                    <tr>
+                                        <th class="py-2 px-3 text-left text-xs font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">Driver</th>
+                                        <th class="py-2 px-3 text-left text-xs font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">Best Lap</th>
+                                        <th class="py-2 px-3 text-left text-xs font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">Fuel Used</th>
+                                        <th class="py-2 px-3 text-left text-xs font-bold text-neutral-200 uppercase tracking-wider">Conditions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lap-times-tbody" class="divide-y divide-neutral-600">
+                                    <!-- Lap data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="race-inputs-container" class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg">
                     <h1 class="text-xl mb-4  road-rage-font">Race Inputs</h1>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -213,36 +243,6 @@
                             <button id="calculate-page2-button" onclick="calculateAndShowPage2()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
                                 Calculate
                             </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Garage61 Lap Times Section -->
-                <div id="garage61-lap-times" class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mb-6 hidden">
-                    <h3 class="text-xl font-bold mb-4 road-rage-font text-white text-shadow">GARAGE61 LAP TIMES</h3>
-                    <div id="lap-times-loading" class="text-center py-4 hidden">
-                        <i class="fas fa-spinner fa-spin text-2xl text-blue-400 mb-2"></i>
-                        <p class="text-neutral-400">Fetching lap data from Garage61...</p>
-                    </div>
-                    <div id="lap-times-error" class="text-center py-4 text-red-400 hidden">
-                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-                        <p id="lap-times-error-message">Error loading lap data</p>
-                    </div>
-                    <div id="lap-times-content" class="hidden">
-                        <div class="bg-neutral-800 rounded-lg border border-neutral-600 overflow-hidden shadow-lg">
-                            <table class="w-full text-neutral-100">
-                                <thead class="bg-gradient-to-r from-neutral-700 to-neutral-600 border-b border-neutral-500">
-                                    <tr>
-                                        <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">Driver</th>
-                                        <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">Best Lap</th>
-                                        <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">Fuel Used</th>
-                                        <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider">Conditions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="lap-times-tbody" class="divide-y divide-neutral-600">
-                                    <!-- Lap data will be populated here -->
-                                </tbody>
-                            </table>
                         </div>
                     </div>
                 </div>
@@ -684,20 +684,26 @@
                                 
                                 const driverName = lap.driver?.name || 'Unknown Driver';
                                 const lapTime = lap.lapTime ? formatLapTime(lap.lapTime) : 'N/A';
-                                const fuelUsed = lap.fuelUsed || 'N/A';
-                                const conditions = `${lap.weather?.name || 'Unknown'} / ${lap.temperature?.air || '?'}°C`;
+                                const fuelUsed = lap.fuelUsed ? parseFloat(lap.fuelUsed).toFixed(2) : 'N/A';
+                                const weather = lap.weather?.name || 'Unknown';
+                                const temp = lap.temperature?.air || '?';
                                 
                                 row.innerHTML = `
-                                    <td class="py-4 px-6 border-r border-neutral-600">${driverName}</td>
-                                    <td class="py-4 px-6 border-r border-neutral-600 font-mono text-blue-400">${lapTime}</td>
-                                    <td class="py-4 px-6 border-r border-neutral-600">${fuelUsed}L</td>
-                                    <td class="py-4 px-6">${conditions}</td>
+                                    <td class="py-2 px-3 border-r border-neutral-600 text-xs">${driverName}</td>
+                                    <td class="py-2 px-3 border-r border-neutral-600 font-mono text-blue-400 text-xs">${lapTime}</td>
+                                    <td class="py-2 px-3 border-r border-neutral-600 text-xs">${fuelUsed}L</td>
+                                    <td class="py-2 px-3 text-xs">
+                                        <div class="leading-tight">
+                                            <div>${weather}</div>
+                                            <div class="text-neutral-400">${temp}°C</div>
+                                        </div>
+                                    </td>
                                 `;
                                 
                                 tbody.appendChild(row);
                             });
                         } else {
-                            tbody.innerHTML = '<tr><td colspan="4" class="py-8 px-6 text-center text-neutral-400">No lap data found</td></tr>';
+                            tbody.innerHTML = '<tr><td colspan="4" class="py-4 px-3 text-center text-neutral-400 text-xs">No lap data found</td></tr>';
                         }
                     })
                     .catch(error => {
