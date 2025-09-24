@@ -724,14 +724,24 @@
             console.log('   selectedCar.garage61_id:', selectedCar.garage61_id, '(type:', typeof selectedCar.garage61_id + ')');
             console.log('   selectedTrack.garage61_id:', selectedTrack.garage61_id, '(type:', typeof selectedTrack.garage61_id + ')');
             console.log('   Condition result:', !!(selectedCar.garage61_id && selectedTrack.garage61_id));
+            console.log('   Car truthy?', !!selectedCar.garage61_id);
+            console.log('   Track truthy?', !!selectedTrack.garage61_id);
+            console.log('   About to check condition...');
             
             if (selectedCar.garage61_id && selectedTrack.garage61_id) {
                 console.log('🚀 Calling Garage61 API with IDs:', selectedCar.garage61_id, 'and', selectedTrack.garage61_id);
-                await fetchGarage61Data(selectedCar.garage61_id, selectedTrack.garage61_id);
+                try {
+                    await fetchGarage61Data(selectedCar.garage61_id, selectedTrack.garage61_id);
+                    console.log('✅ Garage61 API call completed');
+                } catch (error) {
+                    console.error('❌ Garage61 API call failed:', error);
+                }
             } else {
                 console.warn('⚠️ Missing Garage61 IDs - skipping API call');
                 console.log('Car has garage61_id:', !!selectedCar.garage61_id);
                 console.log('Track has garage61_id:', !!selectedTrack.garage61_id);
+                console.log('selectedCar.garage61_id value:', selectedCar.garage61_id);
+                console.log('selectedTrack.garage61_id value:', selectedTrack.garage61_id);
             }
 
             const raceDurationHours = parseInt(document.getElementById('race-duration-hours').value) || 0;
