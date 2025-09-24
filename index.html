@@ -861,17 +861,20 @@
             params.append('tracks', trackId);
             params.append('teams', TEAM_NAME);
             
-            const url = `${GARAGE61_API_URL}?${params.toString()}`;
+            const apiUrl = `${GARAGE61_API_URL}?${params.toString()}`;
+            const corsProxyUrl = `https://cors-anywhere.herokuapp.com/${apiUrl}`;
             
-            console.log('🌐 GARAGE61 API URL:', url);
+            console.log('🌐 GARAGE61 API URL:', apiUrl);
+            console.log('🌐 CORS PROXY URL:', corsProxyUrl);
             console.log('🔑 Using token:', GARAGE61_TOKEN.substring(0, 8) + '...');
             
-            const response = await fetch(url, {
+            const response = await fetch(corsProxyUrl, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${GARAGE61_TOKEN}`,
-                    'User-Agent': 'RadianPlanner/1.0'
+                    'User-Agent': 'RadianPlanner/1.0',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             });
 
