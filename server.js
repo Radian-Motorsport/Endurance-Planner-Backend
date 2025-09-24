@@ -183,6 +183,62 @@ app.delete('/api/tracks/:garage61_id', async (req, res) => {
     }
 });
 
+// Garage61 API proxy endpoint
+app.get('/api/garage61/laps', async (req, res) => {
+    try {
+        const GARAGE61_TOKEN = 'MWVKZTRMOGETNDCZOS0ZMJUZLTK2ODITNJBJZMQ5NMU4M2I5';
+        const GARAGE61_API_URL = 'https://garage61.net/api/v1/laps';
+        const TEAM_NAME = 'radian-motorsport';
+
+        const { cars, tracks, teams } = req.query;
+
+        if (!cars || !tracks) {
+            return res.status(400).json({
+                success: false,
+                error: 'Both cars and tracks parameters are required'
+            });
+        }
+
+        const params = new URLSearchParams();
+        params.append('cars', cars);
+        params.append('tracks', tracks);
+        params.append('teams', teams || TEAM_NAME);
+
+        const url = `${GARAGE61_API_URL}?${params.toString()}`;
+        
+        console.log('Proxying Garage61 request to:', url);
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${GARAGE61_TOKEN}`,
+                'User-Agent': 'RadianPlanner/1.0'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Garage61 API Error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        
+        console.log('Garage61 response:', {
+            total: data.total,
+            itemCount: data.items ? data.items.length : 0
+        });
+
+        res.json(data);
+
+    } catch (error) {
+        console.error('Garage61 proxy error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // API endpoint to save all data to the database
 app.post('/api/data', async (req, res) => {
     // Accept partial payloads; default to empty arrays so batch imports (drivers-only, etc.) work

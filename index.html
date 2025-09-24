@@ -852,41 +852,34 @@
         }
 
         async function callGarage61API(carId, trackId) {
-            const GARAGE61_TOKEN = 'MWVKZTRMOGETNDCZOS0ZMJUZLTK2ODITNJBJZMQ5NMU4M2I5';
-            const GARAGE61_API_URL = 'https://garage61.net/api/v1/laps';
             const TEAM_NAME = 'radian-motorsport';
-
+            
             const params = new URLSearchParams();
             params.append('cars', carId);
             params.append('tracks', trackId);
             params.append('teams', TEAM_NAME);
             
-            const apiUrl = `${GARAGE61_API_URL}?${params.toString()}`;
-            const corsProxyUrl = `https://cors-anywhere.herokuapp.com/${apiUrl}`;
+            const proxyUrl = `/api/garage61/laps?${params.toString()}`;
             
-            console.log('🌐 GARAGE61 API URL:', apiUrl);
-            console.log('🌐 CORS PROXY URL:', corsProxyUrl);
-            console.log('🔑 Using token:', GARAGE61_TOKEN.substring(0, 8) + '...');
+            console.log('🌐 Using server proxy URL:', proxyUrl);
             
-            const response = await fetch(corsProxyUrl, {
+            const response = await fetch(proxyUrl, {
                 method: 'GET',
                 headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${GARAGE61_TOKEN}`,
-                    'User-Agent': 'RadianPlanner/1.0',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'Accept': 'application/json'
                 }
             });
 
-            console.log('📡 API Response status:', response.status, response.statusText);
+            console.log('📡 Proxy response status:', response.status, response.statusText);
 
             if (!response.ok) {
-                throw new Error(`Garage61 API Error: ${response.status} ${response.statusText}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Proxy Error: ${response.status} ${response.statusText}`);
             }
 
             const data = await response.json();
             
-            console.log('📦 Raw API data received:', {
+            console.log('📦 Server proxy data received:', {
                 total: data.total,
                 itemsCount: data.items ? data.items.length : 0,
                 firstItem: data.items && data.items.length > 0 ? data.items[0] : null
