@@ -708,7 +708,12 @@
                                 // Use CORRECT variables from README-G61.md
                                 const driverName = lap.driver?.name || 'Unknown Driver';
                                 
+                                // Format lap time and add sector times below
                                 const lapTime = lap.lapTime ? formatLapTime(lap.lapTime) : 'N/A';
+                                const sectorTimes = lap.sectors && lap.sectors.length > 0 ? 
+                                    lap.sectors.map((sector, i) => `S${i+1}: ${sector.sectorTime.toFixed(3)}`).join(' | ') : 
+                                    '';
+                                
                                 const fuelUsed = lap.fuelUsed ? parseFloat(lap.fuelUsed).toFixed(2) : 'N/A';
                                 
                                 // Weather conditions from README
@@ -722,15 +727,23 @@
                                 const windDir = lap.windDir ? getWindDirection(lap.windDir) : 'N';
                                 const humidity = lap.relativeHumidity ? `${(lap.relativeHumidity * 100).toFixed(0)}%` : '0%';
                                 
+                                // TRACK CONDITIONS
+                                const trackUsage = lap.trackUsage ? `${lap.trackUsage}%` : '0%';
+                                const trackWetness = lap.trackWetness ? `${lap.trackWetness}%` : '0%';
+                                
                                 row.innerHTML = `
                                     <td class="py-2 px-3 border-r border-neutral-600 text-xs">${driverName}</td>
-                                    <td class="py-2 px-3 border-r border-neutral-600 font-mono text-blue-400 text-xs">${lapTime}</td>
+                                    <td class="py-2 px-3 border-r border-neutral-600 font-mono text-blue-400 text-xs">
+                                        <div>${lapTime}</div>
+                                        <div class="text-neutral-400 text-xs">${sectorTimes}</div>
+                                    </td>
                                     <td class="py-2 px-3 border-r border-neutral-600 text-xs">${fuelUsed}L</td>
                                     <td class="py-2 px-3 text-xs">
                                         <div class="leading-tight">
                                             <div>${weather} / ${humidity}</div>
                                             <div class="text-neutral-400">Air: ${airTemp} / Track: ${trackTemp}</div>
                                             <div class="text-neutral-300">Wind: ${windSpeedMph}mph ${windDir}</div>
+                                            <div class="text-neutral-300">Usage: ${trackUsage} / Wet: ${trackWetness}</div>
                                         </div>
                                     </td>
                                 `;
