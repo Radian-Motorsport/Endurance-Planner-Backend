@@ -160,7 +160,7 @@
                 </div>
 
                 <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg">
-                    <div class="grid md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <span class="text-white text-shadow road-rage-font">TRACK:</span>
                             <br> <span id="page2-track" class="text-neutral-100"></span>
@@ -1077,7 +1077,11 @@
         }
 
         function filterLapsByDrivers(laps) {
+            console.log('🔍 DEBUG: filterLapsByDrivers called with:', laps.length, 'laps');
+            console.log('🔍 DEBUG: selectedDrivers:', selectedDrivers);
+            
             if (!selectedDrivers || selectedDrivers.length === 0) {
+                console.log('🔍 DEBUG: No selected drivers, returning all laps');
                 return laps;
             }
 
@@ -1085,20 +1089,33 @@
             const selectedDriverSlugs = selectedDrivers.map(driver => driver.garage61_slug).filter(slug => slug !== null);
             const selectedDriverNames = selectedDrivers.map(driver => driver.name);
 
-            console.log('Filtering for driver slugs:', selectedDriverSlugs);
-            console.log('Filtering for driver names:', selectedDriverNames);
+            console.log('🔍 DEBUG: Filtering for driver slugs:', selectedDriverSlugs);
+            console.log('🔍 DEBUG: Filtering for driver names:', selectedDriverNames);
+            
+            // Show first few laps to see structure
+            console.log('🔍 DEBUG: Sample lap structure:', laps.slice(0, 2));
 
-            return laps.filter(lap => {
+            const filtered = laps.filter(lap => {
                 const driverSlug = lap.driver ? lap.driver.slug : null;
                 const driverName = lap.driver ? lap.driver.name : null;
                 
-                return selectedDriverSlugs.some(slug => 
+                console.log(`🔍 DEBUG: Checking lap - driver: ${driverName}, slug: ${driverSlug}`);
+                
+                const slugMatch = selectedDriverSlugs.some(slug => 
                     (driverSlug && driverSlug.toLowerCase() === slug.toLowerCase())
-                ) || selectedDriverNames.some(name => 
+                );
+                const nameMatch = selectedDriverNames.some(name => 
                     (driverName && name.toLowerCase().includes(driverName.toLowerCase())) ||
                     (driverName && driverName.toLowerCase().includes(name.toLowerCase()))
                 );
+                
+                const matches = slugMatch || nameMatch;
+                console.log(`🔍 DEBUG: Lap matches: ${matches} (slug: ${slugMatch}, name: ${nameMatch})`);
+                return matches;
             });
+            
+            console.log('🔍 DEBUG: Filtered result:', filtered.length, 'laps');
+            return filtered;
         }
 
         function getDriverBestLaps(laps) {
