@@ -631,17 +631,21 @@
         function showPage2() {
             console.log('🔥🔥🔥 FIRST CALCULATE BUTTON PRESSED - showPage2() 🔥🔥🔥');
             
-            // IMMEDIATE API CALL TEST
-            fetch('/api/garage61/laps?cars=1&tracks=1&teams=radian-motorsport')
+            // PROXY API CALL - MAKE SURE WE HIT THE PROXY
+            const proxyUrl = '/api/garage61/laps?cars=1&tracks=1&teams=radian-motorsport';
+            console.log('🌐 Calling PROXY URL:', proxyUrl);
+            
+            fetch(proxyUrl)
                 .then(response => {
-                    console.log('API Response Status:', response.status);
+                    console.log('✅ PROXY Response Status:', response.status, response.statusText);
+                    console.log('✅ PROXY Response URL:', response.url);
                     return response.json();
                 })
                 .then(data => {
-                    console.log('API Response Data:', data);
+                    console.log('✅ PROXY Response Data:', data);
                 })
                 .catch(error => {
-                    console.log('API Error:', error);
+                    console.error('❌ PROXY Error:', error);
                 });
                      
                      //Comment out this block for testing:
