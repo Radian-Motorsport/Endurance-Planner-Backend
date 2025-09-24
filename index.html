@@ -720,6 +720,11 @@
                 console.log('      -', driverName, '→', driver ? driver.garage61_slug : 'NOT FOUND');
             });
             
+            console.log('🔍 CONDITION CHECK:');
+            console.log('   selectedCar.garage61_id:', selectedCar.garage61_id, '(type:', typeof selectedCar.garage61_id + ')');
+            console.log('   selectedTrack.garage61_id:', selectedTrack.garage61_id, '(type:', typeof selectedTrack.garage61_id + ')');
+            console.log('   Condition result:', !!(selectedCar.garage61_id && selectedTrack.garage61_id));
+            
             if (selectedCar.garage61_id && selectedTrack.garage61_id) {
                 console.log('🚀 Calling Garage61 API with IDs:', selectedCar.garage61_id, 'and', selectedTrack.garage61_id);
                 await fetchGarage61Data(selectedCar.garage61_id, selectedTrack.garage61_id);
