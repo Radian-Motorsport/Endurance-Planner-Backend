@@ -638,6 +638,20 @@
             return `${minutes}:${seconds.padStart(6, '0')}`;
         }
         
+        // Helper function to convert wind direction from radians to compass
+        function getWindDirection(radians) {
+            if (radians === null || radians === undefined) return 'N';
+            
+            // Convert radians to degrees
+            let degrees = (radians * 180 / Math.PI) % 360;
+            if (degrees < 0) degrees += 360;
+            
+            // Convert to compass directions
+            const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+            const index = Math.round(degrees / 45) % 8;
+            return directions[index];
+        }
+        
         function showPage2() {
             console.log('🔥🔥🔥 FIRST CALCULATE BUTTON PRESSED - showPage2() 🔥🔥🔥');
             
@@ -703,14 +717,20 @@
                                 const airTemp = lap.airTemp ? `${lap.airTemp.toFixed(1)}°C` : '?°C';
                                 const trackTemp = lap.trackTemp ? `${lap.trackTemp.toFixed(1)}°C` : '?°C';
                                 
+                                // WIND DATA - Convert radians to compass direction and m/s to mph
+                                const windSpeedMph = lap.windVel ? (lap.windVel * 2.237).toFixed(1) : '0';
+                                const windDir = lap.windDir ? getWindDirection(lap.windDir) : 'N';
+                                const humidity = lap.relativeHumidity ? `${(lap.relativeHumidity * 100).toFixed(0)}%` : '0%';
+                                
                                 row.innerHTML = `
                                     <td class="py-2 px-3 border-r border-neutral-600 text-xs">${driverName}</td>
                                     <td class="py-2 px-3 border-r border-neutral-600 font-mono text-blue-400 text-xs">${lapTime}</td>
                                     <td class="py-2 px-3 border-r border-neutral-600 text-xs">${fuelUsed}L</td>
                                     <td class="py-2 px-3 text-xs">
                                         <div class="leading-tight">
-                                            <div>${weather}</div>
+                                            <div>${weather} / ${humidity}</div>
                                             <div class="text-neutral-400">Air: ${airTemp} / Track: ${trackTemp}</div>
+                                            <div class="text-neutral-300">Wind: ${windSpeedMph}mph ${windDir}</div>
                                         </div>
                                     </td>
                                 `;
