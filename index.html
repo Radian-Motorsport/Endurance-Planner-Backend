@@ -701,14 +701,26 @@
             const selectedCar = cars.find(car => car.name === carSelect.value);
             const selectedTrack = tracks.find(track => track.name === trackSelect.value);
             
+            console.log('🔍 DEBUG: Selected car:', selectedCar);
+            console.log('🔍 DEBUG: Selected track:', selectedTrack);
+            console.log('🔍 DEBUG: Selected drivers:', selectedDrivers);
+            
             if (!selectedCar || !selectedTrack) {
                 alert("Selected car or track data not found. Please refresh and try again.");
                 return;
             }
 
             // Call Garage61 API if we have the required IDs
+            console.log('🔍 DEBUG: Car garage61_id:', selectedCar.garage61_id);
+            console.log('🔍 DEBUG: Track garage61_id:', selectedTrack.garage61_id);
+            
             if (selectedCar.garage61_id && selectedTrack.garage61_id) {
+                console.log('🚀 Calling Garage61 API...');
                 await fetchGarage61Data(selectedCar.garage61_id, selectedTrack.garage61_id);
+            } else {
+                console.warn('⚠️ Missing Garage61 IDs - skipping API call');
+                console.log('Car has garage61_id:', !!selectedCar.garage61_id);
+                console.log('Track has garage61_id:', !!selectedTrack.garage61_id);
             }
 
             const raceDurationHours = parseInt(document.getElementById('race-duration-hours').value) || 0;
@@ -767,11 +779,21 @@
 
         // Garage61 API Functions
         async function fetchGarage61Data(carId, trackId) {
+            console.log(`🔥 fetchGarage61Data called with carId: ${carId}, trackId: ${trackId}`);
+            
             const lapTimesSection = document.getElementById('garage61-lap-times');
             const loadingDiv = document.getElementById('lap-times-loading');
             const errorDiv = document.getElementById('lap-times-error');
             const contentDiv = document.getElementById('lap-times-content');
             const tbody = document.getElementById('lap-times-tbody');
+            
+            console.log('🔍 Elements found:', {
+                lapTimesSection: !!lapTimesSection,
+                loadingDiv: !!loadingDiv,
+                errorDiv: !!errorDiv,
+                contentDiv: !!contentDiv,
+                tbody: !!tbody
+            });
             
             // Show loading state
             lapTimesSection.classList.remove('hidden');
@@ -785,6 +807,8 @@
                 // Call Garage61 API directly
                 const response = await callGarage61API(carId, trackId);
                 
+                console.log('🔥 API Response:', response);
+                
                 if (!response.success) {
                     throw new Error(response.error || 'API call failed');
                 }
@@ -792,8 +816,12 @@
                 // Filter laps by selected drivers
                 const filteredLaps = filterLapsByDrivers(response.data);
                 
+                console.log('🔥 Filtered laps:', filteredLaps);
+                
                 // Group laps by driver and get best lap for each
                 const driverBestLaps = getDriverBestLaps(filteredLaps);
+                
+                console.log('🔥 Driver best laps:', driverBestLaps);
                 
                 // Display the results
                 displayLapTimes(driverBestLaps, tbody);
@@ -803,7 +831,7 @@
                 contentDiv.classList.remove('hidden');
 
             } catch (error) {
-                console.error('Garage61 API Error:', error);
+                console.error('🚨 Garage61 API Error:', error);
                 
                 // Show error
                 loadingDiv.classList.add('hidden');
