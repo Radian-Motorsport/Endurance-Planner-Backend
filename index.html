@@ -173,36 +173,6 @@
                             <span class="text-white text-shadow road-rage-font">DRIVERS:</span>
                             <br> <span id="page2-drivers" class="text-neutral-100"></span>
                         </div>
-                        <div>
-                            <span class="text-white text-shadow road-rage-font">BEST LAP TIMES:</span>
-                            <br>
-                            <div id="page2-best-lap-table" class="mt-2">
-                                <div class="bg-neutral-800 rounded-lg border border-neutral-600 overflow-hidden shadow-lg">
-                                    <table class="w-full text-neutral-100">
-                                        <thead class="bg-gradient-to-r from-neutral-700 to-neutral-600 border-b border-neutral-500">
-                                            <tr>
-                                                <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">
-                                                    Driver
-                                                </th>
-                                                <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">
-                                                    Best Lap Time
-                                                </th>
-                                                <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider">
-                                                    Fuel Used (L)
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="lap-times-tbody" class="divide-y divide-neutral-600">
-                                            <tr class="bg-neutral-750 hover:bg-neutral-700 transition-colors duration-200">
-                                                <td colspan="3" class="py-6 px-6 text-center text-neutral-400 italic">
-                                                    Click "Next" to load lap times...
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -247,8 +217,35 @@
                     </div>
                 </div>
 
-
-
+                <!-- Garage61 Lap Times Section -->
+                <div id="garage61-lap-times" class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mb-6 hidden">
+                    <h3 class="text-xl font-bold mb-4 road-rage-font text-white text-shadow">GARAGE61 LAP TIMES</h3>
+                    <div id="lap-times-loading" class="text-center py-4 hidden">
+                        <i class="fas fa-spinner fa-spin text-2xl text-blue-400 mb-2"></i>
+                        <p class="text-neutral-400">Fetching lap data from Garage61...</p>
+                    </div>
+                    <div id="lap-times-error" class="text-center py-4 text-red-400 hidden">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p id="lap-times-error-message">Error loading lap data</p>
+                    </div>
+                    <div id="lap-times-content" class="hidden">
+                        <div class="bg-neutral-800 rounded-lg border border-neutral-600 overflow-hidden shadow-lg">
+                            <table class="w-full text-neutral-100">
+                                <thead class="bg-gradient-to-r from-neutral-700 to-neutral-600 border-b border-neutral-500">
+                                    <tr>
+                                        <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">Driver</th>
+                                        <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">Best Lap</th>
+                                        <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">Fuel Used</th>
+                                        <th class="py-4 px-6 text-left text-sm font-bold text-neutral-200 uppercase tracking-wider">Conditions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lap-times-tbody" class="divide-y divide-neutral-600">
+                                    <!-- Lap data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
                 
                 <div id="overall-summary" class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mb-6">
@@ -680,9 +677,6 @@
             document.getElementById('page2-car').textContent = carSelect.value;
             const driverNames = selectedDrivers.map(d => d.name).join(', ');
             document.getElementById('page2-drivers').textContent = driverNames;
-            
-            // Fetch and display best lap time from Garage 61
-            updateBestLapDisplay();
         }
         function showPage3() {
             document.getElementById('planner-page').classList.add('hidden');
@@ -691,266 +685,32 @@
             document.getElementById('admin-page').classList.add('hidden');
         }
 
-        // --- Garage 61 API Integration ---
-        
-        async function fetchBestLapTime(driverSlug, carId, trackId) {
-            try {
-                console.log(`🏁 Fetching lap time for driver:${driverSlug}, car:${carId}, track:${trackId}`);
-                // Call our server-side proxy to avoid CORS and keep token secret
-                const apiUrl = `/api/garage61/laps?cars=${encodeURIComponent(carId)}&tracks=${encodeURIComponent(trackId)}&driver=${encodeURIComponent(driverSlug)}`;
-                const response = await fetch(apiUrl, { method: 'GET' });
-                
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    console.error(`❌ Garage61 API error ${response.status}:`, errorData);
-                    
-                    if (response.status === 504) {
-                        return 'Garage61 timeout - try again';
-                    } else if (response.status === 404) {
-                        return 'No lap data found';
-                    } else if (response.status >= 500) {
-                        return 'Garage61 service unavailable';
-                    } else {
-                        return `API Error: ${response.status}`;
-                    }
-                }
-                
-                const data = await response.json();
-                console.log(`✅ Received ${data?.items?.length || 0} laps from Garage61`);
-                
-                // Find the best (fastest) lap time from the response  
-                if (data && data.items && data.items.length > 0) {
-                    // Garage61 returns data.items array with lap objects that have lapTime property
-                    const sortedLaps = data.items.sort((a, b) => parseFloat(a.lapTime) - parseFloat(b.lapTime));
-                    const bestLap = sortedLaps[0];
-                    console.log(`🏆 Best lap: ${bestLap.lapTime}s by ${bestLap.driver.firstName} ${bestLap.driver.lastName}`);
-                    return formatLapTime(parseFloat(bestLap.lapTime));
-                } else {
-                    return 'No lap data available';
-                }
-            } catch (error) {
-                console.error('Error fetching best lap time:', error);
-                return `Connection Error: ${error.message}`;
-            }
-        }
-        
-        function formatLapTime(timeInSeconds) {
-            const minutes = Math.floor(timeInSeconds / 60);
-            const seconds = (timeInSeconds % 60).toFixed(3);
-            return `${minutes}:${seconds.padStart(6, '0')}`;
-        }
-        
-        // Fetch lap data for a specific driver including fuel information
-        async function fetchDriverLapData(driverSlug, carId, trackId) {
-            try {
-                console.log(`🔍 Fetching data for driver: ${driverSlug}, car: ${carId}, track: ${trackId}`);
-                
-                if (!carId || !trackId) {
-                    return {
-                        lapTime: 'Missing car/track data',
-                        fuelUsed: 'N/A'
-                    };
-                }
-                
-                const url = `/api/garage61/laps?extraDrivers=${encodeURIComponent(driverSlug)}&cars=${carId}&tracks=${trackId}`;
-                console.log(`🌐 Requesting: ${url}`);
-                
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    console.error(`❌ Garage61 API error ${response.status}:`, errorData);
-                    
-                    return {
-                        lapTime: response.status === 504 ? 'Timeout' : `Error ${response.status}`,
-                        fuelUsed: 'N/A'
-                    };
-                }
-                
-                const data = await response.json();
-                console.log(`✅ Received ${data?.items?.length || 0} laps for ${driverSlug}`);
-                
-                if (data && data.items && data.items.length > 0) {
-                    console.log(`📊 Processing ${data.items.length} laps for driver ${driverSlug}`);
-                    
-                    // Filter laps by the specific driver first
-                    const driverLaps = data.items.filter(lap => {
-                        if (!lap.driver) return false;
-                        const driverName = `${lap.driver.firstName || ''} ${lap.driver.lastName || ''}`.trim();
-                        const driverUsername = lap.driver.username || '';
-                        console.log(`🔍 Lap by: ${driverName} (${driverUsername}) vs looking for: ${driverSlug}`);
-                        return driverUsername === driverSlug;
-                    });
-                    
-                    console.log(`🎯 Found ${driverLaps.length} laps specifically for driver ${driverSlug}`);
-                    
-                    if (driverLaps.length > 0) {
-                        // Sort driver's laps by lap time to get their best (fastest) lap
-                        const sortedLaps = driverLaps.sort((a, b) => parseFloat(a.lapTime) - parseFloat(b.lapTime));
-                        const bestLap = sortedLaps[0];
-                        
-                        console.log(`🏆 Best lap for ${driverSlug}: ${bestLap.lapTime}s, fuel: ${bestLap.fuelUsed}L by ${bestLap.driver.firstName} ${bestLap.driver.lastName}`);
-                        
-                        return {
-                            lapTime: formatLapTime(parseFloat(bestLap.lapTime)),
-                            fuelUsed: bestLap.fuelUsed ? `${parseFloat(bestLap.fuelUsed).toFixed(2)}` : 'N/A'
-                        };
-                    } else {
-                        console.log(`❌ No laps found for specific driver ${driverSlug}, falling back to team best`);
-                        // Fallback: if no laps found for specific driver, get the overall best from team
-                        const sortedLaps = data.items.sort((a, b) => parseFloat(a.lapTime) - parseFloat(b.lapTime));
-                        const bestLap = sortedLaps[0];
-                        
-                        return {
-                            lapTime: formatLapTime(parseFloat(bestLap.lapTime)),
-                            fuelUsed: bestLap.fuelUsed ? `${parseFloat(bestLap.fuelUsed).toFixed(2)}` : 'N/A'
-                        };
-                    }
-                } else {
-                    return {
-                        lapTime: 'No lap data',
-                        fuelUsed: 'N/A'
-                    };
-                }
-            } catch (error) {
-                console.error(`Error fetching data for ${driverSlug}:`, error);
-                return {
-                    lapTime: 'Connection Error',
-                    fuelUsed: 'N/A'
-                };
-            }
-        }
-        
-        async function updateBestLapDisplay() {
-            const tbody = document.getElementById('lap-times-tbody');
-            tbody.innerHTML = '<tr><td colspan="2" class="py-2 text-neutral-400">Loading...</td></tr>';
+        // --- Core Logic ---
 
-            // Validate we have selected drivers
-            if (!selectedDrivers || selectedDrivers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="2" class="py-2 text-red-400">No drivers selected</td></tr>';
-                return;
-            }
-
-            // Get selected car and track garage61_id
+        async function calculateAndShowPage2() {
+            // Get selected values for Garage61 API call
             const carSelect = document.getElementById('car-select');
             const trackSelect = document.getElementById('track-select');
             
-            const selectedCarName = carSelect.value;
-            const selectedTrackName = trackSelect.value;
+            if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
+                alert("Please select at least one driver, a car, and a track before calculating.");
+                return;
+            }
+
+            // Find selected car and track data to get Garage61 IDs
+            const selectedCar = cars.find(car => car.name === carSelect.value);
+            const selectedTrack = tracks.find(track => track.name === trackSelect.value);
             
-            // Find the garage61_id from our global data arrays
-            let carId = null;
-            let trackId = null;
-            
-            try {
-                // Use global cars array (already loaded)
-                if (!cars || cars.length === 0) {
-                    console.error('❌ Cars array is empty, attempting to reload...');
-                    const carsResponse = await fetch('/api/cars');
-                    cars = await carsResponse.json();
-                }
-                const selectedCar = cars.find(car => car.name === selectedCarName);
-                carId = selectedCar ? selectedCar.garage61_id : null;
-                
-                // Use global tracks array (already loaded)
-                if (!tracks || tracks.length === 0) {
-                    console.error('❌ Tracks array is empty, attempting to reload...');
-                    const tracksResponse = await fetch('/api/tracks');
-                    tracks = await tracksResponse.json();
-                }
-                const selectedTrack = tracks.find(track => track.name === selectedTrackName);
-                trackId = selectedTrack ? selectedTrack.garage61_id : null;
-                
-                console.log(`🔍 Lookup results: Car "${selectedCarName}" → ID ${carId}, Track "${selectedTrackName}" → ID ${trackId}`);
-                
-                if (!carId || !trackId) {
-                    const errorMsg = `Missing data: ${!carId ? 'car ID' : ''} ${!trackId ? 'track ID' : ''}`;
-                    console.error(`❌ ${errorMsg}`);
-                    tbody.innerHTML = `<tr><td colspan="2" class="py-2 text-red-400">${errorMsg}</td></tr>`;
-                    return;
-                }
-                
-                // Fetch lap times for all selected drivers
-                await fetchAllDriverLapTimes(selectedDrivers, carId, trackId);
-                
-            } catch (error) {
-                console.error('Error updating best lap display:', error);
-                tbody.innerHTML = '<tr><td colspan="2" class="py-2 text-red-400">Error loading lap times</td></tr>';
-            }
-        }
-
-        async function fetchAllDriverLapTimes(drivers, carId, trackId) {
-            const tbody = document.getElementById('lap-times-tbody');
-            tbody.innerHTML = '';
-
-            // Show loading state for all drivers
-            for (const driver of drivers) {
-                const row = tbody.insertRow();
-                row.className = "bg-neutral-750 hover:bg-neutral-700 transition-colors duration-200";
-                row.innerHTML = `
-                    <td class="py-4 px-6 border-r border-neutral-600 text-neutral-200 font-medium">${driver.name}</td>
-                    <td class="py-4 px-6 border-r border-neutral-600 text-yellow-400 animate-pulse">● Loading...</td>
-                    <td class="py-4 px-6 text-yellow-400 animate-pulse">● Loading...</td>
-                `;
+            if (!selectedCar || !selectedTrack) {
+                alert("Selected car or track data not found. Please refresh and try again.");
+                return;
             }
 
-            // Fetch data for each driver individually
-            for (let i = 0; i < drivers.length; i++) {
-                const driver = drivers[i];
-                
-                if (!driver.garage61_slug) {
-                    const rows = tbody.querySelectorAll('tr');
-                    if (rows[i]) {
-                        rows[i].className = "bg-neutral-750 hover:bg-neutral-700 transition-colors duration-200";
-                        rows[i].innerHTML = `
-                            <td class="py-4 px-6 border-r border-neutral-600 text-neutral-200 font-medium">${driver.name}</td>
-                            <td class="py-4 px-6 border-r border-neutral-600 text-red-400 font-medium">⚠ No Garage61 account</td>
-                            <td class="py-4 px-6 text-red-400 font-medium">N/A</td>
-                        `;
-                    }
-                    continue;
-                }
-
-                try {
-                    console.log(`🏁 Fetching data for ${driver.name} (${driver.garage61_slug})`);
-                    const data = await fetchDriverLapData(driver.garage61_slug, carId, trackId);
-                    
-                    // Determine styling based on data validity
-                    const lapTimeClass = data.lapTime.includes('No lap') || data.lapTime.includes('Error') || data.lapTime.includes('timeout') || data.lapTime.includes('Timeout') 
-                        ? 'text-red-400 font-medium' 
-                        : 'text-green-400 font-mono text-lg font-bold';
-                    const fuelClass = data.fuelUsed === 'N/A' 
-                        ? 'text-red-400 font-medium' 
-                        : 'text-blue-400 font-mono text-lg font-semibold';
-                    
-                    // Update the corresponding row
-                    const rows = tbody.querySelectorAll('tr');
-                    if (rows[i]) {
-                        rows[i].className = "bg-neutral-750 hover:bg-neutral-700 transition-colors duration-200";
-                        rows[i].innerHTML = `
-                            <td class="py-4 px-6 border-r border-neutral-600 text-neutral-200 font-medium">${driver.name}</td>
-                            <td class="py-4 px-6 border-r border-neutral-600 ${lapTimeClass}">${data.lapTime}</td>
-                            <td class="py-4 px-6 ${fuelClass}">${data.fuelUsed}</td>
-                        `;
-                    }
-                } catch (error) {
-                    console.error(`Error fetching data for ${driver.name}:`, error);
-                    const rows = tbody.querySelectorAll('tr');
-                    if (rows[i]) {
-                        rows[i].className = "bg-neutral-750 hover:bg-neutral-700 transition-colors duration-200";
-                        rows[i].innerHTML = `
-                            <td class="py-4 px-6 border-r border-neutral-600 text-neutral-200 font-medium">${driver.name}</td>
-                            <td class="py-4 px-6 border-r border-neutral-600 text-red-400 font-medium">⚠ Error loading</td>
-                            <td class="py-4 px-6 text-red-400 font-medium">N/A</td>
-                        `;
-                    }
-                }
+            // Call Garage61 API if we have the required IDs
+            if (selectedCar.garage61_id && selectedTrack.garage61_id) {
+                await fetchGarage61Data(selectedCar.garage61_id, selectedTrack.garage61_id);
             }
-        }
 
-        // --- Core Logic ---
-
-        function calculateAndShowPage2() {
             const raceDurationHours = parseInt(document.getElementById('race-duration-hours').value) || 0;
             const raceDurationMinutes = parseInt(document.getElementById('race-duration-minutes').value) || 0;
             raceDurationSeconds = (raceDurationHours * 3600) + (raceDurationMinutes * 60);
@@ -1003,6 +763,188 @@
        
             // Show the button to go to the third page after calculation
             document.getElementById('page3-button-container').classList.remove('hidden');
+        }
+
+        // Garage61 API Functions
+        async function fetchGarage61Data(carId, trackId) {
+            const lapTimesSection = document.getElementById('garage61-lap-times');
+            const loadingDiv = document.getElementById('lap-times-loading');
+            const errorDiv = document.getElementById('lap-times-error');
+            const contentDiv = document.getElementById('lap-times-content');
+            const tbody = document.getElementById('lap-times-tbody');
+            
+            // Show loading state
+            lapTimesSection.classList.remove('hidden');
+            loadingDiv.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+            contentDiv.classList.add('hidden');
+
+            try {
+                console.log(`Fetching Garage61 data for car ${carId} at track ${trackId}`);
+                
+                // Call Garage61 API directly
+                const response = await callGarage61API(carId, trackId);
+                
+                if (!response.success) {
+                    throw new Error(response.error || 'API call failed');
+                }
+
+                // Filter laps by selected drivers
+                const filteredLaps = filterLapsByDrivers(response.data);
+                
+                // Group laps by driver and get best lap for each
+                const driverBestLaps = getDriverBestLaps(filteredLaps);
+                
+                // Display the results
+                displayLapTimes(driverBestLaps, tbody);
+                
+                // Show content
+                loadingDiv.classList.add('hidden');
+                contentDiv.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Garage61 API Error:', error);
+                
+                // Show error
+                loadingDiv.classList.add('hidden');
+                document.getElementById('lap-times-error-message').textContent = error.message;
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        async function callGarage61API(carId, trackId) {
+            const GARAGE61_TOKEN = 'MWVKZTRMOGETNDCZOS0ZMJUZLTK2ODITNJBJZMQ5NMU4M2I5';
+            const GARAGE61_API_URL = 'https://garage61.net/api/v1/laps';
+            const TEAM_NAME = 'radian-motorsport';
+
+            const params = new URLSearchParams();
+            params.append('cars', carId);
+            params.append('tracks', trackId);
+            params.append('teams', TEAM_NAME);
+            
+            const url = `${GARAGE61_API_URL}?${params.toString()}`;
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${GARAGE61_TOKEN}`,
+                    'User-Agent': 'RadianPlanner/1.0'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Garage61 API Error: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            
+            return {
+                success: true,
+                data: data.items || [],
+                total: data.total || 0
+            };
+        }
+
+        function filterLapsByDrivers(laps) {
+            if (!selectedDrivers || selectedDrivers.length === 0) {
+                return laps;
+            }
+
+            // Get garage61_slug values for selected drivers
+            const selectedDriverSlugs = selectedDrivers.map(driverName => {
+                const driver = drivers.find(d => d.name === driverName);
+                return driver ? driver.garage61_slug : null;
+            }).filter(slug => slug !== null);
+
+            console.log('Filtering for driver slugs:', selectedDriverSlugs);
+
+            return laps.filter(lap => {
+                const driverSlug = lap.driver ? lap.driver.slug : null;
+                const driverName = lap.driver ? lap.driver.name : null;
+                
+                return selectedDriverSlugs.some(slug => 
+                    (driverSlug && driverSlug.toLowerCase() === slug.toLowerCase()) ||
+                    (driverName && selectedDrivers.some(name => 
+                        name.toLowerCase().includes(driverName.toLowerCase()) ||
+                        driverName.toLowerCase().includes(name.toLowerCase())
+                    ))
+                );
+            });
+        }
+
+        function getDriverBestLaps(laps) {
+            const driverLaps = {};
+            
+            laps.forEach(lap => {
+                const driverName = lap.driver ? lap.driver.name : 'Unknown';
+                
+                if (!driverLaps[driverName] || lap.lapTime < driverLaps[driverName].lapTime) {
+                    driverLaps[driverName] = lap;
+                }
+            });
+            
+            return Object.values(driverLaps).sort((a, b) => a.lapTime - b.lapTime);
+        }
+
+        function displayLapTimes(bestLaps, tbody) {
+            tbody.innerHTML = '';
+            
+            if (bestLaps.length === 0) {
+                tbody.innerHTML = `
+                    <tr class="bg-neutral-750">
+                        <td colspan="4" class="py-6 px-6 text-center text-neutral-400 italic">
+                            No lap data found for selected drivers at this car/track combination
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            bestLaps.forEach((lap, index) => {
+                const driverName = lap.driver ? lap.driver.name : 'Unknown';
+                const lapTime = formatLapTime(lap.lapTime);
+                const fuelUsed = lap.fuelUsed ? lap.fuelUsed.toFixed(1) + 'L' : 'N/A';
+                const conditions = getConditionsText(lap);
+                const rowClass = index % 2 === 0 ? 'bg-neutral-750' : 'bg-neutral-800';
+
+                tbody.innerHTML += `
+                    <tr class="${rowClass} hover:bg-neutral-700 transition-colors duration-200">
+                        <td class="py-3 px-6 border-r border-neutral-600 font-semibold text-neutral-100">${driverName}</td>
+                        <td class="py-3 px-6 border-r border-neutral-600 text-green-400 font-mono">${lapTime}</td>
+                        <td class="py-3 px-6 border-r border-neutral-600 text-neutral-300">${fuelUsed}</td>
+                        <td class="py-3 px-6 text-neutral-400 text-sm">${conditions}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function formatLapTime(seconds) {
+            if (!seconds || seconds <= 0) return 'N/A';
+            
+            const minutes = Math.floor(seconds / 60);
+            const secs = (seconds % 60).toFixed(3);
+            
+            return `${minutes}:${secs.padStart(6, '0')}`;
+        }
+
+        function getConditionsText(lap) {
+            const parts = [];
+            
+            if (lap.trackTemp) {
+                parts.push(`Track: ${lap.trackTemp.toFixed(1)}°C`);
+            }
+            
+            if (lap.trackUsage) {
+                parts.push(`Usage: ${lap.trackUsage}%`);
+            }
+            
+            if (lap.clouds) {
+                const cloudTypes = { 1: 'Clear', 2: 'Partly', 3: 'Mostly', 4: 'Overcast' };
+                parts.push(cloudTypes[lap.clouds] || `Cloud ${lap.clouds}`);
+            }
+            
+            return parts.length > 0 ? parts.join(', ') : 'N/A';
         }
 
         
