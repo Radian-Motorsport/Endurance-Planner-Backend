@@ -631,26 +631,41 @@
         function showPage2() {
             console.log('🔥🔥🔥 FIRST CALCULATE BUTTON PRESSED - showPage2() 🔥🔥🔥');
             
-            // PROXY API CALL - MAKE SURE WE HIT THE PROXY
-            const proxyUrl = '/api/garage61/laps?cars=1&tracks=1&teams=radian-motorsport';
-            console.log('🌐 Calling PROXY URL:', proxyUrl);
+            // Get selected values for Garage61 API call
+            const carSelect = document.getElementById('car-select');
+            const trackSelect = document.getElementById('track-select');
             
-            fetch(proxyUrl)
-                .then(response => {
-                    console.log('✅ PROXY Response Status:', response.status, response.statusText);
-                    console.log('✅ PROXY Response URL:', response.url);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('✅ PROXY Response Data:', data);
-                })
-                .catch(error => {
-                    console.error('❌ PROXY Error:', error);
-                });
+            // Find selected car and track data to get Garage61 IDs
+            const selectedCar = cars.find(car => car.name === carSelect.value);
+            const selectedTrack = tracks.find(track => track.name === trackSelect.value);
+            
+            console.log('Selected car garage61_id:', selectedCar?.garage61_id);
+            console.log('Selected track garage61_id:', selectedTrack?.garage61_id);
+            
+            // PROXY API CALL - USE DATABASE IDs
+            if (selectedCar?.garage61_id && selectedTrack?.garage61_id) {
+                const proxyUrl = `/api/garage61/laps?cars=${selectedCar.garage61_id}&tracks=${selectedTrack.garage61_id}&teams=radian-motorsport`;
+                console.log('🌐 Calling PROXY URL:', proxyUrl);
+                
+                fetch(proxyUrl)
+                    .then(response => {
+                        console.log('✅ PROXY Response Status:', response.status, response.statusText);
+                        console.log('✅ PROXY Response URL:', response.url);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('✅ PROXY Response Data:', data);
+                        // Show the lap times section
+                        document.getElementById('garage61-lap-times').classList.remove('hidden');
+                    })
+                    .catch(error => {
+                        console.error('❌ PROXY Error:', error);
+                    });
+            } else {
+                console.log('⚠️ Missing garage61_id - Car:', selectedCar?.garage61_id, 'Track:', selectedTrack?.garage61_id);
+            }
                      
                      //Comment out this block for testing:
-             const carSelect = document.getElementById('car-select');
-             const trackSelect = document.getElementById('track-select');
              if (selectedDrivers.length === 0 || !carSelect.value || !trackSelect.value) {
                  alert("Please select at least one driver, a car, and a track before continuing.");
                  return;
@@ -663,10 +678,7 @@
             console.log(`   - Drivers: ${selectedDrivers.length} selected`);
             console.log(`   - Global Arrays: ${drivers.length} drivers, ${cars.length} cars, ${tracks.length} tracks`);
             
-            // Find the selected car and track data
-            const selectedCar = cars.find(car => car.name === carSelect.value);
-            const selectedTrack = tracks.find(track => track.name === trackSelect.value);
-            
+            // Use the selectedCar and selectedTrack from above
             console.log(`   - Selected Car Data:`, selectedCar);
             console.log(`   - Selected Track Data:`, selectedTrack);
             
