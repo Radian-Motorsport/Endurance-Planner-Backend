@@ -1082,23 +1082,21 @@
             }
 
             // Get garage61_slug values for selected drivers
-            const selectedDriverSlugs = selectedDrivers.map(driverName => {
-                const driver = drivers.find(d => d.name === driverName);
-                return driver ? driver.garage61_slug : null;
-            }).filter(slug => slug !== null);
+            const selectedDriverSlugs = selectedDrivers.map(driver => driver.garage61_slug).filter(slug => slug !== null);
+            const selectedDriverNames = selectedDrivers.map(driver => driver.name);
 
             console.log('Filtering for driver slugs:', selectedDriverSlugs);
+            console.log('Filtering for driver names:', selectedDriverNames);
 
             return laps.filter(lap => {
                 const driverSlug = lap.driver ? lap.driver.slug : null;
                 const driverName = lap.driver ? lap.driver.name : null;
                 
                 return selectedDriverSlugs.some(slug => 
-                    (driverSlug && driverSlug.toLowerCase() === slug.toLowerCase()) ||
-                    (driverName && selectedDrivers.some(name => 
-                        name.toLowerCase().includes(driverName.toLowerCase()) ||
-                        driverName.toLowerCase().includes(name.toLowerCase())
-                    ))
+                    (driverSlug && driverSlug.toLowerCase() === slug.toLowerCase())
+                ) || selectedDriverNames.some(name => 
+                    (driverName && name.toLowerCase().includes(driverName.toLowerCase())) ||
+                    (driverName && driverName.toLowerCase().includes(name.toLowerCase()))
                 );
             });
         }
