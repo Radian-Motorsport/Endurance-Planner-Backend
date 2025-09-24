@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
+const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -208,8 +209,7 @@ app.get('/api/garage61/laps', async (req, res) => {
         
         console.log('Proxying Garage61 request to:', url);
 
-        const response = await fetch(url, {
-            method: 'GET',
+        const response = await axios.get(url, {
             headers: {
                 'Accept': 'application/json',
                 'Authorization': `Bearer ${GARAGE61_TOKEN}`,
@@ -217,21 +217,19 @@ app.get('/api/garage61/laps', async (req, res) => {
             }
         });
 
-        if (!response.ok) {
-            throw new Error(`Garage61 API Error: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        
-        console.log('Garage61 response:', {
-            total: data.total,
-            itemCount: data.items ? data.items.length : 0
+        console.log('Garage61 response status:', response.status);
+        console.log('Garage61 response data:', {
+            total: response.data.total,
+            itemCount: response.data.items ? response.data.items.length : 0
         });
 
-        res.json(data);
+        res.json(response.data);
 
     } catch (error) {
-        console.error('Garage61 proxy error:', error);
+        console.error('Garage61 proxy error:', error.message);
+        if (error.response) {
+            console.error('Error response:', error.response.status, error.response.data);
+        }
         res.status(500).json({
             success: false,
             error: error.message
