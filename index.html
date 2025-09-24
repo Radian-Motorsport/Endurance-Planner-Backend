@@ -628,6 +628,16 @@
             resetCarAdminForm();
             resetTrackAdminForm();
         }
+        
+        // Helper function to format lap time
+        function formatLapTime(lapTimeMs) {
+            if (!lapTimeMs) return 'N/A';
+            const totalSeconds = lapTimeMs / 1000;
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = (totalSeconds % 60).toFixed(3);
+            return `${minutes}:${seconds.padStart(6, '0')}`;
+        }
+        
         function showPage2() {
             console.log('🔥🔥🔥 FIRST CALCULATE BUTTON PRESSED - showPage2() 🔥🔥🔥');
             
@@ -655,8 +665,40 @@
                     })
                     .then(data => {
                         console.log('✅ PROXY Response Data:', data);
+                        
                         // Show the lap times section
                         document.getElementById('garage61-lap-times').classList.remove('hidden');
+                        document.getElementById('lap-times-loading').classList.add('hidden');
+                        document.getElementById('lap-times-content').classList.remove('hidden');
+                        
+                        // Display the actual lap data in the table
+                        const tbody = document.getElementById('lap-times-tbody');
+                        tbody.innerHTML = ''; // Clear existing data
+                        
+                        if (data.items && data.items.length > 0) {
+                            console.log(`📊 Displaying ${data.items.length} lap records`);
+                            
+                            data.items.forEach(lap => {
+                                const row = document.createElement('tr');
+                                row.className = 'hover:bg-neutral-600 transition-colors duration-200';
+                                
+                                const driverName = lap.driver?.name || 'Unknown Driver';
+                                const lapTime = lap.lapTime ? formatLapTime(lap.lapTime) : 'N/A';
+                                const fuelUsed = lap.fuelUsed || 'N/A';
+                                const conditions = `${lap.weather?.name || 'Unknown'} / ${lap.temperature?.air || '?'}°C`;
+                                
+                                row.innerHTML = `
+                                    <td class="py-4 px-6 border-r border-neutral-600">${driverName}</td>
+                                    <td class="py-4 px-6 border-r border-neutral-600 font-mono text-blue-400">${lapTime}</td>
+                                    <td class="py-4 px-6 border-r border-neutral-600">${fuelUsed}L</td>
+                                    <td class="py-4 px-6">${conditions}</td>
+                                `;
+                                
+                                tbody.appendChild(row);
+                            });
+                        } else {
+                            tbody.innerHTML = '<tr><td colspan="4" class="py-8 px-6 text-center text-neutral-400">No lap data found</td></tr>';
+                        }
                     })
                     .catch(error => {
                         console.error('❌ PROXY Error:', error);
