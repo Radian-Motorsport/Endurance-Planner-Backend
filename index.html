@@ -692,10 +692,14 @@
                         tbody.innerHTML = ''; // Clear existing data
                         
                         if (data.items && data.items.length > 0) {
-                            console.log(`📊 Displaying ${data.items.length} lap records`);
-                            console.log('🔍 First lap data structure:', data.items[0]);
+                            console.log(`📊 Got ${data.items.length} total lap records from API`);
                             
-                            data.items.forEach(lap => {
+                            // FILTER THE LAPS BY SELECTED DRIVERS
+                            const filteredLaps = filterLapsByDrivers(data.items);
+                            console.log(`� After filtering: ${filteredLaps.length} laps for selected drivers`);
+                            
+                            if (filteredLaps.length > 0) {
+                                filteredLaps.forEach(lap => {
                                 console.log('🔍 Processing lap:', {
                                     driver: lap.driver,
                                     lapTime: lap.lapTime,
@@ -752,6 +756,9 @@
                                 
                                 tbody.appendChild(row);
                             });
+                            } else {
+                                tbody.innerHTML = '<tr><td colspan="4" class="py-4 px-3 text-center text-neutral-400 text-xs">No lap data found for selected drivers</td></tr>';
+                            }
                         } else {
                             tbody.innerHTML = '<tr><td colspan="4" class="py-4 px-3 text-center text-neutral-400 text-xs">No lap data found</td></tr>';
                         }
