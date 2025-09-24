@@ -722,12 +722,46 @@
             
             console.log('� FORCING Garage61 API call with IDs:', selectedCar.garage61_id || 'MISSING', 'and', selectedTrack.garage61_id || 'MISSING');
             
-            // FORCE THE API CALL - NO CONDITIONS
+            // DIRECT API CALL - COPY FROM WORKING garage61-api.js
+            const carId = selectedCar.garage61_id || 1;
+            const trackId = selectedTrack.garage61_id || 1;
+            
+            console.log('Making DIRECT API call to Garage61 with car:', carId, 'track:', trackId);
+            
             try {
-                await fetchGarage61Data(selectedCar.garage61_id || 'default-car', selectedTrack.garage61_id || 'default-track');
-                console.log('✅ Garage61 API call completed');
+                const params = new URLSearchParams();
+                params.append('cars', carId);
+                params.append('tracks', trackId);
+                params.append('teams', 'radian-motorsport');
+                
+                const url = `https://garage61.net/api/v1/laps?${params.toString()}`;
+                console.log('Direct API URL:', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': 'Bearer MWVKZTRMOGETNDCZOS0ZMJUZLTK2ODITNJBJZMQ5NMU4M2I5',
+                        'User-Agent': 'RadianPlanner/1.0'
+                    }
+                });
+                
+                console.log('Direct API response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`Direct API Error: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('✅ DIRECT API SUCCESS - GOT DATA:', data);
+                
+                // Show the lap times section
+                document.getElementById('garage61-lap-times').classList.remove('hidden');
+                document.getElementById('lap-times-loading').classList.add('hidden');
+                document.getElementById('lap-times-content').classList.remove('hidden');
+                
             } catch (error) {
-                console.error('❌ Garage61 API call failed:', error);
+                console.error('❌ DIRECT API FAILED:', error);
             }
 
             const raceDurationHours = parseInt(document.getElementById('race-duration-hours').value) || 0;
