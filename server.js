@@ -22,13 +22,8 @@ if (process.env.DATABASE_URL) {
 
 // Increase JSON body size to handle full data imports
 app.use(express.json({ limit: '2mb' }));
-// Serve static files including test page
+// Serve static files
 app.use(express.static('.'));
-
-// Test page route
-app.get('/test', (req, res) => {
-    res.sendFile(path.join(__dirname, 'garage61-test.html'));
-});
 
 // Function to create all necessary tables if they don't exist
 async function createTables() {
@@ -60,12 +55,9 @@ async function createTables() {
         `;
         const createTracksTable = `
             CREATE TABLE IF NOT EXISTS tracks (
-                id SERIAL PRIMARY KEY,
+                garage61_id INTEGER PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
-                garage61_id INTEGER UNIQUE,
-                base_name VARCHAR(255),
-                variant VARCHAR(255),
-                platform VARCHAR(100)
+                track_length DECIMAL(10,3) DEFAULT 0.0
             );
         `;
         const createStrategiesTable = `
@@ -249,14 +241,12 @@ app.post('/api/data', async (req, res) => {
         if (!track || !track.name) continue;
         try {
             await pool.query(
-                    `INSERT INTO tracks (name, garage61_id, base_name, variant, platform)
-                     VALUES ($1, $2, $3, $4, $5)
+                    `INSERT INTO tracks (garage61_id, name, track_length)
+                     VALUES ($1, $2, $3)
                      ON CONFLICT (garage61_id) DO UPDATE SET
                          name = EXCLUDED.name,
-                         base_name = EXCLUDED.base_name,
-                         variant = EXCLUDED.variant,
-                         platform = EXCLUDED.platform`,
-                [track.name, track.garage61_id ?? null, track.base_name || null, track.variant || null, track.platform || null]
+                         track_length = EXCLUDED.track_length`,
+                [track.garage61_id, track.name, track.track_length || 0.0]
             );
             result.inserted.tracks++;
         } catch (e) {
