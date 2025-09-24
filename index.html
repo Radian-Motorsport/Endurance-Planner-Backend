@@ -705,8 +705,8 @@
                                 const row = document.createElement('tr');
                                 row.className = 'hover:bg-neutral-600 transition-colors duration-200';
                                 
-                                // Use CORRECT variables from README-G61.md
-                                const driverName = lap.driver?.name || 'Unknown Driver';
+                                // Use CORRECT variables from README-G61.md  
+                                const driverName = lap.driver ? `${lap.driver.firstName || ''} ${lap.driver.lastName || ''}`.trim() : 'Unknown Driver';
                                 
                                 // Format lap time and add sector times below
                                 const lapTime = lap.lapTime ? formatLapTime(lap.lapTime) : 'N/A';
