@@ -171,7 +171,9 @@
                         </div>
                         <div>
                             <span class="text-white text-shadow road-rage-font">DRIVERS:</span>
-                            <br> <span id="page2-drivers" class="text-neutral-100"></span>
+                            <div id="page2-drivers" class="text-neutral-100 mt-1">
+                                <!-- Drivers will be populated here as rows -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -802,8 +804,16 @@
             // Populate the new display elements with the selected data
             document.getElementById('page2-track').textContent = trackSelect.value;
             document.getElementById('page2-car').textContent = carSelect.value;
-            const driverNames = selectedDrivers.map(d => d.name).join(', ');
-            document.getElementById('page2-drivers').textContent = driverNames;
+            
+            // Display drivers as rows
+            const driversContainer = document.getElementById('page2-drivers');
+            driversContainer.innerHTML = '';
+            selectedDrivers.forEach(driver => {
+                const driverRow = document.createElement('div');
+                driverRow.className = 'py-1';
+                driverRow.textContent = driver.name;
+                driversContainer.appendChild(driverRow);
+            });
         }
         function showPage3() {
             document.getElementById('planner-page').classList.add('hidden');
