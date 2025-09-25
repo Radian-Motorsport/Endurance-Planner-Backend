@@ -383,6 +383,25 @@ app.get('/api/strategies/:id', async (req, res) => {
     }
 });
 
+// API endpoint to update an existing strategy
+app.put('/api/strategies/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const strategyData = req.body;
+        
+        const result = await pool.query('UPDATE strategies SET strategy_data = $1 WHERE id = $2 RETURNING id', [strategyData, id]);
+        
+        if (result.rows.length > 0) {
+            res.json({ id: result.rows[0].id, message: 'Strategy updated successfully' });
+        } else {
+            res.status(404).send('Strategy not found');
+        }
+    } catch (err) {
+        console.error('Error updating strategy:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

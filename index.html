@@ -442,17 +442,19 @@
 
                 <div id="share-link-container" class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg hidden">
                     <h1 class="text-xl font- mb-4  road-rage-font">Share/Save This Strategy</h1>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="generateShareLink()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <button onclick="generateShareLink()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-share-alt mr-2"></i> Generate Link
                         </button>
-                        <input type="text" id="share-link-output" readonly class="flex-grow w-full p-2 border border-neutral-600 rounded-lg bg-neutral-800 text-neutral-100 cursor-copy" placeholder="Click 'Generate Link' to create a shareable URL">
+                        <button id="save-update-btn" onclick="updateShareLink()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 hidden">
+                            <i class="fas fa-save mr-2"></i> Save Update
+                        </button>
                         <button onclick="copyShareLink()" class="bg-neutral-800 hover:bg-cyan-400 text-neutral-500 hover:text-black font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-copy"></i>
                         </button>
-                         </div>
-                        </div>
                     </div>
+                    <input type="text" id="share-link-output" readonly class="w-full p-2 border border-neutral-600 rounded-lg bg-neutral-800 text-neutral-100 cursor-copy" placeholder="Click 'Generate Link' to create a shareable URL">
+                </div>
                 
             <div id="admin-page" class="hidden">
                 <button onclick="saveDataToServer()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -1456,10 +1458,62 @@
 		        const data = await response.json();
 		        const shareLink = `${window.location.origin}${window.location.pathname}?id=${data.id}`;
 		        document.getElementById('share-link-output').value = shareLink;
+		        
+		        // Store the strategy ID for future updates
+		        window.currentStrategyId = data.id;
+		        
+		        // Show the Save Update button
+		        document.getElementById('save-update-btn').classList.remove('hidden');
 		
 		    } catch (error) {
 		        console.error('Error saving strategy:', error);
 		        alert('Could not save strategy. Please try again.');
+		    }
+		}
+        
+        // Function to update existing strategy
+        async function updateShareLink() {
+            if (!window.currentStrategyId) {
+                alert('No strategy to update. Generate a link first.');
+                return;
+            }
+            
+		    const state = {
+		        drivers: selectedDrivers.map(d => d.name),
+		        car: document.getElementById('car-select').value,
+		        track: document.getElementById('track-select').value,
+		        raceDurationHours: document.getElementById('race-duration-hours').value,
+		        raceDurationMinutes: document.getElementById('race-duration-minutes').value,
+		        avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes').value,
+		        avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds').value,
+		        pitStopTime: document.getElementById('pit-stop-time').value,
+		        fuelPerLapInput: document.getElementById('fuel-per-lap-display-input').value,
+		        tankCapacityInput: document.getElementById('tank-capacity-display-input').value,
+		        fuelSlider: document.getElementById('fuel-slider').value,
+		        lapTimeSlider: document.getElementById('lap-time-slider').value,
+		        raceStartTime: document.getElementById('race-start-time-page2').value,
+		        qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
+		        timezone: document.getElementById('timezone-select').value,
+		    };
+		
+		    try {
+		        const response = await fetch(`/api/strategies/${window.currentStrategyId}`, {
+		            method: 'PUT',
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		            body: JSON.stringify(state),
+		        });
+		
+		        if (!response.ok) {
+		            throw new Error('Failed to update strategy.');
+		        }
+		        
+		        alert('Strategy updated successfully!');
+		
+		    } catch (error) {
+		        console.error('Failed to update strategy:', error);
+		        alert('Failed to update strategy. Please try again.');
 		    }
 		}
 
