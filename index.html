@@ -1975,13 +1975,14 @@
             const raceInputs = document.getElementById('race-inputs-container'); // Race Inputs
             const strategySummary = document.getElementById('overall-summary'); // Live Overall Strategy Summary
             const dynamicAdjustments = document.getElementById('sliders-container'); // Dynamic Adjustments
+            const shareContainer = document.getElementById('share-link-container'); // Share/Save buttons
             
             // Right Column Elements - exactly as you specified
             const garage61LapTimes = document.getElementById('garage61-lap-times'); // Garage 61 Lap Times
             const stintsTable = document.getElementById('stint-breakdown-display'); // Stints Table
             
             // Move LEFT column elements
-            [carTrackDriversInfo, raceInputs, strategySummary, dynamicAdjustments].forEach(el => {
+            [carTrackDriversInfo, raceInputs, strategySummary, dynamicAdjustments, shareContainer].forEach(el => {
                 if (el) {
                     el.classList.remove('hidden');
                     leftCol.appendChild(el);
