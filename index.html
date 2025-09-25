@@ -90,6 +90,23 @@
             max-width: 100%;
             box-sizing: border-box;
         }
+        
+        /* Desktop 2-column layout */
+        .desktop-mode {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 2rem !important;
+            max-width: none !important;
+            width: 95vw !important;
+        }
+        
+        .desktop-left {
+            order: 1;
+        }
+        
+        .desktop-right {
+            order: 2;
+        }
     </style>
 </head>
 <body class="bg-neutral-900 text-neutral-100 p-4">
@@ -1844,24 +1861,56 @@
             const text = document.getElementById('layout-text');
             
             if (text.textContent === 'Mobile') {
-                // Switch to desktop - make container wider
-                container.classList.remove('max-w-4xl');
-                container.classList.add('max-w-none');
-                container.style.width = '95vw';
+                // Switch to desktop - 2 column layout
+                container.classList.add('desktop-mode');
+                
+                // Move elements to columns
+                setupDesktopColumns();
                 
                 icon.classList.remove('fa-mobile-alt');
                 icon.classList.add('fa-desktop');
                 text.textContent = 'Desktop';
             } else {
                 // Switch back to mobile
-                container.classList.remove('max-w-none');
-                container.classList.add('max-w-4xl');
-                container.style.width = '';
+                container.classList.remove('desktop-mode');
+                
+                // Reset order
+                resetMobileLayout();
                 
                 icon.classList.remove('fa-desktop');
                 icon.classList.add('fa-mobile-alt');
                 text.textContent = 'Mobile';
             }
+        }
+        
+        function setupDesktopColumns() {
+            // Left column: Car/Track/Drivers, Race Inputs, Strategy Summary, Dynamic Adjustments
+            const leftElements = [
+                'planner-page', 'page-2', 'race-inputs-container', 
+                'overall-summary', 'sliders-container', 'share-link-container'
+            ];
+            
+            // Right column: Garage61 Lap Times, Stints Table
+            const rightElements = [
+                'garage61-lap-times', 'stint-breakdown-display'
+            ];
+            
+            leftElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('desktop-left');
+            });
+            
+            rightElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('desktop-right');
+            });
+        }
+        
+        function resetMobileLayout() {
+            const allElements = document.querySelectorAll('.desktop-left, .desktop-right');
+            allElements.forEach(el => {
+                el.classList.remove('desktop-left', 'desktop-right');
+            });
         }
 		
     </script>
