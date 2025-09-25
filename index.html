@@ -1886,23 +1886,57 @@
                 // Switch to desktop - 2 column layout
                 container.classList.add('desktop-mode');
                 
-                // Move elements to columns
-                setupDesktopColumns();
-                
                 icon.classList.remove('fa-mobile-alt');
                 icon.classList.add('fa-desktop');
                 text.textContent = 'Desktop';
+                
+                // If page2 is already shown, set up desktop layout immediately
+                const page2 = document.getElementById('page-2');
+                if (page2 && !page2.classList.contains('hidden')) {
+                    setupDesktopLayout();
+                }
             } else {
                 // Switch back to mobile
                 container.classList.remove('desktop-mode');
-                
-                // Reset order
                 resetMobileLayout();
                 
                 icon.classList.remove('fa-desktop');
                 icon.classList.add('fa-mobile-alt');
                 text.textContent = 'Mobile';
             }
+        }
+        
+        // Override showPage2 to handle desktop layout after calculate
+        const originalShowPage2 = showPage2;
+        showPage2 = function() {
+            originalShowPage2();
+            
+            // Check if we're in desktop mode
+            const container = document.querySelector('.max-w-4xl');
+            if (container.classList.contains('desktop-mode')) {
+                setupDesktopLayout();
+            }
+        };
+        
+        function setupDesktopLayout() {
+            // Hide initial selection boxes
+            const plannerPage = document.getElementById('planner-page');
+            if (plannerPage) plannerPage.style.display = 'none';
+            
+            // Hide admin button
+            const adminBtn = document.getElementById('admin-btn');
+            if (adminBtn) adminBtn.style.display = 'none';
+            
+            // Make logo smaller and centered
+            const logoImg = document.querySelector('img[alt="?"]');
+            if (logoImg) {
+                logoImg.style.width = '200px';
+                logoImg.style.height = 'auto';
+                logoImg.parentElement.style.textAlign = 'center';
+                logoImg.parentElement.style.marginBottom = '2rem';
+            }
+            
+            setupDesktopColumns();
         }
         
         function setupDesktopColumns() {
@@ -1963,9 +1997,20 @@
             const leftCol = container.querySelector('.desktop-left');
             const rightCol = container.querySelector('.desktop-right');
             
+            // Show initial selection boxes again
+            const plannerPage = document.getElementById('planner-page');
+            if (plannerPage) plannerPage.style.display = '';
+            
             // Show admin button again
             const adminBtn = document.getElementById('admin-btn');
             if (adminBtn) adminBtn.style.display = '';
+            
+            // Reset logo size
+            const logoImg = document.querySelector('img[alt="?"]');
+            if (logoImg) {
+                logoImg.style.width = '';
+                logoImg.style.height = '';
+            }
             
             if (leftCol && rightCol) {
                 // Remove columns
