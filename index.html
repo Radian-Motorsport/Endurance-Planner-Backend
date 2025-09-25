@@ -1909,47 +1909,60 @@
         // Override showPage2 to handle desktop layout after calculate
         const originalShowPage2 = showPage2;
         showPage2 = function() {
+            console.log('showPage2 called');
             originalShowPage2();
             
-            // Check if we're in desktop mode - with delay to ensure elements are ready
-            const container = document.querySelector('.max-w-4xl');
-            if (container && container.classList.contains('desktop-mode')) {
-                setTimeout(() => setupDesktopLayout(), 200);
-            }
+            // ALWAYS check for desktop mode after any calculate
+            setTimeout(() => {
+                const container = document.querySelector('.max-w-4xl');
+                const toggleText = document.getElementById('layout-text');
+                
+                console.log('Container:', container);
+                console.log('Toggle text:', toggleText ? toggleText.textContent : 'not found');
+                
+                if (container && toggleText && toggleText.textContent === 'Desktop') {
+                    console.log('FORCING desktop layout setup');
+                    setupDesktopLayout();
+                }
+            }, 500);
         };
         
         function setupDesktopLayout() {
-            console.log('Setting up desktop layout...');
+            console.log('🔥 SETTING UP DESKTOP LAYOUT - FORCING CHANGES');
             
-            // Hide the entire app-container which contains all the initial boxes
-            const appContainer = document.getElementById('app-container');
-            if (appContainer) {
-                appContainer.style.display = 'none';
-                console.log('Hid app container');
-            }
-            
-            // Hide the admin page with manage drivers/cars/tracks
+            // FORCE hide the admin containers
             const adminPage = document.getElementById('admin-page');
-            if (adminPage) {
-                adminPage.style.display = 'none';
-                console.log('Hid admin page');
-            }
-            
-            // Hide admin button
+            const appContainer = document.getElementById('app-container');
             const adminBtn = document.getElementById('admin-btn');
-            if (adminBtn) {
-                adminBtn.style.display = 'none';
-                console.log('Hid admin button');
+            
+            console.log('Admin page found:', !!adminPage);
+            console.log('App container found:', !!appContainer);
+            
+            // FORCE HIDE EVERYTHING
+            if (adminPage) {
+                adminPage.style.display = 'none !important';
+                adminPage.classList.add('hidden');
+                console.log('✅ FORCED admin page hidden');
             }
             
-            // Make logo smaller and centered
+            if (appContainer) {
+                appContainer.style.display = 'none !important';
+                appContainer.classList.add('hidden');
+                console.log('✅ FORCED app container hidden');
+            }
+            
+            if (adminBtn) {
+                adminBtn.style.display = 'none !important';
+                adminBtn.classList.add('hidden');
+                console.log('✅ FORCED admin button hidden');
+            }
+            
+            // Make logo smaller
             const logoImg = document.querySelector('img[alt="?"]');
             if (logoImg) {
-                logoImg.style.width = '200px';
+                logoImg.style.width = '100px !important';
                 logoImg.style.height = 'auto';
-                logoImg.parentElement.style.textAlign = 'center';
-                logoImg.parentElement.style.marginBottom = '2rem';
-                console.log('Resized logo');
+                console.log('✅ Logo resized');
             }
             
             setupDesktopColumns();
