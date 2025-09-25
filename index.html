@@ -1928,6 +1928,13 @@
                 console.log('Hid app container');
             }
             
+            // Hide the admin page with manage drivers/cars/tracks
+            const adminPage = document.getElementById('admin-page');
+            if (adminPage) {
+                adminPage.style.display = 'none';
+                console.log('Hid admin page');
+            }
+            
             // Hide admin button
             const adminBtn = document.getElementById('admin-btn');
             if (adminBtn) {
@@ -2010,6 +2017,12 @@
             const appContainer = document.getElementById('app-container');
             if (appContainer) {
                 appContainer.style.display = '';
+            }
+            
+            // Show admin page again
+            const adminPage = document.getElementById('admin-page');
+            if (adminPage) {
+                adminPage.style.display = '';
             }
             
             // Show admin button again
