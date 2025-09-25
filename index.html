@@ -1908,6 +1908,10 @@
         function setupDesktopColumns() {
             const container = document.querySelector('.max-w-4xl');
             
+            // Hide admin button
+            const adminBtn = document.getElementById('admin-btn');
+            if (adminBtn) adminBtn.style.display = 'none';
+            
             // Create left column container
             const leftCol = document.createElement('div');
             leftCol.className = 'desktop-left';
@@ -1916,30 +1920,26 @@
             const rightCol = document.createElement('div');
             rightCol.className = 'desktop-right';
             
-            // Left Column Elements
-            const leftElements = [
-                document.querySelector('#page-2 .p-6.bg-neutral-700.border.border-neutral-600.rounded-lg'), // Car/Track/Drivers info
-                document.getElementById('race-inputs-container'), // Race Inputs
-                document.getElementById('overall-summary'), // Live Overall Strategy Summary
-                document.getElementById('sliders-container') // Dynamic Adjustments
-            ];
+            // Left Column Elements - exactly as you specified
+            const carTrackDriversInfo = document.querySelector('#page-2 .p-6.bg-neutral-700.border.border-neutral-600.rounded-lg'); // Car Track and Drivers
+            const raceInputs = document.getElementById('race-inputs-container'); // Race Inputs
+            const strategySummary = document.getElementById('overall-summary'); // Live Overall Strategy Summary
+            const dynamicAdjustments = document.getElementById('sliders-container'); // Dynamic Adjustments
             
-            // Right Column Elements
-            const rightElements = [
-                document.getElementById('garage61-lap-times'), // Garage61 Lap Times
-                document.getElementById('stint-breakdown-display') // Stints Table
-            ];
+            // Right Column Elements - exactly as you specified
+            const garage61LapTimes = document.getElementById('garage61-lap-times'); // Garage 61 Lap Times
+            const stintsTable = document.getElementById('stint-breakdown-display'); // Stints Table
             
-            // Move elements to left column
-            leftElements.forEach(el => {
+            // Move LEFT column elements
+            [carTrackDriversInfo, raceInputs, strategySummary, dynamicAdjustments].forEach(el => {
                 if (el) {
                     el.classList.remove('hidden');
                     leftCol.appendChild(el);
                 }
             });
             
-            // Move elements to right column
-            rightElements.forEach(el => {
+            // Move RIGHT column elements
+            [garage61LapTimes, stintsTable].forEach(el => {
                 if (el) {
                     el.classList.remove('hidden');
                     rightCol.appendChild(el);
@@ -1963,10 +1963,11 @@
             const leftCol = container.querySelector('.desktop-left');
             const rightCol = container.querySelector('.desktop-right');
             
+            // Show admin button again
+            const adminBtn = document.getElementById('admin-btn');
+            if (adminBtn) adminBtn.style.display = '';
+            
             if (leftCol && rightCol) {
-                // Move elements back to their original containers
-                const allElements = [...leftCol.children, ...rightCol.children];
-                
                 // Remove columns
                 leftCol.remove();
                 rightCol.remove();
