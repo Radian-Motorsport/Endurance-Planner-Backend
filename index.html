@@ -1921,11 +1921,11 @@
         function setupDesktopLayout() {
             console.log('Setting up desktop layout...');
             
-            // Hide initial selection boxes
-            const plannerPage = document.getElementById('planner-page');
-            if (plannerPage) {
-                plannerPage.style.display = 'none';
-                console.log('Hid planner page');
+            // Hide the entire app-container which contains all the initial boxes
+            const appContainer = document.getElementById('app-container');
+            if (appContainer) {
+                appContainer.style.display = 'none';
+                console.log('Hid app container');
             }
             
             // Hide admin button
@@ -2006,9 +2006,11 @@
             const leftCol = container.querySelector('.desktop-left');
             const rightCol = container.querySelector('.desktop-right');
             
-            // Show initial selection boxes again
-            const plannerPage = document.getElementById('planner-page');
-            if (plannerPage) plannerPage.style.display = '';
+            // Show app container again
+            const appContainer = document.getElementById('app-container');
+            if (appContainer) {
+                appContainer.style.display = '';
+            }
             
             // Show admin button again
             const adminBtn = document.getElementById('admin-btn');
@@ -2025,13 +2027,6 @@
                 // Remove columns
                 leftCol.remove();
                 rightCol.remove();
-                
-                // Show original pages
-                const pagesToShow = ['planner-page', 'page-2'];
-                pagesToShow.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.style.display = '';
-                });
             }
         }
 		
