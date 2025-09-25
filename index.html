@@ -1893,7 +1893,7 @@
                 // If page2 is already shown, set up desktop layout immediately
                 const page2 = document.getElementById('page-2');
                 if (page2 && !page2.classList.contains('hidden')) {
-                    setupDesktopLayout();
+                    setTimeout(() => setupDesktopLayout(), 100);
                 }
             } else {
                 // Switch back to mobile
@@ -1911,21 +1911,29 @@
         showPage2 = function() {
             originalShowPage2();
             
-            // Check if we're in desktop mode
+            // Check if we're in desktop mode - with delay to ensure elements are ready
             const container = document.querySelector('.max-w-4xl');
-            if (container.classList.contains('desktop-mode')) {
-                setupDesktopLayout();
+            if (container && container.classList.contains('desktop-mode')) {
+                setTimeout(() => setupDesktopLayout(), 200);
             }
         };
         
         function setupDesktopLayout() {
+            console.log('Setting up desktop layout...');
+            
             // Hide initial selection boxes
             const plannerPage = document.getElementById('planner-page');
-            if (plannerPage) plannerPage.style.display = 'none';
+            if (plannerPage) {
+                plannerPage.style.display = 'none';
+                console.log('Hid planner page');
+            }
             
             // Hide admin button
             const adminBtn = document.getElementById('admin-btn');
-            if (adminBtn) adminBtn.style.display = 'none';
+            if (adminBtn) {
+                adminBtn.style.display = 'none';
+                console.log('Hid admin button');
+            }
             
             // Make logo smaller and centered
             const logoImg = document.querySelector('img[alt="?"]');
@@ -1934,6 +1942,7 @@
                 logoImg.style.height = 'auto';
                 logoImg.parentElement.style.textAlign = 'center';
                 logoImg.parentElement.style.marginBottom = '2rem';
+                console.log('Resized logo');
             }
             
             setupDesktopColumns();
