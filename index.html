@@ -1994,6 +1994,18 @@
                 if (el) {
                     el.classList.remove('hidden');
                     rightCol.appendChild(el);
+                    
+                    // Fix garage61 loading issue - force hide loading if data already exists
+                    if (el.id === 'garage61-lap-times') {
+                        const loadingInEl = el.querySelector('#lap-times-loading');
+                        const contentInEl = el.querySelector('#lap-times-content');
+                        const listInEl = el.querySelector('#lap-times-list');
+                        
+                        if (loadingInEl) loadingInEl.classList.add('hidden');
+                        if (contentInEl && listInEl && listInEl.children.length > 0) {
+                            contentInEl.classList.remove('hidden');
+                        }
+                    }
                 }
             });
             
