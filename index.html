@@ -90,13 +90,272 @@
             max-width: 100%;
             box-sizing: border-box;
         }
+        
+        /* Layout System */
+        .layout-mobile {
+            max-width: 64rem;
+            margin: 0 auto;
+            background-color: rgb(23 23 23);
+            padding: 2.5rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease;
+        }
+        
+        .layout-desktop {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            background-color: transparent;
+            padding: 1rem;
+            border-radius: 0;
+            box-shadow: none;
+            transition: all 0.5s ease;
+        }
+        
+        .desktop-columns {
+            display: grid;
+            grid-template-columns: 1280px 1280px;
+            gap: 2rem;
+            max-width: 2560px;
+            margin: 0 auto;
+        }
+        
+        .desktop-column {
+            background-color: rgb(23 23 23);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .desktop-left-column {
+            min-height: 100vh;
+        }
+        
+        .desktop-right-column {
+            min-height: 100vh;
+        }
+        
+        @media (max-width: 2600px) {
+            .desktop-columns {
+                max-width: 95%;
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        /* Hide columns in mobile layout */
+        .layout-mobile .desktop-columns {
+            display: none;
+        }
+        
+        /* Show columns only in desktop layout */
+        .layout-desktop .desktop-columns {
+            display: grid;
+        }
+        
+        /* Hide original content sections in desktop mode, but keep header visible */
+        .layout-desktop > .container,
+        .layout-desktop > button {
+            display: none;
+        }
+        
+        /* Make sure header is still visible in desktop mode */
+        .layout-desktop > .text-center:first-child {
+            display: block !important;
+            margin-bottom: 2rem;
+        }
     </style>
 </head>
 <body class="bg-neutral-900 text-neutral-100 p-4">
     
-    <div class="max-w-4xl mx-auto bg-neutral-900 p-6 md:p-10 rounded-xl shadow-lg transition-colors duration-500">
+    <!-- Layout Toggle Switch -->
+    <div class="fixed top-4 right-4 z-50">
+        <div class="flex items-center space-x-3 bg-neutral-800 px-4 py-2 rounded-lg border border-neutral-600">
+            <span class="text-sm text-neutral-400">Layout:</span>
+            <button id="layout-toggle" onclick="toggleLayout()" class="flex items-center space-x-2 px-3 py-1 rounded-md transition-all duration-200 bg-neutral-600 hover:bg-neutral-500 text-neutral-200">
+                <i id="layout-icon" class="fas fa-mobile-alt text-sm"></i>
+                <span id="layout-text" class="text-sm font-medium">Mobile</span>
+            </button>
+        </div>
+    </div>
+    
+    <div id="main-container" class="layout-mobile">
         <div class="text-center mb-6">
             <img src="https://github.com/Radian-Motorsport/Endurance-Planner-Backend/blob/main/g457912.png?raw=true" alt="?" class="mx-auto w-100  h-auto">
+        </div>
+        
+        <!-- Desktop Two-Column Layout -->
+        <div class="desktop-columns">
+            <!-- Left Column -->
+            <div class="desktop-column desktop-left-column">
+                <div class="space-y-6">
+                    <!-- Car/Track/Drivers Section -->
+                    <div class="p-6 bg-neutral-700 border border-neutral-700 rounded-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <span class="text-white text-shadow road-rage-font">TRACK:</span>
+                                <br> <span id="page2-track-desktop" class="text-neutral-100"></span>
+                            </div>
+                            <div>
+                                <span class="text-white text-shadow road-rage-font">CAR:</span>
+                                <br> <span id="page2-car-desktop" class="text-neutral-100"></span>
+                            </div>
+                            <div>
+                                <span class="text-white text-shadow road-rage-font">DRIVERS:</span>
+                                <div id="page2-drivers-desktop" class="text-neutral-100 mt-1">
+                                    <!-- Drivers will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Race Inputs Section -->
+                    <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg">
+                        <h1 class="text-xl mb-4 road-rage-font">Race Inputs</h1>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="flex flex-col">
+                                <label class="text-sm font-medium text-neutral-500">Race Duration</label>
+                                <div class="flex items-center mt-1 space-x-2">
+                                    <input type="number" id="race-duration-hours-desktop" placeholder="" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                    <span class="text-neutral-500">hr</span>
+                                    <input type="number" id="race-duration-minutes-desktop" placeholder="" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                    <span class="text-neutral-500">min</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm font-medium text-neutral-500">Avg. Lap Time</label>
+                                <div class="flex items-center mt-1 space-x-2">
+                                    <input type="number" id="avg-lap-time-minutes-desktop" placeholder="" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                    <span class="text-neutral-500">min</span>
+                                    <input type="number" id="avg-lap-time-seconds-desktop" placeholder="" class="p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                    <span class="text-neutral-500">sec</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label for="pit-stop-time-desktop" class="text-sm font-medium text-neutral-500">Avg. Pit Stop Time (sec)</label>
+                                <input type="number" id="pit-stop-time-desktop" value="" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            </div>
+                            <div class="flex flex-col">
+                                <label for="fuel-per-lap-display-input-desktop" class="text-sm font-medium text-neutral-500">Fuel Use per Lap (L)</label>
+                                <input type="number" id="fuel-per-lap-display-input-desktop" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            </div>
+                            <div class="flex flex-col">
+                                <label for="tank-capacity-display-input-desktop" class="text-sm font-medium text-neutral-500">Fuel Tank Size (L)</label>
+                                <input type="number" id="tank-capacity-display-input-desktop" class="mt-1 p-2 border border-neutral-600 rounded-lg text-neutral-100 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            </div>
+                            <div class="mt-4 flex justify-end">
+                                <button id="calculate-page2-button-desktop" onclick="calculateAndShowPage2()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
+                                    Calculate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Strategy Summary Section -->
+                    <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg mb-6">
+                        <h3 class="text-xl font- mb-4 road-rage-font mb-8">Live Overall Strategy Summary</h3>
+                        <div class="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-4 text-neutral-100">
+                            <div>
+                                <div class="flex flex-col items-center">
+                                    <i class="fa-solid fa-flag-checkered fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                    <span id="est-laps-display-desktop" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                    <span class="text-sm mb-4 text-neutral-500">Est. Laps</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex flex-col items-center">
+                                    <i class="fa-solid fa-hourglass-half fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                    <span id="stint-duration-display-desktop" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                    <span class="text-sm mb-4 text-neutral-500">Stint Duration</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex flex-col items-center">
+                                    <i class="fa-solid fa-tachometer-alt fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                    <span id="laps-per-stint-display-desktop" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                    <span class="text-sm mb-4 text-neutral-500">Laps per Stint</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex flex-col items-center">
+                                    <i class="fa-solid fa-gas-pump fa-2xl text-neutral-200 mb-4 icon-shadow"></i>
+                                    <span id="number-of-stops-display-desktop" class="font-semibold text-lg text-neutral-100 text-shadow"></span>
+                                    <span class="text-sm mb-4 text-neutral-500">Number of Stops</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dynamic Adjustments Section -->
+                    <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg !mb-6">
+                        <h1 class="text-xl mb-4 road-rage-font">Dynamic Adjustments</h1>
+                        <div class="flex-grow w-full">
+                            <label for="fuel-slider-desktop" class="text-sm font-medium text-neutral-500">Adjust Fuel per Lap</label>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <button onclick="adjustSlider('fuel', -0.05)" class="p-1 rounded-full text-white bg-neutral-800 hover:bg-neutral-500 transition-colors duration-200">-</button>
+                                <input type="range" id="fuel-slider-desktop" min="-2.0" max="2.0" value="0" step="0.05" class="w-full">
+                                <button onclick="adjustSlider('fuel', 0.05)" class="p-1 rounded-full text-white bg-neutral-800 hover:bg-neutral-500 transition-colors duration-200">+</button>
+                                <span id="fuel-slider-value-desktop" class="text-neutral-100 font-mono text-sm w-12 text-right">0.00</span>
+                            </div>
+                        </div>
+                        <div class="flex-grow w-full">
+                            <label for="lap-time-slider-desktop" class="text-sm font-medium text-neutral-500">Adjust Lap Time</label>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <button onclick="adjustSlider('lapTime', -0.05)" class="p-1 rounded-full text-white bg-neutral-800 hover:bg-neutral-500 transition-colors duration-200">-</button>
+                                <input type="range" id="lap-time-slider-desktop" min="-3" max="3" value="0" step="0.05" class="w-full">
+                                <button onclick="adjustSlider('lapTime', 0.05)" class="p-1 rounded-full text-white bg-neutral-800 hover:bg-neutral-500 transition-colors duration-200">+</button>
+                                <span id="lap-time-slider-value-desktop" class="text-neutral-100 font-mono text-sm w-12 text-right">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="desktop-column desktop-right-column">
+                <div class="space-y-6">
+                    <!-- Garage61 Lap Times Section -->
+                    <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg">
+                        <h1 class="text-xl mb-4 road-rage-font">GARAGE61 LAP TIMES</h1>
+                        <div id="lap-times-loading-desktop" class="text-center py-4 hidden">
+                            <i class="fas fa-spinner fa-spin text-2xl text-blue-400 mb-2"></i>
+                            <p class="text-neutral-400">Fetching lap data from Garage61...</p>
+                        </div>
+                        <div id="lap-times-error-desktop" class="text-center py-4 text-red-400 hidden">
+                            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                            <p>Failed to load lap times</p>
+                        </div>
+                        <div id="lap-times-content-desktop" class="hidden">
+                            <div id="lap-times-list-desktop" class="max-h-96 overflow-y-auto">
+                                <!-- Lap times will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stints Table Section -->
+                    <div class="p-6 bg-neutral-700 border border-neutral-600 rounded-lg overflow-x-auto">
+                        <h1 class="text-xl font- mb-4 road-rage-font">Stints</h1>
+                        <div class="overflow-x-auto max-h-96">
+                            <table class="min-w-full bg-neutral-800 rounded-lg overflow-hidden border border-neutral-700">
+                                <thead class="bg-neutral-900">
+                                    <tr class="text-neutral-100">
+                                        <th class="w-16 px-2 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">Stint</th>
+                                        <th class="w-20 px-2 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">Start Time</th>
+                                        <th class="w-20 px-2 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">End Time</th>
+                                        <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">Driver</th>
+                                        <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">Laps per Stint</th>
+                                        <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">Stint Duration</th>
+                                        <th class="w-16 px-1 py-3 text-center text-xs font-medium text-neutral-100 uppercase tracking-wider border-r border-neutral-700">Pit Stop</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stint-table-body-desktop" class="bg-neutral-800 divide-y divide-neutral-600">
+                                    <!-- Table rows will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     
         <button id="admin-btn" onclick="showAdminPage()" class="bg-neutral-900 hover:bg-green-600 text-black font-bold py-1 px-1 rounded-lg  transition-all duration-200 transform hover:scale-105 space-x-2 mt-12">
@@ -1828,6 +2087,188 @@
             // Trigger the calculation to update the strategy
             calculateAndShowPage2();
         }
+		
+		// Layout Toggle System
+        function toggleLayout() {
+            const container = document.getElementById('main-container');
+            const toggleButton = document.getElementById('layout-toggle');
+            const icon = document.getElementById('layout-icon');
+            const text = document.getElementById('layout-text');
+            
+            if (container.classList.contains('layout-mobile')) {
+                // Switch to desktop layout
+                container.classList.remove('layout-mobile');
+                container.classList.add('layout-desktop');
+                
+                icon.classList.remove('fa-mobile-alt');
+                icon.classList.add('fa-desktop');
+                text.textContent = 'Desktop';
+                
+                // Sync data to desktop layout
+                syncToDesktopLayout();
+            } else {
+                // Switch to mobile layout
+                container.classList.remove('layout-desktop');
+                container.classList.add('layout-mobile');
+                
+                icon.classList.remove('fa-desktop');
+                icon.classList.add('fa-mobile-alt');
+                text.textContent = 'Mobile';
+                
+                // Sync data back to mobile layout
+                syncFromDesktopLayout();
+            }
+        }
+        
+        function syncToDesktopLayout() {
+            // Sync input values
+            const syncInputs = [
+                ['race-duration-hours', 'race-duration-hours-desktop'],
+                ['race-duration-minutes', 'race-duration-minutes-desktop'],
+                ['avg-lap-time-minutes', 'avg-lap-time-minutes-desktop'],
+                ['avg-lap-time-seconds', 'avg-lap-time-seconds-desktop'],
+                ['pit-stop-time', 'pit-stop-time-desktop'],
+                ['fuel-per-lap-display-input', 'fuel-per-lap-display-input-desktop'],
+                ['tank-capacity-display-input', 'tank-capacity-display-input-desktop']
+            ];
+            
+            syncInputs.forEach(([source, target]) => {
+                const sourceEl = document.getElementById(source);
+                const targetEl = document.getElementById(target);
+                if (sourceEl && targetEl) {
+                    targetEl.value = sourceEl.value;
+                }
+            });
+            
+            // Sync display values
+            const syncDisplays = [
+                ['page2-track', 'page2-track-desktop'],
+                ['page2-car', 'page2-car-desktop'],
+                ['page2-drivers', 'page2-drivers-desktop'],
+                ['est-laps-display', 'est-laps-display-desktop'],
+                ['stint-duration-display', 'stint-duration-display-desktop'],
+                ['laps-per-stint-display', 'laps-per-stint-display-desktop'],
+                ['number-of-stops-display', 'number-of-stops-display-desktop']
+            ];
+            
+            syncDisplays.forEach(([source, target]) => {
+                const sourceEl = document.getElementById(source);
+                const targetEl = document.getElementById(target);
+                if (sourceEl && targetEl) {
+                    targetEl.innerHTML = sourceEl.innerHTML;
+                }
+            });
+            
+            // Sync slider values
+            const fuelSlider = document.getElementById('fuel-slider');
+            const fuelSliderDesktop = document.getElementById('fuel-slider-desktop');
+            const lapTimeSlider = document.getElementById('lap-time-slider');
+            const lapTimeSliderDesktop = document.getElementById('lap-time-slider-desktop');
+            
+            if (fuelSlider && fuelSliderDesktop) {
+                fuelSliderDesktop.value = fuelSlider.value;
+                document.getElementById('fuel-slider-value-desktop').textContent = fuelSlider.value;
+            }
+            if (lapTimeSlider && lapTimeSliderDesktop) {
+                lapTimeSliderDesktop.value = lapTimeSlider.value;
+                document.getElementById('lap-time-slider-value-desktop').textContent = lapTimeSlider.value;
+            }
+            
+            // Sync Garage61 lap times
+            syncGarage61Data();
+            
+            // Sync stint table
+            syncStintTable();
+        }
+        
+        function syncFromDesktopLayout() {
+            // Sync input values back
+            const syncInputs = [
+                ['race-duration-hours-desktop', 'race-duration-hours'],
+                ['race-duration-minutes-desktop', 'race-duration-minutes'],
+                ['avg-lap-time-minutes-desktop', 'avg-lap-time-minutes'],
+                ['avg-lap-time-seconds-desktop', 'avg-lap-time-seconds'],
+                ['pit-stop-time-desktop', 'pit-stop-time'],
+                ['fuel-per-lap-display-input-desktop', 'fuel-per-lap-display-input'],
+                ['tank-capacity-display-input-desktop', 'tank-capacity-display-input']
+            ];
+            
+            syncInputs.forEach(([source, target]) => {
+                const sourceEl = document.getElementById(source);
+                const targetEl = document.getElementById(target);
+                if (sourceEl && targetEl) {
+                    targetEl.value = sourceEl.value;
+                }
+            });
+        }
+        
+        function syncGarage61Data() {
+            const sourceContent = document.getElementById('lap-times-list');
+            const targetContent = document.getElementById('lap-times-list-desktop');
+            const sourceError = document.getElementById('lap-times-error');
+            const targetError = document.getElementById('lap-times-error-desktop');
+            const sourceLoading = document.getElementById('lap-times-loading');
+            const targetLoading = document.getElementById('lap-times-loading-desktop');
+            
+            if (sourceContent && targetContent) {
+                targetContent.innerHTML = sourceContent.innerHTML;
+                
+                // Show/hide appropriate states
+                if (!sourceError.classList.contains('hidden')) {
+                    targetError.classList.remove('hidden');
+                    document.getElementById('lap-times-content-desktop').classList.add('hidden');
+                } else if (!sourceLoading.classList.contains('hidden')) {
+                    targetLoading.classList.remove('hidden');
+                    document.getElementById('lap-times-content-desktop').classList.add('hidden');
+                } else {
+                    targetError.classList.add('hidden');
+                    targetLoading.classList.add('hidden');
+                    document.getElementById('lap-times-content-desktop').classList.remove('hidden');
+                }
+            }
+        }
+        
+        function syncStintTable() {
+            const sourceTable = document.getElementById('stint-table-body');
+            const targetTable = document.getElementById('stint-table-body-desktop');
+            
+            if (sourceTable && targetTable) {
+                targetTable.innerHTML = sourceTable.innerHTML;
+            }
+        }
+        
+        // Override the original showPage2 function to handle desktop layout
+        const originalShowPage2 = showPage2;
+        showPage2 = function() {
+            originalShowPage2();
+            
+            // If in desktop mode, sync the data
+            const container = document.getElementById('main-container');
+            if (container.classList.contains('layout-desktop')) {
+                setTimeout(() => {
+                    syncToDesktopLayout();
+                }, 100);
+            }
+        };
+        
+        // Override calculateAndShowPage2 to handle desktop layout
+        const originalCalculateAndShowPage2 = calculateAndShowPage2;
+        calculateAndShowPage2 = function() {
+            // Get values from desktop inputs if in desktop mode
+            const container = document.getElementById('main-container');
+            if (container.classList.contains('layout-desktop')) {
+                syncFromDesktopLayout();
+            }
+            
+            originalCalculateAndShowPage2();
+            
+            // Sync back to desktop if needed
+            if (container.classList.contains('layout-desktop')) {
+                setTimeout(() => {
+                    syncToDesktopLayout();
+                }, 100);
+            }
+        };
 		
     </script>
 	
