@@ -1582,6 +1582,13 @@
 		            
 		            // Also populate the share link field with current URL
 		            document.getElementById('share-link-output').value = window.location.href;
+		            
+		            // Hide Generate Share Link button and Back button when loading from shared link
+		            const generateLinkBtn = document.querySelector('button[onclick="generateShareLink()"]');
+		            if (generateLinkBtn) generateLinkBtn.style.display = 'none';
+		            
+		            const backButton = document.getElementById('back-to-page1-btn');
+		            if (backButton) backButton.style.display = 'none';
 		
 		        } catch (error) {
 		            //console.error('Error loading strategy:', error);
