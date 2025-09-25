@@ -1715,13 +1715,34 @@
             const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
             
             if (name && firstName && lastName && garage61_slug) {
-                const index = drivers.findIndex(d => d.name === originalName);
-                if (index !== -1) {
-                    drivers[index] = { name, firstName, lastName, garage61_slug };
-                    await saveDataToServer();
+                try {
+                    const response = await fetch(`/api/drivers/${encodeURIComponent(originalName)}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, firstName, lastName, garage61_slug }),
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText);
+                    }
+                    
+                    // Update local drivers array
+                    const index = drivers.findIndex(d => d.name === originalName);
+                    if (index !== -1) {
+                        drivers[index] = { name, firstName, lastName, garage61_slug };
+                    }
+                    
                     renderAdminLists();
                     populateDrivers();
                     resetDriverAdminForm();
+                    alert('Driver updated successfully!');
+                    
+                } catch (error) {
+                    console.error('Error updating driver:', error);
+                    alert('Failed to update driver: ' + error.message);
                 }
             } else {
                 alert('Please fill in all driver fields');

@@ -162,6 +162,32 @@ app.delete('/api/drivers/:name', async (req, res) => {
     }
 });
 
+// PUT endpoint for updating individual drivers
+app.put('/api/drivers/:originalName', async (req, res) => {
+    try {
+        const { originalName } = req.params;
+        const { name, firstName, lastName, garage61_slug } = req.body;
+        
+        const result = await pool.query(
+            'UPDATE drivers SET name = $1, firstName = $2, lastName = $3, garage61_slug = $4 WHERE name = $5 RETURNING *',
+            [name, firstName, lastName, garage61_slug, originalName]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).send('Driver not found');
+        }
+        
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating driver:', err);
+        if (err.code === '23505') { // Unique constraint violation
+            res.status(400).send('Driver name already exists');
+        } else {
+            res.status(500).send('Internal Server Error');
+        }
+    }
+});
+
 app.delete('/api/cars/:garage61_id', async (req, res) => {
     try {
         const id = parseInt(req.params.garage61_id, 10);
