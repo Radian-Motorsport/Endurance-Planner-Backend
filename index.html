@@ -1687,14 +1687,14 @@
             const lastName = document.getElementById('new-driver-last-name').value;
             const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
             
-            if (name && firstName && lastName && garage61_slug) {
+            if (name && garage61_slug) { // Only require name and garage61_slug
                 drivers.push({ name, firstName, lastName, garage61_slug });
                 await saveDataToServer();
                 renderAdminLists();
                 populateDrivers();
                 resetDriverAdminForm();
             } else {
-                alert('Please fill in all driver fields');
+                alert('Please fill in driver name and garage61 slug fields');
             }
         }
         function editDriverAdmin(name) {
@@ -1714,7 +1714,7 @@
             const lastName = document.getElementById('new-driver-last-name').value;
             const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
             
-            if (name && firstName && lastName && garage61_slug) {
+            if (name && garage61_slug) { // Only require name and garage61_slug
                 try {
                     const response = await fetch(`/api/drivers/${encodeURIComponent(originalName)}`, {
                         method: 'PUT',
@@ -1745,7 +1745,7 @@
                     alert('Failed to update driver: ' + error.message);
                 }
             } else {
-                alert('Please fill in all driver fields');
+                alert('Please fill in driver name and garage61 slug fields');
             }
         }
         async function removeDriverAdmin(name) {
