@@ -94,18 +94,40 @@
         /* Desktop 2-column layout */
         .desktop-mode {
             display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
+            grid-template-columns: 1280px 1280px !important;
             gap: 2rem !important;
-            max-width: none !important;
-            width: 95vw !important;
+            max-width: 2560px !important;
+            width: 2560px !important;
+            margin: 0 auto !important;
+            background: transparent !important;
+            padding: 1rem !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
         }
         
         .desktop-left {
-            order: 1;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 1.5rem !important;
+            background: rgb(23 23 23) !important;
+            padding: 1.5rem !important;
+            border-radius: 0.75rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
         }
         
         .desktop-right {
-            order: 2;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 1.5rem !important;
+            background: rgb(23 23 23) !important;
+            padding: 1.5rem !important;
+            border-radius: 0.75rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Show all containers in desktop mode */
+        .desktop-mode .hidden {
+            display: block !important;
         }
     </style>
 </head>
@@ -1884,33 +1906,78 @@
         }
         
         function setupDesktopColumns() {
-            // Left column: Car/Track/Drivers, Race Inputs, Strategy Summary, Dynamic Adjustments
+            const container = document.querySelector('.max-w-4xl');
+            
+            // Create left column container
+            const leftCol = document.createElement('div');
+            leftCol.className = 'desktop-left';
+            
+            // Create right column container  
+            const rightCol = document.createElement('div');
+            rightCol.className = 'desktop-right';
+            
+            // Left Column Elements
             const leftElements = [
-                'planner-page', 'page-2', 'race-inputs-container', 
-                'overall-summary', 'sliders-container', 'share-link-container'
+                document.querySelector('#page-2 .p-6.bg-neutral-700.border.border-neutral-600.rounded-lg'), // Car/Track/Drivers info
+                document.getElementById('race-inputs-container'), // Race Inputs
+                document.getElementById('overall-summary'), // Live Overall Strategy Summary
+                document.getElementById('sliders-container') // Dynamic Adjustments
             ];
             
-            // Right column: Garage61 Lap Times, Stints Table
+            // Right Column Elements
             const rightElements = [
-                'garage61-lap-times', 'stint-breakdown-display'
+                document.getElementById('garage61-lap-times'), // Garage61 Lap Times
+                document.getElementById('stint-breakdown-display') // Stints Table
             ];
             
-            leftElements.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('desktop-left');
+            // Move elements to left column
+            leftElements.forEach(el => {
+                if (el) {
+                    el.classList.remove('hidden');
+                    leftCol.appendChild(el);
+                }
             });
             
-            rightElements.forEach(id => {
+            // Move elements to right column
+            rightElements.forEach(el => {
+                if (el) {
+                    el.classList.remove('hidden');
+                    rightCol.appendChild(el);
+                }
+            });
+            
+            // Add columns to container
+            container.appendChild(leftCol);
+            container.appendChild(rightCol);
+            
+            // Hide original page structure
+            const pagesToHide = ['planner-page', 'page-2'];
+            pagesToHide.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.classList.add('desktop-right');
+                if (el) el.style.display = 'none';
             });
         }
         
         function resetMobileLayout() {
-            const allElements = document.querySelectorAll('.desktop-left, .desktop-right');
-            allElements.forEach(el => {
-                el.classList.remove('desktop-left', 'desktop-right');
-            });
+            const container = document.querySelector('.max-w-4xl');
+            const leftCol = container.querySelector('.desktop-left');
+            const rightCol = container.querySelector('.desktop-right');
+            
+            if (leftCol && rightCol) {
+                // Move elements back to their original containers
+                const allElements = [...leftCol.children, ...rightCol.children];
+                
+                // Remove columns
+                leftCol.remove();
+                rightCol.remove();
+                
+                // Show original pages
+                const pagesToShow = ['planner-page', 'page-2'];
+                pagesToShow.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = '';
+                });
+            }
         }
 		
     </script>
