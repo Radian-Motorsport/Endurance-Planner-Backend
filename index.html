@@ -1575,6 +1575,13 @@
 		            // Navigate to page 2 and calculate
 		            showPage2();
 		            calculateAndShowPage2();
+		            
+		            // Set the current strategy ID and show Save Update button
+		            window.currentStrategyId = strategyId;
+		            document.getElementById('save-update-btn').classList.remove('hidden');
+		            
+		            // Also populate the share link field with current URL
+		            document.getElementById('share-link-output').value = window.location.href;
 		
 		        } catch (error) {
 		            //console.error('Error loading strategy:', error);
