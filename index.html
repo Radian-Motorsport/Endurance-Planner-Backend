@@ -1589,6 +1589,16 @@
 		            
 		            const backButton = document.getElementById('back-to-page1-btn');
 		            if (backButton) backButton.style.display = 'none';
+		            
+		            // Hide Admin, Race Details, and Live buttons to prevent navigation
+		            const adminBtn = document.querySelector('button[onclick="showAdmin()"]');
+		            if (adminBtn) adminBtn.style.display = 'none';
+		            
+		            const raceDetailsBtn = document.querySelector('button[onclick="showRaceDetails()"]');
+		            if (raceDetailsBtn) raceDetailsBtn.style.display = 'none';
+		            
+		            const liveBtn = document.querySelector('button[onclick="showLive()"]');
+		            if (liveBtn) liveBtn.style.display = 'none';
 		
 		        } catch (error) {
 		            //console.error('Error loading strategy:', error);
