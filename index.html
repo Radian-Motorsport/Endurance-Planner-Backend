@@ -227,14 +227,17 @@
                 <div class="p-6 bg-neutral-800 border-neutral-800 rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="flex flex-col items-center text-center">
+                            <img id="track-logo" src="" alt="Track Logo" class="w-16 h-16 mb-2 rounded-lg object-contain bg-white/10 p-2 hidden">
                             <span class="text-white text-xl text-shadow road-rage-font mb-4">TRACK</span>
                             <span id="page2-track" class="text-neutral-400 mt-1"></span>
                         </div>
                         <div class="flex flex-col items-center text-center">
+                            <img id="car-logo" src="" alt="Car Logo" class="w-16 h-16 mb-2 rounded-lg object-contain bg-white/10 p-2 hidden">
                             <span class="text-white text-xl text-shadow road-rage-font mb-4">CAR</span>
                             <span id="page2-car" class="text-neutral-400 mt-1"></span>
                         </div>
                         <div class="flex flex-col items-center text-center">
+                            <i class="fas fa-users text-3xl text-neutral-400 mb-2"></i>
                             <span class="text-white text-xl text-shadow road-rage-font mb-4">DRIVERS</span>
                             <div id="page2-drivers" class="text-neutral-400 mt-1">
                                 <!-- Drivers will be populated here as rows -->
@@ -878,6 +881,22 @@
             // Populate the new display elements with the selected data
             document.getElementById('page2-track').textContent = trackSelect.value;
             document.getElementById('page2-car').textContent = carSelect.value;
+            
+            // Load car and track logos based on garage61 IDs
+            const carLogo = document.getElementById('car-logo');
+            const trackLogo = document.getElementById('track-logo');
+            
+            if (selectedCar && selectedCar.garage61_id) {
+                carLogo.src = `assets/cars/car-${selectedCar.garage61_id}.png`;
+                carLogo.onerror = function() { this.style.display = 'none'; }; // Hide if image doesn't exist
+                carLogo.onload = function() { this.classList.remove('hidden'); }; // Show if image loads
+            }
+            
+            if (selectedTrack && selectedTrack.garage61_id) {
+                trackLogo.src = `assets/tracks/track-${selectedTrack.garage61_id}.png`;
+                trackLogo.onerror = function() { this.style.display = 'none'; }; // Hide if image doesn't exist
+                trackLogo.onload = function() { this.classList.remove('hidden'); }; // Show if image loads
+            }
             
             // Display drivers as rows
             const driversContainer = document.getElementById('page2-drivers');
