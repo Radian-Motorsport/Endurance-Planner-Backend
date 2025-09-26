@@ -162,10 +162,10 @@
 
             
             <div id="planner-page" class="">
-                    <div class="p-6 bg-neutral-800 border border-neutral-900 rounded-lg">
+                    <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg">
                     <h1 class="text-xl mb-4 road-rage-font">Drivers <span class="text-sm text-neutral-500"></span></h1>
                     <div class="flex items-center space-x-2 mb-4">
-                        <select id="driver-select" class="p-3 border border-neutral-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full bg-neutral-900 text-neutral-400">
+                        <select id="driver-select" class="p-3 border-neutral-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full bg-neutral-900 text-neutral-400">
                             <option value="">Select a Driver...</option>
                         </select>
                         <button onclick="addDriver()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3     px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
@@ -175,16 +175,16 @@
                     <ul id="driver-list" class="space-y-2"></ul>
                 </div>
 
-                                <div class="p-6 bg-neutral-800 border border-neutral-900 rounded-lg mt-6">
+                                <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
                     <h1 class="text-xl mb-4 road-rage-font">Track & Car</h1>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                         <div class="flex flex-col w-full">
-                            <select id="track-select" class="mt-1 p-3 border border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
+                            <select id="track-select" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
                                 <option value="">Select a Track...</option>
                             </select>
                         </div>
                         <div class="flex flex-col w-full">
-                            <select id="car-select" class="mt-1 p-3 border border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
+                            <select id="car-select" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
                                 <option value="">Select a Car...</option>
                             </select>
                         </div>
@@ -207,16 +207,16 @@
                 <div class="p-6 bg-neutral-800 border border-neutral-700 rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <span class="text-white text-shadow road-rage-font">TRACK:</span>
-                            <br> <span id="page2-track" class="text-neutral-200"></span>
+                            <span class="text-white text-shadow road-rage-font">TRACK</span>
+                            <br> <span id="page2-track" class="text-neutral-400"></span>
                         </div>
                         <div>
-                            <span class="text-white text-shadow road-rage-font">CAR:</span>
-                            <br> <span id="page2-car" class="text-neutral-200"></span>
+                            <span class="text-white text-shadow road-rage-font">CAR</span>
+                            <br> <span id="page2-car" class="text-neutral-400"></span>
                         </div>
                         <div>
-                            <span class="text-white text-shadow road-rage-font">DRIVERS:</span>
-                            <div id="page2-drivers" class="text-neutral-200 mt-1">
+                            <span class="text-white text-shadow road-rage-font">DRIVERS</span>
+                            <div id="page2-drivers" class="text-neutral-400 mt-1">
                                 <!-- Drivers will be populated here as rows -->
                             </div>
                         </div>
@@ -235,9 +235,9 @@
                         <p id="lap-times-error-message">Error loading lap data</p>
                     </div>
                     <div id="lap-times-content" class="hidden">
-                        <div class="bg-neutral-800 rounded-lg border border-neutral-700 overflow-hidden shadow-lg">
+                        <div class="bg-neutral-800 rounded-lg border-neutral-700 overflow-hidden shadow-lg">
                             <table class="w-full text-neutral-200 text-xs">
-                                <thead class="bg-gradient-to-r from-neutral-700 to-neutral-600 border-b border-neutral-500">
+                                <thead class="bg-gradient-to-r from-neutral-700 to-neutral-600  border-neutral-500">
                                     <tr>
                                         <th class="py-2 px-3 text-left text-xs font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">Driver</th>
                                         <th class="py-2 px-3 text-left text-xs font-bold text-neutral-200 uppercase tracking-wider border-r border-neutral-500">Best Lap</th>
@@ -253,38 +253,38 @@
                     </div>
                 </div>
 
-                <div id="race-inputs-container" class="p-6 bg-neutral-800 border border-neutral-700 rounded-lg">
+                <div id="race-inputs-container" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg">
                     <h1 class="text-xl mb-4  road-rage-font">Race Inputs</h1>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="flex flex-col">
                             <label class="text-sm font-medium text-neutral-500">Race Duration</label>
                             <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="race-duration-hours" placeholder="" class="p-2 border border-neutral-700 rounded-lg text-neutral-200 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <input type="number" id="race-duration-hours" placeholder="" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <span class="text-neutral-500">hr</span>
-                                <input type="number" id="race-duration-minutes" placeholder="" class="p-2 border border-neutral-700 rounded-lg text-neutral-200 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <input type="number" id="race-duration-minutes" placeholder="" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <span class="text-neutral-500">min</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
                             <label class="text-sm font-medium text-neutral-500">Avg. Lap Time</label>
                             <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="avg-lap-time-minutes" placeholder="" class="p-2 border border-neutral-700 rounded-lg text-neutral-200 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <input type="number" id="avg-lap-time-minutes" placeholder="" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <span class="text-neutral-500">min</span>
-                                <input type="number" id="avg-lap-time-seconds" placeholder="" class="p-2 border border-neutral-700 rounded-lg text-neutral-200 bg-neutral-800 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <input type="number" id="avg-lap-time-seconds" placeholder="" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <span class="text-neutral-500">sec</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
                             <label for="pit-stop-time" class="text-sm font-medium text-neutral-500">Avg. Pit Stop Time (sec)</label>
-                            <input type="number" id="pit-stop-time" value="" class="mt-1 p-2 border border-neutral-700 rounded-lg text-neutral-200 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <input type="number" id="pit-stop-time" value="" class="mt-1 p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                         <div class="flex flex-col">
                             <label for="fuel-per-lap-display-input" class="text-sm font-medium text-neutral-500">Fuel Use per Lap (L)</label>
-                            <input type="number" id="fuel-per-lap-display-input" class="mt-1 p-2 border border-neutral-700 rounded-lg text-neutral-200 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <input type="number" id="fuel-per-lap-display-input" class="mt-1 p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                         <div class="flex flex-col">
                             <label for="tank-capacity-display-input" class="text-sm font-medium text-neutral-500">Fuel Tank Size (L)</label>
-                            <input type="number" id="tank-capacity-display-input" class="mt-1 p-2 border border-neutral-700 rounded-lg text-neutral-200 bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <input type="number" id="tank-capacity-display-input" class="mt-1 p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                         <div class="mt-4 flex justify-end">
                             <button id="calculate-page2-button" onclick="calculateAndShowPage2()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
@@ -295,7 +295,7 @@
                 </div>
 
                 
-                <div id="overall-summary" class="p-6 bg-neutral-800 border border-neutral-700 rounded-lg mb-6">
+                <div id="overall-summary" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg mb-6">
                             <h3 class="text-xl font- mb-4 road-rage-font mb-8">Live Overall Strategy Summary</h3>
                             <div class="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-4 text-neutral-200">
                         <div>
@@ -357,7 +357,7 @@
                     </div>
                 </div>
 
-                <div id="sliders-container" class="p-6 bg-neutral-800 border border-neutral-700 rounded-lg !mb-6 hidden">
+                <div id="sliders-container" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg !mb-6 hidden">
                     <h1 class="text-xl mb-4 road-rage-font">Dynamic Adjustments</h1>
                         <div class="flex-grow w-full">
                             <label for="fuel-slider" class="text-sm font-medium text-neutral-500">Adjust Fuel per Lap</label>
@@ -381,7 +381,7 @@
                 </div>
                 
                   
-                <div id="stint-breakdown-display" class="p-6 bg-neutral-800 border border-neutral-700 rounded-lg overflow-x-auto hidden">
+                <div id="stint-breakdown-display" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg overflow-x-auto hidden">
                     <h1 class="text-xl font- mb-4  road-rage-font">Stints</h1>
                             <div class="flex flex-col mb-4">
                             <label class="text-sm font-medium text-neutral-500">Race Start (UTC) & Qualifying</label>
@@ -421,7 +421,7 @@
                                     <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="calculateAndShowPage2()">Update</button>
                         </div>
                     
-                    <table class= "min-w-full divide-y divide-neutral-600 border border-neutral-900 rounded-lg">
+                    <table class= "min-w-full divide-y divide-neutral-600 border-neutral-900 rounded-lg">
                         <thead class="bg-neutral-900">
                             <tr>
                                 <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Start Time</th>
@@ -438,7 +438,7 @@
                     </table>
                 </div>
 
-                <div id="share-link-container" class="p-6 bg-neutral-800 border border-neutral-700 rounded-lg hidden">
+                <div id="share-link-container" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg hidden">
                     <h1 class="text-xl font- mb-4  road-rage-font">Share/Save This Strategy</h1>
                     <div class="flex items-center space-x-2 mb-4">
                         <button onclick="generateShareLink()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -459,7 +459,7 @@
                     Save All Changes
                 </button>
 
-                <div class="p-6 bg-neutral-800 border border-neutral-700 rounded-lg mt-6">
+                <div class="p-6 bg-neutral-800 border-neutral-800 rounded-lg mt-6">
                     <h1 class="text-xl font- mb-4  road-rage-font">Manage Drivers</h1>
                     <div class="space-y-4">
                         <div class="flex flex-col space-y-4">
@@ -491,7 +491,7 @@
                     </div>
                 </div>
 
-                <div class="p-6 bg-neutral-800 border border-neutral-700 rounded-lg mt-6">
+                <div class="p-6 bg-neutral-800 border-neutral-800 rounded-lg mt-6">
                     <h1 class="text-xl font- mb-4  road-rage-font">Manage Cars</h1>
                     <div class="space-y-4">
                         <div class="flex flex-col space-y-4">
@@ -515,7 +515,7 @@
                     </div>
                 </div>
                 
-                <div class="p-6 bg-neutral-800 border border-neutral-700 rounded-lg mt-6">
+                <div class="p-6 bg-neutral-800 border-neutral-800 rounded-lg mt-6">
                     <h1 class="text-xl font- mb-4  road-rage-font">Manage Tracks</h1>
                     <div class="space-y-4">
                         <div class="flex flex-col space-y-4">
