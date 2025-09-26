@@ -1424,10 +1424,10 @@
 				            <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${endLap}</td>
 				            <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${stintLaps}</td>
 				            <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">
-				                <select id="stint-driver-${i}" class="w-auto bg-neutral-800 text-neutral-200 p-3 rounded-md border border-neutral-900"></select>
+				                <select id="stint-driver-${i}" class="w-auto bg-neutral-800 text-neutral-200 p-1 rounded-md border border-neutral-900"></select>
 				            </td>
 				            <td class="px-1 py-2 text-center text-s text-neutral-200">
-				                <select id="stint-backup-driver-${i}" class="w-auto bg-neutral-800 text-neutral-200 p-3 rounded-md border border-neutral-900"></select>
+				                <select id="stint-backup-driver-${i}" class="w-auto bg-neutral-800 text-neutral-200 p-1 rounded-md border border-neutral-900"></select>
 				            </td>
 				        `;
 				        tbody.appendChild(tr);
@@ -1454,12 +1454,12 @@
 				            const pitRow = document.createElement('tr');
 				            pitRow.classList.add('pit-stop-row');
 				            pitRow.innerHTML = `
-				                <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${pitStartTimeString}</td>
-				                <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${pitEndTimeString}</td>
-				                <td class="px-1 py-2 text-center text-s text-neutral-200 road-rage-font border-r border-neutral-900">PIT</td>
-				                <td class="px-1 py-2 text-center text-s text-neutral-200 road-rage-font border-r border-neutral-900">PIT</td>
-				                <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${pitDurationString}</td>
-				                <td class="px-1 py-2 text-center text-s text-neutral-400 border-r border-neutral-900">-</td>
+				                <td class="px-1 py-2 text-center text-xs text-neutral-200 border-r border-neutral-900">${pitStartTimeString}</td>
+				                <td class="px-1 py-2 text-center text-xs text-neutral-200 border-r border-neutral-900">${pitEndTimeString}</td>
+				                <td class="px-1 py-2 text-center text-xs text-neutral-200 road-rage-font border-r border-neutral-900">PIT</td>
+				                <td class="px-1 py-2 text-center text-xs text-neutral-200 road-rage-font border-r border-neutral-900">PIT</td>
+				                <td class="px-1 py-2 text-center text-xs text-neutral-200 border-r border-neutral-900">${pitDurationString}</td>
+				                <td class="px-1 py-2 text-center text-xs text-neutral-400 border-r border-neutral-900">-</td>
 				                <td class="px-1 py-2 text-center text-s text-neutral-400">-</td>
 				            `;
 				            tbody.appendChild(pitRow);
