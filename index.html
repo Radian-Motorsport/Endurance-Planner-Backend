@@ -1485,6 +1485,27 @@
 				}
         
         async function generateShareLink() {
+		    // Capture driver stint assignments
+		    const stintDrivers = {};
+		    const stintBackupDrivers = {};
+		    
+		    // Loop through all possible stint driver selects
+		    for (let i = 0; i < 50; i++) {
+		        const driverSelect = document.getElementById(`stint-driver-${i}`);
+		        const backupDriverSelect = document.getElementById(`stint-backup-driver-${i}`);
+		        
+		        if (driverSelect && driverSelect.value) {
+		            stintDrivers[i] = driverSelect.value;
+		        }
+		        
+		        if (backupDriverSelect && backupDriverSelect.value) {
+		            stintBackupDrivers[i] = backupDriverSelect.value;
+		        }
+		        
+		        // Stop if we've gone past existing stints
+		        if (!driverSelect) break;
+		    }
+		    
 		    const state = {
 		        drivers: selectedDrivers.map(d => d.name),
 		        car: document.getElementById('car-select').value,
@@ -1500,7 +1521,9 @@
 		        lapTimeSlider: document.getElementById('lap-time-slider').value,
 		        raceStartTime: document.getElementById('race-start-time-page2').value,
 		        qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
-		        timezone: document.getElementById('timezone-select').value, // Add the time zone
+		        timezone: document.getElementById('timezone-select').value,
+		        stintDrivers: stintDrivers, // Save stint driver assignments
+		        stintBackupDrivers: stintBackupDrivers // Save stint backup driver assignments
 		    };
 		
 		    try {
@@ -1539,6 +1562,27 @@
                 return;
             }
             
+		    // Capture driver stint assignments
+		    const stintDrivers = {};
+		    const stintBackupDrivers = {};
+		    
+		    // Loop through all possible stint driver selects
+		    for (let i = 0; i < 50; i++) {
+		        const driverSelect = document.getElementById(`stint-driver-${i}`);
+		        const backupDriverSelect = document.getElementById(`stint-backup-driver-${i}`);
+		        
+		        if (driverSelect && driverSelect.value) {
+		            stintDrivers[i] = driverSelect.value;
+		        }
+		        
+		        if (backupDriverSelect && backupDriverSelect.value) {
+		            stintBackupDrivers[i] = backupDriverSelect.value;
+		        }
+		        
+		        // Stop if we've gone past existing stints
+		        if (!driverSelect) break;
+		    }
+            
 		    const state = {
 		        drivers: selectedDrivers.map(d => d.name),
 		        car: document.getElementById('car-select').value,
@@ -1555,6 +1599,8 @@
 		        raceStartTime: document.getElementById('race-start-time-page2').value,
 		        qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
 		        timezone: document.getElementById('timezone-select').value,
+		        stintDrivers: stintDrivers, // Save stint driver assignments
+		        stintBackupDrivers: stintBackupDrivers // Save stint backup driver assignments
 		    };
 		
 		    try {
@@ -1636,6 +1682,29 @@
 		            // Navigate to page 2 and calculate
 		            showPage2();
 		            calculateAndShowPage2();
+		            
+		            // Restore driver stint assignments after stint table is populated
+		            setTimeout(() => {
+		                if (state.stintDrivers) {
+		                    Object.keys(state.stintDrivers).forEach(stintIndex => {
+		                        const driverSelect = document.getElementById(`stint-driver-${stintIndex}`);
+		                        if (driverSelect) {
+		                            driverSelect.value = state.stintDrivers[stintIndex];
+		                            // Trigger color update
+		                            updateStintRowColor(parseInt(stintIndex), state.stintDrivers[stintIndex], selectedDrivers);
+		                        }
+		                    });
+		                }
+		                
+		                if (state.stintBackupDrivers) {
+		                    Object.keys(state.stintBackupDrivers).forEach(stintIndex => {
+		                        const backupDriverSelect = document.getElementById(`stint-backup-driver-${stintIndex}`);
+		                        if (backupDriverSelect) {
+		                            backupDriverSelect.value = state.stintBackupDrivers[stintIndex];
+		                        }
+		                    });
+		                }
+		            }, 1000); // Wait 1 second for stint table to be fully populated
 		            
 		            // Set the current strategy ID and show Save Update button
 		            window.currentStrategyId = strategyId;
