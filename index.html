@@ -887,13 +887,13 @@
             const trackLogo = document.getElementById('track-logo');
             
             if (selectedCar && selectedCar.garage61_id) {
-                carLogo.src = `assets/cars/car-${selectedCar.garage61_id}.png`;
+                carLogo.src = `assets/car-${selectedCar.garage61_id}.png`;
                 carLogo.onerror = function() { this.style.display = 'none'; }; // Hide if image doesn't exist
                 carLogo.onload = function() { this.classList.remove('hidden'); }; // Show if image loads
             }
             
             if (selectedTrack && selectedTrack.garage61_id) {
-                trackLogo.src = `assets/tracks/track-${selectedTrack.garage61_id}.png`;
+                trackLogo.src = `assets/track-${selectedTrack.garage61_id}.png`;
                 trackLogo.onerror = function() { this.style.display = 'none'; }; // Hide if image doesn't exist
                 trackLogo.onload = function() { this.classList.remove('hidden'); }; // Show if image loads
             }
