@@ -131,16 +131,24 @@
         }
 
         /* Driver Color Classes for Stint Rows */
-        .driver-color-0 { background-color: rgba(59, 130, 246, 0.2) !important; } /* Blue */
-        .driver-color-1 { background-color: rgba(16, 185, 129, 0.2) !important; } /* Green */
-        .driver-color-2 { background-color: rgba(245, 101, 101, 0.2) !important; } /* Red */
-        .driver-color-3 { background-color: rgba(251, 191, 36, 0.2) !important; } /* Yellow */
-        .driver-color-4 { background-color: rgba(168, 85, 247, 0.2) !important; } /* Purple */
-        .driver-color-5 { background-color: rgba(236, 72, 153, 0.2) !important; } /* Pink */
-        .driver-color-6 { background-color: rgba(6, 182, 212, 0.2) !important; } /* Cyan */
-        .driver-color-7 { background-color: rgba(34, 197, 94, 0.2) !important; } /* Lime */
+        .driver-color-7 { background-color: rgba(59, 130, 246, 0.2) !important; } /* Blue */
+
+        .driver-color-6 { background-color: rgba(16, 185, 129, 0.2) !important; } /* Green */
+
+        .driver-color-5 { background-color: rgba(245, 101, 101, 0.2) !important; } /* Red */
+
+        .driver-color-4 { background-color: rgba(251, 191, 36, 0.2) !important; } /* Yellow */
+
+        .driver-color-1 { background-color: rgba(168, 85, 247, 0.2) !important; } /* Purple */
+
+        .driver-color-2 { background-color: rgba(236, 72, 153, 0.2) !important; } /* Pink */
+
+        .driver-color-0 { background-color: rgba(6, 182, 212, 0.2) !important; } /* Cyan */
+
+        .driver-color-3 { background-color: rgba(34, 197, 94, 0.2) !important; } /* Lime */
+        
         .driver-color-default { background-color: rgba(115, 115, 115, 0.2) !important; } /* Default Gray */
-        .pit-stop-row { background-color: rgba(239, 68, 68, 0.3) !important; font-style: italic; } /* Red for pit stops */
+        .pit-stop-row { background-color: rgba(46, 46, 46, 0.3) !important; ; } /* Red for pit stops */
     </style>
 </head>
 <body class="bg-neutral-900 text-neutral-200 p-4">
@@ -1448,8 +1456,8 @@
 				            pitRow.innerHTML = `
 				                <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${pitStartTimeString}</td>
 				                <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${pitEndTimeString}</td>
-				                <td class="px-1 py-2 text-center text-s text-red-400 font-bold border-r border-neutral-900">PIT</td>
-				                <td class="px-1 py-2 text-center text-s text-red-400 font-bold border-r border-neutral-900">PIT</td>
+				                <td class="px-1 py-2 text-center text-s text-neutral-200 road-rage-font border-r border-neutral-900">PIT</td>
+				                <td class="px-1 py-2 text-center text-s text-neutral-200 road-rage-font border-r border-neutral-900">PIT</td>
 				                <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${pitDurationString}</td>
 				                <td class="px-1 py-2 text-center text-s text-neutral-400 border-r border-neutral-900">-</td>
 				                <td class="px-1 py-2 text-center text-s text-neutral-400">-</td>
