@@ -439,7 +439,7 @@
                                     <option value="Pacific/Auckland">NZST (GMT+12)</option>
                                 </select>
                             </div>
-                                    <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="calculateAndShowPage2()">Update</button>
+                                    <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="updateTimesOnly()">Update</button>
                         </div>
                     
                     <table class= "min-w-full divide-y divide-neutral-600 border-neutral-900 rounded-lg">
@@ -601,13 +601,41 @@
             if (fuelSlider) {
                 fuelSlider.addEventListener('input', () => {
                     fuelSliderValue.textContent = parseFloat(fuelSlider.value).toFixed(1);
-                    calculateAndShowPage2();
+                    // 🔧 Use new function to preserve driver assignments
+                    updateTimesOnly();
                 });
             }
             if (lapTimeSlider) {
                 lapTimeSlider.addEventListener('input', () => {
                     lapTimeSliderValue.textContent = lapTimeSlider.value;
-                    calculateAndShowPage2();
+                    // 🔧 Use new function to preserve driver assignments
+                    updateTimesOnly();
+                });
+            }
+            
+            // 🔧 Add listeners for time-related inputs to preserve assignments
+            const raceStartTimeInput = document.getElementById('race-start-time-page2');
+            const qualifyingMinutesInput = document.getElementById('qualifying-minutes-page2');
+            const timezoneSelect = document.getElementById('timezone-select');
+            
+            if (raceStartTimeInput) {
+                raceStartTimeInput.addEventListener('change', () => {
+                    console.log('🕒 Race start time changed, updating times...');
+                    updateTimesOnly();
+                });
+            }
+            
+            if (qualifyingMinutesInput) {
+                qualifyingMinutesInput.addEventListener('change', () => {
+                    console.log('🕒 Qualifying minutes changed, updating times...');
+                    updateTimesOnly();
+                });
+            }
+            
+            if (timezoneSelect) {
+                timezoneSelect.addEventListener('change', () => {
+                    console.log('🌍 Timezone changed, updating times...');
+                    updateTimesOnly();
                 });
             }
         };
@@ -1393,8 +1421,32 @@
                 list.appendChild(li);
             });
         }
-        function populateStintTable(avgLapTimeInSeconds) {
+        function populateStintTable(avgLapTimeInSeconds, preserveDriverAssignments = false) {
 				    const tbody = document.getElementById('stint-table-body');
+				    
+				    // 🔧 PRESERVE DRIVER ASSIGNMENTS BEFORE CLEARING TABLE
+				    let savedDriverAssignments = {};
+				    let savedBackupAssignments = {};
+				    
+				    if (preserveDriverAssignments && tbody.children.length > 0) {
+				        console.log('💾 Preserving driver assignments...');
+				        // Save current driver assignments
+				        for (let i = 0; i < 50; i++) {
+				            const driverSelect = document.getElementById(`stint-driver-${i}`);
+				            const backupSelect = document.getElementById(`stint-backup-driver-${i}`);
+				            
+				            if (driverSelect && driverSelect.value) {
+				                savedDriverAssignments[i] = driverSelect.value;
+				            }
+				            if (backupSelect && backupSelect.value) {
+				                savedBackupAssignments[i] = backupSelect.value;
+				            }
+				            
+				            if (!driverSelect) break;
+				        }
+				        console.log('💾 Saved assignments:', savedDriverAssignments);
+				    }
+				    
 				    tbody.innerHTML = '';
 				    
 				    const raceStartTimeInput = document.getElementById('race-start-time-page2').value;
@@ -1482,7 +1534,63 @@
 				            tbody.appendChild(pitRow);
 				        }
 				    }
+				    
+				    // 🔧 RESTORE SAVED DRIVER ASSIGNMENTS
+				    if (preserveDriverAssignments && Object.keys(savedDriverAssignments).length > 0) {
+				        console.log('🔄 Restoring driver assignments...');
+				        setTimeout(() => {
+				            // Wait for dropdowns to be populated, then restore assignments
+				            Object.keys(savedDriverAssignments).forEach(stintIndex => {
+				                const driverSelect = document.getElementById(`stint-driver-${stintIndex}`);
+				                if (driverSelect && savedDriverAssignments[stintIndex]) {
+				                    driverSelect.value = savedDriverAssignments[stintIndex];
+				                    // Trigger color update if that function exists
+				                    if (typeof updateStintRowColor === 'function') {
+				                        updateStintRowColor(parseInt(stintIndex), savedDriverAssignments[stintIndex], selectedDrivers);
+				                    }
+				                }
+				            });
+				            
+				            Object.keys(savedBackupAssignments).forEach(stintIndex => {
+				                const backupSelect = document.getElementById(`stint-backup-driver-${stintIndex}`);
+				                if (backupSelect && savedBackupAssignments[stintIndex]) {
+				                    backupSelect.value = savedBackupAssignments[stintIndex];
+				                }
+				            });
+				            
+				            console.log('✅ Driver assignments restored successfully!');
+				        }, 100); // Small delay to ensure dropdowns are populated
+				    }
 				}
+        
+        // 🔧 NEW FUNCTION: Update times without losing driver assignments
+        function updateTimesOnly() {
+            console.log('🕒 Updating times while preserving driver assignments...');
+            
+            const carSelect = document.getElementById('car-select');
+            const trackSelect = document.getElementById('track-select');
+            
+            if (!carSelect.value || !trackSelect.value) {
+                alert("Please select a car and track first.");
+                return;
+            }
+            
+            // Get the current average lap time
+            const avgLapTimeMinutes = parseInt(document.getElementById('avg-lap-time-minutes').value) || 0;
+            const avgLapTimeSeconds = parseFloat(document.getElementById('avg-lap-time-seconds').value) || 0;
+            const lapTimeSliderValue = parseInt(document.getElementById('lap-time-slider').value) || 0;
+            
+            const baseAvgLapTimeInSeconds = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+            const adjustedAvgLapTimeInSeconds = baseAvgLapTimeInSeconds + lapTimeSliderValue;
+            
+            if (adjustedAvgLapTimeInSeconds <= 0) {
+                alert("Please set a valid average lap time.");
+                return;
+            }
+            
+            // Only update the stint table times, preserving driver assignments
+            populateStintTable(adjustedAvgLapTimeInSeconds, true); // true = preserve assignments
+        }
         
         async function generateShareLink() {
 		    // Capture driver stint assignments
