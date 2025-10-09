@@ -428,14 +428,15 @@ app.put('/api/strategies/:id', async (req, res) => {
     }
 });
 
-// Add iRacing service integration
-const iracingRoutes = require('./iracing-routes');
-app.use('/api/iracing', iracingRoutes);
+// 🚧 iRacing service integration (COMMENTED OUT - WORK IN PROGRESS)
+// const iracingRoutes = require('./iracing-routes');
+// app.use('/api/iracing', iracingRoutes);
 
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
-  console.log(`iRacing service will initialize automatically...`);
+  // console.log(`iRacing service will initialize automatically...`);
+  console.log(`iRacing integration disabled (files in .gitignore)`);
 });
 
 
