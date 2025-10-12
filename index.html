@@ -1903,7 +1903,7 @@
                 li.innerHTML = `
                     <span>${car.name}</span>
                     <div class="space-x-2">
-                        <button onclick="editCarAdmin('${car.garage61_id}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
+                        <button onclick="editCarAdmin('${car.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
                         <button onclick="removeCarAdmin('${car.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
@@ -1916,8 +1916,8 @@
                 li.innerHTML = `
                     <span>${track.name}</span>
                     <div class="space-x-2">
-                        <button onclick="editTrackAdmin('${track.garage61_id}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
-                        <button onclick="removeTrackAdmin('${track.garage61_id}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
+                        <button onclick="editTrackAdmin('${track.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
+                        <button onclick="removeTrackAdmin('${track.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
                 trackList.appendChild(li);
@@ -2034,22 +2034,28 @@
                 alert('Please fill in all car fields');
             }
         }
-        function editCarAdmin(garage61_id) {
-            const car = cars.find(c => c.garage61_id === garage61_id);
+        function editCarAdmin(name) {
+            const car = cars.find(c => c.name === name);
             if (car) {
                 document.getElementById('new-car-name').value = car.name;
                 document.getElementById('new-car-garage61-id').value = car.garage61_id || '';
                 document.getElementById('add-car-btn').textContent = 'Update Car';
-                document.getElementById('add-car-btn').onclick = () => updateCarAdmin(garage61_id);
+                document.getElementById('add-car-btn').onclick = () => updateCarAdmin(name);
             }
         }
-        async function updateCarAdmin(originalGarage61Id) {
+        async function updateCarAdmin(originalName) {
             const name = document.getElementById('new-car-name').value;
             const garage61_id = parseInt(document.getElementById('new-car-garage61-id').value);
             
             if (name && garage61_id) {
                 try {
-                    const response = await fetch(`/api/cars/${encodeURIComponent(originalGarage61Id)}`, {
+                    // Find the car to get its current garage61_id for the API call
+                    const originalCar = cars.find(c => c.name === originalName);
+                    if (!originalCar) {
+                        throw new Error('Original car not found');
+                    }
+                    
+                    const response = await fetch(`/api/cars/${encodeURIComponent(originalCar.garage61_id)}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -2063,7 +2069,7 @@
                     }
                     
                     // Update local cars array
-                    const index = cars.findIndex(c => c.garage61_id === originalGarage61Id);
+                    const index = cars.findIndex(c => c.name === originalName);
                     if (index !== -1) {
                         cars[index] = { name, garage61_id };
                     }
@@ -2123,24 +2129,30 @@
                 alert('Please fill in required track fields (name and garage61_id)');
             }
         }
-        function editTrackAdmin(garage61_id) {
-            const track = tracks.find(t => t.garage61_id === garage61_id);
+        function editTrackAdmin(name) {
+            const track = tracks.find(t => t.name === name);
             if (track) {
                 document.getElementById('new-track-name').value = track.name;
                 document.getElementById('new-track-garage61-id').value = track.garage61_id || '';
                 document.getElementById('new-track-length').value = track.track_length || '0.0';
                 document.getElementById('add-track-btn').textContent = 'Update Track';
-                document.getElementById('add-track-btn').onclick = () => updateTrackAdmin(garage61_id);
+                document.getElementById('add-track-btn').onclick = () => updateTrackAdmin(name);
             }
         }
-        async function updateTrackAdmin(originalGarage61Id) {
+        async function updateTrackAdmin(originalName) {
             const name = document.getElementById('new-track-name').value;
             const garage61_id = parseInt(document.getElementById('new-track-garage61-id').value);
             const track_length = parseFloat(document.getElementById('new-track-length').value) || 0.0;
             
             if (name && garage61_id) {
                 try {
-                    const response = await fetch(`/api/tracks/${encodeURIComponent(originalGarage61Id)}`, {
+                    // Find the track to get its current garage61_id for the API call
+                    const originalTrack = tracks.find(t => t.name === originalName);
+                    if (!originalTrack) {
+                        throw new Error('Original track not found');
+                    }
+                    
+                    const response = await fetch(`/api/tracks/${encodeURIComponent(originalTrack.garage61_id)}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -2154,7 +2166,7 @@
                     }
                     
                     // Update local tracks array
-                    const index = tracks.findIndex(t => t.garage61_id === originalGarage61Id);
+                    const index = tracks.findIndex(t => t.name === originalName);
                     if (index !== -1) {
                         tracks[index] = { name, garage61_id, track_length };
                     }
@@ -2171,8 +2183,8 @@
                 alert('Please fill in required track fields (name and garage61_id)');
             }
         }
-        async function removeTrackAdmin(garage61_id) {
-            const track = tracks.find(t => t.garage61_id === garage61_id);
+        async function removeTrackAdmin(name) {
+            const track = tracks.find(t => t.name === name);
             if (!track) {
                 alert('Track not found');
                 return;
@@ -2180,7 +2192,7 @@
             if (!confirm(`Are you sure you want to remove ${track.name}?`)) return;
             
             try {
-                const resp = await fetch(`/api/tracks/${encodeURIComponent(garage61_id)}`, { method: 'DELETE' });
+                const resp = await fetch(`/api/tracks/${encodeURIComponent(track.garage61_id)}`, { method: 'DELETE' });
                 if (!resp.ok && resp.status !== 204) {
                     console.error('Failed to delete track on server:', resp.status);
                     alert('Server delete failed');
