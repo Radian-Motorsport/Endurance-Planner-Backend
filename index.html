@@ -153,20 +153,24 @@
         
         /* Daylight Gradient Classes for Daylight Column */
         .daylight-night { 
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important; 
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 30%, #16213e 70%, #0f172a 100%) !important; 
             color: #9ca3af !important;
+            opacity: 0.9;
         }
         .daylight-dawn { 
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%) !important; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #ff6b35 25%, #f7931e 50%, #ffd700 75%, #ffed4e 100%) !important; 
             color: #1f2937 !important;
+            opacity: 0.95;
         }
         .daylight-day { 
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #fff59d 100%) !important; 
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 25%, #fff59d 50%, #fffbeb 75%, #fef3c7 100%) !important; 
             color: #1f2937 !important;
+            opacity: 0.95;
         }
         .daylight-dusk { 
-            background: linear-gradient(135deg, #ff4757 0%, #ff6b35 50%, #1a1a2e 100%) !important; 
+            background: linear-gradient(135deg, #ff4757 0%, #ff6b35 25%, #f7931e 50%, #1a1a2e 75%, #0f0f23 100%) !important; 
             color: #f3f4f6 !important;
+            opacity: 0.92;
         }
         
         /* Toggle Switch Styles */
@@ -515,15 +519,24 @@
                   
                 <div id="stint-breakdown-display" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg overflow-x-auto hidden">
                     <h1 class="text-xl font- mb-4  road-rage-font">Stints</h1>
-                            <div class="flex flex-col mb-4">
-                            <label class="text-sm font-medium text-neutral-500">Race Start (UTC) & Qualifying</label>
-                            <div class="flex items-center space-x-2">
-                                <input type="time" id="race-start-time-page2" value="13:00" class="mt-1 p-2 border-neutral-700 rounded-lg text-neutral-200 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-neutral-500 font-bold">+</span>
-                                <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-2 border-neutral-700 rounded-lg text-neutral-200 bg-neutral-900 w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-sm font-medium text-neutral-500">min (Qualifying)</span>
-                            </div>
-                            <div class="mt-4">
+                    
+                    <!-- Time Mode Toggle Switch - MOVED TO TOP -->
+                    <div class="mb-6 p-4 bg-neutral-700 rounded-lg">
+                        <label class="text-sm font-medium text-neutral-500 mb-3 block">Time Display Mode</label>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-sm text-neutral-400" id="race-time-label">Race Time</span>
+                            <button id="time-mode-toggle" onclick="toggleTimeMode()" class="relative inline-flex h-6 w-11 items-center rounded-full bg-neutral-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                <span id="toggle-slider" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
+                            </button>
+                            <span class="text-sm text-neutral-400" id="local-time-label">Local Time</span>
+                        </div>
+                        <p class="text-xs text-neutral-500 mt-2" id="time-mode-description">Using race start time from page 1</p>
+                    </div>
+
+                    <div class="flex flex-col mb-4">
+                        <!-- Local Time Adjusters - Only shown in Local Time mode -->
+                        <div id="local-time-adjusters" class="mb-4 hidden">
+                            <div class="mb-4">
                                 <label for="timezone-select" class="text-sm font-medium text-neutral-500">Time Zone</label>
                                 <select id="timezone-select" class="mt-1 p-3 border border-neutral-700 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-neutral-200">
                                     <option value="UTC">UTC</option>
@@ -550,32 +563,32 @@
                                     <option value="Pacific/Auckland">NZST (GMT+12)</option>
                                 </select>
                             </div>
-                            
-                            <!-- Time Mode Toggle Switch -->
-                            <div class="mt-4">
-                                <label class="text-sm font-medium text-neutral-500 mb-2 block">Time Display Mode</label>
-                                <div class="flex items-center space-x-3">
-                                    <span class="text-sm text-neutral-400" id="race-time-label">Race Time</span>
-                                    <button id="time-mode-toggle" onclick="toggleTimeMode()" class="relative inline-flex h-6 w-11 items-center rounded-full bg-neutral-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                        <span id="toggle-slider" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
-                                    </button>
-                                    <span class="text-sm text-neutral-400" id="local-time-label">Local Time</span>
-                                </div>
-                                <p class="text-xs text-neutral-500 mt-1" id="time-mode-description">Using race start time from page 1</p>
-                            </div>
-                            
-                            <!-- Practice/Qualifying Time Addition -->
-                            <div class="mt-4">
-                                <label for="practice-qualifying-time" class="text-sm font-medium text-neutral-500 mb-2 block">Practice/Qualifying Time Addition</label>
-                                <div class="flex items-center space-x-2">
-                                    <input type="number" id="practice-qualifying-time" min="0" max="999" step="0.01" value="0.00" class="w-24 p-2 border-neutral-700 rounded-lg text-neutral-200 bg-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                    <span class="text-sm text-neutral-500">hours</span>
-                                </div>
-                                <p class="text-xs text-neutral-500 mt-1">Additional time before race start (e.g., practice sessions, qualifying)</p>
-                            </div>
-                            
-                                    <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="updateTimesOnly()">Update</button>
                         </div>
+                        
+                        <!-- Qualifying Time - Always shown -->
+                        <div class="mb-4">
+                            <label class="text-sm font-medium text-neutral-500">Qualifying Time</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="number" id="qualifying-minutes-page2" min="0" max="59" value="0" class="mt-1 p-2 border-neutral-700 rounded-lg text-neutral-200 bg-neutral-900 w-20 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-sm font-medium text-neutral-500">minutes</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Practice/Qualifying Time Addition - Always shown -->
+                        <div class="mb-4">
+                            <label for="practice-qualifying-time" class="text-sm font-medium text-neutral-500 mb-2 block">Practice/Qualifying Time Addition</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="number" id="practice-qualifying-time" min="0" max="999" step="0.01" value="0.00" class="w-24 p-2 border-neutral-700 rounded-lg text-neutral-200 bg-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <span class="text-sm text-neutral-500">hours</span>
+                            </div>
+                            <p class="text-xs text-neutral-500 mt-1">Additional time before race start (e.g., practice sessions, qualifying)</p>
+                        </div>
+                        
+                        <!-- Hidden race start time input for internal use -->
+                        <input type="hidden" id="race-start-time-page2" value="13:00">
+                        
+                        <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="updateTimesOnly()">Update</button>
+                    </div>
                     
                     <table class= "min-w-full divide-y divide-neutral-600 border-neutral-900 rounded-lg">
                         <thead class="bg-neutral-900">
@@ -585,7 +598,7 @@
                                 <th class="w-12 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Start Lap</th>
                                 <th class="w-12 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">End Lap</th>
                                 <th class="w-12 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Laps</th>
-                                <th class="w-16 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Daylight</th>
+                                <th class="w-4 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900"></th>
 								<th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Driver</th>
 								<th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Backup</th>
                             </tr>
@@ -1205,6 +1218,7 @@
             const raceLabel = document.getElementById('race-time-label');
             const localLabel = document.getElementById('local-time-label');
             const description = document.getElementById('time-mode-description');
+            const localTimeAdjusters = document.getElementById('local-time-adjusters');
             
             if (isRaceTimeMode) {
                 // Race Time Mode
@@ -1213,6 +1227,7 @@
                 raceLabel.classList.add('time-mode-active');
                 localLabel.classList.remove('time-mode-active');
                 description.textContent = 'Using race start time from page 1';
+                localTimeAdjusters.classList.add('hidden');
             } else {
                 // Local Time Mode  
                 toggle.classList.add('toggle-active');
@@ -1220,9 +1235,13 @@
                 raceLabel.classList.remove('time-mode-active');
                 localLabel.classList.add('time-mode-active');
                 description.textContent = 'Using current local time with timezone';
+                localTimeAdjusters.classList.remove('hidden');
             }
             
             console.log(`🕒 Time mode switched to: ${isRaceTimeMode ? 'Race Time' : 'Local Time'}`);
+            
+            // Update the stint table to reflect the new time mode
+            populateStintTable();
         }
 
         // --- Core Logic ---
@@ -1818,7 +1837,9 @@
 				    
 				    tbody.innerHTML = '';
 				    
-				    const raceStartTimeInput = document.getElementById('race-start-time-page2').value;
+				    const raceStartTimeInput = isRaceTimeMode ? 
+				        document.getElementById('race-time').value : 
+				        document.getElementById('race-start-time-page2').value;
 				    const qualifyingMinutesInput = parseInt(document.getElementById('qualifying-minutes-page2').value) || 0;
 				    const practiceQualifyingHours = parseFloat(document.getElementById('practice-qualifying-time').value) || 0;
 				    const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
@@ -1880,7 +1901,7 @@
 				            <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${startLap}</td>
 				            <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${endLap}</td>
 				            <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${stintLaps}</td>
-				            <td id="daylight-cell-${i}" class="px-1 py-2 text-center text-xs font-medium border-r border-neutral-900 ${daylightStatus}"></td>
+				            <td id="daylight-cell-${i}" class="w-4 px-1 py-2 text-center text-xs font-medium border-r border-neutral-900 ${daylightStatus}"></td>
 				            <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">
 				                <select id="stint-driver-${i}" class="w-auto bg-neutral-800 text-neutral-200 p-1 rounded-md border border-neutral-900"></select>
 				            </td>
@@ -1920,7 +1941,7 @@
 				                <td class="px-1 py-2 text-center text-xs text-neutral-200 road-rage-font border-r border-neutral-900">PIT</td>
 				                <td class="px-1 py-2 text-center text-xs text-neutral-200 road-rage-font border-r border-neutral-900">PIT</td>
 				                <td class="px-1 py-2 text-center text-xs text-neutral-200 border-r border-neutral-900">${pitDurationString}</td>
-				                <td class="px-1 py-2 text-center text-xs text-neutral-400 border-r border-neutral-900 ${pitDaylightStatus}">⛽</td>
+				                <td class="w-4 px-1 py-2 text-center text-xs text-neutral-400 border-r border-neutral-900 ${pitDaylightStatus}"></td>
 				                <td class="px-1 py-2 text-center text-xs text-neutral-400 border-r border-neutral-900">-</td>
 				                <td class="px-1 py-2 text-center text-s text-neutral-400">-</td>
 				            `;
