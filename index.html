@@ -211,6 +211,21 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
+                    <h1 class="text-xl mb-4 road-rage-font">Race Date & Time</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                        <div class="flex flex-col w-full">
+                            <label for="race-date" class="text-sm font-medium text-neutral-500 mb-2">Race Date</label>
+                            <input type="date" id="race-date" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
+                        </div>
+                        <div class="flex flex-col w-full">
+                            <label for="race-time" class="text-sm font-medium text-neutral-500 mb-2">Race Start Time</label>
+                            <input type="time" id="race-time" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mt-8">
                     <button onclick="showPage2()" id="continue-button" class="w-full bg-blue-700 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                         Calculate <i class="fas fa-arrow-right ml-2"></i>
@@ -240,6 +255,21 @@
                         
                             <div id="page2-drivers" class="text-neutral-400 mt-1">
                                 <!-- Drivers will be populated here as rows -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Race Date & Time Display -->
+                    <div class="mt-6 pt-4 border-t border-neutral-700">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                            <div class="flex flex-col items-center">
+                                <i class="fas fa-calendar-alt text-blue-400 text-2xl mb-2"></i>
+                                <span class="text-sm text-neutral-500">Race Date</span>
+                                <span id="page2-race-date" class="text-neutral-400 font-medium">Not selected</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <i class="fas fa-clock text-green-400 text-2xl mb-2"></i>
+                                <span class="text-sm text-neutral-500">Start Time</span>
+                                <span id="page2-race-time" class="text-neutral-400 font-medium">Not selected</span>
                             </div>
                         </div>
                     </div>
@@ -916,6 +946,13 @@
             // Populate the new display elements with the selected data
             document.getElementById('page2-track').textContent = trackSelect.value;
             document.getElementById('page2-car').textContent = carSelect.value;
+            
+            // Populate date and time
+            const raceDate = document.getElementById('race-date').value;
+            const raceTime = document.getElementById('race-time').value;
+            
+            document.getElementById('page2-race-date').textContent = raceDate ? new Date(raceDate).toLocaleDateString() : 'Not selected';
+            document.getElementById('page2-race-time').textContent = raceTime || 'Not selected';
             
             // Load car and track logos based on garage61 IDs
             const carLogo = document.getElementById('car-logo');

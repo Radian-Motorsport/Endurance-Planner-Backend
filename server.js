@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const axios = require('axios');
+const SunCalc = require('suncalc');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -425,6 +426,162 @@ app.put('/api/strategies/:id', async (req, res) => {
     } catch (err) {
         console.error('Error updating strategy:', err);
         res.status(500).send('Internal Server Error');
+    }
+});
+
+// 🌞 DAYLIGHT CALCULATION API ENDPOINTS
+// ====================================
+
+// Calculate daylight times for a specific track and date
+app.get('/api/daylight/:trackId/:date?', async (req, res) => {
+    try {
+        const trackId = parseInt(req.params.trackId);
+        const dateParam = req.params.date || new Date().toISOString().split('T')[0]; // Default to today
+        const date = new Date(dateParam);
+        
+        if (!pool) {
+            return res.status(503).json({ error: 'Database not available' });
+        }
+        
+        // Get track coordinates from database
+        const trackResult = await pool.query('SELECT name, latitude, longitude FROM tracks WHERE garage61_id = $1', [trackId]);
+        
+        if (trackResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Track not found' });
+        }
+        
+        const track = trackResult.rows[0];
+        if (!track.latitude || !track.longitude) {
+            return res.status(400).json({ error: 'Track coordinates not available' });
+        }
+        
+        // Calculate daylight times using SunCalc
+        const times = SunCalc.getTimes(date, track.latitude, track.longitude);
+        const position = SunCalc.getPosition(times.solarNoon, track.latitude, track.longitude);
+        const elevationDeg = (position.altitude * 180) / Math.PI;
+        
+        const daylightData = {
+            track: {
+                name: track.name,
+                latitude: track.latitude,
+                longitude: track.longitude
+            },
+            date: dateParam,
+            times: {
+                sunrise: times.sunrise.toISOString(),
+                sunset: times.sunset.toISOString(),
+                solarNoon: times.solarNoon.toISOString(),
+                dawn: times.dawn.toISOString(), // Civil twilight start
+                dusk: times.dusk.toISOString(), // Civil twilight end
+                nauticalDawn: times.nauticalDawn.toISOString(),
+                nauticalDusk: times.nauticalDusk.toISOString(),
+                nightEnd: times.nightEnd.toISOString(), // Astronomical twilight start
+                night: times.night.toISOString() // Astronomical twilight end
+            },
+            summary: {
+                daylightHours: ((times.sunset - times.sunrise) / 3600000).toFixed(2),
+                civilTwilightHours: ((times.dusk - times.dawn) / 3600000).toFixed(2),
+                solarNoonElevation: elevationDeg.toFixed(1)
+            }
+        };
+        
+        res.json(daylightData);
+    } catch (err) {
+        console.error('Error calculating daylight times:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Generate daylight reference table for latitude bands (for testing/reference)
+app.get('/api/daylight/reference/:month?', (req, res) => {
+    try {
+        const month = parseInt(req.params.month) || new Date().getMonth() + 1; // Default to current month
+        
+        if (month < 1 || month > 12) {
+            return res.status(400).json({ error: 'Month must be between 1 and 12' });
+        }
+        
+        // Define latitude bands (-60° to +60° in 10° steps)
+        const latitudeBands = Array.from({ length: 13 }, (_, i) => -60 + i * 10);
+        const results = [];
+        
+        latitudeBands.forEach(lat => {
+            const date = new Date(Date.UTC(2025, month - 1, 15)); // 15th of the specified month
+            const times = SunCalc.getTimes(date, lat, 0); // longitude = 0 for reference
+            
+            const solarNoon = SunCalc.getPosition(times.solarNoon, lat, 0);
+            const elevationDeg = (solarNoon.altitude * 180) / Math.PI;
+            
+            results.push({
+                latitude: lat,
+                month,
+                sunrise: times.sunrise.toISOString().slice(11, 16),
+                sunset: times.sunset.toISOString().slice(11, 16),
+                daylightHours: ((times.sunset - times.sunrise) / 3600000).toFixed(2),
+                civilTwilightStart: times.dawn.toISOString().slice(11, 16),
+                civilTwilightEnd: times.dusk.toISOString().slice(11, 16),
+                solarNoonElevation: elevationDeg.toFixed(1)
+            });
+        });
+        
+        res.json({
+            month,
+            generatedAt: new Date().toISOString(),
+            data: results
+        });
+    } catch (err) {
+        console.error('Error generating daylight reference table:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get daylight times for multiple tracks (bulk query)
+app.post('/api/daylight/bulk', async (req, res) => {
+    try {
+        const { trackIds, date } = req.body;
+        const queryDate = date ? new Date(date) : new Date();
+        
+        if (!trackIds || !Array.isArray(trackIds)) {
+            return res.status(400).json({ error: 'trackIds array is required' });
+        }
+        
+        if (!pool) {
+            return res.status(503).json({ error: 'Database not available' });
+        }
+        
+        // Get all track coordinates
+        const placeholders = trackIds.map((_, i) => `$${i + 1}`).join(',');
+        const tracksResult = await pool.query(
+            `SELECT garage61_id, name, latitude, longitude FROM tracks WHERE garage61_id IN (${placeholders})`,
+            trackIds
+        );
+        
+        const results = [];
+        
+        tracksResult.rows.forEach(track => {
+            if (track.latitude && track.longitude) {
+                const times = SunCalc.getTimes(queryDate, track.latitude, track.longitude);
+                const position = SunCalc.getPosition(times.solarNoon, track.latitude, track.longitude);
+                const elevationDeg = (position.altitude * 180) / Math.PI;
+                
+                results.push({
+                    trackId: track.garage61_id,
+                    trackName: track.name,
+                    sunrise: times.sunrise.toISOString(),
+                    sunset: times.sunset.toISOString(),
+                    daylightHours: ((times.sunset - times.sunrise) / 3600000).toFixed(2),
+                    solarNoonElevation: elevationDeg.toFixed(1)
+                });
+            }
+        });
+        
+        res.json({
+            date: queryDate.toISOString().split('T')[0],
+            tracks: results
+        });
+    } catch (err) {
+        console.error('Error calculating bulk daylight times:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
