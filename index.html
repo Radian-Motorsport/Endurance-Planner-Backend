@@ -1347,13 +1347,17 @@
                 select.innerHTML = '<option value="">No drivers available</option>';
                 return;
             }
-            drivers.forEach(driver => {
+            
+            // Sort drivers alphabetically by name
+            const sortedDrivers = [...drivers].sort((a, b) => a.name.localeCompare(b.name));
+            
+            sortedDrivers.forEach(driver => {
                 const option = document.createElement('option');
                 option.value = driver.name;
                 option.textContent = driver.name;
                 select.appendChild(option);
             });
-            console.log(`✅ Populated ${drivers.length} drivers`);
+            console.log(`✅ Populated ${drivers.length} drivers (sorted alphabetically)`);
         }
         function populateCars() {
             const select = document.getElementById('car-select');
@@ -1367,13 +1371,17 @@
                 select.innerHTML = '<option value="">No cars available</option>';
                 return;
             }
-            cars.forEach(car => {
+            
+            // Sort cars alphabetically by name
+            const sortedCars = [...cars].sort((a, b) => a.name.localeCompare(b.name));
+            
+            sortedCars.forEach(car => {
                 const option = document.createElement('option');
                 option.value = car.name;
                 option.textContent = car.name;
                 select.appendChild(option);
             });
-            console.log(`✅ Populated ${cars.length} cars`);
+            console.log(`✅ Populated ${cars.length} cars (sorted alphabetically)`);
         }
         function populateTracks() {
             const select = document.getElementById('track-select');
@@ -1387,13 +1395,17 @@
                 select.innerHTML = '<option value="">No tracks available</option>';
                 return;
             }
-            tracks.forEach(track => {
+            
+            // Sort tracks alphabetically by name
+            const sortedTracks = [...tracks].sort((a, b) => a.name.localeCompare(b.name));
+            
+            sortedTracks.forEach(track => {
                 const option = document.createElement('option');
                 option.value = track.name;
                 option.textContent = track.name;
                 select.appendChild(option);
             });
-            console.log(`✅ Populated ${tracks.length} tracks`);
+            console.log(`✅ Populated ${tracks.length} tracks (sorted alphabetically)`);
         }
         function addDriver() {
             const select = document.getElementById('driver-select');

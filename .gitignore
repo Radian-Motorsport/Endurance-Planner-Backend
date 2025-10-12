@@ -144,3 +144,6 @@ debug-auth.js
 interactive-test.js
 check-account.js
 oauth2-setup-check.js
+test-iracing-oauth2-isolated.js
+debug-iracing-data.js
+iRacing-API-README.md
