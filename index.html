@@ -538,30 +538,37 @@
                         <div id="local-time-adjusters" class="mb-4 hidden">
                             <div class="mb-4">
                                 <label for="timezone-select" class="text-sm font-medium text-neutral-500">Time Zone</label>
-                                <select id="timezone-select" class="mt-1 p-3 border border-neutral-700 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-neutral-200">
-                                    <option value="UTC">UTC</option>
-                                    <option value="US/Samoa">SST (GMT-11)</option>
-                                    <option value="America/Adak">HAST (GMT-10)</option>
-                                    <option value="America/Los_Angeles">PST (GMT-8)</option>
-                                    <option value="America/Denver">MST (GMT-7)</option>
-                                    <option value="America/Chicago">CST (GMT-6)</option>
-                                    <option value="America/New_York">EST (GMT-5)</option>
-                                    <option value="America/Halifax">AST (GMT-4)</option>
-                                    <option value="America/Sao_Paulo">BRT (GMT-3)</option>
-                                    <option value="Atlantic/Azores">AZOT (GMT-1)</option>
-                                    <option value="Europe/London" selected>GMT</option>
-                                    <option value="Europe/Paris">CET (GMT+1)</option>
-                                    <option value="Europe/Athens">EET (GMT+2)</option>
-                                    <option value="Asia/Riyadh">AST (GMT+3)</option>
-                                    <option value="Asia/Dubai">GST (GMT+4)</option>
-                                    <option value="Asia/Karachi">PKT (GMT+5)</option>
-                                    <option value="Asia/Kolkata">IST (GMT+5:30)</option>
-                                    <option value="Asia/Bangkok">ICT (GMT+7)</option>
-                                    <option value="Asia/Shanghai">CST (GMT+8)</option>
-                                    <option value="Asia/Tokyo">JST (GMT+9)</option>
-                                    <option value="Australia/Sydney">AEST (GMT+10)</option>
-                                    <option value="Pacific/Auckland">NZST (GMT+12)</option>
+                                <select id="timezone-select" class="mt-1 p-3 border border-neutral-700 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-neutral-200 font-mono">
+                                    <option value="UTC">GMT+0    UTC</option>
+                                    <option value="US/Samoa">GMT-11   SST</option>
+                                    <option value="America/Adak">GMT-10   HAST</option>
+                                    <option value="America/Los_Angeles">GMT-8    PST</option>
+                                    <option value="America/Denver">GMT-7    MST</option>
+                                    <option value="America/Chicago">GMT-6    CST</option>
+                                    <option value="America/New_York">GMT-5    EST</option>
+                                    <option value="America/Halifax">GMT-4    AST</option>
+                                    <option value="America/Sao_Paulo">GMT-3    BRT</option>
+                                    <option value="Atlantic/Azores">GMT-1    AZOT</option>
+                                    <option value="Europe/London" selected>GMT+0    GMT</option>
+                                    <option value="Europe/Paris">GMT+1    CET</option>
+                                    <option value="Europe/Athens">GMT+2    EET</option>
+                                    <option value="Asia/Riyadh">GMT+3    AST</option>
+                                    <option value="Asia/Dubai">GMT+4    GST</option>
+                                    <option value="Asia/Karachi">GMT+5    PKT</option>
+                                    <option value="Asia/Bangkok">GMT+7    ICT</option>
+                                    <option value="Asia/Shanghai">GMT+8    CST</option>
+                                    <option value="Asia/Tokyo">GMT+9    JST</option>
+                                    <option value="Australia/Sydney">GMT+10   AEST</option>
+                                    <option value="Pacific/Auckland">GMT+12   NZST</option>
                                 </select>
+                                
+                                <!-- Summertime/DST Checkbox -->
+                                <div class="mt-3">
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" id="summertime-checkbox" class="w-4 h-4 text-blue-600 bg-neutral-900 border-neutral-700 rounded focus:ring-blue-500 focus:ring-2">
+                                        <span class="text-sm text-neutral-400">Summertime/DST (+1 hour)</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                         
@@ -801,6 +808,15 @@
             if (practiceQualifyingTimeInput) {
                 practiceQualifyingTimeInput.addEventListener('change', () => {
                     console.log('🏁 Practice/Qualifying time changed, updating times...');
+                    updateTimesOnly();
+                });
+            }
+            
+            // Add listener for summertime checkbox
+            const summertimeCheckbox = document.getElementById('summertime-checkbox');
+            if (summertimeCheckbox) {
+                summertimeCheckbox.addEventListener('change', () => {
+                    console.log('☀️ Summertime/DST setting changed, updating times...');
                     updateTimesOnly();
                 });
             }
@@ -1878,15 +1894,17 @@
 				        const stintStartTime = new Date(currentTime.getTime());
 				        
 				        // Format the start time for the selected timezone
-				        const startTimeString = formatTimeWithTimezone(currentTime, selectedTimeZone);
+				        const startTimeString = typeof formatTimeWithTimezone === 'function' 
+				            ? formatTimeWithTimezone(currentTime, selectedTimeZone)
+				            : currentTime.toISOString().substr(11, 8);
 				        
 				        const stintDurationSeconds = stintLaps * avgLapTimeInSeconds;
 				        currentTime.setSeconds(currentTime.getSeconds() + stintDurationSeconds);
-				    
+				        
 				        // Format the end time for the selected timezone
-				        const endTimeString = formatTimeWithTimezone(currentTime, selectedTimeZone);
-				    
-				        const startLap = currentLap;
+				        const endTimeString = typeof formatTimeWithTimezone === 'function' 
+				            ? formatTimeWithTimezone(currentTime, selectedTimeZone)
+				            : currentTime.toISOString().substr(11, 8);				        const startLap = currentLap;
 				        const endLap = startLap + stintLaps - 1;
 				        
 				        // Get daylight status for stint start time
@@ -1922,8 +1940,12 @@
 				            currentTime.setSeconds(currentTime.getSeconds() + pitStopTime);
 				            const pitEndTime = new Date(currentTime);
 				            
-				            const pitStartTimeString = formatTimeWithTimezone(pitStartTime, selectedTimeZone);
-				            const pitEndTimeString = formatTimeWithTimezone(pitEndTime, selectedTimeZone);
+				            const pitStartTimeString = typeof formatTimeWithTimezone === 'function' 
+				                ? formatTimeWithTimezone(pitStartTime, selectedTimeZone)
+				                : pitStartTime.toISOString().substr(11, 8);
+				            const pitEndTimeString = typeof formatTimeWithTimezone === 'function' 
+				                ? formatTimeWithTimezone(pitEndTime, selectedTimeZone)
+				                : pitEndTime.toISOString().substr(11, 8);
 				            
 				            // Format pit stop duration (convert seconds to mm:ss)
 				            const pitMinutes = Math.floor(pitStopTime / 60);
@@ -2045,10 +2067,14 @@
 		        qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
 		        practiceQualifyingTime: document.getElementById('practice-qualifying-time').value,
 		        timezone: document.getElementById('timezone-select').value,
+		        summertime: document.getElementById('summertime-checkbox').checked,
+		        weatherImage1: document.getElementById('weather-image-1').value,
+		        weatherImage2: document.getElementById('weather-image-2').value,
+		        weatherImage3: document.getElementById('weather-image-3').value,
 		        stintDrivers: stintDrivers, // Save stint driver assignments
 		        stintBackupDrivers: stintBackupDrivers // Save stint backup driver assignments
 		    };
-		
+
 		    try {
 		        const response = await fetch('/api/strategies', {
 		            method: 'POST',
@@ -2123,10 +2149,14 @@
 		        qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
 		        practiceQualifyingTime: document.getElementById('practice-qualifying-time').value,
 		        timezone: document.getElementById('timezone-select').value,
+		        summertime: document.getElementById('summertime-checkbox').checked,
+		        weatherImage1: document.getElementById('weather-image-1').value,
+		        weatherImage2: document.getElementById('weather-image-2').value,
+		        weatherImage3: document.getElementById('weather-image-3').value,
 		        stintDrivers: stintDrivers, // Save stint driver assignments
 		        stintBackupDrivers: stintBackupDrivers // Save stint backup driver assignments
 		    };
-		
+
 		    try {
 		        const response = await fetch(`/api/strategies/${window.currentStrategyId}`, {
 		            method: 'PUT',
@@ -2200,6 +2230,19 @@
 		            
 		            // Restore the timezone from the shared link
 		            document.getElementById('timezone-select').value = state.timezone || 'UTC';
+		            
+		            // Restore summertime checkbox state
+		            document.getElementById('summertime-checkbox').checked = state.summertime || false;
+		            
+		            // Restore weather image URLs
+		            if (state.weatherImage1) document.getElementById('weather-image-1').value = state.weatherImage1;
+		            if (state.weatherImage2) document.getElementById('weather-image-2').value = state.weatherImage2;
+		            if (state.weatherImage3) document.getElementById('weather-image-3').value = state.weatherImage3;
+		            
+		            // Trigger weather image display after restoration
+		            if (state.weatherImage1 || state.weatherImage2 || state.weatherImage3) {
+		                displayWeatherImages(state.weatherImage1, state.weatherImage2);
+		            }
 		            
 		            document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
 		            document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
@@ -2624,17 +2667,35 @@
             populateTracks();
         }
 
-		// Function to handle time formatting based on the selected time zone
-		function formatTimeWithTimezone(date, timeZone) {
-			    const options = {
-			        timeZone: timeZone,
-			        hour: '2-digit',
-			        minute: '2-digit',
-			        second: '2-digit',
-			        hour12: false
-			    };
-			    return date.toLocaleString('en-GB', options);
-		}
+        // Function to handle time formatting based on the selected time zone
+        function formatTimeWithTimezone(date, timeZone) {
+            try {
+                // Check if summertime/DST is enabled
+                const summertimeCheckbox = document.getElementById('summertime-checkbox');
+                const isDST = summertimeCheckbox && summertimeCheckbox.checked;
+                
+                // Create a new date object to avoid modifying the original
+                let adjustedDate = new Date(date.getTime());
+                
+                // Add 1 hour if summertime is enabled
+                if (isDST) {
+                    adjustedDate.setHours(adjustedDate.getHours() + 1);
+                }
+                
+                const options = {
+                    timeZone: timeZone,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                };
+                return adjustedDate.toLocaleString('en-GB', options);
+            } catch (error) {
+                console.error('Error in formatTimeWithTimezone:', error);
+                // Fallback to basic time formatting
+                return date.toISOString().substr(11, 8);
+            }
+        }
 
 				
 		// Function to populate the driver dropdowns for each stint
