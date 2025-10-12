@@ -150,6 +150,36 @@
         
         .driver-color-default { background-color: rgba(115, 115, 115, 0.2) !important; } /* Default Gray */
         .pit-stop-row { background-color: rgb(42, 42, 42) !important; ; } /* Red for pit stops */
+        
+        /* Daylight Gradient Classes for Daylight Column */
+        .daylight-night { 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important; 
+            color: #9ca3af !important;
+        }
+        .daylight-dawn { 
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%) !important; 
+            color: #1f2937 !important;
+        }
+        .daylight-day { 
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #fff59d 100%) !important; 
+            color: #1f2937 !important;
+        }
+        .daylight-dusk { 
+            background: linear-gradient(135deg, #ff4757 0%, #ff6b35 50%, #1a1a2e 100%) !important; 
+            color: #f3f4f6 !important;
+        }
+        
+        /* Toggle Switch Styles */
+        .toggle-active {
+            background-color: #3b82f6 !important;
+        }
+        .toggle-active .toggle-slider {
+            transform: translateX(1.25rem) !important;
+        }
+        .time-mode-active {
+            color: #3b82f6 !important;
+            font-weight: 600 !important;
+        }
     </style>
 </head>
 <body class="bg-neutral-900 text-neutral-200 p-4">
@@ -515,17 +545,42 @@
                                     <option value="Pacific/Auckland">NZST (GMT+12)</option>
                                 </select>
                             </div>
+                            
+                            <!-- Time Mode Toggle Switch -->
+                            <div class="mt-4">
+                                <label class="text-sm font-medium text-neutral-500 mb-2 block">Time Display Mode</label>
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-sm text-neutral-400" id="race-time-label">Race Time</span>
+                                    <button id="time-mode-toggle" onclick="toggleTimeMode()" class="relative inline-flex h-6 w-11 items-center rounded-full bg-neutral-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        <span id="toggle-slider" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
+                                    </button>
+                                    <span class="text-sm text-neutral-400" id="local-time-label">Local Time</span>
+                                </div>
+                                <p class="text-xs text-neutral-500 mt-1" id="time-mode-description">Using race start time from page 1</p>
+                            </div>
+                            
+                            <!-- Practice/Qualifying Time Addition -->
+                            <div class="mt-4">
+                                <label for="practice-qualifying-time" class="text-sm font-medium text-neutral-500 mb-2 block">Practice/Qualifying Time Addition</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="number" id="practice-qualifying-time" min="0" max="999" step="0.01" value="0.00" class="w-24 p-2 border-neutral-700 rounded-lg text-neutral-200 bg-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                    <span class="text-sm text-neutral-500">hours</span>
+                                </div>
+                                <p class="text-xs text-neutral-500 mt-1">Additional time before race start (e.g., practice sessions, qualifying)</p>
+                            </div>
+                            
                                     <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="updateTimesOnly()">Update</button>
                         </div>
                     
                     <table class= "min-w-full divide-y divide-neutral-600 border-neutral-900 rounded-lg">
                         <thead class="bg-neutral-900">
                             <tr>
-                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Start Time</th>
-                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">End Time</th>
-                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Start Lap</th>
-                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">End Lap</th>
-                                <th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Laps per Stint</th>
+                                <th class="w-16 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Start Time</th>
+                                <th class="w-16 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">End Time</th>
+                                <th class="w-12 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Start Lap</th>
+                                <th class="w-12 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">End Lap</th>
+                                <th class="w-12 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Laps</th>
+                                <th class="w-16 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Daylight</th>
 								<th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Driver</th>
 								<th class="w-20 px-1 py-3 text-center text-xs font-medium text-neutral-200 uppercase tracking-wider border-r border-neutral-900">Backup</th>
                             </tr>
@@ -719,6 +774,15 @@
             if (timezoneSelect) {
                 timezoneSelect.addEventListener('change', () => {
                     console.log('🌍 Timezone changed, updating times...');
+                    updateTimesOnly();
+                });
+            }
+            
+            // Add listener for practice/qualifying time input
+            const practiceQualifyingTimeInput = document.getElementById('practice-qualifying-time');
+            if (practiceQualifyingTimeInput) {
+                practiceQualifyingTimeInput.addEventListener('change', () => {
+                    console.log('🏁 Practice/Qualifying time changed, updating times...');
                     updateTimesOnly();
                 });
             }
@@ -1045,6 +1109,10 @@
             document.getElementById('admin-page').classList.add('hidden');
         }
 
+        // Global variables for daylight data
+        let globalSunriseTime = null;
+        let globalSunsetTime = null;
+
         // Calculate daylight times for page 2 display
         async function calculateDaylightForPage2(trackId, date) {
             try {
@@ -1052,14 +1120,18 @@
                 const data = await response.json();
                 
                 if (response.ok) {
+                    // Store raw Date objects globally for stint calculations
+                    globalSunriseTime = new Date(data.times.sunrise);
+                    globalSunsetTime = new Date(data.times.sunset);
+                    
                     // Format times as HH:MM (local time representation)
-                    const sunrise = new Date(data.times.sunrise).toLocaleTimeString('en-US', { 
+                    const sunrise = globalSunriseTime.toLocaleTimeString('en-US', { 
                         hour: '2-digit', 
                         minute: '2-digit',
                         hour12: false,
                         timeZone: 'UTC'
                     });
-                    const sunset = new Date(data.times.sunset).toLocaleTimeString('en-US', { 
+                    const sunset = globalSunsetTime.toLocaleTimeString('en-US', { 
                         hour: '2-digit', 
                         minute: '2-digit',
                         hour12: false,
@@ -1075,7 +1147,77 @@
                 console.error('Error calculating daylight for page 2:', error);
                 document.getElementById('page2-sunrise').textContent = 'Error';
                 document.getElementById('page2-sunset').textContent = 'Error';
+                // Reset global variables on error
+                globalSunriseTime = null;
+                globalSunsetTime = null;
             }
+        }
+
+        // Function to determine daylight status for a given time
+        function getDaylightStatus(stintTime) {
+            if (!globalSunriseTime || !globalSunsetTime) {
+                return 'daylight-night'; // Default to night if no daylight data
+            }
+            
+            // Create time objects for comparison (same date, different times)
+            const stintHours = stintTime.getUTCHours();
+            const stintMinutes = stintTime.getUTCMinutes();
+            const stintTimeOfDay = stintHours * 60 + stintMinutes; // Convert to minutes since midnight
+            
+            const sunriseHours = globalSunriseTime.getUTCHours();
+            const sunriseMinutes = globalSunriseTime.getUTCMinutes();
+            const sunriseTimeOfDay = sunriseHours * 60 + sunriseMinutes;
+            
+            const sunsetHours = globalSunsetTime.getUTCHours();
+            const sunsetMinutes = globalSunsetTime.getUTCMinutes();
+            const sunsetTimeOfDay = sunsetHours * 60 + sunsetMinutes;
+            
+            const dawnTransition = 30; // 30 minutes for dawn/dusk transitions
+            
+            // Determine daylight status
+            if (stintTimeOfDay < (sunriseTimeOfDay - dawnTransition)) {
+                return 'daylight-night';
+            } else if (stintTimeOfDay < (sunriseTimeOfDay + dawnTransition)) {
+                return 'daylight-dawn';
+            } else if (stintTimeOfDay < (sunsetTimeOfDay - dawnTransition)) {
+                return 'daylight-day';
+            } else if (stintTimeOfDay < (sunsetTimeOfDay + dawnTransition)) {
+                return 'daylight-dusk';
+            } else {
+                return 'daylight-night';
+            }
+        }
+
+        // Global variable for time mode (true = race time, false = local time)
+        let isRaceTimeMode = true;
+
+        // Toggle between Race Time and Local Time modes
+        function toggleTimeMode() {
+            isRaceTimeMode = !isRaceTimeMode;
+            
+            const toggle = document.getElementById('time-mode-toggle');
+            const slider = document.getElementById('toggle-slider');
+            const raceLabel = document.getElementById('race-time-label');
+            const localLabel = document.getElementById('local-time-label');
+            const description = document.getElementById('time-mode-description');
+            
+            if (isRaceTimeMode) {
+                // Race Time Mode
+                toggle.classList.remove('toggle-active');
+                slider.classList.remove('toggle-slider');
+                raceLabel.classList.add('time-mode-active');
+                localLabel.classList.remove('time-mode-active');
+                description.textContent = 'Using race start time from page 1';
+            } else {
+                // Local Time Mode  
+                toggle.classList.add('toggle-active');
+                slider.classList.add('toggle-slider');
+                raceLabel.classList.remove('time-mode-active');
+                localLabel.classList.add('time-mode-active');
+                description.textContent = 'Using current local time with timezone';
+            }
+            
+            console.log(`🕒 Time mode switched to: ${isRaceTimeMode ? 'Race Time' : 'Local Time'}`);
         }
 
         // --- Core Logic ---
@@ -1645,18 +1787,31 @@
 				    
 				    const raceStartTimeInput = document.getElementById('race-start-time-page2').value;
 				    const qualifyingMinutesInput = parseInt(document.getElementById('qualifying-minutes-page2').value) || 0;
+				    const practiceQualifyingHours = parseFloat(document.getElementById('practice-qualifying-time').value) || 0;
 				    const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
 				    const selectedTimeZone = document.getElementById('timezone-select').value; // Get the selected time zone
 				    
-				    const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
+				    let currentTime;
 				    
-				    const raceDate = new Date();
-				    // Set the race start time in UTC
-				    raceDate.setUTCHours(hours, minutes, 0, 0); 
+				    if (isRaceTimeMode) {
+				        // Race Time Mode: Use time from page 1 (race start time input)
+				        const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
+				        const raceDate = new Date();
+				        raceDate.setUTCHours(hours, minutes, 0, 0); 
+				        currentTime = new Date(raceDate.getTime());
+				        console.log('🏁 Using Race Time mode:', currentTime.toISOString());
+				    } else {
+				        // Local Time Mode: Use current local time
+				        currentTime = new Date();
+				        console.log('🌍 Using Local Time mode:', currentTime.toISOString());
+				    }
 				    
-				    let currentTime = new Date(raceDate.getTime());
-				    
+				    // Add practice/qualifying time and qualifying minutes
 				    currentTime.setMinutes(currentTime.getMinutes() + qualifyingMinutesInput);
+				    currentTime.setMinutes(currentTime.getMinutes() + (practiceQualifyingHours * 60));
+				    
+				    console.log('⏰ Final start time after additions:', currentTime.toISOString(), 
+				               `(+${qualifyingMinutesInput}min qualifying, +${practiceQualifyingHours}hrs practice/qualifying)`);
 				    
 				    let currentLap = 1;
 				    let driverIndex = 0;
@@ -1665,6 +1820,9 @@
 				        const stintLaps = (i === totalStints - 1) && (lapsInLastStint !== 0) ? lapsInLastStint : lapsPerStint;
 				        if (stintLaps <= 0) break;
 				    
+				        // Store stint start time for daylight calculation
+				        const stintStartTime = new Date(currentTime.getTime());
+				        
 				        // Format the start time for the selected timezone
 				        const startTimeString = formatTimeWithTimezone(currentTime, selectedTimeZone);
 				        
@@ -1677,6 +1835,9 @@
 				        const startLap = currentLap;
 				        const endLap = startLap + stintLaps - 1;
 				        
+				        // Get daylight status for stint start time
+				        const daylightStatus = getDaylightStatus(stintStartTime);
+				        
 				        // Create driving stint row
 				        const tr = document.createElement('tr');
 				        tr.id = `stint-row-${i}`;  // Add ID for easy targeting
@@ -1686,6 +1847,7 @@
 				            <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${startLap}</td>
 				            <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${endLap}</td>
 				            <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">${stintLaps}</td>
+				            <td id="daylight-cell-${i}" class="px-1 py-2 text-center text-xs font-medium border-r border-neutral-900 ${daylightStatus}"></td>
 				            <td class="px-1 py-2 text-center text-s text-neutral-200 border-r border-neutral-900">
 				                <select id="stint-driver-${i}" class="w-auto bg-neutral-800 text-neutral-200 p-1 rounded-md border border-neutral-900"></select>
 				            </td>
@@ -1714,6 +1876,9 @@
 				            const pitSeconds = pitStopTime % 60;
 				            const pitDurationString = `${pitMinutes.toString().padStart(2, '0')}:${pitSeconds.toString().padStart(2, '0')}`;
 				            
+				            // Get daylight status for pit stop time
+				            const pitDaylightStatus = getDaylightStatus(pitStartTime);
+				            
 				            const pitRow = document.createElement('tr');
 				            pitRow.classList.add('pit-stop-row');
 				            pitRow.innerHTML = `
@@ -1722,6 +1887,7 @@
 				                <td class="px-1 py-2 text-center text-xs text-neutral-200 road-rage-font border-r border-neutral-900">PIT</td>
 				                <td class="px-1 py-2 text-center text-xs text-neutral-200 road-rage-font border-r border-neutral-900">PIT</td>
 				                <td class="px-1 py-2 text-center text-xs text-neutral-200 border-r border-neutral-900">${pitDurationString}</td>
+				                <td class="px-1 py-2 text-center text-xs text-neutral-400 border-r border-neutral-900 ${pitDaylightStatus}">⛽</td>
 				                <td class="px-1 py-2 text-center text-xs text-neutral-400 border-r border-neutral-900">-</td>
 				                <td class="px-1 py-2 text-center text-s text-neutral-400">-</td>
 				            `;
@@ -1823,6 +1989,7 @@
 		        lapTimeSlider: document.getElementById('lap-time-slider').value,
 		        raceStartTime: document.getElementById('race-start-time-page2').value,
 		        qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
+		        practiceQualifyingTime: document.getElementById('practice-qualifying-time').value,
 		        timezone: document.getElementById('timezone-select').value,
 		        stintDrivers: stintDrivers, // Save stint driver assignments
 		        stintBackupDrivers: stintBackupDrivers // Save stint backup driver assignments
@@ -1900,6 +2067,7 @@
 		        lapTimeSlider: document.getElementById('lap-time-slider').value,
 		        raceStartTime: document.getElementById('race-start-time-page2').value,
 		        qualifyingMinutes: document.getElementById('qualifying-minutes-page2').value,
+		        practiceQualifyingTime: document.getElementById('practice-qualifying-time').value,
 		        timezone: document.getElementById('timezone-select').value,
 		        stintDrivers: stintDrivers, // Save stint driver assignments
 		        stintBackupDrivers: stintBackupDrivers // Save stint backup driver assignments
@@ -1974,6 +2142,7 @@
 		            document.getElementById('lap-time-slider').value = state.lapTimeSlider;
 		            document.getElementById('race-start-time-page2').value = state.raceStartTime;
 		            document.getElementById('qualifying-minutes-page2').value = state.qualifyingMinutes;
+		            document.getElementById('practice-qualifying-time').value = state.practiceQualifyingTime || '0.00';
 		            
 		            // Restore the timezone from the shared link
 		            document.getElementById('timezone-select').value = state.timezone || 'UTC';
