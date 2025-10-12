@@ -541,7 +541,7 @@
                     <h1 class="text-xl font- mb-4  road-rage-font">Manage Tracks</h1>
                     <div class="space-y-4">
                         <div class="flex flex-col space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                                 <div>
                                     <label for="new-track-name" class="text-sm font-medium text-neutral-500">Track Name</label>
                                     <input type="text" id="new-track-name" placeholder="Autodromo Nazionale Monza Combined" class="mt-1 p-3 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -553,6 +553,14 @@
                                 <div>
                                     <label for="new-track-length" class="text-sm font-medium text-neutral-500">Track Length (km)</label>
                                     <input type="number" step="0.001" id="new-track-length" placeholder="5.793" class="mt-1 p-3 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="new-track-latitude" class="text-sm font-medium text-neutral-500">Latitude</label>
+                                    <input type="number" step="0.0000001" id="new-track-latitude" placeholder="45.6156" class="mt-1 p-3 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="new-track-longitude" class="text-sm font-medium text-neutral-500">Longitude</label>
+                                    <input type="number" step="0.0000001" id="new-track-longitude" placeholder="9.2811" class="mt-1 p-3 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                             </div>
                             <div class="flex justify-center">
@@ -2117,6 +2125,8 @@
             document.getElementById('new-track-name').value = '';
             document.getElementById('new-track-garage61-id').value = '';
             document.getElementById('new-track-length').value = '';
+            document.getElementById('new-track-latitude').value = '';
+            document.getElementById('new-track-longitude').value = '';
             document.getElementById('add-track-btn').textContent = 'Add Track';
             document.getElementById('add-track-btn').onclick = addTrackAdmin;
         }
@@ -2124,9 +2134,11 @@
             const name = document.getElementById('new-track-name').value;
             const garage61_id = parseInt(document.getElementById('new-track-garage61-id').value);
             const track_length = parseFloat(document.getElementById('new-track-length').value) || 0.0;
+            const latitude = parseFloat(document.getElementById('new-track-latitude').value) || null;
+            const longitude = parseFloat(document.getElementById('new-track-longitude').value) || null;
             
             if (name && garage61_id) {
-                tracks.push({ name, garage61_id, track_length });
+                tracks.push({ name, garage61_id, track_length, latitude, longitude });
                 await saveDataToServer();
                 renderAdminLists();
                 populateTracks();
@@ -2141,6 +2153,8 @@
                 document.getElementById('new-track-name').value = track.name;
                 document.getElementById('new-track-garage61-id').value = track.garage61_id || '';
                 document.getElementById('new-track-length').value = track.track_length || '0.0';
+                document.getElementById('new-track-latitude').value = track.latitude || '';
+                document.getElementById('new-track-longitude').value = track.longitude || '';
                 document.getElementById('add-track-btn').textContent = 'Update Track';
                 document.getElementById('add-track-btn').onclick = () => updateTrackAdmin(name);
             }
@@ -2149,6 +2163,8 @@
             const name = document.getElementById('new-track-name').value;
             const garage61_id = parseInt(document.getElementById('new-track-garage61-id').value);
             const track_length = parseFloat(document.getElementById('new-track-length').value) || 0.0;
+            const latitude = parseFloat(document.getElementById('new-track-latitude').value) || null;
+            const longitude = parseFloat(document.getElementById('new-track-longitude').value) || null;
             
             if (name && garage61_id) {
                 try {
@@ -2163,7 +2179,7 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ name, garage61_id, track_length }),
+                        body: JSON.stringify({ name, garage61_id, track_length, latitude, longitude }),
                     });
                     
                     if (!response.ok) {
@@ -2174,7 +2190,7 @@
                     // Update local tracks array
                     const index = tracks.findIndex(t => t.name === originalName);
                     if (index !== -1) {
-                        tracks[index] = { name, garage61_id, track_length };
+                        tracks[index] = { name, garage61_id, track_length, latitude, longitude };
                     }
                     
                     renderAdminLists();

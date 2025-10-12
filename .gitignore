@@ -143,3 +143,6 @@ IRACING-*
 *OAUTH2*
 PROJECT-RESUME-NOTES.md
 DATA-LOSS-FIX-COMPLETED.md
+
+# Database update scripts (contain sensitive coordinate data)
+update-tracks-coordinates.sql

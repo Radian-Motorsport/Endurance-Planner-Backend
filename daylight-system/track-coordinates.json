@@ -1,0 +1,189 @@
+{
+  "track_coordinates": [
+    {
+      "track_name": "Silverstone Circuit Grand Prix",
+      "garage61_id": 80,
+      "latitude": 52.0786,
+      "longitude": -1.0169
+    },
+    {
+      "track_name": "Silverstone Circuit International",
+      "garage61_id": 292,
+      "latitude": 52.0786,
+      "longitude": -1.0169
+    },
+    {
+      "track_name": "Circuit de Spa-Francorchamps Endurance",
+      "garage61_id": 446,
+      "latitude": 50.4372,
+      "longitude": 5.9714
+    },
+    {
+      "track_name": "Circuit des 24 Heures du Mans",
+      "garage61_id": 95,
+      "latitude": 47.9565,
+      "longitude": 0.2076
+    },
+    {
+      "track_name": "Nurburgring Combined Gesamtstrecke 24h",
+      "garage61_id": 93,
+      "latitude": 50.3356,
+      "longitude": 6.9475
+    },
+    {
+      "track_name": "Nurburgring Combined Gesamtstrecke Long",
+      "garage61_id": 92,
+      "latitude": 50.3356,
+      "longitude": 6.9475
+    },
+    {
+      "track_name": "Nurburgring Combined Gesamtstrecke Short w/out Arena",
+      "garage61_id": 183,
+      "latitude": 50.3356,
+      "longitude": 6.9475
+    },
+    {
+      "track_name": "Nurburgring Combined Gesamtstrecke VLN",
+      "garage61_id": 94,
+      "latitude": 50.3356,
+      "longitude": 6.9475
+    },
+    {
+      "track_name": "Nurburgring Grand-Prix-Strecke BES/WEC",
+      "garage61_id": 100,
+      "latitude": 50.3356,
+      "longitude": 6.9475
+    },
+    {
+      "track_name": "Nurburgring Nordschleife Industriefahrten",
+      "garage61_id": 75,
+      "latitude": 50.3356,
+      "longitude": 6.9475
+    },
+    {
+      "track_name": "Nurburgring Nordschleife Touristenfahrten",
+      "garage61_id": 68,
+      "latitude": 50.3356,
+      "longitude": 6.9475
+    },
+    {
+      "track_name": "Sebring International Raceway International",
+      "garage61_id": 35,
+      "latitude": 27.4547,
+      "longitude": -81.3483
+    },
+    {
+      "track_name": "Road Atlanta Full Course",
+      "garage61_id": 40,
+      "latitude": 34.1547,
+      "longitude": -84.2608
+    },
+    {
+      "track_name": "Road America Full Course",
+      "garage61_id": 49,
+      "latitude": 43.8019,
+      "longitude": -87.9889
+    },
+    {
+      "track_name": "Watkins Glen International Boot",
+      "garage61_id": 324,
+      "latitude": 42.3370,
+      "longitude": -76.9269
+    },
+    {
+      "track_name": "WeatherTech Raceway at Laguna Seca Full Course",
+      "garage61_id": 34,
+      "latitude": 36.5844,
+      "longitude": -121.7536
+    },
+    {
+      "track_name": "Virginia International Raceway Full Course",
+      "garage61_id": 393,
+      "latitude": 36.5578,
+      "longitude": -78.3731
+    },
+    {
+      "track_name": "Autodromo Internazionale Imola",
+      "garage61_id": 53,
+      "latitude": 44.3439,
+      "longitude": 11.7167
+    },
+    {
+      "track_name": "Autodromo Nazionale Monza Combined",
+      "garage61_id": 232,
+      "latitude": 45.6156,
+      "longitude": 9.2811
+    },
+    {
+      "track_name": "Autodromo Nazionale Monza Grand Prix",
+      "garage61_id": 77,
+      "latitude": 45.6156,
+      "longitude": 9.2811
+    },
+    {
+      "track_name": "Brands Hatch Circuit Grand Prix",
+      "garage61_id": 36,
+      "latitude": 51.3569,
+      "longitude": 0.2631
+    },
+    {
+      "track_name": "Suzuka International Racing Course Grand Prix",
+      "garage61_id": 57,
+      "latitude": 34.8431,
+      "longitude": 136.5419
+    },
+    {
+      "track_name": "Hungaroring Standard",
+      "garage61_id": 291,
+      "latitude": 47.5789,
+      "longitude": 19.2486
+    },
+    {
+      "track_name": "Circuit of the Americas Grand Prix",
+      "garage61_id": 175,
+      "latitude": 30.1328,
+      "longitude": -97.6411
+    },
+    {
+      "track_name": "Circuit Zandvoort Grand Prix",
+      "garage61_id": 409,
+      "latitude": 52.3888,
+      "longitude": 4.5409
+    },
+    {
+      "track_name": "Fuji International Speedway Grand Prix",
+      "garage61_id": 376,
+      "latitude": 35.3686,
+      "longitude": 138.9267
+    },
+    {
+      "track_name": "Mount Panorama Circuit Standard",
+      "garage61_id": 79,
+      "latitude": -33.4461,
+      "longitude": 149.5594
+    },
+    {
+      "track_name": "Red Bull Ring Grand Prix",
+      "garage61_id": 253,
+      "latitude": 47.2197,
+      "longitude": 14.7647
+    }
+  ],
+  "data_format": {
+    "latitude": "Decimal degrees (e.g., 52.0786)",
+    "longitude": "Decimal degrees (e.g., -1.0169)",
+    "garage61_id": "ID from your tracks database for cross-reference",
+    "example": {
+      "track_name": "Silverstone Circuit Grand Prix",
+      "garage61_id": 80,
+      "latitude": 52.0786,
+      "longitude": -1.0169
+    }
+  },
+  "notes": [
+    "Coordinates filled in for all tracks from database",
+    "Garage61_ids matched with database entries",  
+    "Track names updated to match database exactly",
+    "Ready for database migration when needed"
+  ]
+}
