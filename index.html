@@ -260,7 +260,7 @@
                     </div>
                     <!-- Race Date & Time Display -->
                     <div class="mt-6 pt-4 border-t border-neutral-700">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                             <div class="flex flex-col items-center">
                                 <i class="fas fa-calendar-alt text-blue-400 text-2xl mb-2"></i>
                                 <span class="text-sm text-neutral-500">Race Date</span>
@@ -270,6 +270,16 @@
                                 <i class="fas fa-clock text-green-400 text-2xl mb-2"></i>
                                 <span class="text-sm text-neutral-500">Start Time</span>
                                 <span id="page2-race-time" class="text-neutral-400 font-medium">Not selected</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <i class="fas fa-sun text-orange-400 text-2xl mb-2"></i>
+                                <span class="text-sm text-neutral-500">Sunrise</span>
+                                <span id="page2-sunrise" class="text-neutral-400 font-medium">Calculating...</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <i class="fas fa-moon text-purple-400 text-2xl mb-2"></i>
+                                <span class="text-sm text-neutral-500">Sunset</span>
+                                <span id="page2-sunset" class="text-neutral-400 font-medium">Calculating...</span>
                             </div>
                         </div>
                     </div>
@@ -954,6 +964,14 @@
             document.getElementById('page2-race-date').textContent = raceDate ? new Date(raceDate).toLocaleDateString() : 'Not selected';
             document.getElementById('page2-race-time').textContent = raceTime || 'Not selected';
             
+            // Calculate and display sunrise/sunset if we have track and date
+            if (selectedTrack?.garage61_id && raceDate) {
+                calculateDaylightForPage2(selectedTrack.garage61_id, raceDate);
+            } else {
+                document.getElementById('page2-sunrise').textContent = 'N/A';
+                document.getElementById('page2-sunset').textContent = 'N/A';
+            }
+            
             // Load car and track logos based on garage61 IDs
             const carLogo = document.getElementById('car-logo');
             const trackLogo = document.getElementById('track-logo');
@@ -985,6 +1003,39 @@
             document.getElementById('page-2').classList.add('hidden');
             document.getElementById('page-3').classList.remove('hidden');
             document.getElementById('admin-page').classList.add('hidden');
+        }
+
+        // Calculate daylight times for page 2 display
+        async function calculateDaylightForPage2(trackId, date) {
+            try {
+                const response = await fetch(`/api/daylight/${trackId}/${date}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Format times as HH:MM (local time representation)
+                    const sunrise = new Date(data.times.sunrise).toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false,
+                        timeZone: 'UTC'
+                    });
+                    const sunset = new Date(data.times.sunset).toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false,
+                        timeZone: 'UTC'
+                    });
+                    
+                    document.getElementById('page2-sunrise').textContent = sunrise + ' UTC';
+                    document.getElementById('page2-sunset').textContent = sunset + ' UTC';
+                } else {
+                    throw new Error(data.error || 'Failed to calculate daylight');
+                }
+            } catch (error) {
+                console.error('Error calculating daylight for page 2:', error);
+                document.getElementById('page2-sunrise').textContent = 'Error';
+                document.getElementById('page2-sunset').textContent = 'Error';
+            }
         }
 
         // --- Core Logic ---
