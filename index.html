@@ -226,6 +226,26 @@
                     </div>
                 </div>
 
+                <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
+                    <h1 class="text-xl mb-4 road-rage-font">Weather Forecast (Optional)</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                        <div class="flex flex-col w-full">
+                            <label for="weather-temp-url" class="text-sm font-medium text-neutral-500 mb-2">Temperature Chart URL</label>
+                            <input type="url" id="weather-temp-url" placeholder="https://raw.githubusercontent.com/..." class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
+                        </div>
+                        <div class="flex flex-col w-full">
+                            <label for="weather-clouds-url" class="text-sm font-medium text-neutral-500 mb-2">Clouds & Precipitation URL</label>
+                            <input type="url" id="weather-clouds-url" placeholder="https://raw.githubusercontent.com/..." class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
+                        </div>
+                    </div>
+                    <div class="mt-4 p-3 bg-neutral-700 rounded-lg">
+                        <p class="text-xs text-neutral-400">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Upload weather images to GitHub and paste the raw URLs here. Format: track_ddmmyyyy_hhmm_type.png
+                        </p>
+                    </div>
+                </div>
+
                 <div class="mt-8">
                     <button onclick="showPage2()" id="continue-button" class="w-full bg-blue-700 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                         Calculate <i class="fas fa-arrow-right ml-2"></i>
@@ -281,6 +301,21 @@
                                 <span class="text-sm text-neutral-500">Sunset</span>
                                 <span id="page2-sunset" class="text-neutral-400 font-medium">Calculating...</span>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weather Forecast Display Section -->
+                <div id="weather-display" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg mb-6 hidden">
+                    <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div id="temp-chart-container" class="hidden">
+                            <h4 class="text-lg font-bold text-white mb-2">Temperature</h4>
+                            <img id="temp-chart" src="" alt="Temperature Chart" class="w-full rounded-lg border border-neutral-700">
+                        </div>
+                        <div id="clouds-chart-container" class="hidden">
+                            <h4 class="text-lg font-bold text-white mb-2">Clouds & Precipitation</h4>
+                            <img id="clouds-chart" src="" alt="Clouds & Precipitation Chart" class="w-full rounded-lg border border-neutral-700">
                         </div>
                     </div>
                 </div>
@@ -972,6 +1007,11 @@
                 document.getElementById('page2-sunset').textContent = 'N/A';
             }
             
+            // Handle weather images
+            const tempUrl = document.getElementById('weather-temp-url').value;
+            const cloudsUrl = document.getElementById('weather-clouds-url').value;
+            displayWeatherImages(tempUrl, cloudsUrl);
+            
             // Load car and track logos based on garage61 IDs
             const carLogo = document.getElementById('car-logo');
             const trackLogo = document.getElementById('track-logo');
@@ -1186,6 +1226,51 @@
        
             // Show the button to go to the third page after calculation
             document.getElementById('page3-button-container').classList.remove('hidden');
+        }
+
+        // Weather Display Functions
+        function displayWeatherImages(tempUrl, cloudsUrl) {
+            console.log('🌦️ Displaying weather images:', { tempUrl, cloudsUrl });
+            
+            const weatherDisplay = document.getElementById('weather-display');
+            const tempContainer = document.getElementById('temp-chart-container');
+            const cloudsContainer = document.getElementById('clouds-chart-container');
+            const tempChart = document.getElementById('temp-chart');
+            const cloudsChart = document.getElementById('clouds-chart');
+            
+            // Hide weather section by default
+            weatherDisplay.classList.add('hidden');
+            tempContainer.classList.add('hidden');
+            cloudsContainer.classList.add('hidden');
+            
+            // Check if we have any weather URLs
+            if (!tempUrl && !cloudsUrl) {
+                console.log('No weather URLs provided, hiding weather section');
+                return;
+            }
+            
+            // Show weather section if we have at least one URL
+            weatherDisplay.classList.remove('hidden');
+            
+            // Handle temperature chart
+            if (tempUrl && tempUrl.trim()) {
+                tempChart.src = tempUrl.trim();
+                tempContainer.classList.remove('hidden');
+                tempChart.onerror = function() { 
+                    console.warn('Failed to load temperature chart:', tempUrl);
+                    tempContainer.classList.add('hidden');
+                };
+            }
+            
+            // Handle clouds/precipitation chart
+            if (cloudsUrl && cloudsUrl.trim()) {
+                cloudsChart.src = cloudsUrl.trim();
+                cloudsContainer.classList.remove('hidden');
+                cloudsChart.onerror = function() { 
+                    console.warn('Failed to load clouds chart:', cloudsUrl);
+                    cloudsContainer.classList.add('hidden');
+                };
+            }
         }
 
         // Garage61 API Functions
