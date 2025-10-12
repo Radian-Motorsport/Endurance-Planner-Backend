@@ -271,7 +271,12 @@
                     <div class="mt-4 p-3 bg-neutral-700 rounded-lg">
                         <p class="text-xs text-neutral-400">
                             <i class="fas fa-info-circle mr-1"></i>
-                            Upload weather images to GitHub and paste the raw URLs here. Format: track_ddmmyyyy_hhmm_type.png
+                            Upload weather images to GitHub and paste the URLs here. Both regular GitHub URLs and raw URLs work.
+                        </p>
+                        <p class="text-xs text-neutral-500 mt-1">
+                            ✅ Works: https://github.com/user/repo/blob/main/weather/track_12102025_1430_temp.png<br>
+                            ✅ Works: https://raw.githubusercontent.com/user/repo/main/weather/track_12102025_1430_temp.png<br>
+                            📁 Format: track_ddmmyyyy_hhmm_type.png
                         </p>
                     </div>
                 </div>
@@ -1396,23 +1401,51 @@
             
             // Handle temperature chart
             if (tempUrl && tempUrl.trim()) {
-                tempChart.src = tempUrl.trim();
+                const convertedTempUrl = convertToRawGitHubUrl(tempUrl.trim());
+                tempChart.src = convertedTempUrl;
                 tempContainer.classList.remove('hidden');
                 tempChart.onerror = function() { 
-                    console.warn('Failed to load temperature chart:', tempUrl);
+                    console.warn('Failed to load temperature chart:', convertedTempUrl);
+                    console.warn('Original URL was:', tempUrl.trim());
                     tempContainer.classList.add('hidden');
                 };
+                console.log('🌡️ Loading temperature chart:', convertedTempUrl);
             }
             
             // Handle clouds/precipitation chart
             if (cloudsUrl && cloudsUrl.trim()) {
-                cloudsChart.src = cloudsUrl.trim();
+                const convertedCloudsUrl = convertToRawGitHubUrl(cloudsUrl.trim());
+                cloudsChart.src = convertedCloudsUrl;
                 cloudsContainer.classList.remove('hidden');
                 cloudsChart.onerror = function() { 
-                    console.warn('Failed to load clouds chart:', cloudsUrl);
+                    console.warn('Failed to load clouds chart:', convertedCloudsUrl);
+                    console.warn('Original URL was:', cloudsUrl.trim());
                     cloudsContainer.classList.add('hidden');
                 };
+                console.log('☁️ Loading clouds chart:', convertedCloudsUrl);
             }
+        }
+
+        // Function to convert regular GitHub URLs to raw URLs
+        function convertToRawGitHubUrl(url) {
+            // If it's already a raw URL, return as-is
+            if (url.includes('raw.githubusercontent.com')) {
+                return url;
+            }
+            
+            // Convert github.com blob URLs to raw URLs
+            if (url.includes('github.com') && url.includes('/blob/')) {
+                // Pattern: https://github.com/user/repo/blob/branch/path
+                // Convert to: https://raw.githubusercontent.com/user/repo/branch/path
+                const converted = url
+                    .replace('github.com', 'raw.githubusercontent.com')
+                    .replace('/blob/', '/');
+                console.log('🔄 Converted GitHub URL:', url, '→', converted);
+                return converted;
+            }
+            
+            // If it's not a GitHub URL, return as-is
+            return url;
         }
 
         // Garage61 API Functions
