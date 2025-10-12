@@ -133,17 +133,13 @@ test-*.json
 *-old.json
 radianplanner-*.json
 
-# iRacing Integration Files (Work in Progress - Not Ready for Production)
+# Development and Documentation Files (Work in Progress)
+iracing-development/
+documentation/
 iracing-*
 IRACING-*
 *iracing*
+*oauth2*
+*OAUTH2*
 PROJECT-RESUME-NOTES.md
-OAUTH2-FILE-SUMMARY.md
 DATA-LOSS-FIX-COMPLETED.md
-debug-auth.js
-interactive-test.js
-check-account.js
-oauth2-setup-check.js
-test-iracing-oauth2-isolated.js
-debug-iracing-data.js
-iRacing-API-README.md
