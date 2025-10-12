@@ -1884,7 +1884,12 @@
             carList.innerHTML = '';
             trackList.innerHTML = '';
 
-            drivers.forEach(driver => {
+            // Sort all arrays alphabetically by name before rendering
+            const sortedDrivers = [...drivers].sort((a, b) => a.name.localeCompare(b.name));
+            const sortedCars = [...cars].sort((a, b) => a.name.localeCompare(b.name));
+            const sortedTracks = [...tracks].sort((a, b) => a.name.localeCompare(b.name));
+
+            sortedDrivers.forEach(driver => {
                 const li = document.createElement('li');
                 li.className = 'flex items-center justify-between bg-neutral-800 p-3 rounded-lg shadow-sm';
                 li.innerHTML = `
@@ -1897,7 +1902,7 @@
                 driverList.appendChild(li);
             });
 
-            cars.forEach(car => {
+            sortedCars.forEach(car => {
                 const li = document.createElement('li');
                 li.className = 'flex items-center justify-between bg-neutral-800 p-3 rounded-lg shadow-sm';
                 li.innerHTML = `
@@ -1910,7 +1915,7 @@
                 carList.appendChild(li);
             });
 
-            tracks.forEach(track => {
+            sortedTracks.forEach(track => {
                 const li = document.createElement('li');
                 li.className = 'flex items-center justify-between bg-neutral-800 p-3 rounded-lg shadow-sm';
                 li.innerHTML = `
