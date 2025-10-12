@@ -1903,7 +1903,7 @@
                 li.innerHTML = `
                     <span>${car.name}</span>
                     <div class="space-x-2">
-                        <button onclick="editCarAdmin('${car.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
+                        <button onclick="editCarAdmin('${car.garage61_id}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
                         <button onclick="removeCarAdmin('${car.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
@@ -1916,8 +1916,8 @@
                 li.innerHTML = `
                     <span>${track.name}</span>
                     <div class="space-x-2">
-                        <button onclick="editTrackAdmin('${track.name}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
-                        <button onclick="removeTrackAdmin('${track.name}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
+                        <button onclick="editTrackAdmin('${track.garage61_id}')" class="text-blue-500 hover:text-blue-700 transition-colors duration-200"><i class="fas fa-edit"></i></button>
+                        <button onclick="removeTrackAdmin('${track.garage61_id}')" class="text-red-500 hover:text-red-700 transition-colors duration-200"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
                 trackList.appendChild(li);
@@ -2048,13 +2048,33 @@
             const garage61_id = parseInt(document.getElementById('new-car-garage61-id').value);
             
             if (name && garage61_id) {
-                const index = cars.findIndex(c => c.garage61_id === originalGarage61Id);
-                if (index !== -1) {
-                    cars[index] = { name, garage61_id };
-                    await saveDataToServer();
+                try {
+                    const response = await fetch(`/api/cars/${encodeURIComponent(originalGarage61Id)}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, garage61_id }),
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText);
+                    }
+                    
+                    // Update local cars array
+                    const index = cars.findIndex(c => c.garage61_id === originalGarage61Id);
+                    if (index !== -1) {
+                        cars[index] = { name, garage61_id };
+                    }
+                    
                     renderAdminLists();
                     populateCars();
                     resetCarAdminForm();
+                    console.log('✅ Car updated successfully');
+                } catch (error) {
+                    console.error('❌ Error updating car:', error);
+                    alert('Failed to update car: ' + error.message);
                 }
             } else {
                 alert('Please fill in all car fields');
@@ -2119,13 +2139,33 @@
             const track_length = parseFloat(document.getElementById('new-track-length').value) || 0.0;
             
             if (name && garage61_id) {
-                const index = tracks.findIndex(t => t.garage61_id === originalGarage61Id);
-                if (index !== -1) {
-                    tracks[index] = { name, garage61_id, track_length };
-                    await saveDataToServer();
+                try {
+                    const response = await fetch(`/api/tracks/${encodeURIComponent(originalGarage61Id)}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, garage61_id, track_length }),
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText);
+                    }
+                    
+                    // Update local tracks array
+                    const index = tracks.findIndex(t => t.garage61_id === originalGarage61Id);
+                    if (index !== -1) {
+                        tracks[index] = { name, garage61_id, track_length };
+                    }
+                    
                     renderAdminLists();
                     populateTracks();
                     resetTrackAdminForm();
+                    console.log('✅ Track updated successfully');
+                } catch (error) {
+                    console.error('❌ Error updating track:', error);
+                    alert('Failed to update track: ' + error.message);
                 }
             } else {
                 alert('Please fill in required track fields (name and garage61_id)');
