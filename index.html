@@ -1026,8 +1026,8 @@
                         timeZone: 'UTC'
                     });
                     
-                    document.getElementById('page2-sunrise').textContent = sunrise + ' UTC';
-                    document.getElementById('page2-sunset').textContent = sunset + ' UTC';
+                    document.getElementById('page2-sunrise').textContent = sunrise;
+                    document.getElementById('page2-sunset').textContent = sunset;
                 } else {
                     throw new Error(data.error || 'Failed to calculate daylight');
                 }
