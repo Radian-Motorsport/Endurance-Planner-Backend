@@ -1159,22 +1159,32 @@
         }
 
         // Function to determine daylight status for a given time
-        function getDaylightStatus(stintTime) {
+        function getDaylightStatus(stintTime, timeZone = 'UTC') {
             if (!globalSunriseTime || !globalSunsetTime) {
                 return 'daylight-night'; // Default to night if no daylight data
             }
             
-            // Create time objects for comparison (same date, different times)
-            const stintHours = stintTime.getUTCHours();
-            const stintMinutes = stintTime.getUTCMinutes();
+            // Convert stint time to the specified timezone for comparison
+            let stintTimeInTimezone;
+            try {
+                // Create a properly timezone-aware time
+                stintTimeInTimezone = new Date(stintTime.toLocaleString('en-US', { timeZone: timeZone }));
+            } catch (error) {
+                // Fallback to UTC if timezone is invalid
+                stintTimeInTimezone = new Date(stintTime.getTime());
+            }
+            
+            const stintHours = stintTimeInTimezone.getHours();
+            const stintMinutes = stintTimeInTimezone.getMinutes();
             const stintTimeOfDay = stintHours * 60 + stintMinutes; // Convert to minutes since midnight
             
-            const sunriseHours = globalSunriseTime.getUTCHours();
-            const sunriseMinutes = globalSunriseTime.getUTCMinutes();
+            // Sunrise and sunset are already in the track's local timezone
+            const sunriseHours = globalSunriseTime.getHours();
+            const sunriseMinutes = globalSunriseTime.getMinutes();
             const sunriseTimeOfDay = sunriseHours * 60 + sunriseMinutes;
             
-            const sunsetHours = globalSunsetTime.getUTCHours();
-            const sunsetMinutes = globalSunsetTime.getUTCMinutes();
+            const sunsetHours = globalSunsetTime.getHours();
+            const sunsetMinutes = globalSunsetTime.getMinutes();
             const sunsetTimeOfDay = sunsetHours * 60 + sunsetMinutes;
             
             const dawnDuskWindow = 60; // 1 hour windows for dawn/dusk periods
@@ -1885,8 +1895,8 @@
 				            : currentTime.toISOString().substr(11, 8);				        const startLap = currentLap;
 				        const endLap = startLap + stintLaps - 1;
 				        
-				        // Get daylight status for stint start time
-				        const daylightStatus = getDaylightStatus(stintStartTime);
+				        // Get daylight status for stint start time using the display timezone
+				        const daylightStatus = getDaylightStatus(stintStartTime, displayTimeZone);
 				        
 				        // Create driving stint row
 				        const tr = document.createElement('tr');
@@ -1930,8 +1940,8 @@
 				            const pitSeconds = pitStopTime % 60;
 				            const pitDurationString = `${pitMinutes.toString().padStart(2, '0')}:${pitSeconds.toString().padStart(2, '0')}`;
 				            
-				            // Get daylight status for pit stop time
-				            const pitDaylightStatus = getDaylightStatus(pitStartTime);
+				            // Get daylight status for pit stop time using the display timezone
+				            const pitDaylightStatus = getDaylightStatus(pitStartTime, displayTimeZone);
 				            
 				            const pitRow = document.createElement('tr');
 				            pitRow.classList.add('pit-stop-row');
