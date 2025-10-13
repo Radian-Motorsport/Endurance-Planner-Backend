@@ -549,72 +549,7 @@
                 <div id="stint-breakdown-display" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg overflow-x-auto hidden">
                     <h1 class="text-xl font- mb-4  road-rage-font">Stints</h1>
                     
-                    <!-- Time Mode Toggle Switch - MOVED TO TOP -->
-                    <div class="mb-6 p-4 bg-neutral-700 rounded-lg">
-                        <label class="text-sm font-medium text-neutral-500 mb-3 block">Time Display Mode</label>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-sm text-neutral-400" id="race-time-label">Race Time</span>
-                            <button id="time-mode-toggle" onclick="toggleTimeMode()" class="relative inline-flex h-6 w-11 items-center rounded-full bg-neutral-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                <span id="toggle-slider" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
-                            </button>
-                            <span class="text-sm text-neutral-400" id="local-time-label">Local Time</span>
-                        </div>
-                        <p class="text-xs text-neutral-500 mt-2" id="time-mode-description">Using race start time from page 1</p>
-                    </div>
-
                     <div class="flex flex-col mb-4">
-                        <!-- Local Time Adjusters - Only shown in Local Time mode -->
-                        <div id="local-time-adjusters" class="mb-4 hidden">
-                            <div class="mb-4">
-                                <label for="local-time-input" class="text-sm font-medium text-neutral-500">Your Local Time</label>
-                                <input type="time" id="local-time-input" value="13:00" class="mt-1 p-3 border border-neutral-700 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-neutral-200">
-                            </div>
-                            <div class="mb-4">
-                                <label for="timezone-select" class="text-sm font-medium text-neutral-500">Time Zone</label>
-                                <select id="timezone-select" class="mt-1 p-3 border border-neutral-700 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full text-neutral-200 font-mono">
-                                    <option value="UTC">GMT+0    UTC</option>
-                                    <option value="US/Samoa">GMT-11   SST</option>
-                                    <option value="America/Adak">GMT-10   HAST</option>
-                                    <option value="America/Los_Angeles">GMT-8    PST</option>
-                                    <option value="America/Denver">GMT-7    MST</option>
-                                    <option value="America/Chicago">GMT-6    CST</option>
-                                    <option value="America/New_York">GMT-5    EST</option>
-                                    <option value="America/Halifax">GMT-4    AST</option>
-                                    <option value="America/Sao_Paulo">GMT-3    BRT</option>
-                                    <option value="Atlantic/Azores">GMT-1    AZOT</option>
-                                    <option value="Europe/London" selected>GMT+0    GMT</option>
-                                    <option value="Europe/Paris">GMT+1    CET</option>
-                                    <option value="Europe/Athens">GMT+2    EET</option>
-                                    <option value="Asia/Riyadh">GMT+3    AST</option>
-                                    <option value="Asia/Dubai">GMT+4    GST</option>
-                                    <option value="Asia/Karachi">GMT+5    PKT</option>
-                                    <option value="Asia/Bangkok">GMT+7    ICT</option>
-                                    <option value="Asia/Shanghai">GMT+8    CST</option>
-                                    <option value="Asia/Tokyo">GMT+9    JST</option>
-                                    <option value="Australia/Sydney">GMT+10   AEST</option>
-                                    <option value="Pacific/Auckland">GMT+12   NZST</option>
-                                </select>
-                                
-                                <!-- Summertime/DST Checkbox -->
-                                <div class="mt-3">
-                                    <label class="flex items-center space-x-2">
-                                        <input type="checkbox" id="summertime-checkbox" class="w-4 h-4 text-blue-600 bg-neutral-900 border-neutral-700 rounded focus:ring-blue-500 focus:ring-2">
-                                        <span class="text-sm text-neutral-400">Summertime/DST (+1 hour)</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Practice/Qualifying Time Addition - Always shown -->
-                        <div class="mb-4">
-                            <label for="practice-qualifying-time" class="text-sm font-medium text-neutral-500 mb-2 block">Practice/Qualifying Time Addition</label>
-                            <div class="flex items-center space-x-2">
-                                <input type="number" id="practice-qualifying-time" min="0" max="999" step="0.01" value="0.00" class="w-24 p-2 border-neutral-700 rounded-lg text-neutral-200 bg-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-sm text-neutral-500">hours</span>
-                            </div>
-                            <p class="text-xs text-neutral-500 mt-1">Additional time before race start (e.g., practice sessions, qualifying)</p>
-                        </div>
-                        
                         <!-- Hidden race start time input for internal use -->
                         <input type="hidden" id="race-start-time-page2" value="13:00">
                         
@@ -803,44 +738,10 @@
             
             // 🔧 Add listeners for time-related inputs to preserve assignments
             const raceStartTimeInput = document.getElementById('race-start-time-page2');
-            const localTimeInput = document.getElementById('local-time-input');
-            const timezoneSelect = document.getElementById('timezone-select');
             
             if (raceStartTimeInput) {
                 raceStartTimeInput.addEventListener('change', () => {
                     console.log('🕒 Race start time changed, updating times...');
-                    updateTimesOnly();
-                });
-            }
-            
-            if (localTimeInput) {
-                localTimeInput.addEventListener('change', () => {
-                    console.log('🌍 Local time changed, updating times...');
-                    updateTimesOnly();
-                });
-            }
-            
-            if (timezoneSelect) {
-                timezoneSelect.addEventListener('change', () => {
-                    console.log('🌍 Timezone changed, updating times...');
-                    updateTimesOnly();
-                });
-            }
-            
-            // Add listener for practice/qualifying time input
-            const practiceQualifyingTimeInput = document.getElementById('practice-qualifying-time');
-            if (practiceQualifyingTimeInput) {
-                practiceQualifyingTimeInput.addEventListener('change', () => {
-                    console.log('🏁 Practice/Qualifying time changed, updating times...');
-                    updateTimesOnly();
-                });
-            }
-            
-            // Add listener for summertime checkbox
-            const summertimeCheckbox = document.getElementById('summertime-checkbox');
-            if (summertimeCheckbox) {
-                summertimeCheckbox.addEventListener('change', () => {
-                    console.log('☀️ Summertime/DST setting changed, updating times...');
                     updateTimesOnly();
                 });
             }
@@ -1256,44 +1157,6 @@
             } else {
                 return 'daylight-night';
             }
-        }
-
-        // Global variable for time mode (true = race time, false = local time)
-        let isRaceTimeMode = true;
-
-        // Toggle between Race Time and Local Time modes
-        function toggleTimeMode() {
-            isRaceTimeMode = !isRaceTimeMode;
-            
-            const toggle = document.getElementById('time-mode-toggle');
-            const slider = document.getElementById('toggle-slider');
-            const raceLabel = document.getElementById('race-time-label');
-            const localLabel = document.getElementById('local-time-label');
-            const description = document.getElementById('time-mode-description');
-            const localTimeAdjusters = document.getElementById('local-time-adjusters');
-            
-            if (isRaceTimeMode) {
-                // Race Time Mode
-                toggle.classList.remove('toggle-active');
-                slider.classList.remove('toggle-slider');
-                raceLabel.classList.add('time-mode-active');
-                localLabel.classList.remove('time-mode-active');
-                description.textContent = 'Using race start time from page 1';
-                localTimeAdjusters.classList.add('hidden');
-            } else {
-                // Local Time Mode  
-                toggle.classList.add('toggle-active');
-                slider.classList.add('toggle-slider');
-                raceLabel.classList.remove('time-mode-active');
-                localLabel.classList.add('time-mode-active');
-                description.textContent = 'Using current local time with timezone';
-                localTimeAdjusters.classList.remove('hidden');
-            }
-            
-            console.log(`🕒 Time mode switched to: ${isRaceTimeMode ? 'Race Time' : 'Local Time'}`);
-            
-            // Update the stint table to reflect the new time mode
-            populateStintTable();
         }
 
         // --- Core Logic ---
@@ -1896,45 +1759,18 @@
 				    
 				    tbody.innerHTML = '';
 				    
-				    const raceStartTimeInput = isRaceTimeMode ? 
-				        document.getElementById('race-time').value : 
-				        document.getElementById('race-start-time-page2').value;
-				    const practiceQualifyingHours = parseFloat(document.getElementById('practice-qualifying-time').value) || 0;
+				    const raceStartTimeInput = document.getElementById('race-time').value;
+				    const practiceQualifyingHours = 0; // Removed qualifying time functionality  
 				    const pitStopTime = parseInt(document.getElementById('pit-stop-time').value) || 0;
-				    const selectedTimeZone = document.getElementById('timezone-select').value; // Get the selected time zone
 				    
 				    let currentTime;
 				    
-				    if (isRaceTimeMode) {
-				        // Race Time Mode: Use time from page 1 (race start time input)
-				        const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
-				        const raceDate = new Date();
-				        raceDate.setUTCHours(hours, minutes, 0, 0); 
-				        currentTime = new Date(raceDate.getTime());
-				        console.log('🏁 Using Race Time mode:', currentTime.toISOString());
-				    } else {
-				        // Local Time Mode: Use local time input and apply timezone offset
-				        const localTimeInput = document.getElementById('local-time-input').value;
-				        const [hours, minutes] = localTimeInput.split(':').map(Number);
-				        
-				        // Create date with local time
-				        const localDate = new Date();
-				        localDate.setHours(hours, minutes, 0, 0);
-				        
-				        // Convert to UTC based on selected timezone
-				        const selectedTimeZone = document.getElementById('timezone-select').value;
-				        const tempDate = new Date(localDate.toLocaleString("en-US", {timeZone: selectedTimeZone}));
-				        const offset = localDate.getTime() - tempDate.getTime();
-				        
-				        currentTime = new Date(localDate.getTime() + offset);
-				        console.log('🌍 Using Local Time mode:', currentTime.toISOString(), 'from local time:', localTimeInput, 'in timezone:', selectedTimeZone);
-				    }
-				    
-				    // Add practice/qualifying time
-				    currentTime.setMinutes(currentTime.getMinutes() + (practiceQualifyingHours * 60));
-				    
-				    console.log('⏰ Final start time after additions:', currentTime.toISOString(), 
-				               `(+${practiceQualifyingHours}hrs practice/qualifying)`);
+				    // Use race time from page 1 (race start time input)
+				    const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
+				    const raceDate = new Date();
+				    raceDate.setUTCHours(hours, minutes, 0, 0); 
+				    currentTime = new Date(raceDate.getTime());
+				    console.log('🏁 Using Race Time:', currentTime.toISOString());
 				    
 				    let currentLap = 1;
 				    let driverIndex = 0;
@@ -2117,8 +1953,7 @@
 		        fuelSlider: document.getElementById('fuel-slider').value,
 		        lapTimeSlider: document.getElementById('lap-time-slider').value,
 		        raceStartTime: document.getElementById('race-start-time-page2').value,
-		        practiceQualifyingTime: document.getElementById('practice-qualifying-time').value,
-		        localTime: document.getElementById('local-time-input').value,
+		        // Removed practice qualifying time and local time functionality
 		        timezone: document.getElementById('timezone-select').value,
 		        summertime: document.getElementById('summertime-checkbox').checked,
 		        weatherTempUrl: document.getElementById('weather-temp-url').value,
@@ -2198,8 +2033,7 @@
 		        fuelSlider: document.getElementById('fuel-slider').value,
 		        lapTimeSlider: document.getElementById('lap-time-slider').value,
 		        raceStartTime: document.getElementById('race-start-time-page2').value,
-		        practiceQualifyingTime: document.getElementById('practice-qualifying-time').value,
-		        localTime: document.getElementById('local-time-input').value,
+		        // Removed practice qualifying time and local time functionality
 		        timezone: document.getElementById('timezone-select').value,
 		        summertime: document.getElementById('summertime-checkbox').checked,
 		        weatherTempUrl: document.getElementById('weather-temp-url').value,
@@ -2276,8 +2110,7 @@
 		            document.getElementById('fuel-slider').value = state.fuelSlider;
 		            document.getElementById('lap-time-slider').value = state.lapTimeSlider;
 		            document.getElementById('race-start-time-page2').value = state.raceStartTime;
-		            document.getElementById('local-time-input').value = state.localTime || '13:00';
-		            document.getElementById('practice-qualifying-time').value = state.practiceQualifyingTime || '0.00';
+		            // Removed practice qualifying time and local time functionality
 		            
 		            // Restore the timezone from the shared link
 		            document.getElementById('timezone-select').value = state.timezone || 'UTC';
