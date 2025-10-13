@@ -622,38 +622,13 @@
                                 <input type="text" id="new-driver-garage61-slug" placeholder="adam-economu" class="mt-1 p-3 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             <div>
-                                <label for="new-driver-timezone" class="text-sm font-medium text-neutral-500">Timezone <span class="text-xs text-neutral-400">(IANA format - handles DST automatically)</span></label>
-                                <select id="new-driver-timezone" class="mt-1 p-3 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Select Timezone</option>
-                                    <optgroup label="North America">
-                                        <option value="America/New_York">Eastern Time (New York)</option>
-                                        <option value="America/Chicago">Central Time (Chicago)</option>
-                                        <option value="America/Denver">Mountain Time (Denver)</option>
-                                        <option value="America/Los_Angeles">Pacific Time (Los Angeles)</option>
-                                        <option value="America/Toronto">Eastern Time (Toronto)</option>
-                                        <option value="America/Vancouver">Pacific Time (Vancouver)</option>
-                                    </optgroup>
-                                    <optgroup label="Europe">
-                                        <option value="Europe/London">GMT/BST (London)</option>
-                                        <option value="Europe/Paris">CET/CEST (Paris)</option>
-                                        <option value="Europe/Berlin">CET/CEST (Berlin)</option>
-                                        <option value="Europe/Rome">CET/CEST (Rome)</option>
-                                        <option value="Europe/Madrid">CET/CEST (Madrid)</option>
-                                        <option value="Europe/Amsterdam">CET/CEST (Amsterdam)</option>
-                                    </optgroup>
-                                    <optgroup label="Asia Pacific">
-                                        <option value="Australia/Sydney">AEDT/AEST (Sydney)</option>
-                                        <option value="Australia/Melbourne">AEDT/AEST (Melbourne)</option>
-                                        <option value="Asia/Tokyo">JST (Tokyo)</option>
-                                        <option value="Asia/Singapore">SGT (Singapore)</option>
-                                        <option value="Asia/Dubai">GST (Dubai)</option>
-                                    </optgroup>
-                                    <optgroup label="Other">
-                                        <option value="UTC">UTC (Coordinated Universal Time)</option>
-                                        <option value="America/Sao_Paulo">BRT/BRST (São Paulo)</option>
-                                        <option value="Africa/Johannesburg">SAST (Johannesburg)</option>
-                                    </optgroup>
-                                </select>
+                                <label for="new-driver-timezone" class="text-sm font-medium text-neutral-500">Timezone <span class="text-xs text-neutral-400">(Searchable - type to filter)</span></label>
+                                <div class="relative">
+                                    <input type="text" id="timezone-search" placeholder="Type to search timezones..." class="mt-1 p-3 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select id="new-driver-timezone" size="6" class="hidden mt-1 p-2 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 absolute z-10 max-h-48 overflow-y-auto">
+                                        <!-- Populated dynamically from assets/timezones.json -->
+                                    </select>
+                                </div>
                             </div>
                             <div class="flex justify-center">
                                 <button id="add-driver-btn" onclick="addDriverAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -2915,6 +2890,76 @@
                 rightCol.remove();
             }
         }
+        
+        // 🌍 TIMEZONE SEARCH FUNCTIONALITY
+        let allTimezones = [];
+        
+        // Load all timezones from assets
+        async function loadTimezones() {
+            try {
+                const response = await fetch('/assets/timezones.json');
+                allTimezones = await response.json();
+                console.log(`Loaded ${allTimezones.length} timezones`);
+            } catch (error) {
+                console.error('Failed to load timezones:', error);
+                // Fallback to basic list
+                allTimezones = ['UTC', 'Europe/London', 'America/New_York', 'Australia/Sydney'];
+            }
+        }
+        
+        // Setup timezone search
+        function setupTimezoneSearch() {
+            const searchInput = document.getElementById('timezone-search');
+            const dropdown = document.getElementById('new-driver-timezone');
+            
+            if (!searchInput || !dropdown) return;
+            
+            // Show dropdown when clicking search input
+            searchInput.addEventListener('focus', () => {
+                dropdown.classList.remove('hidden');
+                filterTimezones('');
+            });
+            
+            // Filter as user types
+            searchInput.addEventListener('input', (e) => {
+                filterTimezones(e.target.value);
+            });
+            
+            // Select timezone when clicking option
+            dropdown.addEventListener('change', (e) => {
+                searchInput.value = e.target.value;
+                dropdown.classList.add('hidden');
+            });
+            
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        }
+        
+        function filterTimezones(search) {
+            const dropdown = document.getElementById('new-driver-timezone');
+            if (!dropdown) return;
+            
+            const filtered = allTimezones.filter(tz => 
+                tz.toLowerCase().includes(search.toLowerCase())
+            );
+            
+            dropdown.innerHTML = filtered.map(tz => 
+                `<option value="${tz}">${tz}</option>`
+            ).join('');
+            
+            // Show dropdown
+            dropdown.classList.remove('hidden');
+        }
+        
+        // Initialize timezone search when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadTimezones();
+            setupTimezoneSearch();
+        });
 		
     </script>
 	
