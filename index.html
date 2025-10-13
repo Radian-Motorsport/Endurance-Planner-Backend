@@ -2021,7 +2021,75 @@
 				            console.log('✅ Driver assignments restored successfully!');
 				        }, 100); // Small delay to ensure dropdowns are populated
 				    }
+				    
+				    // 🌅 DEBUG: Display daylight times for different timezones
+				    debugDaylightTimes();
 				}
+        
+        // 🌅 DEBUG FUNCTION: Display daylight times for different timezones
+        function debugDaylightTimes() {
+            if (!globalSunriseTime || !globalSunsetTime) {
+                console.log('🌅 No daylight data available for debugging');
+                return;
+            }
+            
+            console.log('🌅 ======== DAYLIGHT DEBUGGING ========');
+            
+            // Calculate solar noon from sunrise/sunset
+            const sunriseMinutes = globalSunriseTime.getUTCHours() * 60 + globalSunriseTime.getUTCMinutes();
+            const sunsetMinutes = globalSunsetTime.getUTCHours() * 60 + globalSunsetTime.getUTCMinutes();
+            const solarNoonMinutes = (sunriseMinutes + sunsetMinutes) / 2;
+            const solarNoonHours = Math.floor(solarNoonMinutes / 60);
+            const solarNoonMins = Math.floor(solarNoonMinutes % 60);
+            
+            // Format times for different contexts
+            const formatTimeInTimezone = (hour, minute, timezone) => {
+                try {
+                    const date = new Date();
+                    date.setUTCHours(hour, minute, 0, 0);
+                    return date.toLocaleTimeString('en-US', {
+                        timeZone: timezone,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    });
+                } catch (error) {
+                    return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} (${timezone})`;
+                }
+            };
+            
+            // Track location times (UTC - simulator time)
+            console.log('🏁 RACE TIME (Track Location - Simulator Time):');
+            console.log(`   Sunrise: ${formatTimeInTimezone(globalSunriseTime.getUTCHours(), globalSunriseTime.getUTCMinutes(), 'UTC')}`);
+            console.log(`   Midday:  ${formatTimeInTimezone(solarNoonHours, solarNoonMins, 'UTC')}`);
+            console.log(`   Sunset:  ${formatTimeInTimezone(globalSunsetTime.getUTCHours(), globalSunsetTime.getUTCMinutes(), 'UTC')}`);
+            
+            // Event time (Europe/London)
+            console.log('🇬🇧 EVENT TIME (Europe/London):');
+            console.log(`   Sunrise: ${formatTimeInTimezone(globalSunriseTime.getUTCHours(), globalSunriseTime.getUTCMinutes(), 'Europe/London')}`);
+            console.log(`   Midday:  ${formatTimeInTimezone(solarNoonHours, solarNoonMins, 'Europe/London')}`);
+            console.log(`   Sunset:  ${formatTimeInTimezone(globalSunsetTime.getUTCHours(), globalSunsetTime.getUTCMinutes(), 'Europe/London')}`);
+            
+            // Selected drivers' timezones
+            const drivers = getSelectedDrivers();
+            if (drivers && drivers.length > 0) {
+                console.log('👥 DRIVER TIMEZONES:');
+                drivers.forEach(driver => {
+                    if (driver.timezone) {
+                        console.log(`   ${driver.name} (${driver.timezone}):`);
+                        console.log(`     Sunrise: ${formatTimeInTimezone(globalSunriseTime.getUTCHours(), globalSunriseTime.getUTCMinutes(), driver.timezone)}`);
+                        console.log(`     Midday:  ${formatTimeInTimezone(solarNoonHours, solarNoonMins, driver.timezone)}`);
+                        console.log(`     Sunset:  ${formatTimeInTimezone(globalSunsetTime.getUTCHours(), globalSunsetTime.getUTCMinutes(), driver.timezone)}`);
+                    } else {
+                        console.log(`   ${driver.name}: No timezone set`);
+                    }
+                });
+            } else {
+                console.log('👥 No drivers selected for timezone debugging');
+            }
+            
+            console.log('🌅 ===================================');
+        }
         
         // 🔧 NEW FUNCTION: Update times without losing driver assignments
         function updateTimesOnly() {
