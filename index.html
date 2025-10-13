@@ -2103,22 +2103,29 @@
             console.log(`   Sunset:  ${formatTimeForTrack(trackSunsetTime)}`);
             console.log(`   Track Timezone: ${trackTimezone || 'Unknown'}`);
             
-            // Event time (Europe/London) - TODO: This will be different when we add driver locations
+            // Event time (Europe/London) - calculate daylight for London coordinates
             console.log('🇬🇧 EVENT TIME (Europe/London):');
-            console.log(`   Sunrise: ${formatTimeInTimezone(trackSunriseTime, 'Europe/London')}`);
+            // London coordinates: 51.5074, -0.1278
+            // TODO: Calculate London-specific daylight instead of using track daylight
+            console.log(`   Sunrise: ${formatTimeInTimezone(trackSunriseTime, 'Europe/London')} (WARNING: Using track daylight, should be London daylight)`);
             console.log(`   Midday:  ${formatTimeInTimezone(new Date(2000, 0, 1, solarNoonHours, solarNoonMins), 'Europe/London')}`);
-            console.log(`   Sunset:  ${formatTimeInTimezone(trackSunsetTime, 'Europe/London')}`);
+            console.log(`   Sunset:  ${formatTimeInTimezone(trackSunsetTime, 'Europe/London')} (WARNING: Using track daylight, should be London daylight)`);
             
-            // Selected drivers' timezones (TODO: Will calculate separate daylight for each driver)
+            // Selected drivers' timezones with their location-specific daylight
             const drivers = getSelectedDrivers();
             if (drivers && drivers.length > 0) {
-                console.log('👥 DRIVER TIMEZONES (using track daylight for now):');
+                console.log('👥 DRIVER TIMEZONES (using driver location daylight):');
                 drivers.forEach(driver => {
                     if (driver.timezone) {
-                        console.log(`   ${driver.name} (${driver.timezone}):`);
-                        console.log(`     Sunrise: ${formatTimeInTimezone(trackSunriseTime, driver.timezone)}`);
-                        console.log(`     Midday:  ${formatTimeInTimezone(new Date(2000, 0, 1, solarNoonHours, solarNoonMins), driver.timezone)}`);
-                        console.log(`     Sunset:  ${formatTimeInTimezone(trackSunsetTime, driver.timezone)}`);
+                        const driverData = driverDaylightData[driver.name];
+                        if (driverData) {
+                            console.log(`   ${driver.name} (${driver.timezone}):`);
+                            console.log(`     Sunrise: ${formatTimeInTimezone(driverData.sunrise, driver.timezone)}`);
+                            console.log(`     Midday:  ${formatTimeInTimezone(new Date((driverData.sunrise.getTime() + driverData.sunset.getTime()) / 2), driver.timezone)}`);
+                            console.log(`     Sunset:  ${formatTimeInTimezone(driverData.sunset, driver.timezone)}`);
+                        } else {
+                            console.log(`   ${driver.name} (${driver.timezone}): Driver daylight data not loaded`);
+                        }
                     } else {
                         console.log(`   ${driver.name}: No timezone set`);
                     }
@@ -2983,6 +2990,8 @@
                 raceLabel.classList.remove('time-mode-active');
                 localLabel.classList.add('time-mode-active');
                 populateDriverDropdown();
+                // Pre-load daylight data for all drivers
+                loadAllDriverDaylightData();
             } else {
                 toggleSwitch.classList.remove('active');
                 driverSelector.classList.add('hidden');
@@ -3350,6 +3359,32 @@
         
         // Store driver-specific daylight data
         let driverDaylightData = {}; // { driverName: { sunrise, sunset, timezone } }
+        
+        // Load daylight data for all selected drivers
+        async function loadAllDriverDaylightData() {
+            const drivers = getSelectedDrivers();
+            const eventDate = document.getElementById('event-start-date').value;
+            
+            if (!eventDate) {
+                console.warn('No event date set, cannot load driver daylight data');
+                return;
+            }
+            
+            console.log('🌅 Loading daylight data for all drivers...');
+            
+            for (const driver of drivers) {
+                if (driver.timezone) {
+                    console.log(`Loading daylight for ${driver.name} (${driver.timezone})`);
+                    const daylightData = await calculateDriverDaylightTimes(driver.timezone, eventDate);
+                    if (daylightData) {
+                        driverDaylightData[driver.name] = daylightData;
+                        console.log(`✅ Loaded daylight for ${driver.name}`);
+                    }
+                }
+            }
+            
+            console.log('🌅 All driver daylight data loaded:', driverDaylightData);
+        }
         
         // Load all timezones from assets
         async function loadTimezones() {
