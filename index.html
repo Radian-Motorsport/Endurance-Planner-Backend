@@ -309,7 +309,7 @@
                             <input type="time" id="race-time" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
                         </div>
                         <div class="flex flex-col w-full">
-                            <label for="event-start-time" class="text-sm font-medium text-neutral-500 mb-2">Event Start Time <span class="text-xs text-neutral-400">(Real World GMT)</span></label>
+                            <label for="event-start-time" class="text-sm font-medium text-neutral-500 mb-2">Event Start Time <span class="text-xs text-neutral-400">(Europe/London Time)</span></label>
                             <input type="time" id="event-start-time" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
                         </div>
                     </div>
@@ -2043,8 +2043,9 @@
 		        lapTimeSlider: document.getElementById('lap-time-slider').value,
 		        raceStartTime: document.getElementById('race-start-time-page2').value,
 		        // Removed practice qualifying time and local time functionality
-		        timezone: document.getElementById('timezone-select').value,
-		        summertime: document.getElementById('summertime-checkbox').checked,
+		        eventStartTimeInput: document.getElementById('event-start-time').value,
+		        // timezone: document.getElementById('timezone-select').value, // REMOVED - using driver timezones
+		        // summertime: document.getElementById('summertime-checkbox').checked, // REMOVED
 		        weatherTempUrl: document.getElementById('weather-temp-url').value,
 		        weatherCloudsUrl: document.getElementById('weather-clouds-url').value,
 		        stintDrivers: stintDrivers, // Save stint driver assignments
@@ -2123,8 +2124,9 @@
 		        lapTimeSlider: document.getElementById('lap-time-slider').value,
 		        raceStartTime: document.getElementById('race-start-time-page2').value,
 		        // Removed practice qualifying time and local time functionality
-		        timezone: document.getElementById('timezone-select').value,
-		        summertime: document.getElementById('summertime-checkbox').checked,
+		        eventStartTimeInput: document.getElementById('event-start-time').value,
+		        // timezone: document.getElementById('timezone-select').value, // REMOVED - using driver timezones
+		        // summertime: document.getElementById('summertime-checkbox').checked, // REMOVED
 		        weatherTempUrl: document.getElementById('weather-temp-url').value,
 		        weatherCloudsUrl: document.getElementById('weather-clouds-url').value,
 		        stintDrivers: stintDrivers, // Save stint driver assignments
@@ -2201,11 +2203,12 @@
 		            document.getElementById('race-start-time-page2').value = state.raceStartTime;
 		            // Removed practice qualifying time and local time functionality
 		            
-		            // Restore the timezone from the shared link
-		            document.getElementById('timezone-select').value = state.timezone || 'UTC';
+		            // Restore event start time from shared link
+		            if (state.eventStartTimeInput) {
+		                document.getElementById('event-start-time').value = state.eventStartTimeInput;
+		            }
 		            
-		            // Restore summertime checkbox state
-		            document.getElementById('summertime-checkbox').checked = state.summertime || false;
+		            // Timezone and summertime removed - now using driver-specific timezones
 		            
 		            // Restore weather image URLs (with backward compatibility)
 		            if (state.weatherTempUrl) {
@@ -2662,9 +2665,9 @@
         // Function to handle time formatting based on the selected time zone
         function formatTimeWithTimezone(date, timeZone) {
             try {
-                // Check if summertime/DST is enabled
-                const summertimeCheckbox = document.getElementById('summertime-checkbox');
-                const isDST = summertimeCheckbox && summertimeCheckbox.checked;
+                // DST is now handled automatically by browser's timezone system
+                // Summertime checkbox removed - DST handled by IANA timezone data
+                const isDST = false; // Not used anymore
                 
                 // Create a new date object to avoid modifying the original
                 let adjustedDate = new Date(date.getTime());
