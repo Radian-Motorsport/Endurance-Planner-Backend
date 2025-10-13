@@ -1130,16 +1130,16 @@
                     // Store track-specific daylight data for race time calculations
                     trackSunriseTime = new Date(data.times.sunrise);
                     trackSunsetTime = new Date(data.times.sunset);
-                    trackTimezone = data.track.timezone || 'UTC'; // Add timezone to server response
+                    trackTimezone = 'UTC'; // Track times are calculated in UTC
                     
                     // Format times as HH:MM (local time representation)
-                    const sunrise = globalSunriseTime.toLocaleTimeString('en-US', { 
+                    const sunrise = trackSunriseTime.toLocaleTimeString('en-US', { 
                         hour: '2-digit', 
                         minute: '2-digit',
                         hour12: false,
                         timeZone: 'UTC'
                     });
-                    const sunset = globalSunsetTime.toLocaleTimeString('en-US', { 
+                    const sunset = trackSunsetTime.toLocaleTimeString('en-US', { 
                         hour: '2-digit', 
                         minute: '2-digit',
                         hour12: false,

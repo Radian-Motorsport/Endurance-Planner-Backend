@@ -536,6 +536,31 @@ app.get('/api/daylight/reference/:month?', (req, res) => {
     }
 });
 
+// Daylight calculation for specific coordinates (for driver timezones)
+app.post('/api/daylight', async (req, res) => {
+    try {
+        const { latitude, longitude, date } = req.body;
+        
+        if (!latitude || !longitude) {
+            return res.status(400).json({ error: 'latitude and longitude are required' });
+        }
+        
+        const queryDate = date ? new Date(date) : new Date();
+        const times = SunCalc.getTimes(queryDate, latitude, longitude);
+        
+        res.json({
+            sunrise: times.sunrise.toISOString(),
+            sunset: times.sunset.toISOString(),
+            solarNoon: times.solarNoon.toISOString(),
+            location: { latitude, longitude },
+            date: queryDate.toISOString()
+        });
+    } catch (error) {
+        console.error('Error calculating daylight:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Get daylight times for multiple tracks (bulk query)
 app.post('/api/daylight/bulk', async (req, res) => {
     try {
