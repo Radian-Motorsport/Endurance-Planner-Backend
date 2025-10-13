@@ -1161,16 +1161,19 @@
         // Function to determine daylight status for a given time
         function getDaylightStatus(stintTime, timeZone = 'UTC', mode = 'track') {
             if (mode === 'local') {
-                // LOCAL MODE: Use current date/time in driver's timezone
-                // For local mode, we need to calculate daylight for the driver's current location
-                // This is a simplified approach - in a real implementation you'd want to get
-                // the driver's actual coordinates and calculate sunrise/sunset for their location
+                // LOCAL MODE: Use stint time in driver's timezone for daylight calculation
+                // Convert stint time to the driver's timezone first
+                let stintTimeInDriverZone;
+                try {
+                    stintTimeInDriverZone = new Date(stintTime.toLocaleString('en-US', { timeZone: timeZone }));
+                } catch (error) {
+                    stintTimeInDriverZone = stintTime; // Fallback
+                }
                 
-                const now = new Date();
-                const localHour = now.getHours(); // Current hour in driver's timezone
+                const localHour = stintTimeInDriverZone.getHours(); // Stint hour in driver's timezone
                 
-                // Simplified daylight logic based on typical day/night hours
-                // You could enhance this by calling a daylight API for the driver's location
+                // Simplified daylight logic based on typical day/night hours for the driver's location
+                // This uses general daylight patterns - could be enhanced with actual location coordinates
                 if (localHour >= 6 && localHour < 8) {
                     return 'daylight-dawn';
                 } else if (localHour >= 8 && localHour < 11) {
@@ -1852,19 +1855,27 @@
 				        if (eventStartTimeInput) {
 				            const [eventHours, eventMinutes] = eventStartTimeInput.split(':').map(Number);
 				            
-				            if (selectedDriverTimezone) {
+				            if (selectedDriverTimezone && selectedDriverTimezone !== 'Europe/London') {
 				                // Convert from Europe/London to selected driver's timezone
-				                const eventDate = new Date();
-				                eventDate.setUTCHours(eventHours, eventMinutes, 0, 0);
-				                const londonTime = eventDate.toLocaleString('en-US', { timeZone: 'Europe/London' });
-				                const driverTime = new Date(londonTime).toLocaleString('en-US', { timeZone: selectedDriverTimezone });
-				                currentTime = new Date(driverTime);
+				                // Create a date representing the event time in Europe/London
+				                const today = new Date();
+				                const eventTimeInLondon = new Date(today.getFullYear(), today.getMonth(), today.getDate(), eventHours, eventMinutes);
+				                
+				                // Convert to driver's timezone using proper timezone conversion
+				                const formatter = new Intl.DateTimeFormat('en-US', {
+				                    timeZone: selectedDriverTimezone,
+				                    hour: '2-digit',
+				                    minute: '2-digit',
+				                    hour12: false
+				                });
+				                
+				                // Set current time to the converted time
+				                currentTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), eventHours, eventMinutes);
 				                console.log('🌍 Using Local Time for', selectedDriverDropdown.value, ':', currentTime.toISOString());
 				            } else {
-				                // Use event start time as Europe/London time (default)
-				                const eventDate = new Date();
-				                eventDate.setUTCHours(eventHours, eventMinutes, 0, 0);
-				                currentTime = new Date(eventDate.getTime());
+				                // Use event start time as-is (already Europe/London time)
+				                const today = new Date();
+				                currentTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), eventHours, eventMinutes);
 				                console.log('🇬🇧 Using Event Time (Europe/London):', currentTime.toISOString());
 				            }
 				        } else {
