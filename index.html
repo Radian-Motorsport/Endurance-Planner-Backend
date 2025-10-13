@@ -1123,6 +1123,37 @@
         let trackSunriseTime = null;
         let trackSunsetTime = null;
         let trackTimezone = null;
+        
+        // London daylight data (calculated from London coordinates + event date)
+        let londonSunriseTime = null;
+        let londonSunsetTime = null;
+
+        // Calculate London daylight times for event time display
+        async function calculateLondonDaylight(date) {
+            try {
+                // London coordinates: 51.5074, -0.1278
+                const response = await fetch('/api/daylight', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        latitude: 51.5074,
+                        longitude: -0.1278,
+                        date: date
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    londonSunriseTime = new Date(data.sunrise);
+                    londonSunsetTime = new Date(data.sunset);
+                    console.log('🇬🇧 London daylight calculated:', { sunrise: londonSunriseTime, sunset: londonSunsetTime });
+                } else {
+                    console.error('Failed to calculate London daylight');
+                }
+            } catch (error) {
+                console.error('Error calculating London daylight:', error);
+            }
+        }
 
         // Calculate daylight times for page 2 display
         async function calculateDaylightForPage2(trackId, date) {
@@ -2103,13 +2134,16 @@
             console.log(`   Sunset:  ${formatTimeForTrack(trackSunsetTime)}`);
             console.log(`   Track Timezone: ${trackTimezone || 'Unknown'}`);
             
-            // Event time (Europe/London) - calculate daylight for London coordinates
+            // Event time (Europe/London) - using London coordinates
             console.log('🇬🇧 EVENT TIME (Europe/London):');
-            // London coordinates: 51.5074, -0.1278
-            // TODO: Calculate London-specific daylight instead of using track daylight
-            console.log(`   Sunrise: ${formatTimeInTimezone(trackSunriseTime, 'Europe/London')} (WARNING: Using track daylight, should be London daylight)`);
-            console.log(`   Midday:  ${formatTimeInTimezone(new Date(2000, 0, 1, solarNoonHours, solarNoonMins), 'Europe/London')}`);
-            console.log(`   Sunset:  ${formatTimeInTimezone(trackSunsetTime, 'Europe/London')} (WARNING: Using track daylight, should be London daylight)`);
+            if (londonSunriseTime && londonSunsetTime) {
+                const londonNoon = new Date((londonSunriseTime.getTime() + londonSunsetTime.getTime()) / 2);
+                console.log(`   Sunrise: ${formatTimeInTimezone(londonSunriseTime, 'Europe/London')}`);
+                console.log(`   Midday:  ${formatTimeInTimezone(londonNoon, 'Europe/London')}`);
+                console.log(`   Sunset:  ${formatTimeInTimezone(londonSunsetTime, 'Europe/London')}`);
+            } else {
+                console.log(`   London daylight data not calculated yet`);
+            }
             
             // Selected drivers' timezones with their location-specific daylight
             const drivers = getSelectedDrivers();
@@ -3370,7 +3404,10 @@
                 return;
             }
             
-            console.log('🌅 Loading daylight data for all drivers...');
+            console.log('🌅 Loading daylight data for all drivers and London...');
+            
+            // Calculate London daylight for event time display
+            await calculateLondonDaylight(eventDate);
             
             for (const driver of drivers) {
                 if (driver.timezone) {
@@ -3383,7 +3420,7 @@
                 }
             }
             
-            console.log('🌅 All driver daylight data loaded:', driverDaylightData);
+            console.log('🌅 All daylight data loaded:', { london: { sunrise: londonSunriseTime, sunset: londonSunsetTime }, drivers: driverDaylightData });
         }
         
         // Load all timezones from assets
