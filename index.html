@@ -1812,25 +1812,31 @@
 				    let currentTime;
 				    
 				    if (isLocalTimeMode) {
-				        // Use event start time converted to selected driver's timezone
+				        // Use event start time (default to Europe/London, or convert to selected driver's timezone)
 				        const eventStartTimeInput = document.getElementById('event-start-time').value;
 				        const selectedDriverDropdown = document.getElementById('driver-timezone-dropdown');
 				        const selectedDriverTimezone = selectedDriverDropdown.options[selectedDriverDropdown.selectedIndex]?.dataset.timezone;
 				        
-				        if (eventStartTimeInput && selectedDriverTimezone) {
+				        if (eventStartTimeInput) {
 				            const [eventHours, eventMinutes] = eventStartTimeInput.split(':').map(Number);
-				            // Create event time in Europe/London timezone
-				            const eventDate = new Date();
-				            eventDate.setUTCHours(eventHours, eventMinutes, 0, 0);
 				            
-				            // Convert from Europe/London to selected driver's timezone
-				            const londonTime = eventDate.toLocaleString('en-US', { timeZone: 'Europe/London' });
-				            const driverTime = new Date(londonTime).toLocaleString('en-US', { timeZone: selectedDriverTimezone });
-				            currentTime = new Date(driverTime);
-				            
-				            console.log('🌍 Using Local Time for', selectedDriverDropdown.value, ':', currentTime.toISOString());
+				            if (selectedDriverTimezone) {
+				                // Convert from Europe/London to selected driver's timezone
+				                const eventDate = new Date();
+				                eventDate.setUTCHours(eventHours, eventMinutes, 0, 0);
+				                const londonTime = eventDate.toLocaleString('en-US', { timeZone: 'Europe/London' });
+				                const driverTime = new Date(londonTime).toLocaleString('en-US', { timeZone: selectedDriverTimezone });
+				                currentTime = new Date(driverTime);
+				                console.log('🌍 Using Local Time for', selectedDriverDropdown.value, ':', currentTime.toISOString());
+				            } else {
+				                // Use event start time as Europe/London time (default)
+				                const eventDate = new Date();
+				                eventDate.setUTCHours(eventHours, eventMinutes, 0, 0);
+				                currentTime = new Date(eventDate.getTime());
+				                console.log('🇬🇧 Using Event Time (Europe/London):', currentTime.toISOString());
+				            }
 				        } else {
-				            // Fallback to race time if no driver selected or no event time
+				            // Fallback to race time if no event time set
 				            const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
 				            const raceDate = new Date();
 				            raceDate.setUTCHours(hours, minutes, 0, 0); 
@@ -1846,6 +1852,15 @@
 				        console.log('🏁 Using Race Time:', currentTime.toISOString());
 				    }
 				    
+				    // Determine which timezone to use for formatting
+				    let displayTimeZone;
+				    if (isLocalTimeMode) {
+				        const selectedDriverDropdown = document.getElementById('driver-timezone-dropdown');
+				        displayTimeZone = selectedDriverDropdown.options[selectedDriverDropdown.selectedIndex]?.dataset.timezone || 'Europe/London';
+				    } else {
+				        displayTimeZone = 'UTC'; // Race time is typically UTC
+				    }
+				    
 				    let currentLap = 1;
 				    let driverIndex = 0;
 				    
@@ -1858,7 +1873,7 @@
 				        
 				        // Format the start time for the selected timezone
 				        const startTimeString = typeof formatTimeWithTimezone === 'function' 
-				            ? formatTimeWithTimezone(currentTime, selectedTimeZone)
+				            ? formatTimeWithTimezone(currentTime, displayTimeZone)
 				            : currentTime.toISOString().substr(11, 8);
 				        
 				        const stintDurationSeconds = stintLaps * avgLapTimeInSeconds;
@@ -1866,7 +1881,7 @@
 				        
 				        // Format the end time for the selected timezone
 				        const endTimeString = typeof formatTimeWithTimezone === 'function' 
-				            ? formatTimeWithTimezone(currentTime, selectedTimeZone)
+				            ? formatTimeWithTimezone(currentTime, displayTimeZone)
 				            : currentTime.toISOString().substr(11, 8);				        const startLap = currentLap;
 				        const endLap = startLap + stintLaps - 1;
 				        
@@ -1904,10 +1919,10 @@
 				            const pitEndTime = new Date(currentTime);
 				            
 				            const pitStartTimeString = typeof formatTimeWithTimezone === 'function' 
-				                ? formatTimeWithTimezone(pitStartTime, selectedTimeZone)
+				                ? formatTimeWithTimezone(pitStartTime, displayTimeZone)
 				                : pitStartTime.toISOString().substr(11, 8);
 				            const pitEndTimeString = typeof formatTimeWithTimezone === 'function' 
-				                ? formatTimeWithTimezone(pitEndTime, selectedTimeZone)
+				                ? formatTimeWithTimezone(pitEndTime, displayTimeZone)
 				                : pitEndTime.toISOString().substr(11, 8);
 				            
 				            // Format pit stop duration (convert seconds to mm:ss)
