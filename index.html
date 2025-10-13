@@ -594,6 +594,24 @@
                             </div>
                         </div>
                         
+                        <!-- Daylight Info Display -->
+                        <div id="daylight-info" class="bg-neutral-800 border border-neutral-600 rounded-lg p-3 mt-3 text-sm">
+                            <div class="grid grid-cols-3 gap-4 text-center">
+                                <div>
+                                    <div class="text-neutral-400 mb-1">Sunrise:</div>
+                                    <div id="display-sunrise" class="text-neutral-200 font-medium">--:--</div>
+                                </div>
+                                <div>
+                                    <div class="text-neutral-400 mb-1">Midday:</div>
+                                    <div id="display-midday" class="text-neutral-200 font-medium">--:--</div>
+                                </div>
+                                <div>
+                                    <div class="text-neutral-400 mb-1">Sunset:</div>
+                                    <div id="display-sunset" class="text-neutral-200 font-medium">--:--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="updateTimesOnly()">Update</button>
                     </div>
                     
@@ -1193,6 +1211,9 @@
                 trackSunsetTime = null;
                 trackTimezone = null;
             }
+            
+            // Update daylight display after track daylight data is loaded
+            updateDaylightDisplay();
         }
 
         // Function to determine daylight status for a given time
@@ -1225,8 +1246,13 @@
                     }
                     
                     const stintTimeOfDay = stintTimeInDriverZone.getHours() * 60 + stintTimeInDriverZone.getMinutes();
-                    const sunriseTimeOfDay = driverData.sunrise.getUTCHours() * 60 + driverData.sunrise.getUTCMinutes();
-                    const sunsetTimeOfDay = driverData.sunset.getUTCHours() * 60 + driverData.sunset.getUTCMinutes();
+                    
+                    // Convert driver sunrise/sunset to driver's local time for comparison
+                    const driverSunriseLocal = new Date(driverData.sunrise.toLocaleString('en-US', { timeZone: driverData.timezone }));
+                    const driverSunsetLocal = new Date(driverData.sunset.toLocaleString('en-US', { timeZone: driverData.timezone }));
+                    
+                    const sunriseTimeOfDay = driverSunriseLocal.getHours() * 60 + driverSunriseLocal.getMinutes();
+                    const sunsetTimeOfDay = driverSunsetLocal.getHours() * 60 + driverSunsetLocal.getMinutes();
                     
                     const dawnDuskWindow = 60; // 1 hour windows for dawn/dusk periods
                     const middayWindow = 60; // 1 hour window around solar noon for peak midday
@@ -3036,6 +3062,9 @@
             // Update stint table with new time mode
             updateStintTableTimes();
             
+            // Update daylight display
+            setTimeout(() => updateDaylightDisplay(), 500); // Wait for data to load
+            
             updateStintTableTimes();
         }
         
@@ -3085,6 +3114,9 @@
                 const avgLapTimeInSeconds = parseFloat(avgLapTimeInput.value);
                 populateStintTable(avgLapTimeInSeconds, true); // true = preserve driver assignments
             }
+            
+            // Update daylight display
+            updateDaylightDisplay();
         }
 
         // Simple layout toggle - just change container width
@@ -3393,6 +3425,84 @@
         
         // Store driver-specific daylight data
         let driverDaylightData = {}; // { driverName: { sunrise, sunset, timezone } }
+        
+        // Update the daylight info display
+        function updateDaylightDisplay() {
+            const sunriseEl = document.getElementById('display-sunrise');
+            const middayEl = document.getElementById('display-midday');
+            const sunsetEl = document.getElementById('display-sunset');
+            
+            if (isLocalTimeMode) {
+                // LOCAL TIME MODE: Show selected driver's daylight
+                const selectedDriverDropdown = document.getElementById('driver-timezone-dropdown');
+                const selectedDriverName = selectedDriverDropdown.value;
+                
+                if (selectedDriverName && driverDaylightData[selectedDriverName]) {
+                    const driverData = driverDaylightData[selectedDriverName];
+                    const driverTimezone = driverData.timezone;
+                    
+                    const sunrise = driverData.sunrise.toLocaleTimeString('en-US', { 
+                        timeZone: driverTimezone,
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    });
+                    
+                    const sunset = driverData.sunset.toLocaleTimeString('en-US', { 
+                        timeZone: driverTimezone,
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    });
+                    
+                    const midday = new Date((driverData.sunrise.getTime() + driverData.sunset.getTime()) / 2);
+                    const middayStr = midday.toLocaleTimeString('en-US', { 
+                        timeZone: driverTimezone,
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    });
+                    
+                    sunriseEl.textContent = sunrise;
+                    middayEl.textContent = middayStr;
+                    sunsetEl.textContent = sunset;
+                } else {
+                    sunriseEl.textContent = '--:--';
+                    middayEl.textContent = '--:--';
+                    sunsetEl.textContent = '--:--';
+                }
+            } else {
+                // RACE TIME MODE: Show track daylight
+                if (trackSunriseTime && trackSunsetTime) {
+                    const sunrise = trackSunriseTime.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    });
+                    
+                    const sunset = trackSunsetTime.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    });
+                    
+                    const midday = new Date((trackSunriseTime.getTime() + trackSunsetTime.getTime()) / 2);
+                    const middayStr = midday.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    });
+                    
+                    sunriseEl.textContent = sunrise;
+                    middayEl.textContent = middayStr;
+                    sunsetEl.textContent = sunset;
+                } else {
+                    sunriseEl.textContent = '--:--';
+                    middayEl.textContent = '--:--';
+                    sunsetEl.textContent = '--:--';
+                }
+            }
+        }
         
         // Load daylight data for all selected drivers
         async function loadAllDriverDaylightData() {
