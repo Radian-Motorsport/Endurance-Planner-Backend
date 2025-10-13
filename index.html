@@ -153,32 +153,37 @@
         
         /* Daylight Gradient Classes for Daylight Column */
         .daylight-night { 
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 30%, #16213e 70%, #0f172a 100%) !important; 
+            background: #1a1a2e !important; 
             color: #9ca3af !important;
             opacity: 0.9;
         }
         .daylight-pre-dawn { 
-            background: linear-gradient(135deg, #1a1a2e 0%, #4c1d95 25%, #7c2d12 50%, #991b1b 75%, #450a0a 100%) !important; 
+            background: #4c1d95 !important; 
             color: #e5e7eb !important;
             opacity: 0.9;
         }
         .daylight-dawn { 
-            background: linear-gradient(135deg, #1a1a2e 0%, #ff6b35 25%, #f7931e 50%, #ffd700 75%, #ffed4e 100%) !important; 
+            background: #ff6b35 !important; 
             color: #1f2937 !important;
             opacity: 0.95;
         }
         .daylight-day { 
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 25%, #fff59d 50%, #fffbeb 75%, #fef3c7 100%) !important; 
+            background: #ffed4e !important; 
+            color: #1f2937 !important;
+            opacity: 0.95;
+        }
+        .daylight-midday { 
+            background: #fff59d !important; 
             color: #1f2937 !important;
             opacity: 0.95;
         }
         .daylight-dusk { 
-            background: linear-gradient(135deg, #ff4757 0%, #ff6b35 25%, #f7931e 50%, #1a1a2e 75%, #0f0f23 100%) !important; 
-            color: #f3f4f6 !important;
+            background: #ff6b35 !important; 
+            color: #1f2937 !important;
             opacity: 0.92;
         }
         .daylight-post-dusk { 
-            background: linear-gradient(135deg, #991b1b 0%, #7c2d12 25%, #4c1d95 50%, #312e81 75%, #1a1a2e 100%) !important; 
+            background: #4c1d95 !important; 
             color: #e5e7eb !important;
             opacity: 0.9;
         }
@@ -1213,20 +1218,26 @@
             
             const dawnTransition = 30; // 30 minutes for dawn/dusk transitions
             const transitionBuffer = 15; // Additional buffer for smoother transitions
+            const middayWindow = 60; // 1 hour window around solar noon for peak midday
+            
+            // Calculate solar noon (midpoint between sunrise and sunset)
+            const solarNoon = (sunriseTimeOfDay + sunsetTimeOfDay) / 2;
             
             // Determine daylight status with more granular transitions
             if (stintTimeOfDay < (sunriseTimeOfDay - dawnTransition - transitionBuffer)) {
                 return 'daylight-night';
             } else if (stintTimeOfDay < (sunriseTimeOfDay - dawnTransition)) {
-                return 'daylight-pre-dawn'; // Red/purple before dawn
+                return 'daylight-pre-dawn'; // Purple before dawn
             } else if (stintTimeOfDay < (sunriseTimeOfDay + dawnTransition)) {
-                return 'daylight-dawn';
+                return 'daylight-dawn'; // Orange dawn
+            } else if (stintTimeOfDay >= (solarNoon - middayWindow/2) && stintTimeOfDay <= (solarNoon + middayWindow/2)) {
+                return 'daylight-midday'; // Peak daylight around solar noon
             } else if (stintTimeOfDay < (sunsetTimeOfDay - dawnTransition)) {
-                return 'daylight-day';
+                return 'daylight-day'; // Regular day
             } else if (stintTimeOfDay < (sunsetTimeOfDay + dawnTransition)) {
-                return 'daylight-dusk';
+                return 'daylight-dusk'; // Orange dusk
             } else if (stintTimeOfDay < (sunsetTimeOfDay + dawnTransition + transitionBuffer)) {
-                return 'daylight-post-dusk'; // Red/purple after dusk
+                return 'daylight-post-dusk'; // Purple after dusk
             } else {
                 return 'daylight-night';
             }
