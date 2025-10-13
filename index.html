@@ -178,7 +178,7 @@
             opacity: 0.9;
         }
         .daylight-dawn { 
-            background: #b700ff !important; 
+            background: #7300a0 !important; 
             color: #f9fafb !important;
             opacity: 0.95;
         }
@@ -203,7 +203,7 @@
             opacity: 0.92;
         }
         .daylight-dusk { 
-            background: #b700ff !important; 
+            background: #7300a0 !important; 
             color: #f9fafb !important;
             opacity: 0.92;
         }
@@ -2114,9 +2114,8 @@
 		        localTime: document.getElementById('local-time-input').value,
 		        timezone: document.getElementById('timezone-select').value,
 		        summertime: document.getElementById('summertime-checkbox').checked,
-		        weatherImage1: document.getElementById('weather-image-1').value,
-		        weatherImage2: document.getElementById('weather-image-2').value,
-		        weatherImage3: document.getElementById('weather-image-3').value,
+		        weatherTempUrl: document.getElementById('weather-temp-url').value,
+		        weatherCloudsUrl: document.getElementById('weather-clouds-url').value,
 		        stintDrivers: stintDrivers, // Save stint driver assignments
 		        stintBackupDrivers: stintBackupDrivers // Save stint backup driver assignments
 		    };
@@ -2196,9 +2195,8 @@
 		        localTime: document.getElementById('local-time-input').value,
 		        timezone: document.getElementById('timezone-select').value,
 		        summertime: document.getElementById('summertime-checkbox').checked,
-		        weatherImage1: document.getElementById('weather-image-1').value,
-		        weatherImage2: document.getElementById('weather-image-2').value,
-		        weatherImage3: document.getElementById('weather-image-3').value,
+		        weatherTempUrl: document.getElementById('weather-temp-url').value,
+		        weatherCloudsUrl: document.getElementById('weather-clouds-url').value,
 		        stintDrivers: stintDrivers, // Save stint driver assignments
 		        stintBackupDrivers: stintBackupDrivers // Save stint backup driver assignments
 		    };
@@ -2280,14 +2278,24 @@
 		            // Restore summertime checkbox state
 		            document.getElementById('summertime-checkbox').checked = state.summertime || false;
 		            
-		            // Restore weather image URLs
-		            if (state.weatherImage1) document.getElementById('weather-image-1').value = state.weatherImage1;
-		            if (state.weatherImage2) document.getElementById('weather-image-2').value = state.weatherImage2;
-		            if (state.weatherImage3) document.getElementById('weather-image-3').value = state.weatherImage3;
+		            // Restore weather image URLs (with backward compatibility)
+		            if (state.weatherTempUrl) {
+		                document.getElementById('weather-temp-url').value = state.weatherTempUrl;
+		            } else if (state.weatherImage1) {
+		                document.getElementById('weather-temp-url').value = state.weatherImage1;
+		            }
+		            
+		            if (state.weatherCloudsUrl) {
+		                document.getElementById('weather-clouds-url').value = state.weatherCloudsUrl;
+		            } else if (state.weatherImage2) {
+		                document.getElementById('weather-clouds-url').value = state.weatherImage2;
+		            }
 		            
 		            // Trigger weather image display after restoration
-		            if (state.weatherImage1 || state.weatherImage2 || state.weatherImage3) {
-		                displayWeatherImages(state.weatherImage1, state.weatherImage2);
+		            const tempUrl = state.weatherTempUrl || state.weatherImage1;
+		            const cloudsUrl = state.weatherCloudsUrl || state.weatherImage2;
+		            if (tempUrl || cloudsUrl) {
+		                displayWeatherImages(tempUrl, cloudsUrl);
 		            }
 		            
 		            document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
