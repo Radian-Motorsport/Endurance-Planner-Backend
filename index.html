@@ -625,7 +625,7 @@
                                 <label for="new-driver-timezone" class="text-sm font-medium text-neutral-500">Timezone <span class="text-xs text-neutral-400">(Searchable - type to filter)</span></label>
                                 <div class="relative">
                                     <input type="text" id="timezone-search" placeholder="Type to search timezones..." class="mt-1 p-3 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <select id="new-driver-timezone" multiple class="hidden mt-1 p-2 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 absolute z-10 h-64 overflow-y-auto">
+                                    <select id="new-driver-timezone" size="10" class="hidden mt-1 p-2 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 absolute z-10 h-64 overflow-y-auto">
                                         <!-- Populated dynamically from assets/timezones.json -->
                                     </select>
                                 </div>
@@ -2927,9 +2927,12 @@
             });
             
             // Select timezone when clicking option
-            dropdown.addEventListener('change', (e) => {
-                searchInput.value = e.target.value;
-                dropdown.classList.add('hidden');
+            dropdown.addEventListener('click', (e) => {
+                if (e.target.tagName === 'OPTION') {
+                    searchInput.value = e.target.value;
+                    dropdown.classList.add('hidden');
+                    console.log('Selected timezone:', e.target.value);
+                }
             });
             
             // Hide dropdown when clicking outside
