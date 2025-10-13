@@ -309,6 +309,10 @@
                             <input type="time" id="race-time" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
                         </div>
                         <div class="flex flex-col w-full">
+                            <label for="event-start-date" class="text-sm font-medium text-neutral-500 mb-2">Event Start Date <span class="text-xs text-neutral-400">(Europe/London Date)</span></label>
+                            <input type="date" id="event-start-date" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
+                        </div>
+                        <div class="flex flex-col w-full">
                             <label for="event-start-time" class="text-sm font-medium text-neutral-500 mb-2">Event Start Time <span class="text-xs text-neutral-400">(Europe/London Time)</span></label>
                             <input type="time" id="event-start-time" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
                         </div>
@@ -1130,20 +1134,18 @@
                     // Store track-specific daylight data for race time calculations
                     trackSunriseTime = new Date(data.times.sunrise);
                     trackSunsetTime = new Date(data.times.sunset);
-                    trackTimezone = 'UTC'; // Track times are calculated in UTC
+                    trackTimezone = null; // We don't need timezone, times are already correct for the location
                     
-                    // Format times as HH:MM (local time representation)
+                    // Format times as HH:MM (times are already in track's local time)
                     const sunrise = trackSunriseTime.toLocaleTimeString('en-US', { 
                         hour: '2-digit', 
                         minute: '2-digit',
-                        hour12: false,
-                        timeZone: 'UTC'
+                        hour12: false
                     });
                     const sunset = trackSunsetTime.toLocaleTimeString('en-US', { 
                         hour: '2-digit', 
                         minute: '2-digit',
-                        hour12: false,
-                        timeZone: 'UTC'
+                        hour12: false
                     });
                     
                     document.getElementById('page2-sunrise').textContent = sunrise;
@@ -1898,18 +1900,18 @@
 				    let currentTime;
 				    
 				    if (isLocalTimeMode) {
-				        // LOCAL TIME MODE: Use event start time and convert to driver's timezone for display
+				        // LOCAL TIME MODE: Use event start date & time and convert to driver's timezone for display
 				        const eventStartTimeInput = document.getElementById('event-start-time').value;
-				        const raceDate = document.getElementById('race-date').value;
+				        const eventStartDateInput = document.getElementById('event-start-date').value;
 				        
-				        if (eventStartTimeInput && raceDate) {
-				            // Create a base date object using the race date and event start time
+				        if (eventStartTimeInput && eventStartDateInput) {
+				            // Create a base date object using the event date and event start time
 				            const [eventHours, eventMinutes] = eventStartTimeInput.split(':').map(Number);
-				            const [year, month, day] = raceDate.split('-').map(Number);
+				            const [year, month, day] = eventStartDateInput.split('-').map(Number);
 				            
 				            // Create date in Europe/London time (event timezone)
 				            currentTime = new Date(year, month - 1, day, eventHours, eventMinutes);
-				            console.log('🌍 Local Time Mode - Base Event Time:', currentTime.toISOString());
+				            console.log('🌍 Local Time Mode - Event Date & Time:', currentTime.toISOString());
 				        } else {
 				            // Fallback to race time if no event time/date set
 				            const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
@@ -2195,6 +2197,7 @@
 		        raceStartTime: document.getElementById('race-start-time-page2').value,
 		        // Removed practice qualifying time and local time functionality
 		        eventStartTimeInput: document.getElementById('event-start-time').value,
+		        eventStartDateInput: document.getElementById('event-start-date').value,
 		        // timezone: document.getElementById('timezone-select').value, // REMOVED - using driver timezones
 		        // summertime: document.getElementById('summertime-checkbox').checked, // REMOVED
 		        weatherTempUrl: document.getElementById('weather-temp-url').value,
@@ -2280,6 +2283,7 @@
 		        raceStartTime: document.getElementById('race-start-time-page2').value,
 		        // Removed practice qualifying time and local time functionality
 		        eventStartTimeInput: document.getElementById('event-start-time').value,
+		        eventStartDateInput: document.getElementById('event-start-date').value,
 		        // timezone: document.getElementById('timezone-select').value, // REMOVED - using driver timezones
 		        // summertime: document.getElementById('summertime-checkbox').checked, // REMOVED
 		        weatherTempUrl: document.getElementById('weather-temp-url').value,
@@ -2362,9 +2366,12 @@
 		            document.getElementById('race-start-time-page2').value = state.raceStartTime;
 		            // Removed practice qualifying time and local time functionality
 		            
-		            // Restore event start time from shared link
+		            // Restore event start time & date from shared link
 		            if (state.eventStartTimeInput) {
 		                document.getElementById('event-start-time').value = state.eventStartTimeInput;
+		            }
+		            if (state.eventStartDateInput) {
+		                document.getElementById('event-start-date').value = state.eventStartDateInput;
 		            }
 		            
 		            // Timezone and summertime removed - now using driver-specific timezones
@@ -3017,10 +3024,10 @@
                 if (selectedDriverName && selectedDriverTimezone) {
                     console.log(`🌅 Loading daylight data for driver ${selectedDriverName} (${selectedDriverTimezone})`);
                     
-                    // Get race date for daylight calculation
-                    const raceDate = document.getElementById('race-date').value;
-                    if (raceDate) {
-                        const daylightData = await calculateDriverDaylightTimes(selectedDriverTimezone, raceDate);
+                    // Get event date for daylight calculation (use event date in local time mode)
+                    const eventDate = document.getElementById('event-start-date').value;
+                    if (eventDate) {
+                        const daylightData = await calculateDriverDaylightTimes(selectedDriverTimezone, eventDate);
                         if (daylightData) {
                             driverDaylightData[selectedDriverName] = daylightData;
                             console.log(`✅ Loaded daylight data for ${selectedDriverName}:`, daylightData);
