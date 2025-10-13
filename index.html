@@ -224,6 +224,17 @@
             color: #3b82f6 !important;
             font-weight: 600 !important;
         }
+        
+        /* Time Mode Toggle Styles */
+        .toggle-switch {
+            background-color: #4b5563;
+        }
+        .toggle-switch.active {
+            background-color: #3b82f6;
+        }
+        .toggle-switch.active #time-toggle-slider {
+            transform: translateX(16px);
+        }
     </style>
 </head>
 <body class="bg-neutral-900 text-neutral-200 p-4">
@@ -556,6 +567,28 @@
                     <div class="flex flex-col mb-4">
                         <!-- Hidden race start time input for internal use -->
                         <input type="hidden" id="race-start-time-page2" value="13:00">
+                        
+                        <!-- Time Mode Toggle -->
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm font-medium text-neutral-300">Time Display:</span>
+                                <div class="flex items-center space-x-2">
+                                    <span id="race-time-label" class="text-sm text-neutral-400">Race Time</span>
+                                    <div class="relative inline-block w-10 h-6 transition duration-200 ease-in-out bg-neutral-600 rounded-full cursor-pointer toggle-switch" onclick="toggleTimeMode()">
+                                        <div id="time-toggle-slider" class="absolute left-0 top-0 w-6 h-6 transition duration-200 ease-in-out transform bg-white rounded-full shadow"></div>
+                                    </div>
+                                    <span id="local-time-label" class="text-sm text-neutral-400">Local Time</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Driver Timezone Selector (hidden by default) -->
+                            <div id="driver-timezone-selector" class="hidden flex items-center space-x-2">
+                                <span class="text-sm text-neutral-400">Driver:</span>
+                                <select id="driver-timezone-dropdown" class="bg-neutral-800 text-neutral-300 border border-neutral-600 rounded px-2 py-1 text-sm" onchange="updateStintTableTimes()">
+                                    <option value="">Select Driver</option>
+                                </select>
+                            </div>
+                        </div>
                         
                         <button id="recalculate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 mt-4" onclick="updateTimesOnly()">Update</button>
                     </div>
@@ -1778,12 +1811,40 @@
 				    
 				    let currentTime;
 				    
-				    // Use race time from page 1 (race start time input)
-				    const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
-				    const raceDate = new Date();
-				    raceDate.setUTCHours(hours, minutes, 0, 0); 
-				    currentTime = new Date(raceDate.getTime());
-				    console.log('🏁 Using Race Time:', currentTime.toISOString());
+				    if (isLocalTimeMode) {
+				        // Use event start time converted to selected driver's timezone
+				        const eventStartTimeInput = document.getElementById('event-start-time').value;
+				        const selectedDriverDropdown = document.getElementById('driver-timezone-dropdown');
+				        const selectedDriverTimezone = selectedDriverDropdown.options[selectedDriverDropdown.selectedIndex]?.dataset.timezone;
+				        
+				        if (eventStartTimeInput && selectedDriverTimezone) {
+				            const [eventHours, eventMinutes] = eventStartTimeInput.split(':').map(Number);
+				            // Create event time in Europe/London timezone
+				            const eventDate = new Date();
+				            eventDate.setUTCHours(eventHours, eventMinutes, 0, 0);
+				            
+				            // Convert from Europe/London to selected driver's timezone
+				            const londonTime = eventDate.toLocaleString('en-US', { timeZone: 'Europe/London' });
+				            const driverTime = new Date(londonTime).toLocaleString('en-US', { timeZone: selectedDriverTimezone });
+				            currentTime = new Date(driverTime);
+				            
+				            console.log('🌍 Using Local Time for', selectedDriverDropdown.value, ':', currentTime.toISOString());
+				        } else {
+				            // Fallback to race time if no driver selected or no event time
+				            const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
+				            const raceDate = new Date();
+				            raceDate.setUTCHours(hours, minutes, 0, 0); 
+				            currentTime = new Date(raceDate.getTime());
+				            console.log('🏁 Fallback to Race Time:', currentTime.toISOString());
+				        }
+				    } else {
+				        // Use race time from page 1 (race start time input)
+				        const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
+				        const raceDate = new Date();
+				        raceDate.setUTCHours(hours, minutes, 0, 0); 
+				        currentTime = new Date(raceDate.getTime());
+				        console.log('🏁 Using Race Time:', currentTime.toISOString());
+				    }
 				    
 				    let currentLap = 1;
 				    let driverIndex = 0;
@@ -2703,6 +2764,69 @@
             calculateAndShowPage2();
         }
         
+        // Time mode toggle functions
+        let isLocalTimeMode = false;
+        
+        // Initialize race time mode as active
+        document.addEventListener('DOMContentLoaded', function() {
+            const raceLabel = document.getElementById('race-time-label');
+            if (raceLabel) {
+                raceLabel.classList.add('time-mode-active');
+            }
+        });
+        
+        function toggleTimeMode() {
+            const toggleSwitch = document.querySelector('.toggle-switch');
+            const slider = document.getElementById('time-toggle-slider');
+            const driverSelector = document.getElementById('driver-timezone-selector');
+            const raceLabel = document.getElementById('race-time-label');
+            const localLabel = document.getElementById('local-time-label');
+            
+            isLocalTimeMode = !isLocalTimeMode;
+            
+            if (isLocalTimeMode) {
+                toggleSwitch.classList.add('active');
+                driverSelector.classList.remove('hidden');
+                raceLabel.classList.remove('time-mode-active');
+                localLabel.classList.add('time-mode-active');
+                populateDriverDropdown();
+            } else {
+                toggleSwitch.classList.remove('active');
+                driverSelector.classList.add('hidden');
+                raceLabel.classList.add('time-mode-active');
+                localLabel.classList.remove('time-mode-active');
+            }
+            
+            updateStintTableTimes();
+        }
+        
+        function getSelectedDrivers() {
+            return selectedDrivers || [];
+        }
+        
+        function populateDriverDropdown() {
+            const dropdown = document.getElementById('driver-timezone-dropdown');
+            const drivers = getSelectedDrivers(); // Get drivers from page 1
+            
+            dropdown.innerHTML = '<option value="">Select Driver</option>';
+            drivers.forEach(driver => {
+                const option = document.createElement('option');
+                option.value = driver.name;
+                option.textContent = `${driver.name} (${driver.timezone || 'No timezone'})`;
+                option.dataset.timezone = driver.timezone || '';
+                dropdown.appendChild(option);
+            });
+        }
+        
+        function updateStintTableTimes() {
+            // Get current average lap time and recalculate table
+            const avgLapTimeInput = document.getElementById('avg-lap-time');
+            if (avgLapTimeInput && avgLapTimeInput.value) {
+                const avgLapTimeInSeconds = parseFloat(avgLapTimeInput.value);
+                populateStintTable(avgLapTimeInSeconds, true); // true = preserve driver assignments
+            }
+        }
+
         // Simple layout toggle - just change container width
         function toggleLayout() {
             const container = document.querySelector('.max-w-4xl');
