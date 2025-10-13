@@ -2300,6 +2300,8 @@
             const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
             const timezone = document.getElementById('timezone-search').value;
             
+            console.log('Timezone value being saved:', timezone);
+            
             if (name && garage61_slug) { // Only require name and garage61_slug
                 drivers.push({ name, firstName, lastName, garage61_slug, timezone });
                 await saveDataToServer();
