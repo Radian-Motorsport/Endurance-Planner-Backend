@@ -294,8 +294,12 @@
                             <input type="date" id="race-date" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
                         </div>
                         <div class="flex flex-col w-full">
-                            <label for="race-time" class="text-sm font-medium text-neutral-500 mb-2">Race Start Time</label>
+                            <label for="race-time" class="text-sm font-medium text-neutral-500 mb-2">Race Start Time <span class="text-xs text-neutral-400">(Simulator Time)</span></label>
                             <input type="time" id="race-time" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
+                        </div>
+                        <div class="flex flex-col w-full">
+                            <label for="event-start-time" class="text-sm font-medium text-neutral-500 mb-2">Event Start Time <span class="text-xs text-neutral-400">(Real World GMT)</span></label>
+                            <input type="time" id="event-start-time" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
                         </div>
                     </div>
                 </div>
@@ -616,6 +620,40 @@
                             <div>
                                 <label for="new-driver-garage61-slug" class="text-sm font-medium text-neutral-500">Garage 61 Slug</label>
                                 <input type="text" id="new-driver-garage61-slug" placeholder="adam-economu" class="mt-1 p-3 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="new-driver-timezone" class="text-sm font-medium text-neutral-500">Timezone <span class="text-xs text-neutral-400">(IANA format - handles DST automatically)</span></label>
+                                <select id="new-driver-timezone" class="mt-1 p-3 border border-neutral-700 bg-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select Timezone</option>
+                                    <optgroup label="North America">
+                                        <option value="America/New_York">Eastern Time (New York)</option>
+                                        <option value="America/Chicago">Central Time (Chicago)</option>
+                                        <option value="America/Denver">Mountain Time (Denver)</option>
+                                        <option value="America/Los_Angeles">Pacific Time (Los Angeles)</option>
+                                        <option value="America/Toronto">Eastern Time (Toronto)</option>
+                                        <option value="America/Vancouver">Pacific Time (Vancouver)</option>
+                                    </optgroup>
+                                    <optgroup label="Europe">
+                                        <option value="Europe/London">GMT/BST (London)</option>
+                                        <option value="Europe/Paris">CET/CEST (Paris)</option>
+                                        <option value="Europe/Berlin">CET/CEST (Berlin)</option>
+                                        <option value="Europe/Rome">CET/CEST (Rome)</option>
+                                        <option value="Europe/Madrid">CET/CEST (Madrid)</option>
+                                        <option value="Europe/Amsterdam">CET/CEST (Amsterdam)</option>
+                                    </optgroup>
+                                    <optgroup label="Asia Pacific">
+                                        <option value="Australia/Sydney">AEDT/AEST (Sydney)</option>
+                                        <option value="Australia/Melbourne">AEDT/AEST (Melbourne)</option>
+                                        <option value="Asia/Tokyo">JST (Tokyo)</option>
+                                        <option value="Asia/Singapore">SGT (Singapore)</option>
+                                        <option value="Asia/Dubai">GST (Dubai)</option>
+                                    </optgroup>
+                                    <optgroup label="Other">
+                                        <option value="UTC">UTC (Coordinated Universal Time)</option>
+                                        <option value="America/Sao_Paulo">BRT/BRST (São Paulo)</option>
+                                        <option value="Africa/Johannesburg">SAST (Johannesburg)</option>
+                                    </optgroup>
+                                </select>
                             </div>
                             <div class="flex justify-center">
                                 <button id="add-driver-btn" onclick="addDriverAdmin()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
@@ -2275,6 +2313,7 @@
             document.getElementById('new-driver-first-name').value = '';
             document.getElementById('new-driver-last-name').value = '';
             document.getElementById('new-driver-garage61-slug').value = '';
+            document.getElementById('new-driver-timezone').value = '';
             document.getElementById('add-driver-btn').textContent = 'Add Driver';
             document.getElementById('add-driver-btn').onclick = addDriverAdmin;
         }
@@ -2283,9 +2322,10 @@
             const firstName = document.getElementById('new-driver-first-name').value;
             const lastName = document.getElementById('new-driver-last-name').value;
             const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
+            const timezone = document.getElementById('new-driver-timezone').value;
             
             if (name && garage61_slug) { // Only require name and garage61_slug
-                drivers.push({ name, firstName, lastName, garage61_slug });
+                drivers.push({ name, firstName, lastName, garage61_slug, timezone });
                 await saveDataToServer();
                 renderAdminLists();
                 populateDrivers();
@@ -2301,6 +2341,7 @@
                 document.getElementById('new-driver-first-name').value = driver.firstName || '';
                 document.getElementById('new-driver-last-name').value = driver.lastName || '';
                 document.getElementById('new-driver-garage61-slug').value = driver.garage61_slug || '';
+                document.getElementById('new-driver-timezone').value = driver.timezone || '';
                 document.getElementById('add-driver-btn').textContent = 'Update Driver';
                 document.getElementById('add-driver-btn').onclick = () => updateDriverAdmin(name);
             }
@@ -2310,6 +2351,7 @@
             const firstName = document.getElementById('new-driver-first-name').value;
             const lastName = document.getElementById('new-driver-last-name').value;
             const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
+            const timezone = document.getElementById('new-driver-timezone').value;
             
             if (name && garage61_slug) { // Only require name and garage61_slug
                 try {
@@ -2318,7 +2360,7 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ name, firstName, lastName, garage61_slug }),
+                        body: JSON.stringify({ name, firstName, lastName, garage61_slug, timezone }),
                     });
                     
                     if (!response.ok) {
@@ -2329,7 +2371,7 @@
                     // Update local drivers array
                     const index = drivers.findIndex(d => d.name === originalName);
                     if (index !== -1) {
-                        drivers[index] = { name, firstName, lastName, garage61_slug };
+                        drivers[index] = { name, firstName, lastName, garage61_slug, timezone };
                     }
                     
                     renderAdminLists();
