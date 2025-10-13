@@ -2288,7 +2288,8 @@
             document.getElementById('new-driver-first-name').value = '';
             document.getElementById('new-driver-last-name').value = '';
             document.getElementById('new-driver-garage61-slug').value = '';
-            document.getElementById('new-driver-timezone').value = '';
+            document.getElementById('timezone-search').value = '';
+            document.getElementById('new-driver-timezone').classList.add('hidden');
             document.getElementById('add-driver-btn').textContent = 'Add Driver';
             document.getElementById('add-driver-btn').onclick = addDriverAdmin;
         }
@@ -2297,7 +2298,7 @@
             const firstName = document.getElementById('new-driver-first-name').value;
             const lastName = document.getElementById('new-driver-last-name').value;
             const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
-            const timezone = document.getElementById('new-driver-timezone').value;
+            const timezone = document.getElementById('timezone-search').value;
             
             if (name && garage61_slug) { // Only require name and garage61_slug
                 drivers.push({ name, firstName, lastName, garage61_slug, timezone });
@@ -2316,7 +2317,7 @@
                 document.getElementById('new-driver-first-name').value = driver.firstName || '';
                 document.getElementById('new-driver-last-name').value = driver.lastName || '';
                 document.getElementById('new-driver-garage61-slug').value = driver.garage61_slug || '';
-                document.getElementById('new-driver-timezone').value = driver.timezone || '';
+                document.getElementById('timezone-search').value = driver.timezone || '';
                 document.getElementById('add-driver-btn').textContent = 'Update Driver';
                 document.getElementById('add-driver-btn').onclick = () => updateDriverAdmin(name);
             }
@@ -2326,7 +2327,7 @@
             const firstName = document.getElementById('new-driver-first-name').value;
             const lastName = document.getElementById('new-driver-last-name').value;
             const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
-            const timezone = document.getElementById('new-driver-timezone').value;
+            const timezone = document.getElementById('timezone-search').value;
             
             if (name && garage61_slug) { // Only require name and garage61_slug
                 try {
