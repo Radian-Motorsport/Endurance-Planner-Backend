@@ -2300,11 +2300,8 @@
             const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
             const timezone = document.getElementById('timezone-search').value;
             
-            console.log('🔍 DEBUG: Adding driver with timezone:', {name, firstName, lastName, garage61_slug, timezone});
-            
             if (name && garage61_slug) { // Only require name and garage61_slug
                 drivers.push({ name, firstName, lastName, garage61_slug, timezone });
-                console.log('🔍 DEBUG: Driver added to local array:', drivers[drivers.length - 1]);
                 await saveDataToServer();
                 renderAdminLists();
                 populateDrivers();
