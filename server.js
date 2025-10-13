@@ -281,13 +281,14 @@ app.post('/api/data', async (req, res) => {
         if (!driver || !driver.name) continue;
         try {
             await pool.query(
-                    `INSERT INTO drivers (name, garage61_slug, firstName, lastName)
-                     VALUES ($1, $2, $3, $4)
+                    `INSERT INTO drivers (name, garage61_slug, firstName, lastName, timezone)
+                     VALUES ($1, $2, $3, $4, $5)
                      ON CONFLICT (name) DO UPDATE SET
                          garage61_slug = EXCLUDED.garage61_slug,
                          firstName = EXCLUDED.firstName,
-                         lastName = EXCLUDED.lastName`,
-                [driver.name, driver.garage61_slug || null, driver.firstName || null, driver.lastName || null]
+                         lastName = EXCLUDED.lastName,
+                         timezone = EXCLUDED.timezone`,
+                [driver.name, driver.garage61_slug || null, driver.firstName || null, driver.lastName || null, driver.timezone || null]
             );
             result.inserted.drivers++;
         } catch (e) {
