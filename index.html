@@ -1383,10 +1383,14 @@
                 const data = await response.json();
                 console.log('✅ DIRECT API SUCCESS - GOT DATA:', data);
                 
-                // Show the lap times section
-                document.getElementById('garage61-lap-times').classList.remove('hidden');
-                document.getElementById('lap-times-loading').classList.add('hidden');
-                document.getElementById('lap-times-content').classList.remove('hidden');
+                // Show the lap times section (with null checks)
+                const garage61Section = document.getElementById('garage61-lap-times');
+                const lapTimesLoading = document.getElementById('lap-times-loading');
+                const lapTimesContent = document.getElementById('lap-times-content');
+                
+                if (garage61Section) garage61Section.classList.remove('hidden');
+                if (lapTimesLoading) lapTimesLoading.classList.add('hidden');
+                if (lapTimesContent) lapTimesContent.classList.remove('hidden');
                 
             } catch (error) {
                 console.error('❌ DIRECT API FAILED:', error);
@@ -1442,8 +1446,11 @@
             document.getElementById('sliders-container').classList.remove('hidden');
             document.getElementById('share-link-container').classList.remove('hidden');
        
-            // Show the button to go to the third page after calculation
-            document.getElementById('page3-button-container').classList.remove('hidden');
+            // Show the button to go to the third page after calculation (if it exists)
+            const page3Button = document.getElementById('page3-button-container');
+            if (page3Button) {
+                page3Button.classList.remove('hidden');
+            }
         }
 
         // Weather Display Functions
