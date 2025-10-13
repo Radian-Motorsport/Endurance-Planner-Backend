@@ -1159,59 +1159,81 @@
         }
 
         // Function to determine daylight status for a given time
-        function getDaylightStatus(stintTime, timeZone = 'UTC') {
-            if (!globalSunriseTime || !globalSunsetTime) {
-                return 'daylight-night'; // Default to night if no daylight data
-            }
-            
-            // Convert stint time to the specified timezone for comparison
-            let stintTimeInTimezone;
-            try {
-                // Create a properly timezone-aware time
-                stintTimeInTimezone = new Date(stintTime.toLocaleString('en-US', { timeZone: timeZone }));
-            } catch (error) {
-                // Fallback to UTC if timezone is invalid
-                stintTimeInTimezone = new Date(stintTime.getTime());
-            }
-            
-            const stintHours = stintTimeInTimezone.getHours();
-            const stintMinutes = stintTimeInTimezone.getMinutes();
-            const stintTimeOfDay = stintHours * 60 + stintMinutes; // Convert to minutes since midnight
-            
-            // Sunrise and sunset are already in the track's local timezone
-            const sunriseHours = globalSunriseTime.getHours();
-            const sunriseMinutes = globalSunriseTime.getMinutes();
-            const sunriseTimeOfDay = sunriseHours * 60 + sunriseMinutes;
-            
-            const sunsetHours = globalSunsetTime.getHours();
-            const sunsetMinutes = globalSunsetTime.getMinutes();
-            const sunsetTimeOfDay = sunsetHours * 60 + sunsetMinutes;
-            
-            const dawnDuskWindow = 60; // 1 hour windows for dawn/dusk periods
-            const middayWindow = 60; // 1 hour window around solar noon for peak midday
-            
-            // Calculate solar noon (midpoint between sunrise and sunset)
-            const solarNoon = (sunriseTimeOfDay + sunsetTimeOfDay) / 2;
-            
-            // Determine daylight status with 1-hour windows
-            if (stintTimeOfDay < (sunriseTimeOfDay - dawnDuskWindow)) {
-                return 'daylight-night';
-            } else if (stintTimeOfDay < sunriseTimeOfDay) {
-                return 'daylight-dawn'; // Red hour before sunrise
-            } else if (stintTimeOfDay < (sunriseTimeOfDay + dawnDuskWindow)) {
-                return 'daylight-post-dawn'; // Orange hour after sunrise
-            } else if (stintTimeOfDay >= (solarNoon - middayWindow/2) && stintTimeOfDay <= (solarNoon + middayWindow/2)) {
-                return 'daylight-midday'; // Peak daylight around solar noon
-            } else if (stintTimeOfDay < (sunsetTimeOfDay - (dawnDuskWindow * 2))) {
-                return 'daylight-day'; // Regular day
-            } else if (stintTimeOfDay < (sunsetTimeOfDay - dawnDuskWindow)) {
-                return 'daylight-pre-dusk'; // Orange hour 2-1 hours before sunset
-            } else if (stintTimeOfDay < sunsetTimeOfDay) {
-                return 'daylight-dusk'; // Red hour before sunset
-            } else if (stintTimeOfDay < (sunsetTimeOfDay + dawnDuskWindow)) {
-                return 'daylight-post-dusk'; // Purple hour after sunset
+        function getDaylightStatus(stintTime, timeZone = 'UTC', mode = 'track') {
+            if (mode === 'local') {
+                // LOCAL MODE: Use current date/time in driver's timezone
+                // For local mode, we need to calculate daylight for the driver's current location
+                // This is a simplified approach - in a real implementation you'd want to get
+                // the driver's actual coordinates and calculate sunrise/sunset for their location
+                
+                const now = new Date();
+                const localHour = now.getHours(); // Current hour in driver's timezone
+                
+                // Simplified daylight logic based on typical day/night hours
+                // You could enhance this by calling a daylight API for the driver's location
+                if (localHour >= 6 && localHour < 8) {
+                    return 'daylight-dawn';
+                } else if (localHour >= 8 && localHour < 11) {
+                    return 'daylight-post-dawn';
+                } else if (localHour >= 11 && localHour < 13) {
+                    return 'daylight-midday';
+                } else if (localHour >= 13 && localHour < 17) {
+                    return 'daylight-day';
+                } else if (localHour >= 17 && localHour < 19) {
+                    return 'daylight-pre-dusk';
+                } else if (localHour >= 19 && localHour < 21) {
+                    return 'daylight-dusk';
+                } else if (localHour >= 21 && localHour < 23) {
+                    return 'daylight-post-dusk';
+                } else {
+                    return 'daylight-night';
+                }
             } else {
-                return 'daylight-night';
+                // TRACK MODE: Use track location + simulator time (existing logic)
+                if (!globalSunriseTime || !globalSunsetTime) {
+                    return 'daylight-night'; // Default to night if no daylight data
+                }
+                
+                // Use the stint time directly (simulator time)
+                const stintHours = stintTime.getUTCHours();
+                const stintMinutes = stintTime.getUTCMinutes();
+                const stintTimeOfDay = stintHours * 60 + stintMinutes; // Convert to minutes since midnight
+                
+                // Use track's sunrise/sunset times (already calculated for track location)
+                const sunriseHours = globalSunriseTime.getUTCHours();
+                const sunriseMinutes = globalSunriseTime.getUTCMinutes();
+                const sunriseTimeOfDay = sunriseHours * 60 + sunriseMinutes;
+                
+                const sunsetHours = globalSunsetTime.getUTCHours();
+                const sunsetMinutes = globalSunsetTime.getUTCMinutes();
+                const sunsetTimeOfDay = sunsetHours * 60 + sunsetMinutes;
+                
+                const dawnDuskWindow = 60; // 1 hour windows for dawn/dusk periods
+                const middayWindow = 60; // 1 hour window around solar noon for peak midday
+                
+                // Calculate solar noon (midpoint between sunrise and sunset)
+                const solarNoon = (sunriseTimeOfDay + sunsetTimeOfDay) / 2;
+                
+                // Track mode daylight calculation logic
+                if (stintTimeOfDay < (sunriseTimeOfDay - dawnDuskWindow)) {
+                    return 'daylight-night';
+                } else if (stintTimeOfDay < sunriseTimeOfDay) {
+                    return 'daylight-dawn'; // Red hour before sunrise
+                } else if (stintTimeOfDay < (sunriseTimeOfDay + dawnDuskWindow)) {
+                    return 'daylight-post-dawn'; // Orange hour after sunrise
+                } else if (stintTimeOfDay >= (solarNoon - middayWindow/2) && stintTimeOfDay <= (solarNoon + middayWindow/2)) {
+                    return 'daylight-midday'; // Peak daylight around solar noon
+                } else if (stintTimeOfDay < (sunsetTimeOfDay - (dawnDuskWindow * 2))) {
+                    return 'daylight-day'; // Regular day
+                } else if (stintTimeOfDay < (sunsetTimeOfDay - dawnDuskWindow)) {
+                    return 'daylight-pre-dusk'; // Orange hour 2-1 hours before sunset
+                } else if (stintTimeOfDay < sunsetTimeOfDay) {
+                    return 'daylight-dusk'; // Red hour before sunset
+                } else if (stintTimeOfDay < (sunsetTimeOfDay + dawnDuskWindow)) {
+                    return 'daylight-post-dusk'; // Purple hour after sunset
+                } else {
+                    return 'daylight-night';
+                }
             }
         }
 
@@ -1862,13 +1884,16 @@
 				        console.log('🏁 Using Race Time:', currentTime.toISOString());
 				    }
 				    
-				    // Determine which timezone to use for formatting
+				    // Determine which timezone to use for formatting and daylight calculation
 				    let displayTimeZone;
+				    let daylightCalculationMode;
 				    if (isLocalTimeMode) {
 				        const selectedDriverDropdown = document.getElementById('driver-timezone-dropdown');
 				        displayTimeZone = selectedDriverDropdown.options[selectedDriverDropdown.selectedIndex]?.dataset.timezone || 'Europe/London';
+				        daylightCalculationMode = 'local'; // Use driver's current local time
 				    } else {
 				        displayTimeZone = 'UTC'; // Race time is typically UTC
+				        daylightCalculationMode = 'track'; // Use track location + simulator time
 				    }
 				    
 				    let currentLap = 1;
@@ -1895,8 +1920,8 @@
 				            : currentTime.toISOString().substr(11, 8);				        const startLap = currentLap;
 				        const endLap = startLap + stintLaps - 1;
 				        
-				        // Get daylight status for stint start time using the display timezone
-				        const daylightStatus = getDaylightStatus(stintStartTime, displayTimeZone);
+				        // Get daylight status for stint start time 
+				        const daylightStatus = getDaylightStatus(stintStartTime, displayTimeZone, daylightCalculationMode);
 				        
 				        // Create driving stint row
 				        const tr = document.createElement('tr');
@@ -1940,8 +1965,8 @@
 				            const pitSeconds = pitStopTime % 60;
 				            const pitDurationString = `${pitMinutes.toString().padStart(2, '0')}:${pitSeconds.toString().padStart(2, '0')}`;
 				            
-				            // Get daylight status for pit stop time using the display timezone
-				            const pitDaylightStatus = getDaylightStatus(pitStartTime, displayTimeZone);
+				            // Get daylight status for pit stop time
+				            const pitDaylightStatus = getDaylightStatus(pitStartTime, displayTimeZone, daylightCalculationMode);
 				            
 				            const pitRow = document.createElement('tr');
 				            pitRow.classList.add('pit-stop-row');
