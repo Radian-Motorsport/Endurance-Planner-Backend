@@ -1115,8 +1115,10 @@
         }
 
         // Global variables for daylight data
-        let globalSunriseTime = null;
-        let globalSunsetTime = null;
+        // Track daylight data (calculated from track's lat/lng + race date)
+        let trackSunriseTime = null;
+        let trackSunsetTime = null;
+        let trackTimezone = null;
 
         // Calculate daylight times for page 2 display
         async function calculateDaylightForPage2(trackId, date) {
@@ -1125,9 +1127,10 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // Store raw Date objects globally for stint calculations
-                    globalSunriseTime = new Date(data.times.sunrise);
-                    globalSunsetTime = new Date(data.times.sunset);
+                    // Store track-specific daylight data for race time calculations
+                    trackSunriseTime = new Date(data.times.sunrise);
+                    trackSunsetTime = new Date(data.times.sunset);
+                    trackTimezone = data.track.timezone || 'UTC'; // Add timezone to server response
                     
                     // Format times as HH:MM (local time representation)
                     const sunrise = globalSunriseTime.toLocaleTimeString('en-US', { 
@@ -1152,49 +1155,97 @@
                 console.error('Error calculating daylight for page 2:', error);
                 document.getElementById('page2-sunrise').textContent = 'Error';
                 document.getElementById('page2-sunset').textContent = 'Error';
-                // Reset global variables on error
-                globalSunriseTime = null;
-                globalSunsetTime = null;
+                // Reset track daylight variables on error
+                trackSunriseTime = null;
+                trackSunsetTime = null;
+                trackTimezone = null;
             }
         }
 
         // Function to determine daylight status for a given time
-        function getDaylightStatus(stintTime, timeZone = 'UTC', mode = 'track') {
-            if (mode === 'local') {
-                // LOCAL MODE: Use stint time in driver's timezone for daylight calculation
-                // Convert stint time to the driver's timezone first
-                let stintTimeInDriverZone;
-                try {
-                    stintTimeInDriverZone = new Date(stintTime.toLocaleString('en-US', { timeZone: timeZone }));
-                } catch (error) {
-                    stintTimeInDriverZone = stintTime; // Fallback
-                }
+        function getDaylightStatus(stintTime, timeZone = 'UTC', mode = 'track', driverName = null) {
+            if (mode === 'local' && driverName) {
+                // LOCAL MODE: Use driver-specific daylight times based on their timezone/location
+                const driverData = driverDaylightData[driverName];
                 
-                const localHour = stintTimeInDriverZone.getHours(); // Stint hour in driver's timezone
-                
-                // Simplified daylight logic based on typical day/night hours for the driver's location
-                // This uses general daylight patterns - could be enhanced with actual location coordinates
-                if (localHour >= 6 && localHour < 8) {
-                    return 'daylight-dawn';
-                } else if (localHour >= 8 && localHour < 11) {
-                    return 'daylight-post-dawn';
-                } else if (localHour >= 11 && localHour < 13) {
-                    return 'daylight-midday';
-                } else if (localHour >= 13 && localHour < 17) {
-                    return 'daylight-day';
-                } else if (localHour >= 17 && localHour < 19) {
-                    return 'daylight-pre-dusk';
-                } else if (localHour >= 19 && localHour < 21) {
-                    return 'daylight-dusk';
-                } else if (localHour >= 21 && localHour < 23) {
-                    return 'daylight-post-dusk';
+                if (driverData && driverData.sunrise && driverData.sunset) {
+                    // Convert stint time to driver's timezone for comparison
+                    let stintTimeInDriverZone;
+                    try {
+                        // Create a proper date in the driver's timezone
+                        const formatter = new Intl.DateTimeFormat('en-CA', {
+                            timeZone: timeZone,
+                            year: 'numeric', month: '2-digit', day: '2-digit',
+                            hour: '2-digit', minute: '2-digit', second: '2-digit',
+                            hour12: false
+                        });
+                        const parts = formatter.formatToParts(stintTime);
+                        const year = parseInt(parts.find(p => p.type === 'year').value);
+                        const month = parseInt(parts.find(p => p.type === 'month').value) - 1;
+                        const day = parseInt(parts.find(p => p.type === 'day').value);
+                        const hour = parseInt(parts.find(p => p.type === 'hour').value);
+                        const minute = parseInt(parts.find(p => p.type === 'minute').value);
+                        
+                        stintTimeInDriverZone = new Date(year, month, day, hour, minute);
+                    } catch (error) {
+                        stintTimeInDriverZone = stintTime; // Fallback
+                    }
+                    
+                    const stintTimeOfDay = stintTimeInDriverZone.getHours() * 60 + stintTimeInDriverZone.getMinutes();
+                    const sunriseTimeOfDay = driverData.sunrise.getUTCHours() * 60 + driverData.sunrise.getUTCMinutes();
+                    const sunsetTimeOfDay = driverData.sunset.getUTCHours() * 60 + driverData.sunset.getUTCMinutes();
+                    
+                    const dawnDuskWindow = 60; // 1 hour windows for dawn/dusk periods
+                    const middayWindow = 60; // 1 hour window around solar noon for peak midday
+                    
+                    // Calculate solar noon (midpoint between sunrise and sunset)
+                    const solarNoon = (sunriseTimeOfDay + sunsetTimeOfDay) / 2;
+                    
+                    // Driver-specific daylight calculation using their location's sunrise/sunset
+                    if (stintTimeOfDay < (sunriseTimeOfDay - dawnDuskWindow)) {
+                        return 'daylight-night';
+                    } else if (stintTimeOfDay < sunriseTimeOfDay) {
+                        return 'daylight-dawn'; // Red hour before sunrise
+                    } else if (stintTimeOfDay < (sunriseTimeOfDay + dawnDuskWindow)) {
+                        return 'daylight-post-dawn'; // Orange hour after sunrise
+                    } else if (stintTimeOfDay >= (solarNoon - middayWindow/2) && stintTimeOfDay <= (solarNoon + middayWindow/2)) {
+                        return 'daylight-midday'; // Peak daylight around solar noon
+                    } else if (stintTimeOfDay < (sunsetTimeOfDay - (dawnDuskWindow * 2))) {
+                        return 'daylight-day'; // Regular day
+                    } else if (stintTimeOfDay < (sunsetTimeOfDay - dawnDuskWindow)) {
+                        return 'daylight-pre-dusk'; // Orange hour 2-1 hours before sunset
+                    } else if (stintTimeOfDay < sunsetTimeOfDay) {
+                        return 'daylight-dusk'; // Red hour before sunset
+                    } else if (stintTimeOfDay < (sunsetTimeOfDay + dawnDuskWindow)) {
+                        return 'daylight-post-dusk'; // Purple hour after sunset
+                    } else {
+                        return 'daylight-night';
+                    }
                 } else {
-                    return 'daylight-night';
+                    // Fallback to simplified hour-based logic if no driver daylight data
+                    const localHour = stintTime.getHours();
+                    if (localHour >= 6 && localHour < 8) {
+                        return 'daylight-dawn';
+                    } else if (localHour >= 8 && localHour < 11) {
+                        return 'daylight-post-dawn';
+                    } else if (localHour >= 11 && localHour < 13) {
+                        return 'daylight-midday';
+                    } else if (localHour >= 13 && localHour < 17) {
+                        return 'daylight-day';
+                    } else if (localHour >= 17 && localHour < 19) {
+                        return 'daylight-pre-dusk';
+                    } else if (localHour >= 19 && localHour < 21) {
+                        return 'daylight-dusk';
+                    } else if (localHour >= 21 && localHour < 23) {
+                        return 'daylight-post-dusk';
+                    } else {
+                        return 'daylight-night';
+                    }
                 }
             } else {
-                // TRACK MODE: Use track location + simulator time (existing logic)
-                if (!globalSunriseTime || !globalSunsetTime) {
-                    return 'daylight-night'; // Default to night if no daylight data
+                // TRACK MODE: Use track location + simulator time
+                if (!trackSunriseTime || !trackSunsetTime) {
+                    return 'daylight-night'; // Default to night if no track daylight data
                 }
                 
                 // Use the stint time directly (simulator time)
@@ -1202,13 +1253,13 @@
                 const stintMinutes = stintTime.getUTCMinutes();
                 const stintTimeOfDay = stintHours * 60 + stintMinutes; // Convert to minutes since midnight
                 
-                // Use track's sunrise/sunset times (already calculated for track location)
-                const sunriseHours = globalSunriseTime.getUTCHours();
-                const sunriseMinutes = globalSunriseTime.getUTCMinutes();
+                // Use track's sunrise/sunset times (calculated for track's lat/lng + race date)
+                const sunriseHours = trackSunriseTime.getUTCHours();
+                const sunriseMinutes = trackSunriseTime.getUTCMinutes();
                 const sunriseTimeOfDay = sunriseHours * 60 + sunriseMinutes;
                 
-                const sunsetHours = globalSunsetTime.getUTCHours();
-                const sunsetMinutes = globalSunsetTime.getUTCMinutes();
+                const sunsetHours = trackSunsetTime.getUTCHours();
+                const sunsetMinutes = trackSunsetTime.getUTCMinutes();
                 const sunsetTimeOfDay = sunsetHours * 60 + sunsetMinutes;
                 
                 const dawnDuskWindow = 60; // 1 hour windows for dawn/dusk periods
@@ -1847,59 +1898,48 @@
 				    let currentTime;
 				    
 				    if (isLocalTimeMode) {
-				        // Use event start time (default to Europe/London, or convert to selected driver's timezone)
+				        // LOCAL TIME MODE: Use event start time and convert to driver's timezone for display
 				        const eventStartTimeInput = document.getElementById('event-start-time').value;
-				        const selectedDriverDropdown = document.getElementById('driver-timezone-dropdown');
-				        const selectedDriverTimezone = selectedDriverDropdown.options[selectedDriverDropdown.selectedIndex]?.dataset.timezone;
+				        const raceDate = document.getElementById('race-date').value;
 				        
-				        if (eventStartTimeInput) {
+				        if (eventStartTimeInput && raceDate) {
+				            // Create a base date object using the race date and event start time
 				            const [eventHours, eventMinutes] = eventStartTimeInput.split(':').map(Number);
+				            const [year, month, day] = raceDate.split('-').map(Number);
 				            
-				            if (selectedDriverTimezone && selectedDriverTimezone !== 'Europe/London') {
-				                // Convert from Europe/London to selected driver's timezone
-				                // Create a date representing the event time in Europe/London
-				                const today = new Date();
-				                const eventTimeInLondon = new Date(today.getFullYear(), today.getMonth(), today.getDate(), eventHours, eventMinutes);
-				                
-				                // Convert to driver's timezone using proper timezone conversion
-				                const formatter = new Intl.DateTimeFormat('en-US', {
-				                    timeZone: selectedDriverTimezone,
-				                    hour: '2-digit',
-				                    minute: '2-digit',
-				                    hour12: false
-				                });
-				                
-				                // Set current time to the converted time
-				                currentTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), eventHours, eventMinutes);
-				                console.log('🌍 Using Local Time for', selectedDriverDropdown.value, ':', currentTime.toISOString());
-				            } else {
-				                // Use event start time as-is (already Europe/London time)
-				                const today = new Date();
-				                currentTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), eventHours, eventMinutes);
-				                console.log('🇬🇧 Using Event Time (Europe/London):', currentTime.toISOString());
-				            }
+				            // Create date in Europe/London time (event timezone)
+				            currentTime = new Date(year, month - 1, day, eventHours, eventMinutes);
+				            console.log('🌍 Local Time Mode - Base Event Time:', currentTime.toISOString());
 				        } else {
-				            // Fallback to race time if no event time set
+				            // Fallback to race time if no event time/date set
 				            const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
-				            const raceDate = new Date();
-				            raceDate.setUTCHours(hours, minutes, 0, 0); 
-				            currentTime = new Date(raceDate.getTime());
-				            console.log('🏁 Fallback to Race Time:', currentTime.toISOString());
+				            const today = new Date();
+				            currentTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes);
+				            console.log('� Local Time Fallback to Race Time:', currentTime.toISOString());
 				        }
 				    } else {
-				        // Use race time from page 1 (race start time input)
+				        // RACE TIME MODE: Use race time from page 1 (simulator time)
 				        const [hours, minutes] = raceStartTimeInput.split(':').map(Number);
-				        const raceDate = new Date();
-				        raceDate.setUTCHours(hours, minutes, 0, 0); 
-				        currentTime = new Date(raceDate.getTime());
-				        console.log('🏁 Using Race Time:', currentTime.toISOString());
+				        const raceDate = document.getElementById('race-date').value;
+				        
+				        if (raceDate) {
+				            const [year, month, day] = raceDate.split('-').map(Number);
+				            currentTime = new Date(year, month - 1, day, hours, minutes);
+				        } else {
+				            const today = new Date();
+				            currentTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes);
+				        }
+				        console.log('🏁 Race Time Mode:', currentTime.toISOString());
 				    }
 				    
 				    // Determine which timezone to use for formatting and daylight calculation
 				    let displayTimeZone;
 				    let daylightCalculationMode;
+				    let selectedDriverName = null;
+				    
 				    if (isLocalTimeMode) {
 				        const selectedDriverDropdown = document.getElementById('driver-timezone-dropdown');
+				        selectedDriverName = selectedDriverDropdown.value;
 				        displayTimeZone = selectedDriverDropdown.options[selectedDriverDropdown.selectedIndex]?.dataset.timezone || 'Europe/London';
 				        daylightCalculationMode = 'local'; // Use driver's current local time
 				    } else {
@@ -1918,21 +1958,19 @@
 				        const stintStartTime = new Date(currentTime.getTime());
 				        
 				        // Format the start time for the selected timezone
-				        const startTimeString = typeof formatTimeWithTimezone === 'function' 
-				            ? formatTimeWithTimezone(currentTime, displayTimeZone)
-				            : currentTime.toISOString().substr(11, 8);
+				        const startTimeString = formatTimeWithTimezone(currentTime, displayTimeZone);
 				        
 				        const stintDurationSeconds = stintLaps * avgLapTimeInSeconds;
 				        currentTime.setSeconds(currentTime.getSeconds() + stintDurationSeconds);
 				        
 				        // Format the end time for the selected timezone
-				        const endTimeString = typeof formatTimeWithTimezone === 'function' 
-				            ? formatTimeWithTimezone(currentTime, displayTimeZone)
-				            : currentTime.toISOString().substr(11, 8);				        const startLap = currentLap;
+				        const endTimeString = formatTimeWithTimezone(currentTime, displayTimeZone);
+				        
+				        const startLap = currentLap;
 				        const endLap = startLap + stintLaps - 1;
 				        
 				        // Get daylight status for stint start time 
-				        const daylightStatus = getDaylightStatus(stintStartTime, displayTimeZone, daylightCalculationMode);
+				        const daylightStatus = getDaylightStatus(stintStartTime, displayTimeZone, daylightCalculationMode, selectedDriverName);
 				        
 				        // Create driving stint row
 				        const tr = document.createElement('tr');
@@ -1964,22 +2002,14 @@
 				            currentTime.setSeconds(currentTime.getSeconds() + pitStopTime);
 				            const pitEndTime = new Date(currentTime);
 				            
-				            const pitStartTimeString = typeof formatTimeWithTimezone === 'function' 
-				                ? formatTimeWithTimezone(pitStartTime, displayTimeZone)
-				                : pitStartTime.toISOString().substr(11, 8);
-				            const pitEndTimeString = typeof formatTimeWithTimezone === 'function' 
-				                ? formatTimeWithTimezone(pitEndTime, displayTimeZone)
-				                : pitEndTime.toISOString().substr(11, 8);
-				            
-				            // Format pit stop duration (convert seconds to mm:ss)
+			            const pitStartTimeString = formatTimeWithTimezone(pitStartTime, displayTimeZone);
+			            const pitEndTimeString = formatTimeWithTimezone(pitEndTime, displayTimeZone);				            // Format pit stop duration (convert seconds to mm:ss)
 				            const pitMinutes = Math.floor(pitStopTime / 60);
 				            const pitSeconds = pitStopTime % 60;
 				            const pitDurationString = `${pitMinutes.toString().padStart(2, '0')}:${pitSeconds.toString().padStart(2, '0')}`;
 				            
-				            // Get daylight status for pit stop time
-				            const pitDaylightStatus = getDaylightStatus(pitStartTime, displayTimeZone, daylightCalculationMode);
-				            
-				            const pitRow = document.createElement('tr');
+		            // Get daylight status for pit stop time
+		            const pitDaylightStatus = getDaylightStatus(pitStartTime, displayTimeZone, daylightCalculationMode, selectedDriverName);				            const pitRow = document.createElement('tr');
 				            pitRow.classList.add('pit-stop-row');
 				            pitRow.innerHTML = `
 				                <td class="px-1 py-2 text-center text-xs text-neutral-200 border-r border-neutral-900">${pitStartTimeString}</td>
@@ -2028,58 +2058,65 @@
         
         // 🌅 DEBUG FUNCTION: Display daylight times for different timezones
         function debugDaylightTimes() {
-            if (!globalSunriseTime || !globalSunsetTime) {
-                console.log('🌅 No daylight data available for debugging');
+            if (!trackSunriseTime || !trackSunsetTime) {
+                console.log('🌅 No track daylight data available for debugging');
                 return;
             }
             
             console.log('🌅 ======== DAYLIGHT DEBUGGING ========');
             
-            // Calculate solar noon from sunrise/sunset
-            const sunriseMinutes = globalSunriseTime.getUTCHours() * 60 + globalSunriseTime.getUTCMinutes();
-            const sunsetMinutes = globalSunsetTime.getUTCHours() * 60 + globalSunsetTime.getUTCMinutes();
+            // Calculate solar noon from track sunrise/sunset
+            const sunriseMinutes = trackSunriseTime.getUTCHours() * 60 + trackSunriseTime.getUTCMinutes();
+            const sunsetMinutes = trackSunsetTime.getUTCHours() * 60 + trackSunsetTime.getUTCMinutes();
             const solarNoonMinutes = (sunriseMinutes + sunsetMinutes) / 2;
             const solarNoonHours = Math.floor(solarNoonMinutes / 60);
             const solarNoonMins = Math.floor(solarNoonMinutes % 60);
             
-            // Format times for different contexts
-            const formatTimeInTimezone = (hour, minute, timezone) => {
+            // Format times - track daylight times are Date objects from server
+            const formatTimeForTrack = (dateObj) => {
+                return dateObj.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
+            };
+            
+            const formatTimeInTimezone = (dateObj, timezone) => {
                 try {
-                    const date = new Date();
-                    date.setUTCHours(hour, minute, 0, 0);
-                    return date.toLocaleTimeString('en-US', {
+                    return dateObj.toLocaleTimeString('en-US', {
                         timeZone: timezone,
                         hour: '2-digit',
                         minute: '2-digit',
                         hour12: false
                     });
                 } catch (error) {
-                    return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} (${timezone})`;
+                    return `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')} (${timezone})`;
                 }
             };
             
-            // Track location times (UTC - simulator time)
-            console.log('🏁 RACE TIME (Track Location - Simulator Time):');
-            console.log(`   Sunrise: ${formatTimeInTimezone(globalSunriseTime.getUTCHours(), globalSunriseTime.getUTCMinutes(), 'UTC')}`);
-            console.log(`   Midday:  ${formatTimeInTimezone(solarNoonHours, solarNoonMins, 'UTC')}`);
-            console.log(`   Sunset:  ${formatTimeInTimezone(globalSunsetTime.getUTCHours(), globalSunsetTime.getUTCMinutes(), 'UTC')}`);
+            // Track location times (from track's lat/lng + race date)
+            console.log('🏁 RACE TIME (Track Location):');
+            console.log(`   Sunrise: ${formatTimeForTrack(trackSunriseTime)}`);
+            console.log(`   Midday:  ${formatTimeForTrack(new Date(2000, 0, 1, solarNoonHours, solarNoonMins))}`);
+            console.log(`   Sunset:  ${formatTimeForTrack(trackSunsetTime)}`);
+            console.log(`   Track Timezone: ${trackTimezone || 'Unknown'}`);
             
-            // Event time (Europe/London)
+            // Event time (Europe/London) - TODO: This will be different when we add driver locations
             console.log('🇬🇧 EVENT TIME (Europe/London):');
-            console.log(`   Sunrise: ${formatTimeInTimezone(globalSunriseTime.getUTCHours(), globalSunriseTime.getUTCMinutes(), 'Europe/London')}`);
-            console.log(`   Midday:  ${formatTimeInTimezone(solarNoonHours, solarNoonMins, 'Europe/London')}`);
-            console.log(`   Sunset:  ${formatTimeInTimezone(globalSunsetTime.getUTCHours(), globalSunsetTime.getUTCMinutes(), 'Europe/London')}`);
+            console.log(`   Sunrise: ${formatTimeInTimezone(trackSunriseTime, 'Europe/London')}`);
+            console.log(`   Midday:  ${formatTimeInTimezone(new Date(2000, 0, 1, solarNoonHours, solarNoonMins), 'Europe/London')}`);
+            console.log(`   Sunset:  ${formatTimeInTimezone(trackSunsetTime, 'Europe/London')}`);
             
-            // Selected drivers' timezones
+            // Selected drivers' timezones (TODO: Will calculate separate daylight for each driver)
             const drivers = getSelectedDrivers();
             if (drivers && drivers.length > 0) {
-                console.log('👥 DRIVER TIMEZONES:');
+                console.log('👥 DRIVER TIMEZONES (using track daylight for now):');
                 drivers.forEach(driver => {
                     if (driver.timezone) {
                         console.log(`   ${driver.name} (${driver.timezone}):`);
-                        console.log(`     Sunrise: ${formatTimeInTimezone(globalSunriseTime.getUTCHours(), globalSunriseTime.getUTCMinutes(), driver.timezone)}`);
-                        console.log(`     Midday:  ${formatTimeInTimezone(solarNoonHours, solarNoonMins, driver.timezone)}`);
-                        console.log(`     Sunset:  ${formatTimeInTimezone(globalSunsetTime.getUTCHours(), globalSunsetTime.getUTCMinutes(), driver.timezone)}`);
+                        console.log(`     Sunrise: ${formatTimeInTimezone(trackSunriseTime, driver.timezone)}`);
+                        console.log(`     Midday:  ${formatTimeInTimezone(new Date(2000, 0, 1, solarNoonHours, solarNoonMins), driver.timezone)}`);
+                        console.log(`     Sunset:  ${formatTimeInTimezone(trackSunsetTime, driver.timezone)}`);
                     } else {
                         console.log(`   ${driver.name}: No timezone set`);
                     }
@@ -2162,6 +2199,10 @@
 		        // summertime: document.getElementById('summertime-checkbox').checked, // REMOVED
 		        weatherTempUrl: document.getElementById('weather-temp-url').value,
 		        weatherCloudsUrl: document.getElementById('weather-clouds-url').value,
+		        // Track daylight data (from track lat/lng + race date)
+		        trackSunrise: trackSunriseTime ? trackSunriseTime.toISOString() : null,
+		        trackSunset: trackSunsetTime ? trackSunsetTime.toISOString() : null,
+		        trackTimezone: trackTimezone,
 		        stintDrivers: stintDrivers, // Save stint driver assignments
 		        stintBackupDrivers: stintBackupDrivers // Save stint backup driver assignments
 		    };
@@ -2243,6 +2284,10 @@
 		        // summertime: document.getElementById('summertime-checkbox').checked, // REMOVED
 		        weatherTempUrl: document.getElementById('weather-temp-url').value,
 		        weatherCloudsUrl: document.getElementById('weather-clouds-url').value,
+		        // Track daylight data (from track lat/lng + race date)
+		        trackSunrise: trackSunriseTime ? trackSunriseTime.toISOString() : null,
+		        trackSunset: trackSunsetTime ? trackSunsetTime.toISOString() : null,
+		        trackTimezone: trackTimezone,
 		        stintDrivers: stintDrivers, // Save stint driver assignments
 		        stintBackupDrivers: stintBackupDrivers // Save stint backup driver assignments
 		    };
@@ -2337,17 +2382,26 @@
 		                document.getElementById('weather-clouds-url').value = state.weatherImage2;
 		            }
 		            
-		            // Trigger weather image display after restoration
-		            const tempUrl = state.weatherTempUrl || state.weatherImage1;
-		            const cloudsUrl = state.weatherCloudsUrl || state.weatherImage2;
-		            if (tempUrl || cloudsUrl) {
-		                displayWeatherImages(tempUrl, cloudsUrl);
-		            }
-		            
-		            document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
-		            document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;
-		
-		            // Navigate to page 2 and calculate
+            // Trigger weather image display after restoration
+            const tempUrl = state.weatherTempUrl || state.weatherImage1;
+            const cloudsUrl = state.weatherCloudsUrl || state.weatherImage2;
+            if (tempUrl || cloudsUrl) {
+                displayWeatherImages(tempUrl, cloudsUrl);
+            }
+            
+            // Restore track daylight data
+            if (state.trackSunrise) {
+                trackSunriseTime = new Date(state.trackSunrise);
+            }
+            if (state.trackSunset) {
+                trackSunsetTime = new Date(state.trackSunset);
+            }
+            if (state.trackTimezone) {
+                trackTimezone = state.trackTimezone;
+            }
+            
+            document.getElementById('fuel-slider-value').textContent = parseFloat(state.fuelSlider).toFixed(1);
+            document.getElementById('lap-time-slider-value').textContent = state.lapTimeSlider;		            // Navigate to page 2 and calculate
 		            showPage2();
 		            calculateAndShowPage2();
 		            
@@ -2929,6 +2983,9 @@
                 localLabel.classList.remove('time-mode-active');
             }
             
+            // Update stint table with new time mode
+            updateStintTableTimes();
+            
             updateStintTableTimes();
         }
         
@@ -2950,7 +3007,28 @@
             });
         }
         
-        function updateStintTableTimes() {
+        async function updateStintTableTimes() {
+            // Get selected driver and load their daylight data if in local time mode
+            if (isLocalTimeMode) {
+                const selectedDriverDropdown = document.getElementById('driver-timezone-dropdown');
+                const selectedDriverName = selectedDriverDropdown.value;
+                const selectedDriverTimezone = selectedDriverDropdown.options[selectedDriverDropdown.selectedIndex]?.dataset.timezone;
+                
+                if (selectedDriverName && selectedDriverTimezone) {
+                    console.log(`🌅 Loading daylight data for driver ${selectedDriverName} (${selectedDriverTimezone})`);
+                    
+                    // Get race date for daylight calculation
+                    const raceDate = document.getElementById('race-date').value;
+                    if (raceDate) {
+                        const daylightData = await calculateDriverDaylightTimes(selectedDriverTimezone, raceDate);
+                        if (daylightData) {
+                            driverDaylightData[selectedDriverName] = daylightData;
+                            console.log(`✅ Loaded daylight data for ${selectedDriverName}:`, daylightData);
+                        }
+                    }
+                }
+            }
+            
             // Get current average lap time and recalculate table
             const avgLapTimeInput = document.getElementById('avg-lap-time');
             if (avgLapTimeInput && avgLapTimeInput.value) {
@@ -3154,6 +3232,117 @@
         
         // 🌍 TIMEZONE SEARCH FUNCTIONALITY
         let allTimezones = [];
+        
+        // Timezone to approximate coordinates mapping (for daylight calculations)
+        // Using major cities as representative coordinates for each timezone
+        function getTimezoneCoordinates(timezone) {
+            const timezoneCoords = {
+                // North America
+                'America/New_York': { lat: 40.7128, lng: -74.0060 }, // NYC
+                'America/Chicago': { lat: 41.8781, lng: -87.6298 }, // Chicago
+                'America/Denver': { lat: 39.7392, lng: -104.9903 }, // Denver
+                'America/Los_Angeles': { lat: 34.0522, lng: -118.2437 }, // LA
+                'America/Toronto': { lat: 43.6532, lng: -79.3832 }, // Toronto
+                'America/Vancouver': { lat: 49.2827, lng: -123.1207 }, // Vancouver
+                'America/Mexico_City': { lat: 19.4326, lng: -99.1332 }, // Mexico City
+                
+                // Europe
+                'Europe/London': { lat: 51.5074, lng: -0.1278 }, // London
+                'Europe/Paris': { lat: 48.8566, lng: 2.3522 }, // Paris
+                'Europe/Berlin': { lat: 52.5200, lng: 13.4050 }, // Berlin
+                'Europe/Rome': { lat: 41.9028, lng: 12.4964 }, // Rome
+                'Europe/Madrid': { lat: 40.4168, lng: -3.7038 }, // Madrid
+                'Europe/Amsterdam': { lat: 52.3676, lng: 4.9041 }, // Amsterdam
+                'Europe/Brussels': { lat: 50.8503, lng: 4.3517 }, // Brussels
+                'Europe/Vienna': { lat: 48.2082, lng: 16.3738 }, // Vienna
+                'Europe/Stockholm': { lat: 59.3293, lng: 18.0686 }, // Stockholm
+                'Europe/Helsinki': { lat: 60.1699, lng: 24.9384 }, // Helsinki
+                'Europe/Prague': { lat: 50.0755, lng: 14.4378 }, // Prague
+                'Europe/Warsaw': { lat: 52.2297, lng: 21.0122 }, // Warsaw
+                'Europe/Budapest': { lat: 47.4979, lng: 19.0402 }, // Budapest
+                'Europe/Zurich': { lat: 47.3769, lng: 8.5417 }, // Zurich
+                
+                // Asia Pacific
+                'Asia/Tokyo': { lat: 35.6762, lng: 139.6503 }, // Tokyo
+                'Asia/Shanghai': { lat: 31.2304, lng: 121.4737 }, // Shanghai
+                'Asia/Hong_Kong': { lat: 22.3193, lng: 114.1694 }, // Hong Kong
+                'Asia/Singapore': { lat: 1.3521, lng: 103.8198 }, // Singapore
+                'Asia/Seoul': { lat: 37.5665, lng: 126.9780 }, // Seoul
+                'Asia/Mumbai': { lat: 19.0760, lng: 72.8777 }, // Mumbai
+                'Asia/Dubai': { lat: 25.2048, lng: 55.2708 }, // Dubai
+                'Asia/Bangkok': { lat: 13.7563, lng: 100.5018 }, // Bangkok
+                'Asia/Manila': { lat: 14.5995, lng: 120.9842 }, // Manila
+                'Australia/Sydney': { lat: -33.8688, lng: 151.2093 }, // Sydney
+                'Australia/Melbourne': { lat: -37.8136, lng: 144.9631 }, // Melbourne
+                'Australia/Perth': { lat: -31.9505, lng: 115.8605 }, // Perth
+                'Pacific/Auckland': { lat: -36.8485, lng: 174.7633 }, // Auckland
+                
+                // South America
+                'America/Sao_Paulo': { lat: -23.5505, lng: -46.6333 }, // São Paulo
+                'America/Argentina/Buenos_Aires': { lat: -34.6118, lng: -58.3960 }, // Buenos Aires
+                'America/Lima': { lat: -12.0464, lng: -77.0428 }, // Lima
+                
+                // Africa
+                'Africa/Cairo': { lat: 30.0444, lng: 31.2357 }, // Cairo
+                'Africa/Johannesburg': { lat: -26.2041, lng: 28.0473 }, // Johannesburg
+                'Africa/Lagos': { lat: 6.5244, lng: 3.3792 }, // Lagos
+                
+                // Default fallback
+                'UTC': { lat: 51.4769, lng: 0.0005 } // Greenwich
+            };
+            
+            return timezoneCoords[timezone] || timezoneCoords['UTC'];
+        }
+        
+        // Helper function to format time in a specific timezone
+        function formatTimeWithTimezone(dateTime, timezone) {
+            try {
+                return dateTime.toLocaleTimeString('en-GB', {
+                    timeZone: timezone,
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } catch (error) {
+                // Fallback to UTC format
+                return dateTime.toISOString().substr(11, 8);
+            }
+        }
+        
+        // Calculate driver-specific daylight times using their timezone coordinates
+        async function calculateDriverDaylightTimes(driverTimezone, raceDate) {
+            try {
+                const coords = getTimezoneCoordinates(driverTimezone);
+                const response = await fetch('/api/daylight', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        latitude: coords.lat,
+                        longitude: coords.lng,
+                        date: raceDate
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return {
+                        sunrise: new Date(data.sunrise),
+                        sunset: new Date(data.sunset),
+                        timezone: driverTimezone
+                    };
+                } else {
+                    console.warn(`Failed to get daylight data for driver timezone ${driverTimezone}`);
+                    return null;
+                }
+            } catch (error) {
+                console.error(`Error calculating daylight for driver timezone ${driverTimezone}:`, error);
+                return null;
+            }
+        }
+        
+        // Store driver-specific daylight data
+        let driverDaylightData = {}; // { driverName: { sunrise, sunset, timezone } }
         
         // Load all timezones from assets
         async function loadTimezones() {
