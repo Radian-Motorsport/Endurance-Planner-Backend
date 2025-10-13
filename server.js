@@ -167,11 +167,11 @@ app.delete('/api/drivers/:name', async (req, res) => {
 app.put('/api/drivers/:originalName', async (req, res) => {
     try {
         const { originalName } = req.params;
-        const { name, firstName, lastName, garage61_slug } = req.body;
+        const { name, firstName, lastName, garage61_slug, timezone } = req.body;
         
         const result = await pool.query(
-            'UPDATE drivers SET name = $1, firstName = $2, lastName = $3, garage61_slug = $4 WHERE name = $5 RETURNING *',
-            [name, firstName, lastName, garage61_slug, originalName]
+            'UPDATE drivers SET name = $1, firstName = $2, lastName = $3, garage61_slug = $4, timezone = $5 WHERE name = $6 RETURNING *',
+            [name, firstName, lastName, garage61_slug, timezone, originalName]
         );
         
         if (result.rows.length === 0) {

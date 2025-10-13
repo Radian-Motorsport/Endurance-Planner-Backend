@@ -2331,6 +2331,8 @@
             const garage61_slug = document.getElementById('new-driver-garage61-slug').value;
             const timezone = document.getElementById('timezone-search').value;
             
+            console.log('UPDATE: Timezone value being sent:', timezone);
+            
             if (name && garage61_slug) { // Only require name and garage61_slug
                 try {
                     const response = await fetch(`/api/drivers/${encodeURIComponent(originalName)}`, {
