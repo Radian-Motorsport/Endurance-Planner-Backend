@@ -163,6 +163,11 @@
             opacity: 0.9;
         }
         .daylight-dawn { 
+            background: #dc2626 !important; 
+            color: #f9fafb !important;
+            opacity: 0.95;
+        }
+        .daylight-post-dawn { 
             background: #ff6b35 !important; 
             color: #1f2937 !important;
             opacity: 0.95;
@@ -178,13 +183,13 @@
             opacity: 0.95;
         }
         .daylight-dusk { 
-            background: #ff6b35 !important; 
-            color: #1f2937 !important;
+            background: #dc2626 !important; 
+            color: #f9fafb !important;
             opacity: 0.92;
         }
         .daylight-post-dusk { 
-            background: #4c1d95 !important; 
-            color: #e5e7eb !important;
+            background: #7c3aed !important; 
+            color: #f3f4f6 !important;
             opacity: 0.9;
         }
         
@@ -1216,28 +1221,27 @@
             const sunsetMinutes = globalSunsetTime.getUTCMinutes();
             const sunsetTimeOfDay = sunsetHours * 60 + sunsetMinutes;
             
-            const dawnTransition = 30; // 30 minutes for dawn/dusk transitions
-            const transitionBuffer = 15; // Additional buffer for smoother transitions
+            const dawnDuskWindow = 60; // 1 hour windows for dawn/dusk periods
             const middayWindow = 60; // 1 hour window around solar noon for peak midday
             
             // Calculate solar noon (midpoint between sunrise and sunset)
             const solarNoon = (sunriseTimeOfDay + sunsetTimeOfDay) / 2;
             
-            // Determine daylight status with more granular transitions
-            if (stintTimeOfDay < (sunriseTimeOfDay - dawnTransition - transitionBuffer)) {
+            // Determine daylight status with 1-hour windows
+            if (stintTimeOfDay < (sunriseTimeOfDay - dawnDuskWindow)) {
                 return 'daylight-night';
-            } else if (stintTimeOfDay < (sunriseTimeOfDay - dawnTransition)) {
-                return 'daylight-pre-dawn'; // Purple before dawn
-            } else if (stintTimeOfDay < (sunriseTimeOfDay + dawnTransition)) {
-                return 'daylight-dawn'; // Orange dawn
+            } else if (stintTimeOfDay < sunriseTimeOfDay) {
+                return 'daylight-dawn'; // Red hour before sunrise
+            } else if (stintTimeOfDay < (sunriseTimeOfDay + dawnDuskWindow)) {
+                return 'daylight-post-dawn'; // Orange hour after sunrise
             } else if (stintTimeOfDay >= (solarNoon - middayWindow/2) && stintTimeOfDay <= (solarNoon + middayWindow/2)) {
                 return 'daylight-midday'; // Peak daylight around solar noon
-            } else if (stintTimeOfDay < (sunsetTimeOfDay - dawnTransition)) {
+            } else if (stintTimeOfDay < (sunsetTimeOfDay - dawnDuskWindow)) {
                 return 'daylight-day'; // Regular day
-            } else if (stintTimeOfDay < (sunsetTimeOfDay + dawnTransition)) {
-                return 'daylight-dusk'; // Orange dusk
-            } else if (stintTimeOfDay < (sunsetTimeOfDay + dawnTransition + transitionBuffer)) {
-                return 'daylight-post-dusk'; // Purple after dusk
+            } else if (stintTimeOfDay < sunsetTimeOfDay) {
+                return 'daylight-dusk'; // Red hour before sunset
+            } else if (stintTimeOfDay < (sunsetTimeOfDay + dawnDuskWindow)) {
+                return 'daylight-post-dusk'; // Purple hour after sunset
             } else {
                 return 'daylight-night';
             }
