@@ -67,7 +67,7 @@ class RadianPlannerApp {
     }
 
     populateSeriesDropdown() {
-        const seriesSelect = document.getElementById('seriesSelect');
+        const seriesSelect = document.getElementById('series-select');
         if (!seriesSelect || !this.allData.series) return;
 
         seriesSelect.innerHTML = '<option value="">Select Series</option>';
@@ -240,7 +240,7 @@ class RadianPlannerApp {
         }
 
         // iRacing series dropdowns
-        const seriesSelect = document.getElementById('seriesSelect');
+        const seriesSelect = document.getElementById('series-select');
         const eventsSelect = document.getElementById('eventsSelect');
         const sessionsSelect = document.getElementById('sessionsSelect');
 
