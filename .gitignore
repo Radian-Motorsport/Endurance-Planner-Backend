@@ -134,15 +134,58 @@ test-*.json
 radianplanner-*.json
 
 # Development and Documentation Files (Work in Progress)
-iracing-development/
 documentation/
-iracing-*
-IRACING-*
-*iracing*
-*oauth2*
-*OAUTH2*
 PROJECT-RESUME-NOTES.md
 DATA-LOSS-FIX-COMPLETED.md
 
+# iRacing Development Files (credentials and temp files)
+iracing-development/
+iracing-development/*.js
+iracing-development/*.json
+iracing-development/*.md
+
+# iRacing Database Integration (experimental and generated files)
+iracing-database-integration/
+iracing-database-integration/*.js
+iracing-database-integration/*.sql
+iracing-database-integration/*.json
+
+# iRacing Archive (all experimental and old files)
+iracing-archive/
+iracing-archive/*
+
 # Database update scripts (contain sensitive coordinate data)
 update-tracks-coordinates.sql
+*-garage61-*.sql
+*-garage61-*.json
+garage61-track-mapping-*.json
+
+# Generated SQL files
+insert-*.sql
+create-*.sql
+update-*.sql
+populate-*.sql
+deploy-*.sql
+
+# Debug and temporary files
+debug-*.js
+debug-*.json
+*-debug-*.json
+*-response-*.json
+test-*.json
+temp-*.json
+*-backup-*.json
+
+# iRacing credentials and config (security)
+iracing-credentials.js
+iracing-config.js
+*-credentials.js
+
+# Timestamped files
+*-2025-*.json
+*-2025-*.sql
+*-2025-*.csv
+
+# SQLite databases
+*.db
+radianplanner.db

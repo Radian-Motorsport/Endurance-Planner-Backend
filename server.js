@@ -67,10 +67,51 @@ async function createTables() {
                 strategy_data JSONB NOT NULL
             );
         `;
+        
+        // iRacing Endurance Racing Tables
+        const createSeriesTable = `
+            CREATE TABLE IF NOT EXISTS series (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                short_name VARCHAR(100),
+                category VARCHAR(100)
+            );
+        `;
+        
+        const createEventsTable = `
+            CREATE TABLE IF NOT EXISTS events (
+                id INTEGER PRIMARY KEY,
+                series_id INTEGER NOT NULL,
+                track_id INTEGER NOT NULL,
+                event_name VARCHAR(255) NOT NULL,
+                start_date DATE NOT NULL,
+                start_time TIME NOT NULL,
+                garage61_track_id INTEGER,
+                FOREIGN KEY (series_id) REFERENCES series(id),
+                FOREIGN KEY (garage61_track_id) REFERENCES tracks(garage61_id)
+            );
+        `;
+        
+        const createSessionsTable = `
+            CREATE TABLE IF NOT EXISTS sessions (
+                id INTEGER PRIMARY KEY,
+                event_id INTEGER NOT NULL,
+                session_name VARCHAR(255) NOT NULL,
+                session_type VARCHAR(100) NOT NULL,
+                start_date DATE NOT NULL,
+                start_time TIME NOT NULL,
+                duration_minutes INTEGER,
+                FOREIGN KEY (event_id) REFERENCES events(id)
+            );
+        `;
+        
         await pool.query(createDriversTable);
         await pool.query(createCarsTable);
         await pool.query(createTracksTable);
         await pool.query(createStrategiesTable);
+        await pool.query(createSeriesTable);
+        await pool.query(createEventsTable);
+        await pool.query(createSessionsTable);
         console.log('Database tables created/verified successfully.');
     } catch (err) {
         console.error('Error creating database tables:', err);
@@ -147,6 +188,45 @@ app.get('/api/tracks', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching tracks:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+// iRacing series endpoints
+app.get('/api/series', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM series ORDER BY series_name');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching series:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/api/events/:seriesId', async (req, res) => {
+    try {
+        const { seriesId } = req.params;
+        const result = await pool.query(
+            'SELECT * FROM events WHERE series_id = $1 ORDER BY start_date, start_time', 
+            [seriesId]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching events:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/api/sessions/:eventId', async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const result = await pool.query(
+            'SELECT * FROM sessions WHERE event_id = $1 ORDER BY session_name', 
+            [eventId]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching sessions:', err);
         res.status(500).send('Internal Server Error');
     }
 });
