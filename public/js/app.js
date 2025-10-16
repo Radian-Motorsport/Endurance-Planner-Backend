@@ -24,8 +24,8 @@ class RadianPlannerApp {
         console.log('🏁 Initializing RadianPlanner...');
         
         try {
-            // Initialize UI Manager
-            this.uiManager.init();
+            // Initialize UI Manager (it handles its own initialization)
+            // this.uiManager will initialize automatically in constructor
             
             // Load initial data
             await this.loadInitialData();
