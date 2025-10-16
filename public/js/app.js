@@ -18,6 +18,7 @@ class RadianPlannerApp {
         this.isLoading = false;
         this.selectedDrivers = [];
         this.selectedTrack = null;
+        this.selectedCar = null;
         
         this.init();
     }
@@ -54,6 +55,7 @@ class RadianPlannerApp {
             this.populateSeriesDropdown();
             this.populateDriversDropdown();
             this.populateTracksDropdown();
+            this.populateCarsDropdown();
             
             console.log('✅ Initial data loaded successfully');
         } catch (error) {
@@ -113,6 +115,27 @@ class RadianPlannerApp {
         });
 
         console.log(`✅ Populated tracks dropdown with ${this.allData.tracks.length} tracks`);
+    }
+
+    populateCarsDropdown() {
+        const carSelect = document.getElementById('car-select');
+        if (!carSelect || !this.allData.cars) return;
+
+        carSelect.innerHTML = '<option value="">Select a Car...</option>';
+        
+        // Sort cars alphabetically for better UX
+        const sortedCars = [...this.allData.cars].sort((a, b) => 
+            a.name.localeCompare(b.name)
+        );
+        
+        sortedCars.forEach(car => {
+            const option = document.createElement('option');
+            option.value = car.name;
+            option.textContent = car.name;
+            carSelect.appendChild(option);
+        });
+
+        console.log(`✅ Populated cars dropdown with ${this.allData.cars.length} cars`);
     }
 
     populateEventsDropdown(seriesId) {
@@ -204,6 +227,12 @@ class RadianPlannerApp {
         const trackSelect = document.getElementById('track-select');
         if (trackSelect) {
             trackSelect.addEventListener('change', (e) => this.handleTrackSelection(e.target.value));
+        }
+
+        // Car selection
+        const carSelect = document.getElementById('car-select');
+        if (carSelect) {
+            carSelect.addEventListener('change', (e) => this.handleCarSelection(e.target.value));
         }
 
         // Strategy form submission
@@ -425,6 +454,43 @@ class RadianPlannerApp {
         // Show track info if it has Garage61 integration
         if (track.garage61_id) {
             console.log(`🏁 Track has Garage61 ID: ${track.garage61_id}`);
+        }
+
+        // Check if we can fetch Garage61 lap data
+        this.checkGarage61Data();
+    }
+
+    handleCarSelection(carName) {
+        if (!carName) {
+            this.selectedCar = null;
+            console.log('❌ Car selection cleared');
+            return;
+        }
+
+        // Find the car object
+        const car = this.allData.cars.find(c => c.name === carName);
+        if (!car) {
+            console.error(`❌ Car "${carName}" not found in cars data`);
+            this.uiManager.showNotification('Car not found', 'error');
+            return;
+        }
+
+        this.selectedCar = car;
+        console.log(`✅ Selected car: ${carName}`, car);
+        
+        // Show car info if it has Garage61 integration
+        if (car.garage61_id) {
+            console.log(`🏎️ Car has Garage61 ID: ${car.garage61_id}`);
+        }
+
+        // Check if we can fetch Garage61 lap data
+        this.checkGarage61Data();
+    }
+
+    checkGarage61Data() {
+        if (this.selectedCar?.garage61_id && this.selectedTrack?.garage61_id) {
+            console.log(`🔗 Ready for Garage61 lap data: Car ${this.selectedCar.garage61_id}, Track ${this.selectedTrack.garage61_id}`);
+            // TODO: Automatically fetch lap data when both car and track are selected
         }
     }
 
