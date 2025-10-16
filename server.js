@@ -10,13 +10,15 @@ const PORT = process.env.PORT || 3000;
 // Use the DATABASE_URL environment variable from Render (optional)
 let pool = null;
 if (process.env.DATABASE_URL) {
-    pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: {
-            rejectUnauthorized: false
-        }
-    });
-    console.log('Database connection configured.');
+    try {
+        pool = new Pool({
+            connectionString: process.env.DATABASE_URL,
+            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+        });
+        console.log('Database connection configured with URL:', process.env.DATABASE_URL.substring(0, 30) + '...');
+    } catch (error) {
+        console.error('Failed to create database pool:', error);
+    }
 } else {
     console.log('No database URL provided. Running without database features.');
 }
@@ -174,13 +176,16 @@ app.get('/index.html', (req, res) => {
 app.get('/api/data', async (req, res) => {
     try {
         if (!pool) {
-            return res.status(500).json({ error: 'Database not connected' });
+            console.error('Database pool is null - DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
+            return res.status(500).json({ error: 'Database not connected', hasUrl: !!process.env.DATABASE_URL });
         }
         
+        console.log('Attempting database queries...');
         const driversResult = await pool.query('SELECT * FROM drivers');
         const carsResult = await pool.query('SELECT * FROM cars');
         const tracksResult = await pool.query('SELECT * FROM tracks');
         const seriesResult = await pool.query('SELECT * FROM series');
+        console.log('Database queries successful');
 
         res.json({
             drivers: driversResult.rows,
@@ -189,8 +194,8 @@ app.get('/api/data', async (req, res) => {
             series: seriesResult.rows
         });
     } catch (err) {
-        console.error('Error fetching data:', err);
-        res.status(500).send('Internal Server Error');
+        console.error('Error fetching data:', err.message, err.code);
+        res.status(500).json({ error: 'Database query failed', details: err.message });
     }
 });
 
