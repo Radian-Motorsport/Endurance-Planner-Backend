@@ -308,10 +308,15 @@ app.get('/api/tracks', async (req, res) => {
 // iRacing series endpoints
 app.get('/api/series', async (req, res) => {
     try {
+        console.log('🔍 Fetching series data...');
         const result = await pool.query('SELECT * FROM series ORDER BY series_name');
+        console.log('📊 Series query result:', result.rows.length, 'rows found');
+        if (result.rows.length > 0) {
+            console.log('📋 First series:', result.rows[0]);
+        }
         res.json(result.rows);
     } catch (err) {
-        console.error('Error fetching series:', err);
+        console.error('❌ Error fetching series:', err.message);
         res.status(500).send('Internal Server Error');
     }
 });
