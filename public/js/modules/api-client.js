@@ -19,23 +19,25 @@ export class APIClient {
             console.log('🔄 Starting to fetch data from API...');
             
             // Fetch data from individual endpoints
-            const [driversResponse, carsResponse, tracksResponse] = await Promise.all([
+            const [driversResponse, carsResponse, tracksResponse, seriesResponse] = await Promise.all([
                 fetch('/api/drivers'),
                 fetch('/api/cars'),
-                fetch('/api/tracks')
+                fetch('/api/tracks'),
+                fetch('/api/series')
             ]);
 
-            if (!driversResponse.ok || !carsResponse.ok || !tracksResponse.ok) {
+            if (!driversResponse.ok || !carsResponse.ok || !tracksResponse.ok || !seriesResponse.ok) {
                 throw new Error('One or more API endpoints failed');
             }
 
             const drivers = await driversResponse.json();
             const cars = await carsResponse.json();
             const tracks = await tracksResponse.json();
+            const series = await seriesResponse.json();
             
-            console.log(`✅ Data loaded: ${drivers.length} drivers, ${cars.length} cars, ${tracks.length} tracks`);
+            console.log(`✅ Data loaded: ${drivers.length} drivers, ${cars.length} cars, ${tracks.length} tracks, ${series.length} series`);
             
-            return { drivers, cars, tracks };
+            return { drivers, cars, tracks, series };
         } catch (error) {
             console.error('❌ Failed to fetch data:', error);
             throw new Error('Could not load dropdown data from the server. Please refresh the page or check the server status.');
