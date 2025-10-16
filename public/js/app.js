@@ -181,9 +181,9 @@ class RadianPlannerApp {
         console.log(`✅ Populated ${sortedCars.length} ${selectedClass} cars`);
     }
 
-    populateEventsDropdown(seriesId) {
-        const eventsSelect = document.getElementById('eventsSelect');
-        if (!eventsSelect || !this.allData.events) return;
+    async populateEventsDropdown(seriesId) {
+        const eventsSelect = document.getElementById('event-select');
+        if (!eventsSelect) return;
 
         eventsSelect.innerHTML = '<option value="">Select Event</option>';
         
@@ -241,7 +241,7 @@ class RadianPlannerApp {
 
         // iRacing series dropdowns
         const seriesSelect = document.getElementById('series-select');
-        const eventsSelect = document.getElementById('eventsSelect');
+        const eventsSelect = document.getElementById('event-select');
         const sessionsSelect = document.getElementById('sessionsSelect');
 
         if (seriesSelect) {
