@@ -139,7 +139,18 @@ class RadianPlannerApp {
         sortedCars.forEach(car => {
             const option = document.createElement('option');
             option.value = car.name;
-            option.textContent = car.name;
+            
+            // Show class information if available
+            if (car.class_name) {
+                option.textContent = `${car.name} (${car.class_short_name || car.class_name})`;
+            } else {
+                option.textContent = car.name;
+            }
+            
+            // Store class info for filtering
+            option.dataset.classId = car.iracing_class_id || '';
+            option.dataset.className = car.class_name || '';
+            
             carSelect.appendChild(option);
         });
 

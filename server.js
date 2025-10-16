@@ -201,7 +201,17 @@ app.get('/api/drivers', async (req, res) => {
 
 app.get('/api/cars', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM cars');
+        // Get cars with their class information
+        const result = await pool.query(`
+            SELECT 
+                c.*,
+                cc.name as class_name,
+                cc.short_name as class_short_name,
+                cc.relative_speed
+            FROM cars c
+            LEFT JOIN car_classes cc ON c.iracing_class_id = cc.car_class_id
+            ORDER BY c.name
+        `);
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching cars:', err);
@@ -215,6 +225,27 @@ app.get('/api/car-classes', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching car classes:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+// Get cars by class ID
+app.get('/api/cars/by-class/:classId', async (req, res) => {
+    try {
+        const classId = parseInt(req.params.classId);
+        const result = await pool.query(`
+            SELECT 
+                c.*,
+                cc.name as class_name,
+                cc.short_name as class_short_name
+            FROM cars c
+            JOIN car_classes cc ON c.iracing_class_id = cc.car_class_id
+            WHERE c.iracing_class_id = $1
+            ORDER BY c.name
+        `, [classId]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching cars by class:', err);
         res.status(500).send('Internal Server Error');
     }
 });
