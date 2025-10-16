@@ -1,0 +1,553 @@
+/**
+ * Strategy Calculator Module
+ * Handles all race strategy calculations and stint planning
+ * Extracted from monolithic index.html to improve maintainability
+ */
+
+export class StrategyCalculator {
+    constructor() {
+        this.totalStints = 0;
+        this.raceDurationSeconds = 0;
+        this.lapsPerStint = 0;
+        this.lapsInLastStint = 0;
+        this.pitStopTime = 0;
+        this.selectedDrivers = [];
+    }
+
+    /**
+     * Calculate race strategy and populate results
+     * @param {Object} raceData - Race configuration data
+     * @returns {Object} Calculation results
+     */
+    async calculateStrategy(raceData) {
+        console.log('🔥🔥🔥 CALCULATE BUTTON PRESSED 🔥🔥🔥');
+        
+        try {
+            // Extract and validate inputs
+            const inputs = this.extractInputs();
+            if (!this.validateInputs(inputs)) {
+                throw new Error("Please ensure all race inputs are filled and valid before calculating.");
+            }
+
+            // Apply slider adjustments
+            const adjustedInputs = this.applySliderAdjustments(inputs);
+
+            // Perform core calculations
+            const calculations = this.performCalculations(adjustedInputs);
+
+            // Update display with results
+            this.updateDisplays(calculations, adjustedInputs);
+
+            // Generate stint breakdown
+            await this.populateStintTable(adjustedInputs.avgLapTimeInSeconds);
+
+            // Show results sections
+            this.showResultsSections();
+
+            return {
+                success: true,
+                calculations,
+                inputs: adjustedInputs
+            };
+
+        } catch (error) {
+            console.error('❌ Strategy calculation failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Extract inputs from form elements
+     * @returns {Object} Input values
+     */
+    extractInputs() {
+        const raceDurationHours = parseInt(document.getElementById('race-duration-hours')?.value) || 0;
+        const raceDurationMinutes = parseInt(document.getElementById('race-duration-minutes')?.value) || 0;
+        this.raceDurationSeconds = (raceDurationHours * 3600) + (raceDurationMinutes * 60);
+
+        const avgLapTimeMinutes = parseInt(document.getElementById('avg-lap-time-minutes')?.value) || 0;
+        const avgLapTimeSeconds = parseInt(document.getElementById('avg-lap-time-seconds')?.value) || 0;
+        const avgLapTimeInSeconds = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+
+        const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value) || 0;
+        const tankCapacity = parseInt(document.getElementById('tank-capacity-display-input')?.value) || 0;
+        this.pitStopTime = parseInt(document.getElementById('pit-stop-time')?.value) || 0;
+
+        return {
+            raceDurationHours,
+            raceDurationMinutes,
+            raceDurationSeconds: this.raceDurationSeconds,
+            avgLapTimeMinutes,
+            avgLapTimeSeconds,
+            avgLapTimeInSeconds,
+            fuelPerLap,
+            tankCapacity,
+            pitStopTime: this.pitStopTime
+        };
+    }
+
+    /**
+     * Validate input values
+     * @param {Object} inputs - Input values to validate
+     * @returns {boolean} True if valid
+     */
+    validateInputs(inputs) {
+        return inputs.raceDurationSeconds > 0 && 
+               inputs.avgLapTimeInSeconds > 0 && 
+               inputs.fuelPerLap > 0 && 
+               inputs.tankCapacity > 0;
+    }
+
+    /**
+     * Apply slider adjustments to base values
+     * @param {Object} inputs - Base input values
+     * @returns {Object} Adjusted input values
+     */
+    applySliderAdjustments(inputs) {
+        const fuelSliderAdjustment = parseFloat(document.getElementById('fuel-slider')?.value) || 0;
+        const lapTimeSliderAdjustment = parseInt(document.getElementById('lap-time-slider')?.value) || 0;
+
+        return {
+            ...inputs,
+            fuelPerLap: inputs.fuelPerLap + fuelSliderAdjustment,
+            avgLapTimeInSeconds: inputs.avgLapTimeInSeconds + lapTimeSliderAdjustment
+        };
+    }
+
+    /**
+     * Perform core race calculations
+     * @param {Object} inputs - Adjusted input values
+     * @returns {Object} Calculation results
+     */
+    performCalculations(inputs) {
+        const lapsPerTank = Math.floor(inputs.tankCapacity / inputs.fuelPerLap);
+        const totalLaps = Math.floor(inputs.raceDurationSeconds / inputs.avgLapTimeInSeconds);
+        const stintDuration = lapsPerTank * inputs.avgLapTimeInSeconds;
+        
+        this.totalStints = Math.floor(totalLaps / lapsPerTank) + (totalLaps % lapsPerTank > 0 ? 1 : 0);
+        this.lapsPerStint = lapsPerTank;
+        this.lapsInLastStint = totalLaps % this.lapsPerStint;
+
+        const totalFuel = totalLaps * inputs.fuelPerLap;
+        const totalPitStops = this.totalStints - 1;
+
+        return {
+            lapsPerTank,
+            totalLaps,
+            stintDuration,
+            totalStints: this.totalStints,
+            lapsPerStint: this.lapsPerStint,
+            lapsInLastStint: this.lapsInLastStint,
+            totalFuel,
+            totalPitStops
+        };
+    }
+
+    /**
+     * Update display elements with calculation results
+     * @param {Object} calculations - Calculation results
+     * @param {Object} inputs - Input values
+     */
+    updateDisplays(calculations, inputs) {
+        this.updateElement('est-laps-display', calculations.totalLaps);
+        this.updateElement('stint-duration-display', this.formatDuration(calculations.stintDuration));
+        this.updateElement('laps-per-stint-display', calculations.lapsPerStint);
+        this.updateElement('pit-stops-display', calculations.totalPitStops);
+        this.updateElement('total-fuel-display', calculations.totalFuel.toFixed(1) + ' L');
+        this.updateElement('fuel-per-lap-display', inputs.fuelPerLap.toFixed(1) + ' L');
+        this.updateElement('lap-time-display', this.formatLapTime(inputs.avgLapTimeInSeconds));
+        this.updateElement('pit-stop-duration-display', `${inputs.pitStopTime} sec`);
+    }
+
+    /**
+     * Update element text content if element exists
+     * @param {string} elementId - Element ID
+     * @param {string|number} value - Value to set
+     */
+    updateElement(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+
+    /**
+     * Format duration in seconds to readable format
+     * @param {number} seconds - Duration in seconds
+     * @returns {string} Formatted duration
+     */
+    formatDuration(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
+        
+        if (hours > 0) {
+            return `${hours}h ${minutes}m ${secs}s`;
+        } else if (minutes > 0) {
+            return `${minutes}m ${secs}s`;
+        } else {
+            return `${secs}s`;
+        }
+    }
+
+    /**
+     * Format lap time in seconds to M:SS format
+     * @param {number} seconds - Lap time in seconds
+     * @returns {string} Formatted lap time
+     */
+    formatLapTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = (seconds % 60).toFixed(0).padStart(2, '0');
+        return `${minutes}:${secs}`;
+    }
+
+    /**
+     * Generate and populate stint breakdown table
+     * @param {number} avgLapTimeInSeconds - Average lap time
+     */
+    async populateStintTable(avgLapTimeInSeconds) {
+        const tbody = document.getElementById('stint-table-body');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        // Get race start time and timezone settings
+        const raceStartTime = this.getRaceStartTime();
+        const displayTimeZone = this.getDisplayTimeZone();
+        const daylightCalculationMode = this.getDaylightCalculationMode();
+
+        let currentTime = new Date(raceStartTime);
+
+        for (let i = 0; i < this.totalStints; i++) {
+            const stintLaps = (i === this.totalStints - 1) && (this.lapsInLastStint !== 0) 
+                ? this.lapsInLastStint 
+                : this.lapsPerStint;
+
+            const stintDuration = stintLaps * avgLapTimeInSeconds * 1000; // Convert to milliseconds
+            const stintStartTime = new Date(currentTime);
+            const stintEndTime = new Date(currentTime.getTime() + stintDuration);
+
+            // Get assigned driver for this stint
+            const assignedDriver = this.getAssignedDriver(i);
+            const selectedDriverName = assignedDriver ? assignedDriver.name : 'Unassigned';
+
+            // Calculate daylight status
+            const daylightStatus = this.getDaylightStatus(stintStartTime, displayTimeZone, daylightCalculationMode, selectedDriverName);
+
+            // Create table row
+            const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, displayTimeZone, daylightStatus);
+            tbody.appendChild(row);
+
+            // Add pit stop time for next stint (except last stint)
+            if (i < this.totalStints - 1) {
+                currentTime = new Date(stintEndTime.getTime() + (this.pitStopTime * 1000));
+            }
+        }
+    }
+
+    /**
+     * Create stint table row
+     * @param {number} stintNumber - Stint number
+     * @param {string} driverName - Driver name
+     * @param {number} stintLaps - Number of laps in stint
+     * @param {Date} startTime - Stint start time
+     * @param {Date} endTime - Stint end time
+     * @param {string} timeZone - Display timezone
+     * @param {string} daylightStatus - Daylight status
+     * @returns {HTMLElement} Table row element
+     */
+    createStintRow(stintNumber, driverName, stintLaps, startTime, endTime, timeZone, daylightStatus) {
+        const row = document.createElement('tr');
+        row.className = 'bg-neutral-750 hover:bg-neutral-700 transition-colors';
+        
+        row.innerHTML = `
+            <td class="py-3 px-6 text-center font-medium text-neutral-200">${stintNumber}</td>
+            <td class="py-3 px-6 text-neutral-200 driver-cell">
+                <select class="driver-select-stint bg-neutral-800 text-neutral-200 p-2 rounded w-full border border-neutral-600" 
+                        data-stint="${stintNumber - 1}">
+                    ${this.generateDriverOptions(driverName)}
+                </select>
+            </td>
+            <td class="py-3 px-6 text-center text-blue-400 font-mono">${stintLaps}</td>
+            <td class="py-3 px-6 text-center text-neutral-300 font-mono">
+                ${this.formatTimeForDisplay(startTime, timeZone)}
+            </td>
+            <td class="py-3 px-6 text-center text-neutral-300 font-mono">
+                ${this.formatTimeForDisplay(endTime, timeZone)}
+            </td>
+            <td class="py-3 px-6 text-center ${this.getDaylightStatusClass(daylightStatus)}">
+                ${daylightStatus}
+            </td>
+        `;
+
+        // Add event listener for driver selection change
+        const driverSelect = row.querySelector('.driver-select-stint');
+        if (driverSelect) {
+            driverSelect.addEventListener('change', (e) => {
+                this.handleDriverSelectionChange(e.target);
+            });
+        }
+
+        return row;
+    }
+
+    /**
+     * Generate driver options for select dropdown
+     * @param {string} selectedDriverName - Currently selected driver
+     * @returns {string} HTML options string
+     */
+    generateDriverOptions(selectedDriverName) {
+        let options = '<option value="">Select Driver</option>';
+        
+        if (this.selectedDrivers && this.selectedDrivers.length > 0) {
+            this.selectedDrivers.forEach(driver => {
+                const isSelected = driver.name === selectedDriverName ? 'selected' : '';
+                options += `<option value="${driver.name}" ${isSelected}>${driver.name}</option>`;
+            });
+        }
+        
+        return options;
+    }
+
+    /**
+     * Format time for display in specific timezone
+     * @param {Date} time - Time to format
+     * @param {string} timeZone - Target timezone
+     * @returns {string} Formatted time string
+     */
+    formatTimeForDisplay(time, timeZone) {
+        try {
+            return time.toLocaleTimeString('en-GB', { 
+                timeZone: timeZone,
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+        } catch (error) {
+            return time.toLocaleTimeString('en-GB', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+        }
+    }
+
+    /**
+     * Get daylight status CSS class
+     * @param {string} status - Daylight status
+     * @returns {string} CSS class
+     */
+    getDaylightStatusClass(status) {
+        switch (status.toLowerCase()) {
+            case 'day':
+                return 'text-yellow-400';
+            case 'night':
+                return 'text-blue-400';
+            case 'dawn':
+            case 'dusk':
+                return 'text-orange-400';
+            default:
+                return 'text-neutral-400';
+        }
+    }
+
+    /**
+     * Show results sections after calculation
+     */
+    showResultsSections() {
+        const sectionsToShow = [
+            'overall-summary',
+            'stint-breakdown-display',
+            'sliders-container',
+            'share-link-container'
+        ];
+
+        sectionsToShow.forEach(sectionId => {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.classList.remove('hidden');
+            }
+        });
+
+        // Show page 3 button if it exists
+        const page3Button = document.getElementById('page3-button-container');
+        if (page3Button) {
+            page3Button.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Get race start time from form
+     * @returns {Date} Race start time
+     */
+    getRaceStartTime() {
+        const dateInput = document.getElementById('race-start-date-page2');
+        const timeInput = document.getElementById('race-start-time-page2');
+        
+        if (dateInput && timeInput && dateInput.value && timeInput.value) {
+            return new Date(`${dateInput.value}T${timeInput.value}`);
+        }
+        
+        return new Date(); // Fallback to current time
+    }
+
+    /**
+     * Get display timezone setting
+     * @returns {string} Timezone string
+     */
+    getDisplayTimeZone() {
+        const timezoneSelect = document.getElementById('timezone-select');
+        return timezoneSelect?.value || 'Europe/London';
+    }
+
+    /**
+     * Get daylight calculation mode
+     * @returns {string} Calculation mode
+     */
+    getDaylightCalculationMode() {
+        const modeSelect = document.getElementById('daylight-calculation-mode');
+        return modeSelect?.value || 'track';
+    }
+
+    /**
+     * Get assigned driver for stint
+     * @param {number} stintIndex - Stint index
+     * @returns {Object|null} Driver object
+     */
+    getAssignedDriver(stintIndex) {
+        if (!this.selectedDrivers || this.selectedDrivers.length === 0) {
+            return null;
+        }
+        
+        // Simple round-robin assignment
+        return this.selectedDrivers[stintIndex % this.selectedDrivers.length];
+    }
+
+    /**
+     * Get daylight status for time and location
+     * @param {Date} time - Time to check
+     * @param {string} timeZone - Timezone
+     * @param {string} mode - Calculation mode
+     * @param {string} driverName - Driver name
+     * @returns {string} Daylight status
+     */
+    getDaylightStatus(time, timeZone, mode, driverName) {
+        // Simplified daylight calculation - in a real implementation,
+        // this would integrate with the daylight calculation system
+        const hour = time.getHours();
+        
+        if (hour >= 6 && hour < 18) {
+            return 'Day';
+        } else if (hour >= 18 && hour < 20) {
+            return 'Dusk';
+        } else if (hour >= 4 && hour < 6) {
+            return 'Dawn';
+        } else {
+            return 'Night';
+        }
+    }
+
+    /**
+     * Handle driver selection change in stint table
+     * @param {HTMLElement} selectElement - Select element that changed
+     */
+    handleDriverSelectionChange(selectElement) {
+        const stintIndex = parseInt(selectElement.dataset.stint);
+        const selectedDriverName = selectElement.value;
+        
+        console.log(`Driver assignment changed for stint ${stintIndex + 1}: ${selectedDriverName}`);
+        
+        // Update internal state or trigger recalculation if needed
+        // This could trigger daylight recalculation for driver-specific timezones
+    }
+
+    /**
+     * Set selected drivers for calculations
+     * @param {Array} drivers - Array of selected driver objects
+     */
+    setSelectedDrivers(drivers) {
+        this.selectedDrivers = drivers;
+    }
+
+    /**
+     * Get current calculation state
+     * @returns {Object} Current state
+     */
+    getState() {
+        return {
+            totalStints: this.totalStints,
+            raceDurationSeconds: this.raceDurationSeconds,
+            lapsPerStint: this.lapsPerStint,
+            lapsInLastStint: this.lapsInLastStint,
+            pitStopTime: this.pitStopTime,
+            selectedDrivers: this.selectedDrivers
+        };
+    }
+
+    /**
+     * Update calculations when sliders change (preserve driver assignments)
+     * @param {Object} sliderValues - Current slider values
+     */
+    updateTimesOnly(sliderValues = {}) {
+        console.log('🔧 Updating times only (preserving driver assignments)');
+        
+        try {
+            const inputs = this.extractInputs();
+            if (!this.validateInputs(inputs)) {
+                return;
+            }
+
+            // Apply slider adjustments
+            const adjustedInputs = this.applySliderAdjustments(inputs);
+
+            // Perform calculations
+            const calculations = this.performCalculations(adjustedInputs);
+
+            // Update displays
+            this.updateDisplays(calculations, adjustedInputs);
+
+            // Update stint table times but preserve driver assignments
+            this.updateStintTableTimes(adjustedInputs.avgLapTimeInSeconds);
+
+        } catch (error) {
+            console.error('❌ Time update failed:', error);
+        }
+    }
+
+    /**
+     * Update stint table times while preserving driver assignments
+     * @param {number} avgLapTimeInSeconds - Updated average lap time
+     */
+    updateStintTableTimes(avgLapTimeInSeconds) {
+        const tbody = document.getElementById('stint-table-body');
+        if (!tbody) return;
+
+        const rows = tbody.querySelectorAll('tr');
+        const raceStartTime = this.getRaceStartTime();
+        const displayTimeZone = this.getDisplayTimeZone();
+        
+        let currentTime = new Date(raceStartTime);
+
+        rows.forEach((row, index) => {
+            const stintLaps = (index === this.totalStints - 1) && (this.lapsInLastStint !== 0) 
+                ? this.lapsInLastStint 
+                : this.lapsPerStint;
+
+            const stintDuration = stintLaps * avgLapTimeInSeconds * 1000;
+            const stintStartTime = new Date(currentTime);
+            const stintEndTime = new Date(currentTime.getTime() + stintDuration);
+
+            // Update time cells (4th and 5th columns)
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 6) {
+                cells[3].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
+                cells[4].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
+            }
+
+            // Move to next stint start time
+            if (index < this.totalStints - 1) {
+                currentTime = new Date(stintEndTime.getTime() + (this.pitStopTime * 1000));
+            }
+        });
+    }
+}

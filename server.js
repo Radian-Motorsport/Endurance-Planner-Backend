@@ -23,7 +23,23 @@ if (process.env.DATABASE_URL) {
 
 // Increase JSON body size to handle full data imports
 app.use(express.json({ limit: '2mb' }));
-// Serve static files
+
+// Serve static files with proper MIME types
+app.use('/public', express.static('public', {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        }
+        if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        }
+    }
+}));
+
+// Serve assets folder
+app.use('/assets', express.static('assets'));
+
+// Serve root files (like index.html)
 app.use(express.static('.'));
 
 // Function to create all necessary tables if they don't exist
