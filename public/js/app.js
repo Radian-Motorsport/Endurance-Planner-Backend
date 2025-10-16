@@ -17,6 +17,7 @@ class RadianPlannerApp {
         this.allData = {};
         this.isLoading = false;
         this.selectedDrivers = [];
+        this.selectedTrack = null;
         
         this.init();
     }
@@ -52,6 +53,7 @@ class RadianPlannerApp {
             // Populate dropdowns with loaded data
             this.populateSeriesDropdown();
             this.populateDriversDropdown();
+            this.populateTracksDropdown();
             
             console.log('✅ Initial data loaded successfully');
         } catch (error) {
@@ -90,6 +92,27 @@ class RadianPlannerApp {
         });
 
         console.log(`✅ Populated drivers dropdown with ${this.allData.drivers.length} drivers`);
+    }
+
+    populateTracksDropdown() {
+        const trackSelect = document.getElementById('track-select');
+        if (!trackSelect || !this.allData.tracks) return;
+
+        trackSelect.innerHTML = '<option value="">Select a Track...</option>';
+        
+        // Sort tracks alphabetically for better UX
+        const sortedTracks = [...this.allData.tracks].sort((a, b) => 
+            a.name.localeCompare(b.name)
+        );
+        
+        sortedTracks.forEach(track => {
+            const option = document.createElement('option');
+            option.value = track.name;
+            option.textContent = track.name;
+            trackSelect.appendChild(option);
+        });
+
+        console.log(`✅ Populated tracks dropdown with ${this.allData.tracks.length} tracks`);
     }
 
     populateEventsDropdown(seriesId) {
@@ -175,6 +198,12 @@ class RadianPlannerApp {
         const addDriverBtn = document.getElementById('add-driver-btn');
         if (addDriverBtn) {
             addDriverBtn.addEventListener('click', () => this.addSelectedDriver());
+        }
+
+        // Track selection
+        const trackSelect = document.getElementById('track-select');
+        if (trackSelect) {
+            trackSelect.addEventListener('change', (e) => this.handleTrackSelection(e.target.value));
         }
 
         // Strategy form submission
@@ -373,6 +402,30 @@ class RadianPlannerApp {
             `;
             driversList.appendChild(li);
         });
+    }
+
+    handleTrackSelection(trackName) {
+        if (!trackName) {
+            this.selectedTrack = null;
+            console.log('❌ Track selection cleared');
+            return;
+        }
+
+        // Find the track object
+        const track = this.allData.tracks.find(t => t.name === trackName);
+        if (!track) {
+            console.error(`❌ Track "${trackName}" not found in tracks data`);
+            this.uiManager.showNotification('Track not found', 'error');
+            return;
+        }
+
+        this.selectedTrack = track;
+        console.log(`✅ Selected track: ${trackName}`, track);
+        
+        // Show track info if it has Garage61 integration
+        if (track.garage61_id) {
+            console.log(`🏁 Track has Garage61 ID: ${track.garage61_id}`);
+        }
     }
 
     parseTimeToSeconds(timeString) {
