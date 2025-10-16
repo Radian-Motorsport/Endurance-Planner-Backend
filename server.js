@@ -309,7 +309,7 @@ app.get('/api/tracks', async (req, res) => {
 app.get('/api/series', async (req, res) => {
     try {
         console.log('🔍 Fetching series data...');
-        const result = await pool.query('SELECT * FROM series');
+        const result = await pool.query('SELECT DISTINCT series_id, season_name FROM events ORDER BY series_id');
         console.log('📊 Series query result:', result.rows.length, 'rows found');
         if (result.rows.length > 0) {
             console.log('📋 First series:', result.rows[0]);

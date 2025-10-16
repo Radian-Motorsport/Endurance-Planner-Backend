@@ -185,10 +185,13 @@ class RadianPlannerApp {
         const eventsSelect = document.getElementById('event-select');
         if (!eventsSelect) return;
 
+        console.log('🔍 Loading events for series ID:', seriesId, 'Type:', typeof seriesId);
         eventsSelect.innerHTML = '<option value="">Loading events...</option>';
         
         try {
-            const response = await fetch(`/api/events/${seriesId}`);
+            const url = `/api/events/${seriesId}`;
+            console.log('🌐 Fetching URL:', url);
+            const response = await fetch(url);
             const events = await response.json();
             
             eventsSelect.innerHTML = '<option value="">Select Event</option>';
@@ -261,6 +264,8 @@ class RadianPlannerApp {
         if (seriesSelect) {
             seriesSelect.addEventListener('change', (e) => {
                 if (e.target.value) {
+                    console.log('🔍 Series selected:', e.target.value, 'Type:', typeof e.target.value);
+                    console.log('🔍 Selected option text:', e.target.selectedOptions[0]?.textContent);
                     this.populateEventsDropdown(e.target.value);
                 }
             });
