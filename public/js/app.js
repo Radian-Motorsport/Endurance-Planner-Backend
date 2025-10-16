@@ -202,6 +202,12 @@ class RadianPlannerApp {
             
             eventsSelect.innerHTML = '<option value="">Select Event</option>';
             
+            if (!Array.isArray(events)) {
+                console.error('❌ Events response is not an array:', events);
+                eventsSelect.innerHTML = '<option value="">Error: ' + (events.error || 'Invalid response') + '</option>';
+                return;
+            }
+            
             events.forEach(event => {
                 const option = document.createElement('option');
                 option.value = event.event_id || event.id;
