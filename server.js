@@ -68,7 +68,16 @@ async function createTables() {
                 garage61_id INTEGER UNIQUE,
                 platform VARCHAR(100),
                 platform_id VARCHAR(100),
-                class VARCHAR(100)
+                iracing_class_id INTEGER
+            );
+        `;
+        const createCarClassesTable = `
+            CREATE TABLE IF NOT EXISTS car_classes (
+                car_class_id INTEGER PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                short_name VARCHAR(100),
+                relative_speed INTEGER DEFAULT 0,
+                car_count INTEGER DEFAULT 0
             );
         `;
         const createTracksTable = `
@@ -124,6 +133,7 @@ async function createTables() {
         
         await pool.query(createDriversTable);
         await pool.query(createCarsTable);
+        await pool.query(createCarClassesTable);
         await pool.query(createTracksTable);
         await pool.query(createStrategiesTable);
         await pool.query(createSeriesTable);
@@ -195,6 +205,16 @@ app.get('/api/cars', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching cars:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/api/car-classes', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM car_classes ORDER BY name');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching car classes:', err);
         res.status(500).send('Internal Server Error');
     }
 });
