@@ -185,21 +185,35 @@ class RadianPlannerApp {
         const eventsSelect = document.getElementById('event-select');
         if (!eventsSelect) return;
 
-        eventsSelect.innerHTML = '<option value="">Select Event</option>';
+        eventsSelect.innerHTML = '<option value="">Loading events...</option>';
         
-        const seriesEvents = this.allData.events.filter(event => 
-            event.series_id === parseInt(seriesId)
-        );
-        
-        seriesEvents.forEach(event => {
-            const option = document.createElement('option');
-            option.value = event.event_id;
-            option.textContent = event.event_name;
-            eventsSelect.appendChild(option);
-        });
+        try {
+            const response = await fetch(`/api/events/${seriesId}`);
+            const events = await response.json();
+            
+            eventsSelect.innerHTML = '<option value="">Select Event</option>';
+            
+            events.forEach(event => {
+                const option = document.createElement('option');
+                option.value = event.event_id || event.id;
+                
+                // Format the date for display
+                const eventDate = new Date(event.start_date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                option.textContent = `${event.event_name} - ${eventDate}`;
+                eventsSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error fetching events:', error);
+            eventsSelect.innerHTML = '<option value="">Error loading events</option>';
+        }
 
         // Reset sessions dropdown
-        const sessionsSelect = document.getElementById('sessionsSelect');
+        const sessionsSelect = document.getElementById('session-select');
         if (sessionsSelect) {
             sessionsSelect.innerHTML = '<option value="">Select Session</option>';
         }
