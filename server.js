@@ -67,7 +67,8 @@ async function createTables() {
                 name VARCHAR(255) NOT NULL,
                 garage61_id INTEGER UNIQUE,
                 platform VARCHAR(100),
-                platform_id VARCHAR(100)
+                platform_id VARCHAR(100),
+                class VARCHAR(100)
             );
         `;
         const createTracksTable = `
