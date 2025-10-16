@@ -99,10 +99,15 @@ async function createTables() {
         // iRacing Endurance Racing Tables
         const createSeriesTable = `
             CREATE TABLE IF NOT EXISTS series (
-                id INTEGER PRIMARY KEY,
+                series_id INTEGER PRIMARY KEY,
                 series_name VARCHAR(255) NOT NULL,
-                short_name VARCHAR(100),
-                category VARCHAR(100)
+                description VARCHAR(500),
+                category VARCHAR(100),
+                active BOOLEAN DEFAULT true,
+                multiclass BOOLEAN DEFAULT false,
+                driver_changes BOOLEAN DEFAULT false,
+                min_team_drivers INTEGER DEFAULT 1,
+                max_team_drivers INTEGER DEFAULT 16
             );
         `;
         
