@@ -98,7 +98,7 @@ async function createTables() {
         const createSeriesTable = `
             CREATE TABLE IF NOT EXISTS series (
                 id INTEGER PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
+                series_name VARCHAR(255) NOT NULL,
                 short_name VARCHAR(100),
                 category VARCHAR(100)
             );
@@ -246,6 +246,35 @@ app.get('/api/cars/by-class/:classId', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching cars by class:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+// Get endurance racing cars (GT3, GT4, GTP, Porsche Cup)
+app.get('/api/cars/endurance', async (req, res) => {
+    try {
+        const enduranceClassIds = [4083, 2708, 4091, 4048, 4084, 4029, 3104];
+        const result = await pool.query(`
+            SELECT 
+                c.*,
+                cc.name as class_name,
+                cc.short_name as class_short_name,
+                cc.car_class_id,
+                CASE 
+                    WHEN cc.car_class_id IN (4083, 2708, 4091) THEN 'GT3'
+                    WHEN cc.car_class_id IN (4048, 4084) THEN 'GT4'
+                    WHEN cc.car_class_id = 4029 THEN 'GTP'
+                    WHEN cc.car_class_id = 3104 THEN 'Porsche Cup'
+                    ELSE 'Other'
+                END as category
+            FROM cars c
+            JOIN car_classes cc ON c.iracing_class_id = cc.car_class_id
+            WHERE c.iracing_class_id = ANY($1)
+            ORDER BY category, c.name
+        `, [enduranceClassIds]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching endurance cars:', err);
         res.status(500).send('Internal Server Error');
     }
 });

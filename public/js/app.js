@@ -125,36 +125,60 @@ class RadianPlannerApp {
     }
 
     populateCarsDropdown() {
+        // This method now just sets up the class dropdown listener
+        // The actual car population happens when a class is selected
+        console.log('✅ Car dropdown system initialized');
+    }
+
+    populateCarsByClass(selectedClass) {
         const carSelect = document.getElementById('car-select');
         if (!carSelect || !this.allData.cars) return;
 
+        // Enable the car dropdown
+        carSelect.disabled = false;
         carSelect.innerHTML = '<option value="">Select a Car...</option>';
-        
-        // Filter out cars without names and sort alphabetically
-        const validCars = this.allData.cars.filter(car => car && car.name);
-        const sortedCars = validCars.sort((a, b) => 
+
+        if (!selectedClass) {
+            carSelect.disabled = true;
+            carSelect.innerHTML = '<option value="">Select Class First...</option>';
+            return;
+        }
+
+        // Define class ID mappings based on your reference
+        const classIdMap = {
+            'GT3': [4083, 2708, 4091],
+            'GT4': [4048, 4084], 
+            'GTP': [4029],
+            'Porsche Cup': [3104]
+        };
+
+        const classIds = classIdMap[selectedClass];
+        if (!classIds) return;
+
+        // Filter cars by selected class
+        const classCars = this.allData.cars.filter(car => 
+            car && car.name && car.iracing_class_id && 
+            classIds.includes(parseInt(car.iracing_class_id))
+        );
+
+        // Sort alphabetically
+        const sortedCars = classCars.sort((a, b) => 
             a.name.localeCompare(b.name)
         );
-        
+
         sortedCars.forEach(car => {
             const option = document.createElement('option');
             option.value = car.name;
+            option.textContent = car.name;
             
-            // Show class information if available
-            if (car.class_name) {
-                option.textContent = `${car.name} (${car.class_short_name || car.class_name})`;
-            } else {
-                option.textContent = car.name;
-            }
-            
-            // Store class info for filtering
-            option.dataset.classId = car.iracing_class_id || '';
+            // Store class info for reference
+            option.dataset.classId = car.iracing_class_id;
             option.dataset.className = car.class_name || '';
             
             carSelect.appendChild(option);
         });
 
-        console.log(`✅ Populated cars dropdown with ${sortedCars.length} cars`);
+        console.log(`✅ Populated ${sortedCars.length} ${selectedClass} cars`);
     }
 
     populateEventsDropdown(seriesId) {
@@ -246,6 +270,12 @@ class RadianPlannerApp {
         const trackSelect = document.getElementById('track-select');
         if (trackSelect) {
             trackSelect.addEventListener('change', (e) => this.handleTrackSelection(e.target.value));
+        }
+
+        // Car class selection
+        const carClassSelect = document.getElementById('car-class-select');
+        if (carClassSelect) {
+            carClassSelect.addEventListener('change', (e) => this.populateCarsByClass(e.target.value));
         }
 
         // Car selection

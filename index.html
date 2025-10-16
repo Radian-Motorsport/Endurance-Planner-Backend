@@ -97,7 +97,7 @@
                 </div>
 
                 <!-- Track & Car Selection -->
-                <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
+                <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6 hidden">
                     <h1 class="text-xl mb-4 road-rage-font">Track & Car</h1>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                         <div class="flex flex-col w-full">
@@ -105,10 +105,23 @@
                                 <option value="">Select a Track...</option>
                             </select>
                         </div>
-                        <div class="flex flex-col w-full">
-                            <select id="car-select" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
-                                <option value="">Select a Car...</option>
-                            </select>
+                        <div class="flex flex-col w-full space-y-4">
+                            <div>
+                                <label class="text-sm font-medium text-neutral-500 mb-2 block">Car Class</label>
+                                <select id="car-class-select" class="p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
+                                    <option value="">Select a Class...</option>
+                                    <option value="GT3">GT3</option>
+                                    <option value="GT4">GT4</option>
+                                    <option value="GTP">GTP</option>
+                                    <option value="Porsche Cup">Porsche Cup</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-neutral-500 mb-2 block">Car</label>
+                                <select id="car-select" class="p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400" disabled>
+                                    <option value="">Select Class First...</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
