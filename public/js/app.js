@@ -16,6 +16,7 @@ class RadianPlannerApp {
         this.currentStrategies = [];
         this.allData = {};
         this.isLoading = false;
+        this.selectedDrivers = [];
         
         this.init();
     }
@@ -50,6 +51,7 @@ class RadianPlannerApp {
             
             // Populate dropdowns with loaded data
             this.populateSeriesDropdown();
+            this.populateDriversDropdown();
             
             console.log('✅ Initial data loaded successfully');
         } catch (error) {
@@ -72,6 +74,22 @@ class RadianPlannerApp {
             option.textContent = series.series_name;
             seriesSelect.appendChild(option);
         });
+    }
+
+    populateDriversDropdown() {
+        const driverSelect = document.getElementById('driver-select');
+        if (!driverSelect || !this.allData.drivers) return;
+
+        driverSelect.innerHTML = '<option value="">Select a Driver...</option>';
+        
+        this.allData.drivers.forEach(driver => {
+            const option = document.createElement('option');
+            option.value = driver.name;
+            option.textContent = driver.name;
+            driverSelect.appendChild(option);
+        });
+
+        console.log(`✅ Populated drivers dropdown with ${this.allData.drivers.length} drivers`);
     }
 
     populateEventsDropdown(seriesId) {
@@ -151,6 +169,12 @@ class RadianPlannerApp {
                     this.populateSessionsDropdown(e.target.value);
                 }
             });
+        }
+
+        // Driver selection and management
+        const addDriverBtn = document.getElementById('add-driver-btn');
+        if (addDriverBtn) {
+            addDriverBtn.addEventListener('click', () => this.addSelectedDriver());
         }
 
         // Strategy form submission
@@ -284,6 +308,70 @@ class RadianPlannerApp {
         const formElements = document.querySelectorAll('input, select, button');
         formElements.forEach(el => {
             el.disabled = loading;
+        });
+    }
+
+    addSelectedDriver() {
+        const driverSelect = document.getElementById('driver-select');
+        const driverName = driverSelect.value;
+        
+        if (!driverName) {
+            this.uiManager.showNotification('Please select a driver first', 'error');
+            return;
+        }
+
+        // Find the driver object
+        const driver = this.allData.drivers.find(d => d.name === driverName);
+        if (!driver) {
+            this.uiManager.showNotification('Driver not found', 'error');
+            return;
+        }
+
+        // Check if driver is already selected
+        if (this.selectedDrivers.some(d => d.name === driverName)) {
+            this.uiManager.showNotification('Driver already selected', 'warning');
+            return;
+        }
+
+        // Check max drivers limit (6 for endurance racing)
+        if (this.selectedDrivers.length >= 6) {
+            this.uiManager.showNotification('Maximum 6 drivers allowed', 'warning');
+            return;
+        }
+
+        // Add driver to selected list
+        this.selectedDrivers.push(driver);
+        this.updateDriversList();
+        
+        // Reset dropdown
+        driverSelect.value = '';
+        
+        console.log(`✅ Added driver: ${driverName}`);
+    }
+
+    removeSelectedDriver(driverName) {
+        this.selectedDrivers = this.selectedDrivers.filter(d => d.name !== driverName);
+        this.updateDriversList();
+        console.log(`❌ Removed driver: ${driverName}`);
+    }
+
+    updateDriversList() {
+        const driversList = document.getElementById('driver-list');
+        if (!driversList) return;
+
+        driversList.innerHTML = '';
+
+        this.selectedDrivers.forEach(driver => {
+            const li = document.createElement('li');
+            li.className = 'flex items-center justify-between bg-neutral-700 p-3 rounded';
+            li.innerHTML = `
+                <span class="text-neutral-200">${driver.name}</span>
+                <button onclick="window.radianPlanner.removeSelectedDriver('${driver.name}')" 
+                        class="text-red-400 hover:text-red-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            driversList.appendChild(li);
         });
     }
 
