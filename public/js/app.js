@@ -192,7 +192,13 @@ class RadianPlannerApp {
             const url = `/api/events/${seriesId}`;
             console.log('🌐 Fetching URL:', url);
             const response = await fetch(url);
-            const events = await response.json();
+            console.log('🔍 Response status:', response.status, response.statusText);
+            console.log('🔍 Response headers:', response.headers.get('content-type'));
+            
+            const responseText = await response.text();
+            console.log('🔍 Raw response:', responseText.substring(0, 200));
+            
+            const events = JSON.parse(responseText);
             
             eventsSelect.innerHTML = '<option value="">Select Event</option>';
             
