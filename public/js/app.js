@@ -86,14 +86,20 @@ class RadianPlannerApp {
 
         driverSelect.innerHTML = '<option value="">Select a Driver...</option>';
         
-        this.allData.drivers.forEach(driver => {
+        // Filter out drivers without names and sort alphabetically
+        const validDrivers = this.allData.drivers.filter(driver => driver && driver.name);
+        const sortedDrivers = validDrivers.sort((a, b) => 
+            a.name.localeCompare(b.name)
+        );
+        
+        sortedDrivers.forEach(driver => {
             const option = document.createElement('option');
             option.value = driver.name;
             option.textContent = driver.name;
             driverSelect.appendChild(option);
         });
 
-        console.log(`✅ Populated drivers dropdown with ${this.allData.drivers.length} drivers`);
+        console.log(`✅ Populated drivers dropdown with ${sortedDrivers.length} drivers`);
     }
 
     populateTracksDropdown() {
@@ -102,8 +108,9 @@ class RadianPlannerApp {
 
         trackSelect.innerHTML = '<option value="">Select a Track...</option>';
         
-        // Sort tracks alphabetically for better UX
-        const sortedTracks = [...this.allData.tracks].sort((a, b) => 
+        // Filter out tracks without names and sort alphabetically
+        const validTracks = this.allData.tracks.filter(track => track && track.name);
+        const sortedTracks = validTracks.sort((a, b) => 
             a.name.localeCompare(b.name)
         );
         
@@ -114,7 +121,7 @@ class RadianPlannerApp {
             trackSelect.appendChild(option);
         });
 
-        console.log(`✅ Populated tracks dropdown with ${this.allData.tracks.length} tracks`);
+        console.log(`✅ Populated tracks dropdown with ${sortedTracks.length} tracks`);
     }
 
     populateCarsDropdown() {
@@ -123,8 +130,9 @@ class RadianPlannerApp {
 
         carSelect.innerHTML = '<option value="">Select a Car...</option>';
         
-        // Sort cars alphabetically for better UX
-        const sortedCars = [...this.allData.cars].sort((a, b) => 
+        // Filter out cars without names and sort alphabetically
+        const validCars = this.allData.cars.filter(car => car && car.name);
+        const sortedCars = validCars.sort((a, b) => 
             a.name.localeCompare(b.name)
         );
         
@@ -135,7 +143,7 @@ class RadianPlannerApp {
             carSelect.appendChild(option);
         });
 
-        console.log(`✅ Populated cars dropdown with ${this.allData.cars.length} cars`);
+        console.log(`✅ Populated cars dropdown with ${sortedCars.length} cars`);
     }
 
     populateEventsDropdown(seriesId) {
