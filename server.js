@@ -338,7 +338,7 @@ app.get('/api/events/:seriesId', async (req, res) => {
         }
         
         const result = await pool.query(
-            'SELECT * FROM events WHERE series_id = $1 ORDER BY start_date, start_time', 
+            'SELECT * FROM events WHERE series_id = $1 AND active = true ORDER BY start_date, event_name', 
             [seriesId]
         );
         console.log(`✅ Found ${result.rows.length} events for series ${seriesId}`);
@@ -352,14 +352,22 @@ app.get('/api/events/:seriesId', async (req, res) => {
 app.get('/api/sessions/:eventId', async (req, res) => {
     try {
         const { eventId } = req.params;
+        console.log('🔍 Fetching sessions for event ID:', eventId);
+        
+        if (!pool) {
+            console.error('❌ Database pool is null');
+            return res.status(500).json({ error: 'Database connection not available' });
+        }
+        
         const result = await pool.query(
-            'SELECT * FROM sessions WHERE event_id = $1 ORDER BY session_name', 
+            'SELECT * FROM sessions WHERE event_id = $1 AND active = true ORDER BY session_type, session_num', 
             [eventId]
         );
+        console.log(`✅ Found ${result.rows.length} sessions for event ${eventId}`);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error fetching sessions:', err);
-        res.status(500).send('Internal Server Error');
+        console.error('❌ Error fetching sessions:', err);
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
 });
 
