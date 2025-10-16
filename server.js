@@ -173,14 +173,20 @@ app.get('/index.html', (req, res) => {
 // API endpoint to get all data from the database
 app.get('/api/data', async (req, res) => {
     try {
+        if (!pool) {
+            return res.status(500).json({ error: 'Database not connected' });
+        }
+        
         const driversResult = await pool.query('SELECT * FROM drivers');
         const carsResult = await pool.query('SELECT * FROM cars');
         const tracksResult = await pool.query('SELECT * FROM tracks');
+        const seriesResult = await pool.query('SELECT * FROM series');
 
         res.json({
             drivers: driversResult.rows,
             cars: carsResult.rows,
-            tracks: tracksResult.rows
+            tracks: tracksResult.rows,
+            series: seriesResult.rows
         });
     } catch (err) {
         console.error('Error fetching data:', err);
