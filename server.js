@@ -309,6 +309,12 @@ app.get('/api/tracks', async (req, res) => {
 app.get('/api/series', async (req, res) => {
     try {
         console.log('🔍 Fetching series data...');
+        
+        if (!pool) {
+            console.error('❌ Database pool is null');
+            return res.status(500).json({ error: 'Database connection not available' });
+        }
+        
         const result = await pool.query('SELECT DISTINCT series_id, season_name FROM events ORDER BY series_id');
         console.log('📊 Series query result:', result.rows.length, 'rows found');
         if (result.rows.length > 0) {
@@ -317,21 +323,29 @@ app.get('/api/series', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error('❌ Error fetching series:', err.message);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
 });
 
 app.get('/api/events/:seriesId', async (req, res) => {
     try {
         const { seriesId } = req.params;
+        console.log('🔍 Fetching events for series ID:', seriesId);
+        
+        if (!pool) {
+            console.error('❌ Database pool is null');
+            return res.status(500).json({ error: 'Database connection not available' });
+        }
+        
         const result = await pool.query(
             'SELECT * FROM events WHERE series_id = $1 ORDER BY start_date, start_time', 
             [seriesId]
         );
+        console.log(`✅ Found ${result.rows.length} events for series ${seriesId}`);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error fetching events:', err);
-        res.status(500).send('Internal Server Error');
+        console.error('❌ Error fetching events:', err);
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
 });
 
