@@ -188,3 +188,23 @@ iracing-config.js
 # SQLite databases
 *.db
 radianplanner.db
+update-data/test-track-assets-oauth2.js
+update-data/test-track-assets.js
+analyze-car-techspecs.js
+car-techspecs-analysis.json
+generate-car-data-sql.js
+generate-enhanced-car-sql.js
+generate-track-assets-improved-sql.js
+generate-track-assets-sql.js
+test-track-assets-structure.sql
+track-1-active.svg
+track-1-background.svg
+track-1-inactive.svg
+track-1-pitroad.svg
+track-1-start-finish.svg
+track-1-turns.svg
+update-data/fetch-car-assets-only.js
+update-data/fetch-car-data.js
+update-data/fetch-track-assets-data.js
+update-data/test-car-apis-oauth2.js
+update-data/test-svg-layers.js

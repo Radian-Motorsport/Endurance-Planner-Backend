@@ -583,6 +583,10 @@ class RadianPlannerApp {
         const trackDetailsSection = document.getElementById('track-details-section');
         if (trackDetailsSection) trackDetailsSection.classList.remove('hidden');
         
+        // Show track map section
+        const trackMapSection = document.getElementById('track-map-section');
+        if (trackMapSection) trackMapSection.classList.remove('hidden');
+        
         // Populate track name
         const trackNameElement = document.getElementById('track-name');
         if (trackNameElement) {
@@ -648,12 +652,189 @@ class RadianPlannerApp {
         } else if (trackImageElement) {
             trackImageElement.classList.add('hidden');
         }
+        
+        // Load track map if available
+        await this.loadTrackMap(sessionDetails);
+    }
+
+    async loadTrackMap(sessionDetails) {
+        console.log('🗺️ Loading track map for:', sessionDetails.track_name);
+        
+        const mapContainer = document.getElementById('track-map-svg');
+        const loadingElement = document.getElementById('track-map-loading');
+        const errorElement = document.getElementById('track-map-error');
+        
+        // Show loading state
+        mapContainer.classList.add('hidden');
+        errorElement.classList.add('hidden');
+        loadingElement.classList.remove('hidden');
+        
+        try {
+            // Get track assets data from database
+            const trackAssetsResponse = await this.apiClient.query(`
+                SELECT track_map, background_svg, active_svg, inactive_svg, 
+                       pitroad_svg, start_finish_svg, turns_svg, track_map_layers
+                FROM track_assets 
+                WHERE track_id = $1
+            `, [sessionDetails.track_id]);
+            
+            if (trackAssetsResponse.length === 0) {
+                throw new Error('No track assets found');
+            }
+            
+            const trackAssets = trackAssetsResponse[0];
+            
+            if (!trackAssets.track_map || !trackAssets.track_map_layers) {
+                throw new Error('Track map data not available');
+            }
+            
+            // Setup layer toggle event listeners
+            this.setupTrackMapLayerToggles();
+            
+            // Load SVG layers
+            await this.loadTrackMapLayers(trackAssets);
+            
+            // Show the map
+            loadingElement.classList.add('hidden');
+            mapContainer.classList.remove('hidden');
+            
+            console.log('✅ Track map loaded successfully');
+            
+        } catch (error) {
+            console.warn('❌ Failed to load track map:', error);
+            
+            // Show error state
+            loadingElement.classList.add('hidden');
+            errorElement.classList.remove('hidden');
+        }
+    }
+    
+    async loadTrackMapLayers(trackAssets) {
+        const mapContainer = document.getElementById('track-map-svg');
+        const baseUrl = trackAssets.track_map;
+        const layers = JSON.parse(trackAssets.track_map_layers || '{}');
+        
+        console.log('📋 Available track map layers:', Object.keys(layers));
+        
+        // Clear existing map content
+        mapContainer.innerHTML = '';
+        
+        // Create SVG container
+        const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svgElement.setAttribute('viewBox', '0 0 1000 1000'); // Default viewBox, will be updated from actual SVG
+        svgElement.setAttribute('width', '100%');
+        svgElement.setAttribute('height', '100%');
+        svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        svgElement.style.maxHeight = '400px';
+        
+        mapContainer.appendChild(svgElement);
+        
+        // Load each layer
+        const layerOrder = ['background', 'inactive', 'active', 'pitroad', 'start-finish', 'turns'];
+        
+        for (const layerName of layerOrder) {
+            if (layers[layerName]) {
+                try {
+                    await this.loadTrackMapLayer(svgElement, baseUrl, layerName, layers[layerName]);
+                } catch (error) {
+                    console.warn(`⚠️ Failed to load layer ${layerName}:`, error);
+                }
+            }
+        }
+    }
+    
+    async loadTrackMapLayer(svgContainer, baseUrl, layerName, layerFile) {
+        const layerUrl = `${baseUrl}${layerFile}`;
+        
+        try {
+            const response = await fetch(layerUrl);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const svgText = await response.text();
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+            const sourceSvg = svgDoc.querySelector('svg');
+            
+            if (!sourceSvg) throw new Error('No SVG element found');
+            
+            // Create layer group
+            const layerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            layerGroup.setAttribute('id', `layer-${layerName}`);
+            layerGroup.setAttribute('class', 'track-svg-layer');
+            
+            // Copy all child elements from source SVG to layer group
+            while (sourceSvg.firstChild) {
+                layerGroup.appendChild(sourceSvg.firstChild);
+            }
+            
+            // Set initial visibility based on checkbox state
+            const checkbox = document.getElementById(`layer-${layerName}`);
+            if (checkbox && !checkbox.checked) {
+                layerGroup.style.display = 'none';
+            }
+            
+            // Update container viewBox from first loaded layer (usually background)
+            if (layerName === 'background' && sourceSvg.getAttribute('viewBox')) {
+                svgContainer.setAttribute('viewBox', sourceSvg.getAttribute('viewBox'));
+            }
+            
+            svgContainer.appendChild(layerGroup);
+            
+            console.log(`✅ Loaded track map layer: ${layerName}`);
+            
+        } catch (error) {
+            console.warn(`❌ Failed to load track map layer ${layerName}:`, error);
+        }
+    }
+    
+    setupTrackMapLayerToggles() {
+        const layerNames = ['background', 'active', 'pitroad', 'start-finish', 'turns'];
+        
+        layerNames.forEach(layerName => {
+            const checkbox = document.getElementById(`layer-${layerName}`);
+            if (checkbox) {
+                checkbox.addEventListener('change', (e) => {
+                    this.toggleTrackMapLayer(layerName, e.target.checked);
+                });
+            }
+        });
+        
+        // Fullscreen button
+        const fullscreenBtn = document.getElementById('track-map-fullscreen');
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', () => {
+                this.toggleTrackMapFullscreen();
+            });
+        }
+    }
+    
+    toggleTrackMapLayer(layerName, visible) {
+        const layerGroup = document.getElementById(`layer-${layerName}`);
+        if (layerGroup) {
+            layerGroup.style.display = visible ? 'block' : 'none';
+            console.log(`🎚️ Layer ${layerName}: ${visible ? 'visible' : 'hidden'}`);
+        }
+    }
+    
+    toggleTrackMapFullscreen() {
+        const mapContainer = document.getElementById('track-map-container');
+        if (mapContainer) {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                mapContainer.requestFullscreen().catch(console.warn);
+            }
+        }
     }
 
     clearTrackDetails() {
         // Hide track details section
         const trackDetailsSection = document.getElementById('track-details-section');
         if (trackDetailsSection) trackDetailsSection.classList.add('hidden');
+        
+        // Hide track map section
+        const trackMapSection = document.getElementById('track-map-section');
+        if (trackMapSection) trackMapSection.classList.add('hidden');
         
         // Clear track details content
         const elements = ['track-name', 'track-garage61-id', 'track-config', 'track-location', 

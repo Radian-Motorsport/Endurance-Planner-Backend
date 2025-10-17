@@ -21,6 +21,43 @@
             darkMode: 'class'
         }
     </script>
+    
+    <style>
+        /* Custom toggle switch styles for track map layers */
+        .track-layer-toggle input:checked + label {
+            background-color: #22c55e; /* green-500 */
+        }
+        
+        .track-layer-toggle input:checked + label span {
+            transform: translateX(100%);
+        }
+        
+        .track-layer-toggle input:not(:checked) + label {
+            background-color: #525252; /* neutral-600 */
+        }
+        
+        /* Track map SVG layer styles */
+        .track-svg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .track-svg-layer.hidden {
+            display: none;
+        }
+        
+        /* Track map container responsiveness */
+        #track-map-svg svg {
+            max-width: 100%;
+            max-height: 100%;
+            height: auto;
+            width: auto;
+        }
+    </style>
 </head>
 <body class="bg-neutral-900 text-neutral-200 p-4">
     
@@ -32,7 +69,7 @@
         </button>
     </div>
     
-    <div class="max-w-5xl mx-auto bg-neutral-900 p-6 md:p-10 rounded-xl transition-colors duration-500">
+    <div class="max-w-6xl mx-auto bg-neutral-900 p-6 md:p-10 rounded-xl transition-colors duration-500">
         <!-- Header -->
         <div class="text-center mb-6">
             <img src="assets/g457912.png" alt="RadianPlanner Logo" class="mx-auto w-100 h-auto">
@@ -131,7 +168,7 @@
                                     <!-- Track Image and Basic Info -->
                                     <div class="flex flex-col space-y-4">
                                         <div class="flex items-center space-x-4">
-                                            <img id="track-image" src="" alt="Track Image" class="w-32 h-20 object-contain rounded-lg bg-neutral-700 hidden">
+                                            <img id="track-image" src="" alt="Track Image" class="w-32 h-32 object-cover rounded-lg bg-neutral-700 hidden">
                                             <div class="flex-1">
                                                 <div id="track-name" class="text-lg font-medium text-neutral-200 mb-1">-</div>
                                                 <div id="track-garage61-id" class="text-sm text-neutral-400 mb-1">Garage61 ID: -</div>
@@ -157,6 +194,97 @@
                                         <div class="flex justify-between">
                                             <span class="text-sm text-neutral-500">Corners:</span>
                                             <span id="track-corners" class="text-sm text-neutral-200">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Interactive Track Map -->
+                                <div id="track-map-section" class="hidden mt-6">
+                                    <div class="border-t border-neutral-700 pt-6">
+                                        <h3 class="text-lg font-medium text-neutral-300 mb-4">Track Map</h3>
+                                        
+                                        <!-- Track Map Container -->
+                                        <div class="bg-neutral-800 border border-neutral-700 rounded-lg p-4">
+                                            <div class="flex justify-between items-start mb-4">
+                                                <!-- Track Map SVG Container -->
+                                                <div class="flex-1 mr-4">
+                                                    <div id="track-map-container" class="relative bg-white rounded-lg p-4 min-h-[300px] flex items-center justify-center">
+                                                        <div id="track-map-loading" class="text-neutral-600">
+                                                            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                                            <p>Loading track map...</p>
+                                                        </div>
+                                                        <div id="track-map-svg" class="hidden w-full h-full">
+                                                            <!-- SVG track map will be loaded here -->
+                                                        </div>
+                                                        <div id="track-map-error" class="hidden text-neutral-600 text-center">
+                                                            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                                                            <p>Track map not available</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Layer Controls -->
+                                                <div class="w-48 bg-neutral-900 border border-neutral-600 rounded-lg p-4">
+                                                    <h4 class="text-sm font-medium text-neutral-300 mb-3">Map Layers</h4>
+                                                    <div class="space-y-2">
+                                                        <div class="flex items-center justify-between">
+                                                            <span class="text-sm text-neutral-400">Background</span>
+                                                            <div class="track-layer-toggle relative inline-block w-10 h-6">
+                                                                <input type="checkbox" id="layer-background" class="absolute w-0 h-0 opacity-0" checked>
+                                                                <label for="layer-background" class="block w-10 h-6 bg-green-500 rounded-full cursor-pointer transition-all duration-200">
+                                                                    <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 transform translate-x-full"></span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="flex items-center justify-between">
+                                                            <span class="text-sm text-neutral-400">Active Config</span>
+                                                            <div class="track-layer-toggle relative inline-block w-10 h-6">
+                                                                <input type="checkbox" id="layer-active" class="absolute w-0 h-0 opacity-0" checked>
+                                                                <label for="layer-active" class="block w-10 h-6 bg-green-500 rounded-full cursor-pointer transition-all duration-200">
+                                                                    <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 transform translate-x-full"></span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="flex items-center justify-between">
+                                                            <span class="text-sm text-neutral-400">Pit Road</span>
+                                                            <div class="track-layer-toggle relative inline-block w-10 h-6">
+                                                                <input type="checkbox" id="layer-pitroad" class="absolute w-0 h-0 opacity-0">
+                                                                <label for="layer-pitroad" class="block w-10 h-6 bg-neutral-600 rounded-full cursor-pointer transition-all duration-200">
+                                                                    <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-200"></span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="flex items-center justify-between">
+                                                            <span class="text-sm text-neutral-400">Start/Finish</span>
+                                                            <div class="track-layer-toggle relative inline-block w-10 h-6">
+                                                                <input type="checkbox" id="layer-start-finish" class="absolute w-0 h-0 opacity-0">
+                                                                <label for="layer-start-finish" class="block w-10 h-6 bg-neutral-600 rounded-full cursor-pointer transition-all duration-200">
+                                                                    <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-200"></span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="flex items-center justify-between">
+                                                            <span class="text-sm text-neutral-400">Turn Numbers</span>
+                                                            <div class="track-layer-toggle relative inline-block w-10 h-6">
+                                                                <input type="checkbox" id="layer-turns" class="absolute w-0 h-0 opacity-0">
+                                                                <label for="layer-turns" class="block w-10 h-6 bg-neutral-600 rounded-full cursor-pointer transition-all duration-200">
+                                                                    <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-200"></span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="mt-4 pt-3 border-t border-neutral-700">
+                                                        <button id="track-map-fullscreen" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-3 rounded transition-all duration-200">
+                                                            <i class="fas fa-expand mr-2"></i>Fullscreen
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
