@@ -904,12 +904,16 @@ class RadianPlannerApp {
     
     async displayWeatherData(weatherUrl) {
         try {
-            console.log('🌦️ Loading weather data directly from:', weatherUrl);
+            console.log('🌦️ Loading weather data via proxy from:', weatherUrl);
             
-            // Use the weather URL directly instead of proxy
-            const response = await fetch(weatherUrl);
+            // Use the weather proxy to avoid CORS issues
+            const response = await fetch(`/api/weather-proxy?url=${encodeURIComponent(weatherUrl)}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const weatherData = await response.json();
-            
             console.log('🌦️ Weather data received:', weatherData);
             
             // Display weather data in the weather-display section
@@ -919,21 +923,23 @@ class RadianPlannerApp {
                 weatherDisplay.innerHTML = `
                     <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
                     <div class="text-sm text-neutral-400">
-                        <p>Weather URL: ${weatherUrl}</p>
-                        <p>Weather data: ${JSON.stringify(weatherData).substring(0, 200)}...</p>
+                        <p>Weather data loaded from AWS S3</p>
+                        <p>Data type: ${typeof weatherData}</p>
+                        <p>Content: ${JSON.stringify(weatherData).substring(0, 300)}...</p>
                     </div>
                 `;
             }
         } catch (error) {
-            console.warn('❌ Failed to display weather data:', error);
+            console.error('❌ Failed to display weather data:', error);
             
             // Show error message
             const weatherDisplay = document.getElementById('weather-display');
             if (weatherDisplay) {
                 weatherDisplay.innerHTML = `
                     <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
-                    <div class="text-sm text-neutral-400">
-                        <p>Error loading weather data from: ${weatherUrl}</p>
+                    <div class="text-sm text-red-400">
+                        <p>Error loading weather data</p>
+                        <p>URL: ${weatherUrl}</p>
                         <p>Error: ${error.message}</p>
                     </div>
                 `;
