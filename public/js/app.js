@@ -904,25 +904,40 @@ class RadianPlannerApp {
     
     async displayWeatherData(weatherUrl) {
         try {
-            // Fetch weather data through proxy
-            const response = await fetch(`/api/weather-proxy?url=${encodeURIComponent(weatherUrl)}`);
+            console.log('🌦️ Loading weather data directly from:', weatherUrl);
+            
+            // Use the weather URL directly instead of proxy
+            const response = await fetch(weatherUrl);
             const weatherData = await response.json();
+            
+            console.log('🌦️ Weather data received:', weatherData);
             
             // Display weather data in the weather-display section
             const weatherDisplay = document.getElementById('weather-display');
             if (weatherDisplay && weatherData) {
-                // Add weather content here - for now just show basic info
+                // Display actual weather data
                 weatherDisplay.innerHTML = `
                     <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
                     <div class="text-sm text-neutral-400">
-                        <p>Weather data loaded successfully</p>
-                        <p>Temperature data: ${weatherData.temp_units || 'Available'}</p>
-                        <p>Weather conditions: ${weatherData.weather_type || 'Variable'}</p>
+                        <p>Weather URL: ${weatherUrl}</p>
+                        <p>Weather data: ${JSON.stringify(weatherData).substring(0, 200)}...</p>
                     </div>
                 `;
             }
         } catch (error) {
             console.warn('❌ Failed to display weather data:', error);
+            
+            // Show error message
+            const weatherDisplay = document.getElementById('weather-display');
+            if (weatherDisplay) {
+                weatherDisplay.innerHTML = `
+                    <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
+                    <div class="text-sm text-neutral-400">
+                        <p>Error loading weather data from: ${weatherUrl}</p>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
         }
     }
     
