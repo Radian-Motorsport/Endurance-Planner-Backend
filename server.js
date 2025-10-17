@@ -389,6 +389,7 @@ app.get('/api/session-details/:sessionId', async (req, res) => {
                 e.track_name,
                 e.start_date as event_start_date,
                 e.season_name,
+                e.car_class_ids,
                 ser.series_name
             FROM sessions s
             JOIN events e ON s.event_id = e.event_id
@@ -400,8 +401,25 @@ app.get('/api/session-details/:sessionId', async (req, res) => {
             return res.status(404).json({ error: 'Session not found' });
         }
         
-        console.log(`✅ Found session details for session ${sessionId}`);
-        res.json(result.rows[0]);
+        const sessionData = result.rows[0];
+        
+        // If there are car_class_ids, fetch the car class details
+        let carClasses = [];
+        if (sessionData.car_class_ids && sessionData.car_class_ids.length > 0) {
+            const classResult = await pool.query(`
+                SELECT car_class_id, name, short_name, relative_speed
+                FROM car_classes 
+                WHERE car_class_id = ANY($1)
+                ORDER BY name
+            `, [sessionData.car_class_ids]);
+            carClasses = classResult.rows;
+        }
+        
+        // Add car classes to the response
+        sessionData.available_car_classes = carClasses;
+        
+        console.log(`✅ Found session details for session ${sessionId} with ${carClasses.length} car classes`);
+        res.json(sessionData);
     } catch (err) {
         console.error('❌ Error fetching session details:', err);
         res.status(500).json({ error: 'Internal Server Error', details: err.message });

@@ -336,6 +336,9 @@ class RadianPlannerApp {
                 trackNameElement.textContent = sessionDetails.track_name;
             }
             
+            // Populate car selection
+            await this.populateCarSelection(sessionDetails);
+            
         } catch (error) {
             console.error('❌ Error fetching session details:', error);
             this.clearRaceInformation();
@@ -356,6 +359,108 @@ class RadianPlannerApp {
             const element = document.getElementById(id);
             if (element) element.textContent = '-';
         });
+        
+        // Clear car selection
+        this.clearCarSelection();
+        
+        // Clear car selection
+        this.clearCarSelection();
+    }
+
+    async populateCarSelection(sessionDetails) {
+        // Show car selection content and hide placeholder
+        const carSelectionContent = document.getElementById('car-selection-content');
+        const carSelectionPlaceholder = document.getElementById('car-selection-placeholder');
+        
+        if (carSelectionContent) carSelectionContent.classList.remove('hidden');
+        if (carSelectionPlaceholder) carSelectionPlaceholder.classList.add('hidden');
+        
+        // Populate car class dropdown
+        const carClassDropdown = document.getElementById('car-class-dropdown');
+        if (carClassDropdown && sessionDetails.available_car_classes) {
+            carClassDropdown.innerHTML = '<option value="">Select Car Class...</option>';
+            carClassDropdown.disabled = false;
+            
+            sessionDetails.available_car_classes.forEach(carClass => {
+                const option = document.createElement('option');
+                option.value = carClass.car_class_id;
+                option.textContent = carClass.name;
+                carClassDropdown.appendChild(option);
+            });
+            
+            console.log(`✅ Populated car classes: ${sessionDetails.available_car_classes.length} classes`);
+        }
+        
+        // Reset car dropdown
+        const carDropdown = document.getElementById('car-dropdown');
+        if (carDropdown) {
+            carDropdown.innerHTML = '<option value="">Select Car Class First...</option>';
+            carDropdown.disabled = true;
+        }
+        
+        // Store session details for later use
+        this.currentSessionDetails = sessionDetails;
+    }
+
+    async populateCarsByClass(classId) {
+        const carDropdown = document.getElementById('car-dropdown');
+        if (!carDropdown || !classId) return;
+        
+        console.log('🔍 Loading cars for class ID:', classId);
+        carDropdown.innerHTML = '<option value="">Loading cars...</option>';
+        carDropdown.disabled = false;
+        
+        try {
+            // Fetch cars filtered by the selected class
+            const response = await fetch(`/api/cars`);
+            if (!response.ok) throw new Error('Failed to fetch cars');
+            
+            const allCars = await response.json();
+            const filteredCars = allCars.filter(car => 
+                car.iracing_class_id && car.iracing_class_id.toString() === classId.toString()
+            );
+            
+            carDropdown.innerHTML = '<option value="">Select Car...</option>';
+            
+            filteredCars.forEach(car => {
+                const option = document.createElement('option');
+                option.value = car.car_id || car.id;
+                option.textContent = car.car_name || car.name;
+                carDropdown.appendChild(option);
+            });
+            
+            console.log(`✅ Found ${filteredCars.length} cars for class ${classId}`);
+            
+        } catch (error) {
+            console.error('❌ Error fetching cars:', error);
+            carDropdown.innerHTML = '<option value="">Error loading cars</option>';
+        }
+    }
+
+    clearCarSelection() {
+        // Hide car selection content and show placeholder
+        const carSelectionContent = document.getElementById('car-selection-content');
+        const carSelectionPlaceholder = document.getElementById('car-selection-placeholder');
+        
+        if (carSelectionContent) carSelectionContent.classList.add('hidden');
+        if (carSelectionPlaceholder) carSelectionPlaceholder.classList.remove('hidden');
+        
+        // Reset dropdowns
+        const carClassDropdown = document.getElementById('car-class-dropdown');
+        const carDropdown = document.getElementById('car-dropdown');
+        
+        if (carClassDropdown) {
+            carClassDropdown.innerHTML = '<option value="">Select Session First...</option>';
+            carClassDropdown.disabled = true;
+        }
+        
+        if (carDropdown) {
+            carDropdown.innerHTML = '<option value="">Select Car Class First...</option>';
+            carDropdown.disabled = true;
+        }
+        
+        // Clear stored session details
+        this.currentSessionDetails = null;
     }
 
     setupEventListeners() {
@@ -414,6 +519,40 @@ class RadianPlannerApp {
                     await this.populateRaceInformation(e.target.value);
                 } else {
                     this.clearRaceInformation();
+                }
+            });
+        }
+
+        // Car class selection
+        const carClassDropdown = document.getElementById('car-class-dropdown');
+        if (carClassDropdown) {
+            carClassDropdown.addEventListener('change', async (e) => {
+                if (e.target.value) {
+                    await this.populateCarsByClass(e.target.value);
+                } else {
+                    // Reset car dropdown when no class selected
+                    const carDropdown = document.getElementById('car-dropdown');
+                    if (carDropdown) {
+                        carDropdown.innerHTML = '<option value="">Select Car Class First...</option>';
+                        carDropdown.disabled = true;
+                    }
+                }
+            });
+        }
+
+        // Car selection
+        const carDropdown = document.getElementById('car-dropdown');
+        if (carDropdown) {
+            carDropdown.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    console.log('🚗 Car selected:', e.target.value);
+                    // Store selected car for later use
+                    this.selectedCar = {
+                        id: e.target.value,
+                        name: e.target.selectedOptions[0]?.textContent
+                    };
+                } else {
+                    this.selectedCar = null;
                 }
             });
         }

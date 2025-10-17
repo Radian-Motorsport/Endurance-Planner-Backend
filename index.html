@@ -163,6 +163,31 @@
                     </div>
                 </div>
 
+                <!-- Car Selection -->
+                <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
+                    <h1 class="text-xl mb-4 road-rage-font">Car Selection</h1>
+                    <div id="car-selection-content" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                            <div class="flex flex-col w-full">
+                                <label class="text-sm font-medium text-neutral-500 mb-2">Car Class</label>
+                                <select id="car-class-dropdown" class="p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400" disabled>
+                                    <option value="">Select Session First...</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col w-full">
+                                <label class="text-sm font-medium text-neutral-500 mb-2">Car</label>
+                                <select id="car-dropdown" class="p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400" disabled>
+                                    <option value="">Select Car Class First...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="car-selection-placeholder" class="text-center text-neutral-500 py-8">
+                        <i class="fas fa-car mb-2 text-2xl"></i>
+                        <p>Select a session above to choose your car</p>
+                    </div>
+                </div>
+
                 <!-- Weather Forecast -->
                 <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
                     <h1 class="text-xl mb-4 road-rage-font">Weather Forecast (Optional)</h1>
