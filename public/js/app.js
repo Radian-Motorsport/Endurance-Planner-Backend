@@ -274,6 +274,90 @@ class RadianPlannerApp {
         }
     }
 
+    async populateRaceInformation(sessionId) {
+        console.log('🔍 Loading race information for session ID:', sessionId);
+        
+        try {
+            const response = await fetch(`/api/session-details/${sessionId}`);
+            if (!response.ok) throw new Error('Failed to fetch session details');
+            
+            const sessionDetails = await response.json();
+            console.log('✅ Session details:', sessionDetails);
+            
+            // Show the race info content and hide placeholder
+            const raceInfoContent = document.getElementById('race-info-content');
+            const raceInfoPlaceholder = document.getElementById('race-info-placeholder');
+            
+            if (raceInfoContent) raceInfoContent.classList.remove('hidden');
+            if (raceInfoPlaceholder) raceInfoPlaceholder.classList.add('hidden');
+            
+            // Populate race datetime (simulated_start_time)
+            const raceDatetimeElement = document.getElementById('race-datetime');
+            if (raceDatetimeElement && sessionDetails.simulated_start_time) {
+                const raceDateTime = new Date(sessionDetails.simulated_start_time);
+                raceDatetimeElement.textContent = raceDateTime.toLocaleString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZoneName: 'short'
+                });
+            }
+            
+            // Populate event datetime (session_date)
+            const eventDatetimeElement = document.getElementById('event-datetime');
+            if (eventDatetimeElement && sessionDetails.session_date) {
+                const eventDateTime = new Date(sessionDetails.session_date);
+                eventDatetimeElement.textContent = eventDateTime.toLocaleString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZoneName: 'short'
+                });
+            }
+            
+            // Populate session length
+            const sessionLengthElement = document.getElementById('session-length');
+            if (sessionLengthElement && sessionDetails.session_length) {
+                const hours = Math.floor(sessionDetails.session_length / 60);
+                const minutes = sessionDetails.session_length % 60;
+                sessionLengthElement.textContent = hours > 0 ? 
+                    `${hours}h ${minutes}m` : `${minutes} minutes`;
+            }
+            
+            // Populate track name
+            const trackNameElement = document.getElementById('track-name');
+            if (trackNameElement && sessionDetails.track_name) {
+                trackNameElement.textContent = sessionDetails.track_name;
+            }
+            
+        } catch (error) {
+            console.error('❌ Error fetching session details:', error);
+            this.clearRaceInformation();
+        }
+    }
+
+    clearRaceInformation() {
+        // Hide race info content and show placeholder
+        const raceInfoContent = document.getElementById('race-info-content');
+        const raceInfoPlaceholder = document.getElementById('race-info-placeholder');
+        
+        if (raceInfoContent) raceInfoContent.classList.add('hidden');
+        if (raceInfoPlaceholder) raceInfoPlaceholder.classList.remove('hidden');
+        
+        // Clear all the content
+        const elements = ['race-datetime', 'event-datetime', 'session-length', 'track-name'];
+        elements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = '-';
+        });
+    }
+
     setupEventListeners() {
         // Navigation buttons
         const showPlannerBtn = document.getElementById('showPlannerBtn');
@@ -316,6 +400,20 @@ class RadianPlannerApp {
                         sessionsSelect.innerHTML = '<option value="">Select Event First...</option>';
                         sessionsSelect.disabled = true;
                     }
+                }
+                // Clear race information when event changes
+                this.clearRaceInformation();
+            });
+        }
+
+        // Session selection
+        const sessionSelectElement = document.getElementById('session-select');
+        if (sessionSelectElement) {
+            sessionSelectElement.addEventListener('change', async (e) => {
+                if (e.target.value) {
+                    await this.populateRaceInformation(e.target.value);
+                } else {
+                    this.clearRaceInformation();
                 }
             });
         }

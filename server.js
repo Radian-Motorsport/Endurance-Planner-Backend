@@ -371,6 +371,43 @@ app.get('/api/sessions/:eventId', async (req, res) => {
     }
 });
 
+// Get detailed session information including event data
+app.get('/api/session-details/:sessionId', async (req, res) => {
+    try {
+        const { sessionId } = req.params;
+        console.log('🔍 Fetching session details for session ID:', sessionId);
+        
+        if (!pool) {
+            console.error('❌ Database pool is null');
+            return res.status(500).json({ error: 'Database connection not available' });
+        }
+        
+        const result = await pool.query(`
+            SELECT 
+                s.*,
+                e.event_name,
+                e.track_name,
+                e.start_date as event_start_date,
+                e.season_name,
+                ser.series_name
+            FROM sessions s
+            JOIN events e ON s.event_id = e.event_id
+            JOIN series ser ON e.series_id = ser.series_id
+            WHERE s.session_id = $1 AND s.active = true
+        `, [sessionId]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Session not found' });
+        }
+        
+        console.log(`✅ Found session details for session ${sessionId}`);
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('❌ Error fetching session details:', err);
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
+    }
+});
+
 // Minimal admin DELETE endpoints (no auth yet). Use with care.
 app.delete('/api/drivers/:name', async (req, res) => {
     try {

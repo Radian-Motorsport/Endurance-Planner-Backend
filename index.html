@@ -128,24 +128,38 @@
 
                 <!-- Race Date & Time -->
                 <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
-                    <h1 class="text-xl mb-4 road-rage-font">Race Date & Time</h1>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                        <div class="flex flex-col w-full">
-                            <label for="race-date" class="text-sm font-medium text-neutral-500 mb-2">Race Date</label>
-                            <input type="date" id="race-date" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
+                    <h1 class="text-xl mb-4 road-rage-font">Race Information</h1>
+                    <div id="race-info-content" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                            <div class="flex flex-col w-full">
+                                <label class="text-sm font-medium text-neutral-500 mb-2">Race Date & Time <span class="text-xs text-neutral-400">(Simulator Time)</span></label>
+                                <div id="race-datetime" class="p-3 bg-neutral-900 rounded-lg text-neutral-200 border border-neutral-700">
+                                    Select a session to view race information
+                                </div>
+                            </div>
+                            <div class="flex flex-col w-full">
+                                <label class="text-sm font-medium text-neutral-500 mb-2">Event Date & Time <span class="text-xs text-neutral-400">(Real World Time)</span></label>
+                                <div id="event-datetime" class="p-3 bg-neutral-900 rounded-lg text-neutral-200 border border-neutral-700">
+                                    Select a session to view event information
+                                </div>
+                            </div>
+                            <div class="flex flex-col w-full">
+                                <label class="text-sm font-medium text-neutral-500 mb-2">Session Length</label>
+                                <div id="session-length" class="p-3 bg-neutral-900 rounded-lg text-neutral-200 border border-neutral-700">
+                                    -
+                                </div>
+                            </div>
+                            <div class="flex flex-col w-full">
+                                <label class="text-sm font-medium text-neutral-500 mb-2">Track</label>
+                                <div id="track-name" class="p-3 bg-neutral-900 rounded-lg text-neutral-200 border border-neutral-700">
+                                    -
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex flex-col w-full">
-                            <label for="race-time" class="text-sm font-medium text-neutral-500 mb-2">Race Start Time <span class="text-xs text-neutral-400">(Simulator Time)</span></label>
-                            <input type="time" id="race-time" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
-                        </div>
-                        <div class="flex flex-col w-full">
-                            <label for="event-start-date" class="text-sm font-medium text-neutral-500 mb-2">Event Start Date <span class="text-xs text-neutral-400">(Europe/London Date)</span></label>
-                            <input type="date" id="event-start-date" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
-                        </div>
-                        <div class="flex flex-col w-full">
-                            <label for="event-start-time" class="text-sm font-medium text-neutral-500 mb-2">Event Start Time <span class="text-xs text-neutral-400">(Europe/London Time)</span></label>
-                            <input type="time" id="event-start-time" class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
-                        </div>
+                    </div>
+                    <div id="race-info-placeholder" class="text-center text-neutral-500 py-8">
+                        <i class="fas fa-info-circle mb-2 text-2xl"></i>
+                        <p>Select a session above to view race information</p>
                     </div>
                 </div>
 
