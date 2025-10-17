@@ -390,10 +390,21 @@ app.get('/api/session-details/:sessionId', async (req, res) => {
                 e.start_date as event_start_date,
                 e.season_name,
                 e.car_class_ids,
-                ser.series_name
+                e.track_id,
+                ser.series_name,
+                t.location,
+                t.latitude,
+                t.longitude,
+                t.track_config_length,
+                t.corners_per_lap,
+                t.config_name,
+                t.folder as track_folder,
+                t.small_image as track_small_image,
+                t.garage61_id as track_garage61_id
             FROM sessions s
             JOIN events e ON s.event_id = e.event_id
             JOIN series ser ON e.series_id = ser.series_id
+            LEFT JOIN tracks t ON e.track_id = t.track_id
             WHERE s.session_id = $1 AND s.active = true
         `, [sessionId]);
         

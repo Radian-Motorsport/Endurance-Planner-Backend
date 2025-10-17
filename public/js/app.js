@@ -330,11 +330,8 @@ class RadianPlannerApp {
                     `${hours}h ${minutes}m` : `${minutes} minutes`;
             }
             
-            // Populate track name
-            const trackNameElement = document.getElementById('track-name');
-            if (trackNameElement && sessionDetails.track_name) {
-                trackNameElement.textContent = sessionDetails.track_name;
-            }
+            // Populate track details
+            await this.populateTrackDetails(sessionDetails);
             
             // Populate car selection
             await this.populateCarSelection(sessionDetails);
@@ -354,14 +351,14 @@ class RadianPlannerApp {
         if (raceInfoPlaceholder) raceInfoPlaceholder.classList.remove('hidden');
         
         // Clear all the content
-        const elements = ['race-datetime', 'event-datetime', 'session-length', 'track-name'];
+        const elements = ['race-datetime', 'event-datetime', 'session-length'];
         elements.forEach(id => {
             const element = document.getElementById(id);
             if (element) element.textContent = '-';
         });
         
-        // Clear car selection
-        this.clearCarSelection();
+        // Clear track details
+        this.clearTrackDetails();
         
         // Clear car selection
         this.clearCarSelection();
@@ -575,6 +572,101 @@ class RadianPlannerApp {
         
         // Clear stored car details
         this.selectedCar = null;
+    }
+
+    async populateTrackDetails(sessionDetails) {
+        console.log('🏁 Populating track details:', sessionDetails);
+        
+        // Show track details section
+        const trackDetailsSection = document.getElementById('track-details-section');
+        if (trackDetailsSection) trackDetailsSection.classList.remove('hidden');
+        
+        // Populate track name
+        const trackNameElement = document.getElementById('track-name');
+        if (trackNameElement) {
+            trackNameElement.textContent = sessionDetails.track_name || '-';
+        }
+        
+        // Populate Garage61 ID
+        const trackGarage61IdElement = document.getElementById('track-garage61-id');
+        if (trackGarage61IdElement) {
+            trackGarage61IdElement.textContent = sessionDetails.track_garage61_id ? 
+                `Garage61 ID: ${sessionDetails.track_garage61_id}` : 'Garage61 ID: -';
+        }
+        
+        // Populate track config
+        const trackConfigElement = document.getElementById('track-config');
+        if (trackConfigElement) {
+            trackConfigElement.textContent = sessionDetails.config_name || '-';
+        }
+        
+        // Populate track location
+        const trackLocationElement = document.getElementById('track-location');
+        if (trackLocationElement) {
+            trackLocationElement.textContent = sessionDetails.location || '-';
+        }
+        
+        // Populate coordinates
+        const trackCoordinatesElement = document.getElementById('track-coordinates');
+        if (trackCoordinatesElement && sessionDetails.latitude && sessionDetails.longitude) {
+            trackCoordinatesElement.textContent = `${sessionDetails.latitude}, ${sessionDetails.longitude}`;
+        } else if (trackCoordinatesElement) {
+            trackCoordinatesElement.textContent = '-';
+        }
+        
+        // Populate track length
+        const trackLengthElement = document.getElementById('track-length');
+        if (trackLengthElement) {
+            trackLengthElement.textContent = sessionDetails.track_config_length ? 
+                `${sessionDetails.track_config_length} km` : '-';
+        }
+        
+        // Populate corners
+        const trackCornersElement = document.getElementById('track-corners');
+        if (trackCornersElement) {
+            trackCornersElement.textContent = sessionDetails.corners_per_lap ? 
+                `${sessionDetails.corners_per_lap} corners` : '-';
+        }
+        
+        // Populate track image
+        const trackImageElement = document.getElementById('track-image');
+        if (trackImageElement && sessionDetails.track_small_image && sessionDetails.track_folder) {
+            const imageUrl = `https://images-static.iracing.com/${sessionDetails.track_folder}/${sessionDetails.track_small_image}`;
+            trackImageElement.src = imageUrl;
+            trackImageElement.alt = sessionDetails.track_name || 'Track Image';
+            trackImageElement.classList.remove('hidden');
+            
+            console.log('🖼️ Loading track image:', imageUrl);
+            
+            // Handle image load errors
+            trackImageElement.onerror = function() {
+                console.warn('❌ Failed to load track image:', imageUrl);
+                this.classList.add('hidden');
+            };
+        } else if (trackImageElement) {
+            trackImageElement.classList.add('hidden');
+        }
+    }
+
+    clearTrackDetails() {
+        // Hide track details section
+        const trackDetailsSection = document.getElementById('track-details-section');
+        if (trackDetailsSection) trackDetailsSection.classList.add('hidden');
+        
+        // Clear track details content
+        const elements = ['track-name', 'track-garage61-id', 'track-config', 'track-location', 
+                         'track-coordinates', 'track-length', 'track-corners'];
+        elements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = '-';
+        });
+        
+        // Hide track image
+        const trackImageElement = document.getElementById('track-image');
+        if (trackImageElement) {
+            trackImageElement.classList.add('hidden');
+            trackImageElement.src = '';
+        }
     }
 
     setupEventListeners() {

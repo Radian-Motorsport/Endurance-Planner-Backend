@@ -101,7 +101,8 @@
                 <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
                     <h1 class="text-xl mb-4 road-rage-font">Race Information</h1>
                     <div id="race-info-content" class="hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                        <!-- Race Date & Time Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-6">
                             <div class="flex flex-col w-full">
                                 <label class="text-sm font-medium text-neutral-500 mb-2">Race Date & Time <span class="text-xs text-neutral-400">(Simulator Time)</span></label>
                                 <div id="race-datetime" class="p-3 bg-neutral-900 rounded-lg text-neutral-200 border border-neutral-700">
@@ -120,10 +121,44 @@
                                     -
                                 </div>
                             </div>
-                            <div class="flex flex-col w-full">
-                                <label class="text-sm font-medium text-neutral-500 mb-2">Track</label>
-                                <div id="track-name" class="p-3 bg-neutral-900 rounded-lg text-neutral-200 border border-neutral-700">
-                                    -
+                        </div>
+                        
+                        <!-- Track Details Section -->
+                        <div id="track-details-section" class="hidden">
+                            <div class="border-t border-neutral-700 pt-6">
+                                <h3 class="text-lg font-medium text-neutral-300 mb-4">Track Details</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Track Image and Basic Info -->
+                                    <div class="flex flex-col space-y-4">
+                                        <div class="flex items-center space-x-4">
+                                            <img id="track-image" src="" alt="Track Image" class="w-32 h-20 object-contain rounded-lg bg-neutral-700 hidden">
+                                            <div class="flex-1">
+                                                <div id="track-name" class="text-lg font-medium text-neutral-200 mb-1">-</div>
+                                                <div id="track-garage61-id" class="text-sm text-neutral-400 mb-1">Garage61 ID: -</div>
+                                                <div id="track-config" class="text-xs text-neutral-500">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Track Specifications -->
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-neutral-500">Location:</span>
+                                            <span id="track-location" class="text-sm text-neutral-200">-</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-neutral-500">Coordinates:</span>
+                                            <span id="track-coordinates" class="text-sm text-neutral-200">-</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-neutral-500">Track Length:</span>
+                                            <span id="track-length" class="text-sm text-neutral-200">-</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-neutral-500">Corners:</span>
+                                            <span id="track-corners" class="text-sm text-neutral-200">-</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -171,18 +206,14 @@
                                     </div>
                                     
                                     <!-- Car Specifications -->
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div class="flex flex-col">
-                                            <label class="text-sm font-medium text-neutral-500 mb-2">Weight</label>
-                                            <div id="car-weight" class="p-3 bg-neutral-900 rounded-lg text-neutral-200 border border-neutral-700">
-                                                -
-                                            </div>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-neutral-500">Weight:</span>
+                                            <span id="car-weight" class="text-sm text-neutral-200">-</span>
                                         </div>
-                                        <div class="flex flex-col">
-                                            <label class="text-sm font-medium text-neutral-500 mb-2">Horsepower</label>
-                                            <div id="car-hp" class="p-3 bg-neutral-900 rounded-lg text-neutral-200 border border-neutral-700">
-                                                -
-                                            </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-neutral-500">Horsepower:</span>
+                                            <span id="car-hp" class="text-sm text-neutral-200">-</span>
                                         </div>
                                     </div>
                                 </div>
@@ -195,20 +226,7 @@
                     </div>
                 </div>
 
-                <!-- Weather Forecast -->
-                <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
-                    <h1 class="text-xl mb-4 road-rage-font">Weather Forecast (Optional)</h1>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                        <div class="flex flex-col w-full">
-                            <label for="weather-temp-url" class="text-sm font-medium text-neutral-500 mb-2">Temperature Chart URL</label>
-                            <input type="url" id="weather-temp-url" placeholder="https://raw.githubusercontent.com/..." class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
-                        </div>
-                        <div class="flex flex-col w-full">
-                            <label for="weather-clouds-url" class="text-sm font-medium text-neutral-500 mb-2">Clouds & Precipitation URL</label>
-                            <input type="url" id="weather-clouds-url" placeholder="https://raw.githubusercontent.com/..." class="mt-1 p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400">
-                        </div>
-                    </div>
-                </div>
+                
 
                 <!-- Continue Button -->
                 <div class="mt-8">
