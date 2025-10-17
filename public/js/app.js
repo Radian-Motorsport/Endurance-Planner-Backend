@@ -851,34 +851,47 @@ class RadianPlannerApp {
     
     async loadWeatherForecast(sessionDetails) {
         console.log('🌦️ Loading weather forecast for event:', sessionDetails.event_id);
+        console.log('🌦️ Session details:', sessionDetails);
         
         try {
             // Check if event has weather_url
-            const response = await fetch(`/api/events/${sessionDetails.event_id}/weather`);
+            const weatherUrl = `/api/events/${sessionDetails.event_id}/weather`;
+            console.log('🌦️ Fetching weather from:', weatherUrl);
+            
+            const response = await fetch(weatherUrl);
+            console.log('🌦️ Weather API response status:', response.status);
+            
             if (!response.ok) {
-                console.log('ℹ️ No weather data available for this event');
+                console.log('ℹ️ No weather data available for this event, status:', response.status);
                 return;
             }
             
             const eventWeather = await response.json();
+            console.log('🌦️ Event weather data:', eventWeather);
             
             if (eventWeather && eventWeather.weather_url) {
                 console.log('✅ Event has weather URL:', eventWeather.weather_url);
                 
                 // Show weather display section
                 const weatherDisplay = document.getElementById('weather-display');
+                console.log('🌦️ Weather display element:', weatherDisplay);
+                
                 if (weatherDisplay) {
+                    console.log('🌦️ Showing weather display section');
                     weatherDisplay.classList.remove('hidden');
                     
                     // Load actual weather data and display it
                     await this.displayWeatherData(eventWeather.weather_url);
+                } else {
+                    console.error('❌ Weather display element not found');
                 }
             } else {
                 console.log('ℹ️ Event does not have weather URL');
+                console.log('ℹ️ Event weather response:', eventWeather);
             }
             
         } catch (error) {
-            console.warn('❌ Failed to load weather forecast:', error);
+            console.error('❌ Failed to load weather forecast:', error);
         }
     }
     
