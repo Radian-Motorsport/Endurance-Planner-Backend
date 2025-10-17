@@ -853,6 +853,24 @@ class RadianPlannerApp {
         console.log('🌦️ Loading weather forecast for event:', sessionDetails.event_id);
         console.log('🌦️ Session details:', sessionDetails);
         
+        // Show weather display section regardless - for testing
+        const weatherDisplay = document.getElementById('weather-display');
+        console.log('🌦️ Weather display element:', weatherDisplay);
+        
+        if (weatherDisplay) {
+            console.log('🌦️ Showing weather display section');
+            weatherDisplay.classList.remove('hidden');
+            weatherDisplay.innerHTML = `
+                <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
+                <div class="text-sm text-neutral-400">
+                    <p>Testing weather display for event ${sessionDetails.event_id}</p>
+                    <p>Weather box is working!</p>
+                </div>
+            `;
+        } else {
+            console.error('❌ Weather display element not found');
+        }
+        
         try {
             // Check if event has weather_url
             const weatherUrl = `/api/events/${sessionDetails.event_id}/weather`;
@@ -872,19 +890,8 @@ class RadianPlannerApp {
             if (eventWeather && eventWeather.weather_url) {
                 console.log('✅ Event has weather URL:', eventWeather.weather_url);
                 
-                // Show weather display section
-                const weatherDisplay = document.getElementById('weather-display');
-                console.log('🌦️ Weather display element:', weatherDisplay);
-                
-                if (weatherDisplay) {
-                    console.log('🌦️ Showing weather display section');
-                    weatherDisplay.classList.remove('hidden');
-                    
-                    // Load actual weather data and display it
-                    await this.displayWeatherData(eventWeather.weather_url);
-                } else {
-                    console.error('❌ Weather display element not found');
-                }
+                // Load actual weather data and display it
+                await this.displayWeatherData(eventWeather.weather_url);
             } else {
                 console.log('ℹ️ Event does not have weather URL');
                 console.log('ℹ️ Event weather response:', eventWeather);
