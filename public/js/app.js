@@ -20,6 +20,11 @@ class RadianPlannerApp {
         this.selectedTrack = null;
         this.selectedCar = null;
         
+        // Weather chart instances
+        this.temperatureChart = null;
+        this.cloudsChart = null;
+        this.disposables = [];
+        
         this.init();
     }
 
@@ -916,17 +921,75 @@ class RadianPlannerApp {
             const weatherData = await response.json();
             console.log('🌦️ Weather data received:', weatherData);
             
-            // Create the weather interface exactly like weather-forecast.html
+            // Create the COMPLETE weather interface exactly like weather-forecast.html
             const weatherDisplay = document.getElementById('weather-display');
             if (weatherDisplay && weatherData) {
+                // Show the weather display
+                weatherDisplay.classList.remove('hidden');
+                
+                // First add the complete CSS styles
+                this.addWeatherStyles();
+                
+                // Then add the complete HTML structure
                 weatherDisplay.innerHTML = `
-                    <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
-                    <div id="temperature-chart" style="width: 100%; height: 300px; margin-bottom: 20px;"></div>
-                    <div id="clouds-chart" style="width: 100%; height: 300px;"></div>
+                    <div style="background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                        <div style="display: flex; align-items: center; padding: 16px 24px; border-bottom: 1px solid #e0e0e0; background: #f8f9fa; border-radius: 8px 8px 0 0;">
+                            <svg style="width: 20px; height: 20px; color: #666;" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+                            </svg>
+                            <h6 style="margin: 0 0 0 8px; font-size: 18px; font-weight: 600; color: #333;">Weather Forecast</h6>
+                        </div>
+
+                        <div style="padding: 24px;">
+                            <div class="chakra-tabs" style="width: 100%;">
+                                <div class="chakra-tabs__tablist" role="tablist" style="display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 24px;">
+                                    <button class="chakra-tabs__tab" role="tab" aria-selected="false" data-tab="temperature" style="padding: 12px 24px; background: none; border: none; font-size: 16px; font-weight: 500; color: #718096; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
+                                        Temperature
+                                    </button>
+                                    <button class="chakra-tabs__tab" role="tab" aria-selected="true" data-tab="clouds" style="padding: 12px 24px; background: none; border: none; font-size: 16px; font-weight: 500; color: #2b6cb0; cursor: pointer; border-bottom: 3px solid #2b6cb0; transition: all 0.2s;">
+                                        Clouds & Precipitation
+                                    </button>
+                                </div>
+
+                                <!-- Temperature Tab Panel -->
+                                <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="true" id="temperature-panel" style="display: none;">
+                                    <div style="display: flex; gap: 32px; margin-bottom: 16px; align-items: center;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div style="width: 24px; height: 3px; border-radius: 2px; background: #ff6b6b;"></div>
+                                            <span style="font-size: 14px; color: #4a5568; font-weight: 500;">Temperature</span>
+                                        </div>
+                                    </div>
+                                    <div style="width: 100%; height: 350px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; background: #fff; position: relative;">
+                                        <div id="temperature-chart" style="width: 100%; height: 300px;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Clouds & Precipitation Tab Panel -->
+                                <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="false" id="clouds-panel" style="display: block;">
+                                    <div style="display: flex; gap: 32px; margin-bottom: 16px; align-items: center;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div style="width: 24px; height: 3px; border-radius: 2px; background: rgb(5,5,15);"></div>
+                                            <span style="font-size: 14px; color: #4a5568; font-weight: 500;">Clouds</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div style="width: 24px; height: 3px; border-radius: 2px; background: #0B5559;"></div>
+                                            <span style="font-size: 14px; color: #4a5568; font-weight: 500;">Chance of Precipitation</span>
+                                        </div>
+                                    </div>
+                                    <div style="width: 100%; height: 350px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; background: #fff; position: relative;">
+                                        <div id="clouds-chart" style="width: 100%; height: 300px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 `;
                 
                 // Import ECharts if not loaded
                 await this.loadECharts();
+                
+                // Initialize tabs functionality
+                this.initializeWeatherTabs();
                 
                 // Use your exact weather processing logic
                 this.renderWeatherCharts(weatherData);
@@ -944,6 +1007,57 @@ class RadianPlannerApp {
                 `;
             }
         }
+    }
+    
+    addWeatherStyles() {
+        // Add CSS styles for weather tabs if not already added
+        if (!document.getElementById('weather-styles')) {
+            const style = document.createElement('style');
+            style.id = 'weather-styles';
+            style.textContent = `
+                .chakra-tabs__tab:hover {
+                    color: #4a5568 !important;
+                }
+                .chakra-tabs__tab[aria-selected="true"] {
+                    color: #2b6cb0 !important;
+                    border-bottom-color: #2b6cb0 !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    
+    initializeWeatherTabs() {
+        const tabs = document.querySelectorAll('.chakra-tabs__tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => this.switchWeatherTab(tab.dataset.tab));
+        });
+    }
+    
+    switchWeatherTab(tabName) {
+        // Update tab states
+        document.querySelectorAll('.chakra-tabs__tab').forEach(tab => {
+            const isSelected = tab.dataset.tab === tabName;
+            tab.setAttribute('aria-selected', isSelected);
+            tab.style.color = isSelected ? '#2b6cb0' : '#718096';
+            tab.style.borderBottomColor = isSelected ? '#2b6cb0' : 'transparent';
+        });
+
+        // Update panel visibility
+        document.querySelectorAll('.chakra-tabs__tab-panel').forEach(panel => {
+            const isVisible = panel.id === `${tabName}-panel`;
+            panel.setAttribute('aria-hidden', !isVisible);
+            panel.style.display = isVisible ? 'block' : 'none';
+        });
+
+        // Resize charts when switching tabs
+        setTimeout(() => {
+            if (tabName === 'temperature' && this.temperatureChart) {
+                this.temperatureChart.resize();
+            } else if (tabName === 'clouds' && this.cloudsChart) {
+                this.cloudsChart.resize();
+            }
+        }, 100);
     }
     
     async loadECharts() {
@@ -969,8 +1083,13 @@ class RadianPlannerApp {
     }
 
     renderTemperatureChart(weatherData) {
+        // Dispose existing chart if it exists
+        if (this.temperatureChart) {
+            this.temperatureChart.dispose();
+        }
+        
         const container = document.getElementById('temperature-chart');
-        const chart = echarts.init(container);
+        this.temperatureChart = echarts.init(container);
 
         const forecast = weatherData.weather_forecast;
         const timeLabels = this.generateTimeLabels(forecast);
@@ -1021,12 +1140,17 @@ class RadianPlannerApp {
             }
         };
 
-        chart.setOption(option);
+        this.temperatureChart.setOption(option);
     }
 
     renderCloudsChart(weatherData) {
+        // Dispose existing chart if it exists
+        if (this.cloudsChart) {
+            this.cloudsChart.dispose();
+        }
+        
         const container = document.getElementById('clouds-chart');
-        const chart = echarts.init(container);
+        this.cloudsChart = echarts.init(container);
 
         const forecast = weatherData.weather_forecast;
         const timeLabels = this.generateTimeLabels(forecast);
@@ -1078,7 +1202,24 @@ class RadianPlannerApp {
             }
         };
 
-        chart.setOption(option);
+        this.cloudsChart.setOption(option);
+    }
+
+    dispose() {
+        if (this.temperatureChart) {
+            this.temperatureChart.dispose();
+            this.temperatureChart = null;
+        }
+        if (this.cloudsChart) {
+            this.cloudsChart.dispose();
+            this.cloudsChart = null;
+        }
+        this.disposables.forEach(disposable => {
+            if (disposable && typeof disposable.dispose === 'function') {
+                disposable.dispose();
+            }
+        });
+        this.disposables = [];
     }
 
     generateTimeLabels(forecast) {
