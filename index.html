@@ -74,17 +74,15 @@
             fill: #dc2626 !important; /* Red for start/finish line */
             stroke: #991b1b !important; /* Darker red borders */
             stroke-width: 3px !important;
-            transform: scale(0.25) !important; /* Make start/finish arrow 1/4 the size */
-            transform-origin: center !important; /* Scale from center */
         }
         
         #layer-turns {
-            fill: #d39e00 !important; /* Blue for turn numbers */
-            stroke: #bc9000 !important; /* Darker blue borders */
+            fill: #fbbf24 !important; /* Bold yellow for turn numbers */
+            stroke: #f59e0b !important; /* Darker yellow borders */
             stroke-width: 1px !important;
             font-family: Arial, sans-serif !important;
-            font-size: 14px !important;
-            font-weight: semi-bold !important;
+            font-size: 12px !important;
+            font-weight: bold !important;
         }
         
         /* Override any default SVG colors and ensure visibility on dark background */
@@ -260,7 +258,12 @@
                                     <!-- Track Image and Basic Info -->
                                     <div class="flex flex-col space-y-4">
                                         <div class="flex items-center space-x-4">
-                                            <img id="track-image" src="" alt="Track Image" class="w-32 h-32 object-cover rounded-lg bg-neutral-700 hidden">
+                                            <div class="relative w-32 h-32">
+                                                <!-- Background track image -->
+                                                <img id="track-image" src="" alt="Track Image" class="w-32 h-32 object-cover rounded-lg bg-neutral-700 hidden">
+                                                <!-- Track logo overlay -->
+                                                <img id="track-logo-overlay" src="" alt="Track Logo" class="absolute inset-0 w-32 h-32 object-contain rounded-lg hidden" style="z-index: 10;">
+                                            </div>
                                             <div class="flex-1">
                                                 <div id="track-name" class="text-lg font-medium text-neutral-200 mb-1">-</div>
                                                 <div id="track-garage61-id" class="text-sm text-neutral-400 mb-1">Garage61 ID: -</div>
