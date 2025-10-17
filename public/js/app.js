@@ -916,49 +916,39 @@ class RadianPlannerApp {
             const weatherData = await response.json();
             console.log('🌦️ Weather data received:', weatherData);
             
-            // Process and display the weather data properly
+            // Create the weather interface exactly like weather-forecast.html
             const weatherDisplay = document.getElementById('weather-display');
             if (weatherDisplay && weatherData) {
-                // Create the weather interface like the standalone HTML
                 weatherDisplay.innerHTML = `
                     <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
-                    <div class="weather-content">
-                        <div id="weather-temperature-chart" style="width: 100%; height: 300px; margin-bottom: 20px;"></div>
-                        <div id="weather-clouds-chart" style="width: 100%; height: 300px;"></div>
-                    </div>
+                    <div id="temperature-chart" style="width: 100%; height: 300px; margin-bottom: 20px;"></div>
+                    <div id="clouds-chart" style="width: 100%; height: 300px;"></div>
                 `;
                 
-                // Process the weather data and create charts
-                await this.createWeatherCharts(weatherData);
+                // Import ECharts if not loaded
+                await this.loadECharts();
+                
+                // Use your exact weather processing logic
+                this.renderWeatherCharts(weatherData);
             }
         } catch (error) {
             console.error('❌ Failed to display weather data:', error);
             
-            // Show error message
             const weatherDisplay = document.getElementById('weather-display');
             if (weatherDisplay) {
                 weatherDisplay.innerHTML = `
                     <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
                     <div class="text-sm text-red-400">
-                        <p>Error loading weather data</p>
-                        <p>Error: ${error.message}</p>
+                        <p>Error loading weather data: ${error.message}</p>
                     </div>
                 `;
             }
         }
     }
     
-    async createWeatherCharts(weatherData) {
-        // Import ECharts if not already loaded
-        if (typeof echarts === 'undefined') {
-            await this.loadECharts();
-        }
-        
-        // Process weather data like in weather-forecast.html
-        this.processWeatherData(weatherData);
-    }
-    
     async loadECharts() {
+        if (typeof echarts !== 'undefined') return;
+        
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js';
@@ -968,34 +958,161 @@ class RadianPlannerApp {
         });
     }
     
-    processWeatherData(data) {
-        try {
-            // Create temperature chart
-            const tempChart = echarts.init(document.getElementById('weather-temperature-chart'));
-            const cloudsChart = echarts.init(document.getElementById('weather-clouds-chart'));
-            
-            // Basic chart options - you can expand this with the full logic from weather-forecast.html
-            const tempOption = {
-                title: { text: 'Temperature Forecast' },
-                xAxis: { type: 'category', data: ['Hour 1', 'Hour 2', 'Hour 3'] },
-                yAxis: { type: 'value' },
-                series: [{ data: [20, 22, 24], type: 'line' }]
-            };
-            
-            const cloudsOption = {
-                title: { text: 'Cloud Coverage' },
-                xAxis: { type: 'category', data: ['Hour 1', 'Hour 2', 'Hour 3'] },
-                yAxis: { type: 'value' },
-                series: [{ data: [30, 50, 70], type: 'bar' }]
-            };
-            
-            tempChart.setOption(tempOption);
-            cloudsChart.setOption(cloudsOption);
-            
-            console.log('✅ Weather charts created successfully');
-        } catch (error) {
-            console.error('❌ Failed to create weather charts:', error);
+    renderWeatherCharts(weatherData) {
+        if (!weatherData || !weatherData.weather_forecast) {
+            console.error('Invalid weather data format');
+            return;
         }
+
+        this.renderTemperatureChart(weatherData);
+        this.renderCloudsChart(weatherData);
+    }
+
+    renderTemperatureChart(weatherData) {
+        const container = document.getElementById('temperature-chart');
+        const chart = echarts.init(container);
+
+        const forecast = weatherData.weather_forecast;
+        const timeLabels = this.generateTimeLabels(forecast);
+        const temperatures = forecast.map(item => this.convertTemperature(item.temp));
+
+        const option = {
+            grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
+            xAxis: {
+                type: 'category',
+                data: timeLabels,
+                axisLine: { lineStyle: { color: '#6E7079' } },
+                axisLabel: { color: '#6E7079', fontSize: 12 }
+            },
+            yAxis: {
+                type: 'value',
+                axisLine: { lineStyle: { color: '#6E7079' } },
+                axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}°F' },
+                splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
+            },
+            series: [{
+                name: 'Temperature',
+                type: 'line',
+                data: temperatures,
+                lineStyle: { color: '#ff6b6b', width: 3 },
+                itemStyle: { color: '#ff6b6b' },
+                areaStyle: { 
+                    color: {
+                        type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                        colorStops: [
+                            { offset: 0, color: 'rgba(255, 107, 107, 0.3)' },
+                            { offset: 1, color: 'rgba(255, 107, 107, 0.05)' }
+                        ]
+                    }
+                },
+                smooth: true, symbol: 'circle', symbolSize: 6
+            }],
+            tooltip: {
+                trigger: 'axis',
+                formatter: (params) => {
+                    const point = params[0];
+                    const forecastItem = forecast[point.dataIndex];
+                    return `<div style="color: black;">
+                        <strong>Time:</strong> ${timeLabels[point.dataIndex]}<br>
+                        <strong>Temperature:</strong> ${point.value}°F<br>
+                        <strong>Weather:</strong> ${this.getWeatherDescription(forecastItem)}
+                    </div>`;
+                }
+            }
+        };
+
+        chart.setOption(option);
+    }
+
+    renderCloudsChart(weatherData) {
+        const container = document.getElementById('clouds-chart');
+        const chart = echarts.init(container);
+
+        const forecast = weatherData.weather_forecast;
+        const timeLabels = this.generateTimeLabels(forecast);
+        const cloudCover = forecast.map(item => this.convertCloudCover(item.cloud_cover));
+        const precipitation = forecast.map(item => this.convertPrecipitation(item.humidity));
+
+        const option = {
+            grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
+            xAxis: {
+                type: 'category', data: timeLabels,
+                axisLine: { lineStyle: { color: '#6E7079' } },
+                axisLabel: { color: '#6E7079', fontSize: 12 }
+            },
+            yAxis: {
+                type: 'value', min: 0, max: 100,
+                axisLine: { lineStyle: { color: '#6E7079' } },
+                axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}%' },
+                splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
+            },
+            series: [
+                {
+                    name: 'Cloud Cover', type: 'line', data: cloudCover,
+                    lineStyle: { color: 'rgb(5,5,15)', width: 2 },
+                    itemStyle: { color: 'rgb(5,5,15)' },
+                    areaStyle: { color: 'rgba(5,5,15,0.04)' },
+                    smooth: true, symbol: 'circle', symbolSize: 4
+                },
+                {
+                    name: 'Precipitation Chance', type: 'line', data: precipitation,
+                    lineStyle: { color: '#0B5559', width: 2 },
+                    itemStyle: { color: '#0B5559' },
+                    areaStyle: { color: 'rgba(15,138,138,0.04)' },
+                    smooth: true, symbol: 'circle', symbolSize: 4
+                }
+            ],
+            tooltip: {
+                trigger: 'axis',
+                formatter: (params) => {
+                    const dataIndex = params[0].dataIndex;
+                    const forecastItem = forecast[dataIndex];
+                    return `<div style="color: black;">
+                        <strong>Time:</strong> ${timeLabels[dataIndex]}<br>
+                        <strong>Temperature:</strong> ${this.convertTemperature(forecastItem.temp)}°F<br>
+                        <strong>Cloud Cover:</strong> ${cloudCover[dataIndex]}%<br>
+                        <strong>Chance of Precipitation:</strong> ${precipitation[dataIndex]}%<br>
+                        <strong>Wind:</strong> ${this.convertWindSpeed(forecastItem.wind_speed)} mph
+                    </div>`;
+                }
+            }
+        };
+
+        chart.setOption(option);
+    }
+
+    generateTimeLabels(forecast) {
+        return forecast.map(item => {
+            const date = new Date(item.timestamp);
+            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        });
+    }
+
+    convertTemperature(temp) {
+        const minTemp = 1917, maxTemp = 2091, minF = 67, maxF = 70;
+        return Math.round(((temp - minTemp) / (maxTemp - minTemp)) * (maxF - minF) + minF);
+    }
+
+    convertCloudCover(cloudCover) {
+        const minCloud = 465, maxCloud = 809;
+        return Math.round(((cloudCover - minCloud) / (maxCloud - minCloud)) * 100);
+    }
+
+    convertPrecipitation(humidity) {
+        return Math.round((humidity / 100) * 10);
+    }
+
+    convertWindSpeed(windSpeed) {
+        const minWind = 147, maxWind = 306;
+        return Math.round(((windSpeed - minWind) / (maxWind - minWind)) * 20 + 5);
+    }
+
+    getWeatherDescription(forecastItem) {
+        const cloudCover = this.convertCloudCover(forecastItem.cloud_cover);
+        if (cloudCover < 25) return 'Clear';
+        if (cloudCover < 50) return 'Partly Cloudy';
+        if (cloudCover < 75) return 'Mostly Cloudy';
+        return 'Overcast';
     }
     
     clearWeatherDisplay() {
