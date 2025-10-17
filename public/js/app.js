@@ -870,8 +870,8 @@ class RadianPlannerApp {
                 if (weatherDisplay) {
                     weatherDisplay.classList.remove('hidden');
                     
-                    // Add weather button if not already present
-                    this.addWeatherButton(sessionDetails.event_id, eventWeather.weather_url);
+                    // Load actual weather data and display it
+                    await this.displayWeatherData(eventWeather.weather_url);
                 }
             } else {
                 console.log('ℹ️ Event does not have weather URL');
@@ -882,34 +882,28 @@ class RadianPlannerApp {
         }
     }
     
-    addWeatherButton(eventId, weatherUrl) {
-        // Check if weather button already exists
-        let weatherButton = document.getElementById('weather-forecast-btn');
-        
-        if (!weatherButton) {
-            // Create weather button
-            weatherButton = document.createElement('button');
-            weatherButton.id = 'weather-forecast-btn';
-            weatherButton.className = 'inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200';
-            weatherButton.innerHTML = '<i class="fas fa-cloud-sun mr-2"></i>Weather Forecast';
+    async displayWeatherData(weatherUrl) {
+        try {
+            // Fetch weather data through proxy
+            const response = await fetch(`/api/weather-proxy?url=${encodeURIComponent(weatherUrl)}`);
+            const weatherData = await response.json();
             
-            // Find a good place to insert the button (near the track map section)
-            const trackMapSection = document.getElementById('track-map-section');
-            if (trackMapSection) {
-                const buttonContainer = document.createElement('div');
-                buttonContainer.className = 'mb-4';
-                buttonContainer.appendChild(weatherButton);
-                trackMapSection.parentNode.insertBefore(buttonContainer, trackMapSection.nextSibling);
+            // Display weather data in the weather-display section
+            const weatherDisplay = document.getElementById('weather-display');
+            if (weatherDisplay && weatherData) {
+                // Add weather content here - for now just show basic info
+                weatherDisplay.innerHTML = `
+                    <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
+                    <div class="text-sm text-neutral-400">
+                        <p>Weather data loaded successfully</p>
+                        <p>Temperature data: ${weatherData.temp_units || 'Available'}</p>
+                        <p>Weather conditions: ${weatherData.weather_type || 'Variable'}</p>
+                    </div>
+                `;
             }
+        } catch (error) {
+            console.warn('❌ Failed to display weather data:', error);
         }
-        
-        // Update button click handler
-        weatherButton.onclick = () => {
-            const weatherForecastUrl = `/public/weather-forecast.html?eventId=${eventId}&weatherUrl=${encodeURIComponent(weatherUrl)}`;
-            window.open(weatherForecastUrl, '_blank');
-        };
-        
-        console.log('✅ Weather button added/updated for event:', eventId);
     }
     
     clearWeatherDisplay() {
@@ -917,12 +911,7 @@ class RadianPlannerApp {
         const weatherDisplay = document.getElementById('weather-display');
         if (weatherDisplay) {
             weatherDisplay.classList.add('hidden');
-        }
-        
-        // Remove weather button if it exists
-        const weatherButton = document.getElementById('weather-forecast-btn');
-        if (weatherButton && weatherButton.parentNode) {
-            weatherButton.parentNode.remove();
+            weatherDisplay.innerHTML = ''; // Clear content
         }
         
         console.log('✅ Weather display cleared');
