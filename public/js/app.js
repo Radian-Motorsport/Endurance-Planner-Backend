@@ -521,12 +521,13 @@ class RadianPlannerApp {
             // Populate car image
             const carImageElement = document.getElementById('car-image');
             if (carImageElement && selectedCar.small_image && selectedCar.folder) {
-                const imageUrl = `https://images-static.iracing.com/img/cars/${selectedCar.folder}/${selectedCar.small_image}`;
+                const imageUrl = `https://images-static.iracing.com/${selectedCar.folder}/${selectedCar.small_image}`;
                 carImageElement.src = imageUrl;
                 carImageElement.alt = selectedCar.car_name || 'Car Image';
                 carImageElement.classList.remove('hidden');
                 
                 console.log('🖼️ Loading car image:', imageUrl);
+                console.log('🖼️ Folder field contains:', selectedCar.folder);
                 
                 // Handle image load errors
                 carImageElement.onerror = function() {
