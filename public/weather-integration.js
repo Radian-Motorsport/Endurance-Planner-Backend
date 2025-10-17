@@ -19,9 +19,11 @@ class WeatherIntegration {
             const response = await fetch('/api/events/with-weather');
             const data = await response.json();
             
-            data.events.forEach(event => {
-                this.eventsWithWeather.add(event.event_id);
-            });
+            if (data.events && Array.isArray(data.events)) {
+                data.events.forEach(event => {
+                    this.eventsWithWeather.add(event.event_id);
+                });
+            }
 
             // Update any existing event displays
             this.updateEventDisplays();

@@ -91,7 +91,6 @@ async function getEventsWithWeather(req, res) {
             SELECT 
                 e.event_id,
                 e.event_name,
-                s.series_name,
                 e.track_name,
                 e.start_date,
                 e.weather_url,
@@ -100,7 +99,6 @@ async function getEventsWithWeather(req, res) {
                     ELSE false 
                 END as has_weather
             FROM events e
-            LEFT JOIN series s ON e.series_id = s.series_id
             WHERE e.weather_url IS NOT NULL 
             ORDER BY e.start_date ASC
             LIMIT 100
