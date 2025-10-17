@@ -812,48 +812,18 @@ class RadianPlannerApp {
                 const handleToggle = (e) => {
                     console.log(`🎚️ Toggle ${layerName}: ${e.target.checked}`);
                     this.toggleTrackMapLayer(layerName, e.target.checked);
-                    
-                    // Update toggle switch visual state
-                    this.updateToggleSwitchVisual(layerName, e.target.checked);
                 };
                 
                 checkbox.addEventListener('change', handleToggle);
                 
-                // Set initial state
+                // Set initial state for default layers
                 const isDefaultLayer = ['background', 'active'].includes(layerName);
                 checkbox.checked = isDefaultLayer;
-                this.updateToggleSwitchVisual(layerName, isDefaultLayer);
                 
             } else {
                 console.warn(`❌ Checkbox not found for layer: ${layerName}`);
             }
         });
-        
-        // Fullscreen button
-        const fullscreenBtn = document.getElementById('track-map-fullscreen');
-        if (fullscreenBtn) {
-            console.log('✅ Found fullscreen button');
-            fullscreenBtn.addEventListener('click', () => {
-                this.toggleTrackMapFullscreen();
-            });
-        } else {
-            console.warn('❌ Fullscreen button not found');
-        }
-    }
-    
-    updateToggleSwitchVisual(layerName, isChecked) {
-        const label = document.querySelector(`label[for="layer-${layerName}"]`);
-        if (label) {
-            if (isChecked) {
-                label.style.backgroundColor = '#22c55e'; // green-500
-                const slider = label.querySelector('span');
-                if (slider) slider.style.transform = 'translateX(100%)';
-            } else {
-                label.style.backgroundColor = '#525252'; // neutral-600
-                const slider = label.querySelector('span');
-                if (slider) slider.style.transform = 'translateX(0%)';
-            }
-        }
     }
     
     toggleTrackMapLayer(layerName, visible) {
@@ -873,17 +843,6 @@ class RadianPlannerApp {
         }
     }
     
-    toggleTrackMapFullscreen() {
-        const mapContainer = document.getElementById('track-map-container');
-        if (mapContainer) {
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            } else {
-                mapContainer.requestFullscreen().catch(console.warn);
-            }
-        }
-    }
-
     clearTrackDetails() {
         // Hide track details section
         const trackDetailsSection = document.getElementById('track-details-section');
