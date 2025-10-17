@@ -520,11 +520,13 @@ class RadianPlannerApp {
             
             // Populate car image
             const carImageElement = document.getElementById('car-image');
-            if (carImageElement && selectedCar.small_image) {
-                const imageUrl = `https://images-static.iracing.com/${selectedCar.small_image}`;
+            if (carImageElement && selectedCar.small_image && selectedCar.folder) {
+                const imageUrl = `https://images-static.iracing.com/img/cars/${selectedCar.folder}/${selectedCar.small_image}`;
                 carImageElement.src = imageUrl;
                 carImageElement.alt = selectedCar.car_name || 'Car Image';
                 carImageElement.classList.remove('hidden');
+                
+                console.log('🖼️ Loading car image:', imageUrl);
                 
                 // Handle image load errors
                 carImageElement.onerror = function() {
@@ -533,6 +535,9 @@ class RadianPlannerApp {
                 };
             } else if (carImageElement) {
                 carImageElement.classList.add('hidden');
+                if (selectedCar.small_image && !selectedCar.folder) {
+                    console.warn('❌ Car has small_image but missing folder:', selectedCar);
+                }
             }
             
             // Store selected car details for later use
