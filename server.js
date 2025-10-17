@@ -305,6 +305,37 @@ app.get('/api/tracks', async (req, res) => {
     }
 });
 
+// Track assets endpoint for track maps
+app.get('/api/track-assets/:trackId', async (req, res) => {
+    try {
+        const trackId = parseInt(req.params.trackId);
+        console.log('🗺️ Fetching track assets for track ID:', trackId);
+        
+        if (!pool) {
+            console.error('❌ Database pool is null');
+            return res.status(500).json({ error: 'Database connection not available' });
+        }
+        
+        const result = await pool.query(`
+            SELECT track_map, background_svg, active_svg, inactive_svg, 
+                   pitroad_svg, start_finish_svg, turns_svg, track_map_layers
+            FROM track_assets 
+            WHERE track_id = $1
+        `, [trackId]);
+        
+        if (result.rows.length === 0) {
+            console.log('⚠️ No track assets found for track ID:', trackId);
+            return res.status(404).json({ error: 'Track assets not found' });
+        }
+        
+        console.log('✅ Track assets found for track ID:', trackId);
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('❌ Error fetching track assets:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 // iRacing series endpoints
 app.get('/api/series', async (req, res) => {
     try {

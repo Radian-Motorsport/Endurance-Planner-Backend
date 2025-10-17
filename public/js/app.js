@@ -670,21 +670,20 @@ class RadianPlannerApp {
         loadingElement.classList.remove('hidden');
         
         try {
-            // Get track assets data from database
-            const trackAssetsResponse = await this.apiClient.query(`
-                SELECT track_map, background_svg, active_svg, inactive_svg, 
-                       pitroad_svg, start_finish_svg, turns_svg, track_map_layers
-                FROM track_assets 
-                WHERE track_id = $1
-            `, [sessionDetails.track_id]);
+            // Fetch track assets data via API endpoint
+            const response = await fetch(`/api/track-assets/${sessionDetails.track_id}`);
             
-            if (trackAssetsResponse.length === 0) {
-                throw new Error('No track assets found');
+            if (response.status === 404) {
+                throw new Error('Track map data not available for this track');
             }
             
-            const trackAssets = trackAssetsResponse[0];
+            if (!response.ok) {
+                throw new Error(`Failed to fetch track assets: ${response.status}`);
+            }
             
-            if (!trackAssets.track_map || !trackAssets.track_map_layers) {
+            const trackAssets = await response.json();
+            
+            if (!trackAssets || !trackAssets.track_map || !trackAssets.track_map_layers) {
                 throw new Error('Track map data not available');
             }
             
@@ -701,7 +700,17 @@ class RadianPlannerApp {
             console.log('✅ Track map loaded successfully');
             
         } catch (error) {
-            console.warn('❌ Failed to load track map:', error);
+            console.warn('❌ Failed to load track map:', error.message);
+            
+            // Update error message to be more helpful
+            const errorTextElement = errorElement.querySelector('p');
+            if (errorTextElement) {
+                if (error.message.includes('not available')) {
+                    errorTextElement.textContent = 'Track map not available for this track';
+                } else {
+                    errorTextElement.textContent = 'Track map temporarily unavailable';
+                }
+            }
             
             // Show error state
             loadingElement.classList.add('hidden');
