@@ -511,8 +511,10 @@ class RadianPlannerApp {
             // Populate car HP
             const carHpElement = document.getElementById('car-hp');
             if (carHpElement) {
-                carHpElement.textContent = selectedCar.car_hp ? 
-                    `${selectedCar.car_hp} HP` : '-';
+                console.log('🏎️ Car HP data:', selectedCar.hp);
+                carHpElement.textContent = selectedCar.hp ? 
+                    `${selectedCar.hp} HP` : '-';
+                console.log('🏎️ Set HP element to:', carHpElement.textContent);
             }
             
             // Populate car image
