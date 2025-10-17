@@ -3,6 +3,12 @@ const path = require('path');
 const { Pool } = require('pg');
 const axios = require('axios');
 const SunCalc = require('suncalc');
+const { 
+    getEventWeather, 
+    proxyWeatherData, 
+    getEventsWithWeather, 
+    updateEventWeather 
+} = require('./weather-api');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -358,6 +364,22 @@ app.get('/api/track-assets/:trackId', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+// ========================= WEATHER API ROUTES =========================
+
+// Get weather URL for a specific event
+app.get('/api/events/:eventId/weather', getEventWeather);
+
+// Proxy weather data from iRacing API
+app.get('/api/weather-proxy', proxyWeatherData);
+
+// Get all events with weather data available
+app.get('/api/events/with-weather', getEventsWithWeather);
+
+// Update weather URL for an event
+app.put('/api/events/:eventId/weather', updateEventWeather);
+
+// ========================= END WEATHER API ROUTES =========================
 
 // iRacing series endpoints
 app.get('/api/series', async (req, res) => {

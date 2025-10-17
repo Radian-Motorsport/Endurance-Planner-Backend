@@ -360,6 +360,9 @@ class RadianPlannerApp {
         // Clear track details
         this.clearTrackDetails();
         
+        // Clear weather display
+        this.clearWeatherDisplay();
+        
         // Clear car selection
         this.clearCarSelection();
     }
@@ -655,6 +658,9 @@ class RadianPlannerApp {
         
         // Load track map if available
         await this.loadTrackMap(sessionDetails);
+        
+        // Load weather forecast if available
+        await this.loadWeatherForecast(sessionDetails);
     }
 
     async loadTrackMap(sessionDetails) {
@@ -841,6 +847,85 @@ class RadianPlannerApp {
             const allLayers = document.querySelectorAll('[id*="layer-"]');
             console.log('🔍 Available layer elements:', Array.from(allLayers).map(el => el.id));
         }
+    }
+    
+    async loadWeatherForecast(sessionDetails) {
+        console.log('🌦️ Loading weather forecast for event:', sessionDetails.event_id);
+        
+        try {
+            // Check if event has weather_url
+            const response = await fetch(`/api/weather/event/${sessionDetails.event_id}`);
+            if (!response.ok) {
+                console.log('ℹ️ No weather data available for this event');
+                return;
+            }
+            
+            const eventWeather = await response.json();
+            
+            if (eventWeather && eventWeather.weather_url) {
+                console.log('✅ Event has weather URL:', eventWeather.weather_url);
+                
+                // Show weather display section
+                const weatherDisplay = document.getElementById('weather-display');
+                if (weatherDisplay) {
+                    weatherDisplay.classList.remove('hidden');
+                    
+                    // Add weather button if not already present
+                    this.addWeatherButton(sessionDetails.event_id, eventWeather.weather_url);
+                }
+            } else {
+                console.log('ℹ️ Event does not have weather URL');
+            }
+            
+        } catch (error) {
+            console.warn('❌ Failed to load weather forecast:', error);
+        }
+    }
+    
+    addWeatherButton(eventId, weatherUrl) {
+        // Check if weather button already exists
+        let weatherButton = document.getElementById('weather-forecast-btn');
+        
+        if (!weatherButton) {
+            // Create weather button
+            weatherButton = document.createElement('button');
+            weatherButton.id = 'weather-forecast-btn';
+            weatherButton.className = 'inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200';
+            weatherButton.innerHTML = '<i class="fas fa-cloud-sun mr-2"></i>Weather Forecast';
+            
+            // Find a good place to insert the button (near the track map section)
+            const trackMapSection = document.getElementById('track-map-section');
+            if (trackMapSection) {
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'mb-4';
+                buttonContainer.appendChild(weatherButton);
+                trackMapSection.parentNode.insertBefore(buttonContainer, trackMapSection.nextSibling);
+            }
+        }
+        
+        // Update button click handler
+        weatherButton.onclick = () => {
+            const weatherForecastUrl = `/public/weather-forecast.html?eventId=${eventId}&weatherUrl=${encodeURIComponent(weatherUrl)}`;
+            window.open(weatherForecastUrl, '_blank');
+        };
+        
+        console.log('✅ Weather button added/updated for event:', eventId);
+    }
+    
+    clearWeatherDisplay() {
+        // Hide weather display section
+        const weatherDisplay = document.getElementById('weather-display');
+        if (weatherDisplay) {
+            weatherDisplay.classList.add('hidden');
+        }
+        
+        // Remove weather button if it exists
+        const weatherButton = document.getElementById('weather-forecast-btn');
+        if (weatherButton && weatherButton.parentNode) {
+            weatherButton.parentNode.remove();
+        }
+        
+        console.log('✅ Weather display cleared');
     }
     
     clearTrackDetails() {
