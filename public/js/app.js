@@ -461,6 +461,114 @@ class RadianPlannerApp {
         
         // Clear stored session details
         this.currentSessionDetails = null;
+        
+        // Clear car details
+        this.clearCarDetails();
+    }
+
+    async populateCarDetails(carId, carName) {
+        console.log('🔍 Loading car details for car ID:', carId);
+        
+        try {
+            // Fetch car details from the cars API
+            const response = await fetch(`/api/cars`);
+            if (!response.ok) throw new Error('Failed to fetch cars');
+            
+            const cars = await response.json();
+            const selectedCar = cars.find(car => 
+                (car.car_id && car.car_id.toString() === carId.toString()) || 
+                (car.id && car.id.toString() === carId.toString())
+            );
+            
+            if (!selectedCar) {
+                console.error('❌ Car not found:', carId);
+                return;
+            }
+            
+            console.log('✅ Found car details:', selectedCar);
+            
+            // Show car details section
+            const carDetailsSection = document.getElementById('car-details-section');
+            if (carDetailsSection) carDetailsSection.classList.remove('hidden');
+            
+            // Populate car name
+            const carNameElement = document.getElementById('car-name');
+            if (carNameElement) {
+                carNameElement.textContent = selectedCar.car_name || carName || '-';
+            }
+            
+            // Populate Garage61 ID
+            const garage61IdElement = document.getElementById('garage61-id');
+            if (garage61IdElement) {
+                garage61IdElement.textContent = selectedCar.garage61_id ? 
+                    `Garage61 ID: ${selectedCar.garage61_id}` : 'Garage61 ID: -';
+            }
+            
+            // Populate car weight
+            const carWeightElement = document.getElementById('car-weight');
+            if (carWeightElement) {
+                carWeightElement.textContent = selectedCar.car_weight ? 
+                    `${selectedCar.car_weight} kg` : '-';
+            }
+            
+            // Populate car HP
+            const carHpElement = document.getElementById('car-hp');
+            if (carHpElement) {
+                carHpElement.textContent = selectedCar.car_hp ? 
+                    `${selectedCar.car_hp} HP` : '-';
+            }
+            
+            // Populate car image
+            const carImageElement = document.getElementById('car-image');
+            if (carImageElement && selectedCar.small_image) {
+                const imageUrl = `https://images-static.iracing.com/${selectedCar.small_image}`;
+                carImageElement.src = imageUrl;
+                carImageElement.alt = selectedCar.car_name || 'Car Image';
+                carImageElement.classList.remove('hidden');
+                
+                // Handle image load errors
+                carImageElement.onerror = function() {
+                    console.warn('❌ Failed to load car image:', imageUrl);
+                    this.classList.add('hidden');
+                };
+            } else if (carImageElement) {
+                carImageElement.classList.add('hidden');
+            }
+            
+            // Store selected car details for later use
+            this.selectedCar = {
+                id: carId,
+                name: carName,
+                details: selectedCar
+            };
+            
+        } catch (error) {
+            console.error('❌ Error fetching car details:', error);
+            this.clearCarDetails();
+        }
+    }
+
+    clearCarDetails() {
+        // Hide car details section
+        const carDetailsSection = document.getElementById('car-details-section');
+        if (carDetailsSection) carDetailsSection.classList.add('hidden');
+        
+        // Clear car details content
+        const elements = ['car-name', 'garage61-id', 'car-weight', 'car-hp'];
+        elements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = '-';
+        });
+        
+        // Hide car image
+        const carImageElement = document.getElementById('car-image');
+        if (carImageElement) {
+            carImageElement.classList.add('hidden');
+            carImageElement.src = '';
+        }
+        
+        // Clear stored car details
+        this.selectedCar = null;
     }
 
     setupEventListeners() {
@@ -537,22 +645,20 @@ class RadianPlannerApp {
                         carDropdown.disabled = true;
                     }
                 }
+                // Clear car details when class changes
+                this.clearCarDetails();
             });
         }
 
         // Car selection
         const carDropdown = document.getElementById('car-dropdown');
         if (carDropdown) {
-            carDropdown.addEventListener('change', (e) => {
+            carDropdown.addEventListener('change', async (e) => {
                 if (e.target.value) {
                     console.log('🚗 Car selected:', e.target.value);
-                    // Store selected car for later use
-                    this.selectedCar = {
-                        id: e.target.value,
-                        name: e.target.selectedOptions[0]?.textContent
-                    };
+                    await this.populateCarDetails(e.target.value, e.target.selectedOptions[0]?.textContent);
                 } else {
-                    this.selectedCar = null;
+                    this.clearCarDetails();
                 }
             });
         }

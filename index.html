@@ -167,7 +167,8 @@
                 <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
                     <h1 class="text-xl mb-4 road-rage-font">Car Selection</h1>
                     <div id="car-selection-content" class="hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                        <!-- Car Selection Dropdowns -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
                             <div class="flex flex-col w-full">
                                 <label class="text-sm font-medium text-neutral-500 mb-2">Car Class</label>
                                 <select id="car-class-dropdown" class="p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400" disabled>
@@ -179,6 +180,41 @@
                                 <select id="car-dropdown" class="p-3 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400" disabled>
                                     <option value="">Select Car Class First...</option>
                                 </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Car Details Section -->
+                        <div id="car-details-section" class="hidden">
+                            <div class="border-t border-neutral-700 pt-6">
+                                <h3 class="text-lg font-medium text-neutral-300 mb-4">Car Details</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Car Image and Basic Info -->
+                                    <div class="flex flex-col space-y-4">
+                                        <div class="flex items-center space-x-4">
+                                            <img id="car-image" src="" alt="Car Image" class="w-24 h-16 object-cover rounded-lg bg-neutral-700 hidden">
+                                            <div class="flex-1">
+                                                <div id="car-name" class="text-lg font-medium text-neutral-200 mb-1">-</div>
+                                                <div id="garage61-id" class="text-sm text-neutral-400">Garage61 ID: -</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Car Specifications -->
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="flex flex-col">
+                                            <label class="text-sm font-medium text-neutral-500 mb-2">Weight</label>
+                                            <div id="car-weight" class="p-3 bg-neutral-900 rounded-lg text-neutral-200 border border-neutral-700">
+                                                -
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <label class="text-sm font-medium text-neutral-500 mb-2">Horsepower</label>
+                                            <div id="car-hp" class="p-3 bg-neutral-900 rounded-lg text-neutral-200 border border-neutral-700">
+                                                -
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
