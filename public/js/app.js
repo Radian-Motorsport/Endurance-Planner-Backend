@@ -854,7 +854,7 @@ class RadianPlannerApp {
         
         try {
             // Check if event has weather_url
-            const response = await fetch(`/api/weather/event/${sessionDetails.event_id}`);
+            const response = await fetch(`/api/events/${sessionDetails.event_id}/weather`);
             if (!response.ok) {
                 console.log('ℹ️ No weather data available for this event');
                 return;

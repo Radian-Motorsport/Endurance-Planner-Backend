@@ -18,7 +18,7 @@ async function getEventWeather(req, res) {
         });
 
         const result = await pool.query(
-            'SELECT event_id, event_name, weather_url, start_time FROM events WHERE event_id = $1',
+            'SELECT event_id, event_name, weather_url, start_date FROM events WHERE event_id = $1',
             [eventId]
         );
 
@@ -36,7 +36,7 @@ async function getEventWeather(req, res) {
             event_id: event.event_id,
             event_name: event.event_name,
             weather_url: event.weather_url,
-            start_time: event.start_time
+            start_date: event.start_date
         });
 
     } catch (error) {
@@ -89,19 +89,20 @@ async function getEventsWithWeather(req, res) {
 
         const result = await pool.query(`
             SELECT 
-                event_id,
-                event_name,
-                series_name,
-                track_name,
-                start_time,
-                weather_url,
+                e.event_id,
+                e.event_name,
+                s.series_name,
+                e.track_name,
+                e.start_date,
+                e.weather_url,
                 CASE 
-                    WHEN weather_url IS NOT NULL THEN true 
+                    WHEN e.weather_url IS NOT NULL THEN true 
                     ELSE false 
                 END as has_weather
-            FROM events 
-            WHERE weather_url IS NOT NULL 
-            ORDER BY start_time ASC
+            FROM events e
+            LEFT JOIN series s ON e.series_id = s.series_id
+            WHERE e.weather_url IS NOT NULL 
+            ORDER BY e.start_date ASC
             LIMIT 100
         `);
 
