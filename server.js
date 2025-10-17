@@ -318,7 +318,7 @@ app.get('/api/track-assets/:trackId', async (req, res) => {
         
         const result = await pool.query(`
             SELECT track_map, background_svg, active_svg, inactive_svg, 
-                   pitroad_svg, start_finish_svg, turns_svg, track_map_layers
+                   pitroad_svg, start_finish_svg, turns_svg
             FROM track_assets 
             WHERE track_id = $1
         `, [trackId]);
@@ -328,8 +328,31 @@ app.get('/api/track-assets/:trackId', async (req, res) => {
             return res.status(404).json({ error: 'Track assets not found' });
         }
         
+        // Convert individual SVG columns to track_map_layers format expected by frontend
+        const trackAssets = result.rows[0];
+        const track_map_layers = {
+            'background': trackAssets.background_svg,
+            'active': trackAssets.active_svg,
+            'inactive': trackAssets.inactive_svg,
+            'pitroad': trackAssets.pitroad_svg,
+            'start-finish': trackAssets.start_finish_svg,
+            'turns': trackAssets.turns_svg
+        };
+        
+        // Return data in format expected by frontend
+        const response = {
+            track_map: trackAssets.track_map,
+            track_map_layers: JSON.stringify(track_map_layers),
+            background_svg: trackAssets.background_svg,
+            active_svg: trackAssets.active_svg,
+            inactive_svg: trackAssets.inactive_svg,
+            pitroad_svg: trackAssets.pitroad_svg,
+            start_finish_svg: trackAssets.start_finish_svg,
+            turns_svg: trackAssets.turns_svg
+        };
+        
         console.log('✅ Track assets found for track ID:', trackId);
-        res.json(result.rows[0]);
+        res.json(response);
     } catch (err) {
         console.error('❌ Error fetching track assets:', err);
         res.status(500).json({ error: 'Internal Server Error' });
