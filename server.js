@@ -360,8 +360,8 @@ app.get('/api/sessions/:eventId', async (req, res) => {
         }
         
         const result = await pool.query(
-            'SELECT * FROM sessions WHERE event_id = $1 AND active = true ORDER BY session_type, session_num', 
-            [eventId]
+            'SELECT * FROM sessions WHERE event_id = $1 AND session_type = $2 AND active = true ORDER BY session_num', 
+            [eventId, 'race']
         );
         console.log(`✅ Found ${result.rows.length} sessions for event ${eventId}`);
         res.json(result.rows);

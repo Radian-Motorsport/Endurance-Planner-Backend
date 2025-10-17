@@ -234,22 +234,44 @@ class RadianPlannerApp {
         }
     }
 
-    populateSessionsDropdown(eventId) {
-        const sessionsSelect = document.getElementById('sessionsSelect');
-        if (!sessionsSelect || !this.allData.sessions) return;
+    async populateSessionsDropdown(eventId) {
+        const sessionsSelect = document.getElementById('session-select');
+        if (!sessionsSelect) return;
 
-        sessionsSelect.innerHTML = '<option value="">Select Session</option>';
+        console.log('🔍 Loading sessions for event ID:', eventId);
+        sessionsSelect.innerHTML = '<option value="">Loading sessions...</option>';
+        sessionsSelect.disabled = false;
         
-        const eventSessions = this.allData.sessions.filter(session => 
-            session.event_id === parseInt(eventId)
-        );
-        
-        eventSessions.forEach(session => {
-            const option = document.createElement('option');
-            option.value = session.session_id;
-            option.textContent = session.session_name;
-            sessionsSelect.appendChild(option);
-        });
+        try {
+            const response = await fetch(`/api/sessions/${eventId}`);
+            if (!response.ok) throw new Error('Failed to fetch sessions');
+            
+            const sessions = await response.json();
+            console.log('✅ Found sessions:', sessions);
+            
+            sessionsSelect.innerHTML = '<option value="">Select Session</option>';
+            
+            sessions.forEach(session => {
+                const option = document.createElement('option');
+                option.value = session.session_id;
+                
+                // Format session display with name and date
+                const sessionDate = new Date(session.session_date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                option.textContent = `${session.session_name} - ${sessionDate}`;
+                sessionsSelect.appendChild(option);
+            });
+            
+        } catch (error) {
+            console.error('❌ Error fetching sessions:', error);
+            sessionsSelect.innerHTML = '<option value="">Error loading sessions</option>';
+        }
     }
 
     setupEventListeners() {
@@ -284,9 +306,16 @@ class RadianPlannerApp {
         }
 
         if (eventsSelect) {
-            eventsSelect.addEventListener('change', (e) => {
+            eventsSelect.addEventListener('change', async (e) => {
                 if (e.target.value) {
-                    this.populateSessionsDropdown(e.target.value);
+                    await this.populateSessionsDropdown(e.target.value);
+                } else {
+                    // Reset sessions dropdown when no event selected
+                    const sessionsSelect = document.getElementById('session-select');
+                    if (sessionsSelect) {
+                        sessionsSelect.innerHTML = '<option value="">Select Event First...</option>';
+                        sessionsSelect.disabled = true;
+                    }
                 }
             });
         }
