@@ -40,45 +40,75 @@
             transform: translateX(0%) !important;
         }
         
-        /* SVG Track Map Layer Styling */
+        /* SVG Track Map Layer Styling - Dark Mode */
         .track-svg-layer {
             transition: opacity 0.3s ease;
         }
         
-        /* Style different SVG layers with different colors */
+        /* Dark mode track styling with progressive shading */
         #layer-background {
-            fill: #374151 !important; /* neutral-700 for track outline */
-            stroke: #6b7280 !important; /* neutral-500 for borders */
+            fill: #ffffff !important; /* White for track outline/boundaries */
+            stroke: #e5e7eb !important; /* Light gray for track borders */
+            stroke-width: 2px !important;
         }
         
         #layer-active {
-            fill: #1f2937 !important; /* neutral-800 for racing surface */
-            stroke: #ffffff !important; /* white for track edges */
+            fill: #1f2937 !important; /* Dark gray for racing surface */
+            stroke: #374151 !important; /* Medium gray for track edges */
+            stroke-width: 1px !important;
+        }
+        
+        #layer-inactive {
+            fill: #111827 !important; /* Very dark gray for unused sections */
+            stroke: #1f2937 !important; /* Dark gray borders */
             stroke-width: 1px !important;
         }
         
         #layer-pitroad {
-            fill: #fbbf24 !important; /* amber-400 for pit road */
-            stroke: #f59e0b !important; /* amber-500 */
+            fill: #059669 !important; /* Green for pit road */
+            stroke: #047857 !important; /* Darker green borders */
+            stroke-width: 2px !important;
         }
         
         #layer-start-finish {
-            fill: #ef4444 !important; /* red-500 for start/finish */
-            stroke: #dc2626 !important; /* red-600 */
+            fill: #dc2626 !important; /* Red for start/finish line */
+            stroke: #991b1b !important; /* Darker red borders */
+            stroke-width: 3px !important;
         }
         
         #layer-turns {
-            fill: #3b82f6 !important; /* blue-500 for turn numbers */
-            stroke: #1d4ed8 !important; /* blue-700 */
+            fill: #3b82f6 !important; /* Blue for turn numbers */
+            stroke: #1e40af !important; /* Darker blue borders */
+            stroke-width: 1px !important;
+            font-family: Arial, sans-serif !important;
+            font-size: 12px !important;
+            font-weight: bold !important;
         }
         
-        /* Override any default SVG colors */
+        /* Override any default SVG colors and ensure visibility on dark background */
         .track-svg-layer path,
         .track-svg-layer circle,
         .track-svg-layer rect,
-        .track-svg-layer polygon {
+        .track-svg-layer polygon,
+        .track-svg-layer text {
             fill: inherit !important;
             stroke: inherit !important;
+            stroke-width: inherit !important;
+        }
+        
+        /* Ensure text elements are visible */
+        .track-svg-layer text {
+            fill: #ffffff !important;
+            font-weight: bold !important;
+        }
+        
+        /* Track map container styling */
+        #track-map-svg svg {
+            background: transparent !important;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
         }
     </style>
     
@@ -268,15 +298,15 @@
                                             <div class="flex justify-between items-start mb-4">
                                                 <!-- Track Map SVG Container -->
                                                 <div class="flex-1 mr-4">
-                                                    <div id="track-map-container" class="relative bg-white rounded-lg p-4 min-h-[300px] flex items-center justify-center">
-                                                        <div id="track-map-loading" class="text-neutral-600">
+                                                    <div id="track-map-container" class="relative bg-neutral-800 border border-neutral-600 rounded-lg p-4 min-h-[300px] flex items-center justify-center">
+                                                        <div id="track-map-loading" class="text-neutral-400">
                                                             <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
                                                             <p>Loading track map...</p>
                                                         </div>
                                                         <div id="track-map-svg" class="hidden w-full h-full">
                                                             <!-- SVG track map will be loaded here -->
                                                         </div>
-                                                        <div id="track-map-error" class="hidden text-neutral-600 text-center">
+                                                        <div id="track-map-error" class="hidden text-neutral-400 text-center">
                                                             <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
                                                             <p>Track map not available</p>
                                                         </div>

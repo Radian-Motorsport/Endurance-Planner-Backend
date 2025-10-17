@@ -797,31 +797,79 @@ class RadianPlannerApp {
     }
     
     setupTrackMapLayerToggles() {
+        console.log('🎚️ Setting up track map layer toggles...');
         const layerNames = ['background', 'active', 'pitroad', 'start-finish', 'turns'];
         
         layerNames.forEach(layerName => {
             const checkbox = document.getElementById(`layer-${layerName}`);
             if (checkbox) {
-                checkbox.addEventListener('change', (e) => {
+                console.log(`✅ Found checkbox for layer: ${layerName}`);
+                
+                // Remove existing event listeners to avoid duplicates
+                checkbox.removeEventListener('change', this.handleLayerToggle);
+                
+                // Add new event listener with proper binding
+                const handleToggle = (e) => {
+                    console.log(`🎚️ Toggle ${layerName}: ${e.target.checked}`);
                     this.toggleTrackMapLayer(layerName, e.target.checked);
-                });
+                    
+                    // Update toggle switch visual state
+                    this.updateToggleSwitchVisual(layerName, e.target.checked);
+                };
+                
+                checkbox.addEventListener('change', handleToggle);
+                
+                // Set initial state
+                const isDefaultLayer = ['background', 'active'].includes(layerName);
+                checkbox.checked = isDefaultLayer;
+                this.updateToggleSwitchVisual(layerName, isDefaultLayer);
+                
+            } else {
+                console.warn(`❌ Checkbox not found for layer: ${layerName}`);
             }
         });
         
         // Fullscreen button
         const fullscreenBtn = document.getElementById('track-map-fullscreen');
         if (fullscreenBtn) {
+            console.log('✅ Found fullscreen button');
             fullscreenBtn.addEventListener('click', () => {
                 this.toggleTrackMapFullscreen();
             });
+        } else {
+            console.warn('❌ Fullscreen button not found');
+        }
+    }
+    
+    updateToggleSwitchVisual(layerName, isChecked) {
+        const label = document.querySelector(`label[for="layer-${layerName}"]`);
+        if (label) {
+            if (isChecked) {
+                label.style.backgroundColor = '#22c55e'; // green-500
+                const slider = label.querySelector('span');
+                if (slider) slider.style.transform = 'translateX(100%)';
+            } else {
+                label.style.backgroundColor = '#525252'; // neutral-600
+                const slider = label.querySelector('span');
+                if (slider) slider.style.transform = 'translateX(0%)';
+            }
         }
     }
     
     toggleTrackMapLayer(layerName, visible) {
         const layerGroup = document.getElementById(`layer-${layerName}`);
+        console.log(`🎚️ Toggling layer ${layerName} to ${visible ? 'visible' : 'hidden'}`);
+        console.log(`🔍 Layer group found:`, layerGroup);
+        
         if (layerGroup) {
             layerGroup.style.display = visible ? 'block' : 'none';
-            console.log(`🎚️ Layer ${layerName}: ${visible ? 'visible' : 'hidden'}`);
+            console.log(`✅ Layer ${layerName}: ${visible ? 'visible' : 'hidden'}`);
+        } else {
+            console.error(`❌ Layer group not found: layer-${layerName}`);
+            
+            // Debug: List all available layer elements
+            const allLayers = document.querySelectorAll('[id*="layer-"]');
+            console.log('🔍 Available layer elements:', Array.from(allLayers).map(el => el.id));
         }
     }
     
