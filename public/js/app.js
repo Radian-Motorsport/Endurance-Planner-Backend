@@ -328,10 +328,7 @@ class RadianPlannerApp {
             // Populate session length
             const sessionLengthElement = document.getElementById('session-length');
             if (sessionLengthElement && sessionDetails.session_length) {
-                const hours = Math.floor(sessionDetails.session_length / 60);
-                const minutes = sessionDetails.session_length % 60;
-                sessionLengthElement.textContent = hours > 0 ? 
-                    `${hours}h ${minutes}m` : `${minutes} minutes`;
+                sessionLengthElement.textContent = `${sessionDetails.session_length} minutes`;
             }
             
             // Fetch and populate practice/qualifying lengths
@@ -363,10 +360,7 @@ class RadianPlannerApp {
             // Update practice length
             const practiceElement = document.getElementById('practice-length');
             if (practiceElement && practiceSession?.session_length) {
-                const hours = Math.floor(practiceSession.session_length / 60);
-                const minutes = practiceSession.session_length % 60;
-                practiceElement.textContent = hours > 0 ? 
-                    `${hours}h ${minutes}m` : `${minutes} minutes`;
+                practiceElement.textContent = `${practiceSession.session_length} minutes`;
             } else if (practiceElement) {
                 practiceElement.textContent = '-';
             }
@@ -374,10 +368,7 @@ class RadianPlannerApp {
             // Update qualifying length
             const qualifyingElement = document.getElementById('qualifying-length');
             if (qualifyingElement && qualifyingSession?.session_length) {
-                const hours = Math.floor(qualifyingSession.session_length / 60);
-                const minutes = qualifyingSession.session_length % 60;
-                qualifyingElement.textContent = hours > 0 ? 
-                    `${hours}h ${minutes}m` : `${minutes} minutes`;
+                qualifyingElement.textContent = `${qualifyingSession.session_length} minutes`;
             } else if (qualifyingElement) {
                 qualifyingElement.textContent = '-';
             }
