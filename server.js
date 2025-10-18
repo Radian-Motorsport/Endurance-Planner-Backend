@@ -476,6 +476,7 @@ app.get('/api/session-details/:sessionId', async (req, res) => {
                 t.config_name,
                 t.folder as track_folder,
                 t.small_image as track_small_image,
+                t.logo,
                 t.garage61_id as track_garage61_id
             FROM sessions s
             JOIN events e ON s.event_id = e.event_id
