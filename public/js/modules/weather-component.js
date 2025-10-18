@@ -51,7 +51,7 @@ export class WeatherComponent {
                     align-items: center;
                     padding: 16px 24px;
                     border-bottom: 1px solid #404040;
-                    background: #1c1c1c;
+                    background: transparent;
                     border-radius: 8px 8px 0 0;
                 }
                 
@@ -113,7 +113,7 @@ export class WeatherComponent {
                 
                 .weather-chart-container {
                     width: 100%;
-                    height: 350px;
+                    height: 400px;
                     border: 1px solid #404040;
                     border-radius: 8px;
                     padding: 16px;
@@ -233,31 +233,39 @@ export class WeatherComponent {
 
                         <!-- Temperature Tab Panel -->
                         <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="true" id="temperature-panel">
-                            <div class="weather-legend">
-                                <div class="weather-legend-item">
-                                    <div class="weather-legend-color" style="background: #ff6b6b;"></div>
-                                    <span class="weather-legend-label">Temperature</span>
-                                </div>
-                            </div>
                             <div class="weather-chart-container">
-                                <div id="${this.containerId}-temperature-chart" style="width: 100%; height: 300px;"></div>
+                                <div class="weather-legend">
+                                    <div class="weather-legend-item">
+                                        <div class="weather-legend-color" style="background: #ff6b6b;"></div>
+                                        <span class="weather-legend-label">Temperature (°F)</span>
+                                    </div>
+                                    <div class="weather-legend-item">
+                                        <div class="weather-legend-color" style="background: #4ecdc4;"></div>
+                                        <span class="weather-legend-label">Humidity (%)</span>
+                                    </div>
+                                </div>
+                                <div id="${this.containerId}-temperature-chart" style="width: 100%; height: 340px;"></div>
                             </div>
                         </div>
 
                         <!-- Clouds & Precipitation Tab Panel -->
                         <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="false" id="clouds-panel">
-                            <div class="weather-legend">
-                                <div class="weather-legend-item">
-                                    <div class="weather-legend-color" style="background: rgb(5,5,15);"></div>
-                                    <span class="weather-legend-label">Clouds</span>
-                                </div>
-                                <div class="weather-legend-item">
-                                    <div class="weather-legend-color" style="background: #0B5559;"></div>
-                                    <span class="weather-legend-label">Chance of Precipitation</span>
-                                </div>
-                            </div>
                             <div class="weather-chart-container">
-                                <div id="${this.containerId}-clouds-chart" style="width: 100%; height: 300px;"></div>
+                                <div class="weather-legend">
+                                    <div class="weather-legend-item">
+                                        <div class="weather-legend-color" style="background: rgb(5,5,15);"></div>
+                                        <span class="weather-legend-label">Cloud Cover (%)</span>
+                                    </div>
+                                    <div class="weather-legend-item">
+                                        <div class="weather-legend-color" style="background: #0B5559;"></div>
+                                        <span class="weather-legend-label">Precipitation Chance (%)</span>
+                                    </div>
+                                    <div class="weather-legend-item">
+                                        <div class="weather-legend-color" style="background: #1a8faa; border: 2px dashed #1a8faa; background: transparent;"></div>
+                                        <span class="weather-legend-label">Precipitation Amount</span>
+                                    </div>
+                                </div>
+                                <div id="${this.containerId}-clouds-chart" style="width: 100%; height: 340px;"></div>
                             </div>
                         </div>
                     </div>
@@ -380,7 +388,7 @@ export class WeatherComponent {
                     markLine: raceStartIndex >= 0 ? {
                         data: [{
                             xAxis: raceStartIndex,
-                            lineStyle: { color: '#00ff00', width: 1 },
+                            lineStyle: { color: '#22c55e', width: 2, type: 'solid' },
                             label: { show: false }
                         }]
                     } : undefined
@@ -459,7 +467,7 @@ export class WeatherComponent {
                 min: 0, 
                 max: 100,
                 axisLine: { lineStyle: { color: '#6E7079' } },
-                axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}%' },
+                axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}' },
                 splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
             },
             series: [
@@ -474,7 +482,7 @@ export class WeatherComponent {
                     markLine: raceStartIndex >= 0 ? {
                         data: [{
                             xAxis: raceStartIndex,
-                            lineStyle: { color: '#00ff00', width: 1 },
+                            lineStyle: { color: '#22c55e', width: 2, type: 'solid' },
                             label: { show: false }
                         }]
                     } : undefined
@@ -538,7 +546,7 @@ export class WeatherComponent {
                 periodStart = index;
             } else if (currentPeriod !== isDay) {
                 markAreas.push([
-                    { name: currentPeriod ? 'Day' : 'Night', xAxis: periodStart },
+                    { xAxis: periodStart },
                     { xAxis: index - 1 }
                 ]);
                 currentPeriod = isDay;
@@ -548,7 +556,7 @@ export class WeatherComponent {
         
         if (currentPeriod !== null) {
             markAreas.push([
-                { name: currentPeriod ? 'Day' : 'Night', xAxis: periodStart },
+                { xAxis: periodStart },
                 { xAxis: forecast.length - 1 }
             ]);
         }
@@ -561,9 +569,12 @@ export class WeatherComponent {
                 silent: true,
                 itemStyle: {
                     color: function(params) {
-                        return params.name === 'Day' ? 
-                            'rgba(255, 255, 0, 0.1)' :
-                            'rgba(0, 0, 100, 0.1)';
+                        // Use index to determine if it's day or night
+                        const startIndex = params.coord[0];
+                        const isDay = forecast[startIndex]?.is_sun_up;
+                        return isDay ? 
+                            'rgba(255, 255, 0, 0.25)' :     // Yellow for day with 25% opacity
+                            'rgba(0, 0, 139, 0.25)';        // Dark blue for night with 25% opacity
                     }
                 },
                 data: markAreas
