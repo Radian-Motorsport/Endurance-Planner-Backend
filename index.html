@@ -704,6 +704,18 @@
             console.log('🔍 DEBUG: Button element:', continueBtn);
             continueBtn.addEventListener('click', () => {
                 console.log('🔍 DEBUG: Button clicked directly!');
+                
+                // DIRECT PAGE SWITCH - NO COMPLEX LOGIC
+                const plannerPage = document.getElementById('planner-page');
+                const page2 = document.getElementById('page-2');
+                
+                if (plannerPage && page2) {
+                    plannerPage.classList.add('hidden');
+                    page2.classList.remove('hidden');
+                    console.log('✅ Switched to page 2 directly!');
+                } else {
+                    console.log('❌ Page elements not found');
+                }
             });
             console.log('🔍 DEBUG: Direct click listener added');
         }
