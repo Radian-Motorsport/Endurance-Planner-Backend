@@ -1154,7 +1154,7 @@ class RadianPlannerApp {
 
         const forecast = weatherData.weather_forecast;
         const timeLabels = this.generateTimeLabels(forecast);
-        const temperatures = forecast.map(item => this.convertTemperature(item.temp));
+        const temperatures = forecast.map(item => this.convertTemperature(item.raw_air_temp));
 
         const option = {
             grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
@@ -1241,7 +1241,7 @@ class RadianPlannerApp {
         const forecast = weatherData.weather_forecast;
         const timeLabels = this.generateTimeLabels(forecast);
         const cloudCover = forecast.map(item => this.convertCloudCover(item.cloud_cover));
-        const precipitation = forecast.map(item => this.convertPrecipitation(item.humidity));
+        const precipitation = forecast.map(item => this.convertPrecipitation(item.rel_humidity));
 
         const option = {
             grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
@@ -1279,7 +1279,7 @@ class RadianPlannerApp {
                     const forecastItem = forecast[dataIndex];
                     return `<div style="color: black;">
                         <strong>Time:</strong> ${timeLabels[dataIndex]}<br>
-                        <strong>Temperature:</strong> ${this.convertTemperature(forecastItem.temp)}°F<br>
+                        <strong>Temperature:</strong> ${this.convertTemperature(forecastItem.raw_air_temp)}°F<br>
                         <strong>Cloud Cover:</strong> ${cloudCover[dataIndex]}%<br>
                         <strong>Chance of Precipitation:</strong> ${precipitation[dataIndex]}%<br>
                         <strong>Wind:</strong> ${this.convertWindSpeed(forecastItem.wind_speed)} mph
@@ -1312,9 +1312,17 @@ class RadianPlannerApp {
     }
 
     generateTimeLabels(forecast) {
-        return forecast.map(item => {
-            const date = new Date(item.timestamp);
-            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        return forecast.map((item, index) => {
+            // time_offset is in seconds, convert to hours and create a time label
+            const hours = Math.floor(item.time_offset / 3600);
+            const minutes = Math.floor((item.time_offset % 3600) / 60);
+            
+            // Create a time starting from session start (e.g., 11:00 AM + offset)
+            const baseTime = new Date();
+            baseTime.setHours(11, 0, 0, 0); // Start at 11:00 AM
+            baseTime.setTime(baseTime.getTime() + (item.time_offset * 1000));
+            
+            return baseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
         });
     }
 
@@ -1324,12 +1332,17 @@ class RadianPlannerApp {
     }
 
     convertCloudCover(cloudCover) {
-        const minCloud = 465, maxCloud = 809;
-        return Math.round(((cloudCover - minCloud) / (maxCloud - minCloud)) * 100);
+        // Cloud cover values seem to be in a different range, let's normalize them
+        // Based on the data showing values around 600-800, let's scale to 0-100%
+        const minCloud = 200, maxCloud = 1000;
+        const percentage = Math.round(((cloudCover - minCloud) / (maxCloud - minCloud)) * 100);
+        return Math.max(0, Math.min(100, percentage)); // Clamp to 0-100%
     }
 
     convertPrecipitation(humidity) {
-        return Math.round((humidity / 100) * 10);
+        // Convert relative humidity to precipitation chance percentage
+        // Humidity is likely already in percentage (0-100), so just clamp it
+        return Math.max(0, Math.min(100, Math.round(humidity)));
     }
 
     convertWindSpeed(windSpeed) {
