@@ -711,12 +711,10 @@
                     plannerPage.classList.add('hidden');
                     page2.classList.remove('hidden');
                     
-                    // Show all sections EXCEPT stint table
+                    // Show initial sections only - summary and sliders stay hidden until race inputs filled
                     const sectionsToShow = [
                         'garage61-lap-times',
-                        'race-inputs-container', 
-                        'overall-summary',
-                        'sliders-container'
+                        'race-inputs-container'
                     ];
                     
                     sectionsToShow.forEach(sectionId => {
