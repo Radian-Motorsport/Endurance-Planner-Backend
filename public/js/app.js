@@ -1155,46 +1155,108 @@ class RadianPlannerApp {
         const forecast = weatherData.weather_forecast;
         const timeLabels = this.generateTimeLabels(forecast);
         const temperatures = forecast.map(item => this.convertTemperature(item.raw_air_temp));
+        
+        // Find race start index (where time_offset >= 0 and affects_session becomes true)
+        const raceStartIndex = forecast.findIndex(item => item.time_offset >= 0 && item.affects_session);
+        
+        // Create day/night background markings
+        const dayNightMarkings = this.createDayNightMarkings(forecast, timeLabels);
 
         const option = {
-            grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
+            title: {
+                text: '24-Hour Temperature Forecast',
+                left: 'center',
+                textStyle: { color: '#333', fontSize: 16 }
+            },
+            grid: { left: '60px', right: '40px', top: '60px', bottom: '80px' },
+            toolbox: {
+                feature: {
+                    dataZoom: { yAxisIndex: 'none' },
+                    restore: {},
+                    saveAsImage: {}
+                }
+            },
+            dataZoom: [
+                {
+                    type: 'inside',
+                    start: 0,
+                    end: 100
+                },
+                {
+                    start: 0,
+                    end: 100,
+                    height: 30,
+                    bottom: 40
+                }
+            ],
+
+        const option = {
             xAxis: {
                 type: 'category',
                 data: timeLabels,
                 axisLine: { lineStyle: { color: '#6E7079' } },
-                axisLabel: { color: '#6E7079', fontSize: 12 }
+                axisLabel: { 
+                    color: '#6E7079', 
+                    fontSize: 10,
+                    rotate: 45,
+                    interval: Math.floor(timeLabels.length / 12) // Show ~12 labels max
+                }
             },
             yAxis: {
                 type: 'value',
+                name: 'Temperature (°F)',
+                nameLocation: 'middle',
+                nameGap: 40,
                 axisLine: { lineStyle: { color: '#6E7079' } },
                 axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}°F' },
                 splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
             },
-            series: [{
-                name: 'Temperature',
-                type: 'line',
-                data: temperatures,
-                lineStyle: { color: '#ff6b6b', width: 3 },
-                itemStyle: { color: '#ff6b6b' },
-                areaStyle: { 
-                    color: {
-                        type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-                        colorStops: [
-                            { offset: 0, color: 'rgba(255, 107, 107, 0.3)' },
-                            { offset: 1, color: 'rgba(255, 107, 107, 0.05)' }
-                        ]
-                    }
-                },
-                smooth: true, symbol: 'circle', symbolSize: 6
-            }],
+            series: [
+                {
+                    name: 'Temperature',
+                    type: 'line',
+                    data: temperatures,
+                    lineStyle: { color: '#ff6b6b', width: 2 },
+                    itemStyle: { color: '#ff6b6b' },
+                    areaStyle: { 
+                        color: {
+                            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                { offset: 0, color: 'rgba(255, 107, 107, 0.3)' },
+                                { offset: 1, color: 'rgba(255, 107, 107, 0.05)' }
+                            ]
+                        }
+                    },
+                    smooth: true, 
+                    symbol: 'none',
+                    markLine: raceStartIndex >= 0 ? {
+                        data: [{
+                            name: 'Race Start',
+                            xAxis: raceStartIndex,
+                            lineStyle: { color: '#00ff00', width: 3, type: 'solid' },
+                            label: { 
+                                position: 'end',
+                                formatter: 'Race Start',
+                                color: '#00ff00',
+                                fontWeight: 'bold'
+                            }
+                        }]
+                    } : undefined
+                }
+            ].concat(dayNightMarkings),
             tooltip: {
                 trigger: 'axis',
                 formatter: (params) => {
                     const point = params[0];
                     const forecastItem = forecast[point.dataIndex];
+                    const isRace = forecastItem.affects_session;
+                    const sunStatus = forecastItem.is_sun_up ? '☀️ Day' : '🌙 Night';
+                    
                     return `<div style="color: black;">
                         <strong>Time:</strong> ${timeLabels[point.dataIndex]}<br>
                         <strong>Temperature:</strong> ${point.value}°F<br>
+                        <strong>Period:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
+                        <strong>Sun:</strong> ${sunStatus}<br>
                         <strong>Weather:</strong> ${this.getWeatherDescription(forecastItem)}
                     </div>`;
                 }
@@ -1242,46 +1304,114 @@ class RadianPlannerApp {
         const timeLabels = this.generateTimeLabels(forecast);
         const cloudCover = forecast.map(item => this.convertCloudCover(item.cloud_cover));
         const precipitation = forecast.map(item => this.convertPrecipitation(item.rel_humidity));
+        
+        // Find race start index
+        const raceStartIndex = forecast.findIndex(item => item.time_offset >= 0 && item.affects_session);
+        
+        // Create day/night background markings
+        const dayNightMarkings = this.createDayNightMarkings(forecast, timeLabels);
 
         const option = {
-            grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
+            title: {
+                text: '24-Hour Clouds & Precipitation Forecast',
+                left: 'center',
+                textStyle: { color: '#333', fontSize: 16 }
+            },
+            grid: { left: '60px', right: '40px', top: '60px', bottom: '80px' },
+            toolbox: {
+                feature: {
+                    dataZoom: { yAxisIndex: 'none' },
+                    restore: {},
+                    saveAsImage: {}
+                }
+            },
+            dataZoom: [
+                {
+                    type: 'inside',
+                    start: 0,
+                    end: 100
+                },
+                {
+                    start: 0,
+                    end: 100,
+                    height: 30,
+                    bottom: 40
+                }
+            ],
+
+        const option = {
             xAxis: {
-                type: 'category', data: timeLabels,
+                type: 'category', 
+                data: timeLabels,
                 axisLine: { lineStyle: { color: '#6E7079' } },
-                axisLabel: { color: '#6E7079', fontSize: 12 }
+                axisLabel: { 
+                    color: '#6E7079', 
+                    fontSize: 10,
+                    rotate: 45,
+                    interval: Math.floor(timeLabels.length / 12)
+                }
             },
             yAxis: {
-                type: 'value', min: 0, max: 100,
+                type: 'value', 
+                min: 0, 
+                max: 100,
+                name: 'Percentage (%)',
+                nameLocation: 'middle',
+                nameGap: 40,
                 axisLine: { lineStyle: { color: '#6E7079' } },
                 axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}%' },
                 splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
             },
             series: [
                 {
-                    name: 'Cloud Cover', type: 'line', data: cloudCover,
+                    name: 'Cloud Cover', 
+                    type: 'line', 
+                    data: cloudCover,
                     lineStyle: { color: 'rgb(5,5,15)', width: 2 },
                     itemStyle: { color: 'rgb(5,5,15)' },
                     areaStyle: { color: 'rgba(5,5,15,0.04)' },
-                    smooth: true, symbol: 'circle', symbolSize: 4
+                    smooth: true, 
+                    symbol: 'none',
+                    markLine: raceStartIndex >= 0 ? {
+                        data: [{
+                            name: 'Race Start',
+                            xAxis: raceStartIndex,
+                            lineStyle: { color: '#00ff00', width: 3, type: 'solid' },
+                            label: { 
+                                position: 'end',
+                                formatter: 'Race Start',
+                                color: '#00ff00',
+                                fontWeight: 'bold'
+                            }
+                        }]
+                    } : undefined
                 },
                 {
-                    name: 'Precipitation Chance', type: 'line', data: precipitation,
+                    name: 'Precipitation Chance', 
+                    type: 'line', 
+                    data: precipitation,
                     lineStyle: { color: '#0B5559', width: 2 },
                     itemStyle: { color: '#0B5559' },
                     areaStyle: { color: 'rgba(15,138,138,0.04)' },
-                    smooth: true, symbol: 'circle', symbolSize: 4
+                    smooth: true, 
+                    symbol: 'none'
                 }
-            ],
+            ].concat(dayNightMarkings),
             tooltip: {
                 trigger: 'axis',
                 formatter: (params) => {
                     const dataIndex = params[0].dataIndex;
                     const forecastItem = forecast[dataIndex];
+                    const isRace = forecastItem.affects_session;
+                    const sunStatus = forecastItem.is_sun_up ? '☀️ Day' : '🌙 Night';
+                    
                     return `<div style="color: black;">
                         <strong>Time:</strong> ${timeLabels[dataIndex]}<br>
                         <strong>Temperature:</strong> ${this.convertTemperature(forecastItem.raw_air_temp)}°F<br>
                         <strong>Cloud Cover:</strong> ${cloudCover[dataIndex]}%<br>
-                        <strong>Chance of Precipitation:</strong> ${precipitation[dataIndex]}%<br>
+                        <strong>Precipitation Chance:</strong> ${precipitation[dataIndex]}%<br>
+                        <strong>Period:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
+                        <strong>Sun:</strong> ${sunStatus}<br>
                         <strong>Wind:</strong> ${this.convertWindSpeed(forecastItem.wind_speed)} mph
                     </div>`;
                 }
@@ -1311,38 +1441,103 @@ class RadianPlannerApp {
         this.disposables = [];
     }
 
+    createDayNightMarkings(forecast, timeLabels) {
+        // Create background shading for day/night periods
+        const markAreas = [];
+        let currentPeriod = null;
+        let periodStart = 0;
+        
+        forecast.forEach((item, index) => {
+            const isDay = item.is_sun_up;
+            
+            if (currentPeriod === null) {
+                currentPeriod = isDay;
+                periodStart = index;
+            } else if (currentPeriod !== isDay) {
+                // Period changed, add the previous period
+                markAreas.push([
+                    { name: currentPeriod ? 'Day' : 'Night', xAxis: periodStart },
+                    { xAxis: index - 1 }
+                ]);
+                currentPeriod = isDay;
+                periodStart = index;
+            }
+        });
+        
+        // Add the final period
+        if (currentPeriod !== null) {
+            markAreas.push([
+                { name: currentPeriod ? 'Day' : 'Night', xAxis: periodStart },
+                { xAxis: forecast.length - 1 }
+            ]);
+        }
+        
+        return [{
+            name: 'Day/Night',
+            type: 'line',
+            data: [], // No actual data
+            markArea: {
+                silent: true,
+                itemStyle: {
+                    color: function(params) {
+                        return params.name === 'Day' ? 
+                            'rgba(255, 255, 0, 0.1)' :  // Light yellow for day
+                            'rgba(0, 0, 100, 0.1)';     // Light blue for night
+                    }
+                },
+                data: markAreas
+            }
+        }];
+    }
+
     generateTimeLabels(forecast) {
         return forecast.map((item, index) => {
-            // time_offset is in seconds, convert to hours and create a time label
-            const hours = Math.floor(item.time_offset / 3600);
-            const minutes = Math.floor((item.time_offset % 3600) / 60);
+            // Use the actual timestamp from the data for accurate time display
+            const timestamp = new Date(item.timestamp);
             
-            // Create a time starting from session start (e.g., 11:00 AM + offset)
-            const baseTime = new Date();
-            baseTime.setHours(11, 0, 0, 0); // Start at 11:00 AM
-            baseTime.setTime(baseTime.getTime() + (item.time_offset * 1000));
+            // Format to show date and time for 24+ hour period
+            const timeStr = timestamp.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit', 
+                hour12: true 
+            });
             
-            return baseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            // Add date if it spans multiple days
+            const dateStr = timestamp.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            // Show date every 24 hours or when day changes
+            if (index === 0 || index % 96 === 0) { // Every ~24 hours (assuming 15min intervals)
+                return `${dateStr}\n${timeStr}`;
+            }
+            
+            return timeStr;
         });
     }
 
     convertTemperature(temp) {
-        const minTemp = 1917, maxTemp = 2091, minF = 67, maxF = 70;
+        // Based on actual data: raw_air_temp ranges from ~1200-1850
+        // Convert to realistic Fahrenheit range (60-85°F)
+        const minTemp = 1200, maxTemp = 1850, minF = 60, maxF = 85;
         return Math.round(((temp - minTemp) / (maxTemp - minTemp)) * (maxF - minF) + minF);
     }
 
     convertCloudCover(cloudCover) {
-        // Cloud cover values seem to be in a different range, let's normalize them
-        // Based on the data showing values around 600-800, let's scale to 0-100%
-        const minCloud = 200, maxCloud = 1000;
+        // Based on actual data: cloud_cover ranges from ~400-1000
+        // Convert to 0-100% with proper clamping
+        const minCloud = 400, maxCloud = 1000;
         const percentage = Math.round(((cloudCover - minCloud) / (maxCloud - minCloud)) * 100);
-        return Math.max(0, Math.min(100, percentage)); // Clamp to 0-100%
+        return Math.max(0, Math.min(100, percentage));
     }
 
     convertPrecipitation(humidity) {
-        // Convert relative humidity to precipitation chance percentage
-        // Humidity is likely already in percentage (0-100), so just clamp it
-        return Math.max(0, Math.min(100, Math.round(humidity)));
+        // Based on actual data: rel_humidity ranges from ~4000-7000
+        // Convert to precipitation chance 0-100%
+        const minHumidity = 4000, maxHumidity = 7000;
+        const percentage = Math.round(((humidity - minHumidity) / (maxHumidity - minHumidity)) * 100);
+        return Math.max(0, Math.min(100, percentage));
     }
 
     convertWindSpeed(windSpeed) {
