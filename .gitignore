@@ -233,3 +233,6 @@ update-data/refresh-events-oauth2.js
 update-data/schedules-refresh-error.json
 update-data/tracks-refresh-error.json
 public/weather-forecast.html
+complete-test.html
+debug-modules.html
+test-modules.html

@@ -15,10 +15,14 @@ export class UIManager {
      * Setup initial event listeners
      */
     setupEventListeners() {
-        // Will be called after DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
+        // Initialize immediately since DOM is already loaded when app creates this
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.initializeUI();
+            });
+        } else {
             this.initializeUI();
-        });
+        }
     }
 
     /**
