@@ -40,7 +40,7 @@ export class TrackMapComponent {
                     <div class="flex justify-between items-start mb-4">
                         <!-- Track Map SVG Container -->
                         <div class="flex-1 ${this.options.showControls ? 'mr-4' : ''}">
-                            <div id="${this.containerId}-map" class="relative bg-neutral-800 border border-neutral-600 rounded-lg p-4 min-h-[300px] flex items-center justify-center">
+                            <div id="${this.containerId}-map" class="relative bg-neutral-800 rounded-lg p-4 min-h-[300px] flex items-center justify-center">
                             <div id="${this.containerId}-loading" class="text-neutral-400">
                                 <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
                                 <p>Loading track map...</p>
@@ -79,7 +79,7 @@ export class TrackMapComponent {
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-neutral-400">Background</span>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="${this.containerId}-layer-background" class="sr-only peer" checked>
+                            <input type="checkbox" id="layer-background" class="sr-only peer" checked>
                             <div class="relative w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
                     </div>
@@ -87,7 +87,7 @@ export class TrackMapComponent {
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-neutral-400">Active Config</span>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="${this.containerId}-layer-active" class="sr-only peer" checked>
+                            <input type="checkbox" id="layer-active" class="sr-only peer" checked>
                             <div class="relative w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
                     </div>
@@ -95,7 +95,7 @@ export class TrackMapComponent {
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-neutral-400">Pit Road</span>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="${this.containerId}-layer-pitroad" class="sr-only peer">
+                            <input type="checkbox" id="layer-pitroad" class="sr-only peer">
                             <div class="relative w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
                     </div>
@@ -103,7 +103,7 @@ export class TrackMapComponent {
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-neutral-400">Start/Finish</span>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="${this.containerId}-layer-start-finish" class="sr-only peer">
+                            <input type="checkbox" id="layer-start-finish" class="sr-only peer">
                             <div class="relative w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
                     </div>
@@ -111,7 +111,7 @@ export class TrackMapComponent {
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-neutral-400">Turn Numbers</span>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="${this.containerId}-layer-turns" class="sr-only peer">
+                            <input type="checkbox" id="layer-turns" class="sr-only peer">
                             <div class="relative w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
                     </div>
@@ -126,7 +126,7 @@ export class TrackMapComponent {
         const layerNames = ['background', 'active', 'pitroad', 'start-finish', 'turns'];
         
         layerNames.forEach(layerName => {
-            const checkbox = document.getElementById(`${this.containerId}-layer-${layerName}`);
+            const checkbox = document.getElementById(`layer-${layerName}`);
             if (checkbox) {
                 checkbox.addEventListener('change', (e) => {
                     this.toggleLayer(layerName, e.target.checked);
@@ -285,7 +285,7 @@ export class TrackMapComponent {
         }
     }
     
-    toggleLayer(layerName) {
+    toggleLayer(layerName, visible) {
         const layerGroup = this.layers[layerName];
         if (layerGroup) {
             layerGroup.style.display = visible ? 'block' : 'none';
@@ -299,7 +299,7 @@ export class TrackMapComponent {
     showLayer(layerName) {
         this.toggleLayer(layerName, true);
         if (this.options.showControls) {
-            const checkbox = document.getElementById(`${this.containerId}-layer-${layerName}`);
+            const checkbox = document.getElementById(`layer-${layerName}`);
             if (checkbox) checkbox.checked = true;
         }
     }
@@ -307,7 +307,7 @@ export class TrackMapComponent {
     hideLayer(layerName) {
         this.toggleLayer(layerName, false);
         if (this.options.showControls) {
-            const checkbox = document.getElementById(`${this.containerId}-layer-${layerName}`);
+            const checkbox = document.getElementById(`layer-${layerName}`);
             if (checkbox) checkbox.checked = false;
         }
     }
@@ -318,7 +318,7 @@ export class TrackMapComponent {
             const visible = visibleLayers.includes(layer);
             this.toggleLayer(layer, visible);
             if (this.options.showControls) {
-                const checkbox = document.getElementById(`${this.containerId}-layer-${layer}`);
+                const checkbox = document.getElementById(`layer-${layer}`);
                 if (checkbox) checkbox.checked = visible;
             }
         });
