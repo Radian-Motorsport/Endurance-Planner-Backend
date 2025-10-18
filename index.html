@@ -696,27 +696,26 @@
     <!-- Debug Script -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('🔍 DEBUG: DOM loaded, checking buttons...');
+        console.log('🔍 DOM loaded, setting up navigation...');
         
         // CONTINUE BUTTON (Page 1 -> Page 2)
         const continueBtn = document.getElementById('continue-button');
-        console.log('🔍 DEBUG: Continue button found:', !!continueBtn);
-        
         if (continueBtn) {
             continueBtn.addEventListener('click', () => {
-                console.log('🔍 DEBUG: Continue button clicked!');
+                console.log('➡️ Continue button clicked - switching to page 2');
                 
                 const plannerPage = document.getElementById('planner-page');
                 const page2 = document.getElementById('page-2');
                 
-                console.log('🔍 Found planner-page:', !!plannerPage);
-                console.log('🔍 Found page-2:', !!page2);
-                
                 if (plannerPage && page2) {
-                    console.log('🔍 Switching: planner-page -> hidden, page-2 -> visible');
                     plannerPage.classList.add('hidden');
                     page2.classList.remove('hidden');
-                    console.log('✅ Switched to page 2!');
+                    console.log('✅ Switched to page 2');
+                    
+                    // Add test content to make sure page 2 is visible
+                    const trackSpan = document.getElementById('page2-track');
+                    if (trackSpan) trackSpan.textContent = 'TEST TRACK NAME';
+                    
                 } else {
                     console.log('❌ Page elements not found');
                 }
@@ -726,24 +725,46 @@
         
         // BACK BUTTON (Page 2 -> Page 1)
         const backBtn = document.getElementById('back-button');
-        console.log('🔍 DEBUG: Back button found:', !!backBtn);
-        
         if (backBtn) {
             backBtn.addEventListener('click', () => {
-                console.log('🔍 DEBUG: Back button clicked!');
+                console.log('⬅️ Back button clicked - switching to page 1');
                 
                 const plannerPage = document.getElementById('planner-page');
                 const page2 = document.getElementById('page-2');
                 
                 if (plannerPage && page2) {
-                    console.log('🔍 Switching: page-2 -> hidden, planner-page -> visible');
                     page2.classList.add('hidden');
                     plannerPage.classList.remove('hidden');
-                    console.log('✅ Switched back to page 1!');
+                    console.log('✅ Switched back to page 1');
                 }
             });
             console.log('✅ Back button listener added');
         }
+        
+        // DETAILS BUTTON (Header navigation to Page 1)
+        const detailsBtn = document.getElementById('race-details-btn');
+        if (detailsBtn) {
+            detailsBtn.addEventListener('click', () => {
+                console.log('� Details button clicked - switching to page 1');
+                
+                const plannerPage = document.getElementById('planner-page');
+                const page2 = document.getElementById('page-2');
+                const adminPage = document.getElementById('admin-page');
+                
+                if (plannerPage) {
+                    // Hide all other pages
+                    if (page2) page2.classList.add('hidden');
+                    if (adminPage) adminPage.classList.add('hidden');
+                    
+                    // Show planner page
+                    plannerPage.classList.remove('hidden');
+                    console.log('✅ Switched to page 1 via Details button');
+                }
+            });
+            console.log('✅ Details button listener added');
+        }
+        
+        console.log('🚀 All navigation listeners set up');
     });
     </script>
     
