@@ -153,10 +153,10 @@ export class WeatherComponent {
     
     createHTML() {
         return `
-            <div style="max-height: ${this.options.maxHeight}; overflow: hidden;">
+            <div>
                 <h3 class="text-lg font-medium text-neutral-300 mb-4">Weather Forecast</h3>
                 
-                <div class="bg-neutral-800 border border-neutral-700 rounded-lg p-4" style="max-height: calc(${this.options.maxHeight} - 60px); overflow: auto;">
+                <div class="bg-neutral-800 border border-neutral-700 rounded-lg p-4">
                     <div class="chakra-tabs">
                         <div class="chakra-tabs__tablist" role="tablist">
                             <button class="chakra-tabs__tab" role="tab" aria-selected="false" data-tab="temperature">
@@ -169,12 +169,12 @@ export class WeatherComponent {
 
                         <!-- Temperature Tab Panel -->
                         <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="true" id="temperature-panel">
-                            <div id="${this.containerId}-temperature-chart" style="width: 100%; height: 280px; margin-top: 16px;"></div>
+                            <div id="${this.containerId}-temperature-chart" style="width: 100%; height: 300px; margin-top: 16px;"></div>
                         </div>
 
                         <!-- Clouds & Precipitation Tab Panel -->
                         <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="false" id="clouds-panel">
-                            <div id="${this.containerId}-clouds-chart" style="width: 100%; height: 280px; margin-top: 16px;"></div>
+                            <div id="${this.containerId}-clouds-chart" style="width: 100%; height: 300px; margin-top: 16px;"></div>
                         </div>
                     </div>
                 </div>
