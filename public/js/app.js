@@ -662,6 +662,25 @@ class RadianPlannerApp {
             trackImageElement.classList.add('hidden');
         }
         
+        // Populate track logo overlay
+        const trackLogoOverlay = document.getElementById('track-logo-overlay');
+        if (trackLogoOverlay && sessionDetails.logo) {
+            const logoUrl = `https://ir-core-sites.iracing.com${sessionDetails.logo}`;
+            trackLogoOverlay.src = logoUrl;
+            trackLogoOverlay.alt = `${sessionDetails.track_name} Logo` || 'Track Logo';
+            trackLogoOverlay.classList.remove('hidden');
+            
+            console.log('🏷️ Loading track logo overlay:', logoUrl);
+            
+            // Handle logo load errors
+            trackLogoOverlay.onerror = function() {
+                console.warn('❌ Failed to load track logo:', logoUrl);
+                this.classList.add('hidden');
+            };
+        } else if (trackLogoOverlay) {
+            trackLogoOverlay.classList.add('hidden');
+        }
+        
         // Load track map if available
         await this.loadTrackMap(sessionDetails);
         
@@ -908,6 +927,13 @@ class RadianPlannerApp {
         if (trackImageElement) {
             trackImageElement.classList.add('hidden');
             trackImageElement.src = '';
+        }
+        
+        // Hide track logo overlay
+        const trackLogoOverlay = document.getElementById('track-logo-overlay');
+        if (trackLogoOverlay) {
+            trackLogoOverlay.classList.add('hidden');
+            trackLogoOverlay.src = '';
         }
     }
 

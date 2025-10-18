@@ -153,7 +153,7 @@ export class WeatherComponent {
     
     createHTML() {
         return `
-            <div class="border-t border-neutral-700 pt-6" style="max-height: ${this.options.maxHeight}; overflow: hidden;">
+            <div style="max-height: ${this.options.maxHeight}; overflow: hidden;">
                 <h3 class="text-lg font-medium text-neutral-300 mb-4">Weather Forecast</h3>
                 
                 <div class="bg-neutral-800 border border-neutral-700 rounded-lg p-4" style="max-height: calc(${this.options.maxHeight} - 60px); overflow: auto;">
