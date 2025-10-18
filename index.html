@@ -709,12 +709,22 @@
                 const plannerPage = document.getElementById('planner-page');
                 const page2 = document.getElementById('page-2');
                 
+                console.log('🔍 Found planner-page:', !!plannerPage);
+                console.log('🔍 Found page-2:', !!page2);
+                
                 if (plannerPage && page2) {
+                    console.log('🔍 Before: planner-page hidden =', plannerPage.classList.contains('hidden'));
+                    console.log('🔍 Before: page-2 hidden =', page2.classList.contains('hidden'));
+                    
                     plannerPage.classList.add('hidden');
                     page2.classList.remove('hidden');
+                    
+                    console.log('🔍 After: planner-page hidden =', plannerPage.classList.contains('hidden'));
+                    console.log('🔍 After: page-2 hidden =', page2.classList.contains('hidden'));
                     console.log('✅ Switched to page 2 directly!');
                 } else {
                     console.log('❌ Page elements not found');
+                    console.log('Available elements with IDs:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
                 }
             });
             console.log('🔍 DEBUG: Direct click listener added');
