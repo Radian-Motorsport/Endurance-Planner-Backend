@@ -225,7 +225,9 @@ class RadianPlannerApp {
                     year: 'numeric'
                 });
                 
-                option.textContent = `${event.event_name} - ${eventDate}`;
+                // Use event_name if available, otherwise fall back to season_name
+                const displayName = event.event_name || event.season_name || 'Unnamed Event';
+                option.textContent = `${displayName} - ${eventDate}`;
                 eventsSelect.appendChild(option);
             });
         } catch (error) {
