@@ -1156,8 +1156,10 @@ class RadianPlannerApp {
             const timeLabels = this.generateTimeLabels(forecast);
             const temperatures = forecast.map(item => this.convertTemperature(item.raw_air_temp));
             
-            // Find race start index
-            const raceStartIndex = forecast.findIndex(item => item.time_offset >= 0 && item.affects_session);
+            // Find race start index - first point where affects_session becomes true
+            const raceStartIndex = forecast.findIndex((item, index) => 
+                item.affects_session && (index === 0 || !forecast[index-1].affects_session)
+            );
 
             const option = {
                 grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
@@ -1198,10 +1200,27 @@ class RadianPlannerApp {
                         const isRace = forecastItem.affects_session;
                         const sunStatus = forecastItem.is_sun_up ? '☀️ Day' : '🌙 Night';
                         
+                        // Format time offset for display
+                        const offsetHours = Math.floor(forecastItem.time_offset / 60);
+                        const offsetMinutes = Math.abs(forecastItem.time_offset % 60);
+                        let timeOffset;
+                        if (forecastItem.time_offset < 0) {
+                            timeOffset = `-${Math.abs(offsetHours)}:${offsetMinutes.toString().padStart(2, '0')} (before race)`;
+                        } else {
+                            timeOffset = `+${offsetHours}:${offsetMinutes.toString().padStart(2, '0')} (race time)`;
+                        }
+                        
+                        // Also show actual timestamp
+                        const timestamp = new Date(forecastItem.timestamp).toLocaleString('en-US', {
+                            month: 'short', day: 'numeric', 
+                            hour: 'numeric', minute: '2-digit', hour12: true
+                        });
+                        
                         return `<div style="color: black;">
-                            <strong>Time:</strong> ${timeLabels[point.dataIndex]}<br>
+                            <strong>Race Time:</strong> ${timeOffset}<br>
+                            <strong>Real Time:</strong> ${timestamp}<br>
                             <strong>Temperature:</strong> ${point.value}°F<br>
-                            <strong>Period:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
+                            <strong>Session:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
                             <strong>Sun:</strong> ${sunStatus}
                         </div>`;
                     }
@@ -1250,8 +1269,10 @@ class RadianPlannerApp {
             const cloudCover = forecast.map(item => this.convertCloudCover(item.cloud_cover));
             const precipitation = forecast.map(item => this.convertPrecipitation(item.rel_humidity));
             
-            // Find race start index
-            const raceStartIndex = forecast.findIndex(item => item.time_offset >= 0 && item.affects_session);
+            // Find race start index - first point where affects_session becomes true
+            const raceStartIndex = forecast.findIndex((item, index) => 
+                item.affects_session && (index === 0 || !forecast[index-1].affects_session)
+            );
 
             const option = {
                 grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
@@ -1305,11 +1326,28 @@ class RadianPlannerApp {
                         const isRace = forecastItem.affects_session;
                         const sunStatus = forecastItem.is_sun_up ? '☀️ Day' : '🌙 Night';
                         
+                        // Format time offset for display
+                        const offsetHours = Math.floor(forecastItem.time_offset / 60);
+                        const offsetMinutes = Math.abs(forecastItem.time_offset % 60);
+                        let timeOffset;
+                        if (forecastItem.time_offset < 0) {
+                            timeOffset = `-${Math.abs(offsetHours)}:${offsetMinutes.toString().padStart(2, '0')} (before race)`;
+                        } else {
+                            timeOffset = `+${offsetHours}:${offsetMinutes.toString().padStart(2, '0')} (race time)`;
+                        }
+                        
+                        // Also show actual timestamp
+                        const timestamp = new Date(forecastItem.timestamp).toLocaleString('en-US', {
+                            month: 'short', day: 'numeric', 
+                            hour: 'numeric', minute: '2-digit', hour12: true
+                        });
+                        
                         return `<div style="color: black;">
-                            <strong>Time:</strong> ${timeLabels[dataIndex]}<br>
+                            <strong>Race Time:</strong> ${timeOffset}<br>
+                            <strong>Real Time:</strong> ${timestamp}<br>
                             <strong>Cloud Cover:</strong> ${cloudCover[dataIndex]}%<br>
                             <strong>Precipitation:</strong> ${precipitation[dataIndex]}%<br>
-                            <strong>Period:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
+                            <strong>Session:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
                             <strong>Sun:</strong> ${sunStatus}
                         </div>`;
                     }
@@ -1390,28 +1428,30 @@ class RadianPlannerApp {
 
     generateTimeLabels(forecast) {
         return forecast.map((item, index) => {
-            // Use the actual timestamp from the data for accurate time display
-            const timestamp = new Date(item.timestamp);
+            // Use time_offset for more accurate relative timing
+            const offsetHours = Math.floor(item.time_offset / 60);
+            const offsetMinutes = Math.abs(item.time_offset % 60);
             
-            // Format to show date and time for 24+ hour period
-            const timeStr = timestamp.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit', 
-                hour12: true 
-            });
-            
-            // Add date if it spans multiple days
-            const dateStr = timestamp.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
-            });
-            
-            // Show date every 24 hours or when day changes
-            if (index === 0 || index % 96 === 0) { // Every ~24 hours (assuming 15min intervals)
-                return `${dateStr}\n${timeStr}`;
+            // Create readable time labels
+            let timeLabel;
+            if (item.time_offset < 0) {
+                timeLabel = `-${Math.abs(offsetHours)}:${offsetMinutes.toString().padStart(2, '0')}`;
+            } else {
+                timeLabel = `+${offsetHours}:${offsetMinutes.toString().padStart(2, '0')}`;
             }
             
-            return timeStr;
+            // Mark race start clearly
+            if (item.affects_session && item.time_offset >= 0 && 
+                (index === 0 || !forecast[index-1].affects_session)) {
+                timeLabel += ' (RACE START)';
+            }
+            
+            // Show fewer labels for cleaner display - every 2 hours
+            if (index % 8 === 0) { // Every 8 intervals = 2 hours (15min intervals)
+                return timeLabel;
+            }
+            
+            return '';
         });
     }
 
