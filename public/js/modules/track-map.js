@@ -261,7 +261,7 @@ export class TrackMapComponent {
             'inactive': { fill: '#111827', stroke: '#1f2937', strokeWidth: '1px' },
             'pitroad': { fill: '#059669', stroke: '#047857', strokeWidth: '2px' },
             'start-finish': { fill: '#dc2626', stroke: '#991b1b', strokeWidth: '3px' },
-            'turns': { fill: '#ffbf00', stroke: '#ffea00', strokeWidth: '1px', fontFamily: 'Arial, sans-serif', fontSize: '18px', fontWeight: 'bold' }
+            'turns': { fill: '#ffbf00', stroke: '#ffea00', strokeWidth: '1px', fontFamily: 'Arial, sans-serif', fontSize: '24px', fontWeight: 'bold' }
         };
 
         if (styles[layerName]) {
@@ -281,9 +281,24 @@ export class TrackMapComponent {
                     element.setAttribute('stroke-width', style.strokeWidth);
                     element.style.setProperty('stroke-width', style.strokeWidth, 'important');
                 }
-                if (style.fontFamily) element.setAttribute('font-family', style.fontFamily);
-                if (style.fontSize) element.setAttribute('font-size', style.fontSize);
-                if (style.fontWeight) element.setAttribute('font-weight', style.fontWeight);
+                if (style.fontFamily) {
+                    element.setAttribute('font-family', style.fontFamily);
+                    element.style.setProperty('font-family', style.fontFamily, 'important');
+                }
+                if (style.fontSize) {
+                    element.setAttribute('font-size', style.fontSize);
+                    element.style.setProperty('font-size', style.fontSize, 'important');
+                }
+                if (style.fontWeight) {
+                    element.setAttribute('font-weight', style.fontWeight);
+                    element.style.setProperty('font-weight', style.fontWeight, 'important');
+                }
+                
+                // Add crisp text rendering for turn numbers
+                if (layerName === 'turns' && element.tagName === 'text') {
+                    element.style.textRendering = 'optimizeLegibility';
+                    element.style.shapeRendering = 'crispEdges';
+                }
             });
 
 
