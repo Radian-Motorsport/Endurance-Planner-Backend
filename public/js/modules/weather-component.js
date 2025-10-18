@@ -157,7 +157,7 @@ export class WeatherComponent {
             <div class="border-t border-neutral-700 pt-6">
                 <h3 class="text-lg font-medium text-neutral-300 mb-4">Weather Forecast</h3>
                 
-                <div class="bg-neutral-800 border border-neutral-700 rounded-lg p-4">
+                <div class="bg-neutral-800 p-4">
                     <div class="chakra-tabs">
                         <div class="chakra-tabs__tablist" role="tablist">
                             <button class="chakra-tabs__tab" role="tab" aria-selected="false" data-tab="temperature">
@@ -267,8 +267,8 @@ export class WeatherComponent {
             xAxis: {
                 type: 'category',
                 data: timeLabels,
-                axisLine: { lineStyle: { color: '#6E7079' } },
-                axisLabel: { color: '#6E7079', fontSize: 10, rotate: 45 }
+                axisLine: { lineStyle: { color: '#adadadff' } },
+                axisLabel: { color: '#adadadff', fontSize: 10, rotate: 45 }
             },
             yAxis: [
                 {
@@ -276,15 +276,15 @@ export class WeatherComponent {
                     position: 'left',
                     axisLine: { lineStyle: { color: '#fbbf24' } },
                     axisLabel: { color: '#fbbf24', fontSize: 12, formatter: '{value}' },
-                    splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
+                    splitLine: { lineStyle: { color: '#6E7079', opacity: 0.2 } }
                 },
                 {
                     type: 'value',
                     position: 'right',
                     min: 0,
                     max: 100,
-                    axisLine: { lineStyle: { color: '#4ecdc4' } },
-                    axisLabel: { color: '#4ecdc4', fontSize: 12, formatter: '{value}' },
+                    axisLine: { lineStyle: { color: '#1c76fcff' } },
+                    axisLabel: { color: '#1c76fcff', fontSize: 12, formatter: '{value}' },
                     splitLine: { show: false }
                 }
             ],
@@ -314,8 +314,8 @@ export class WeatherComponent {
                     type: 'line',
                     yAxisIndex: 1,
                     data: humidity,
-                    lineStyle: { color: '#4ecdc4', width: 2 },
-                    itemStyle: { color: '#4ecdc4' },
+                    lineStyle: { color: '#1c76fcff', width: 2 },
+                    itemStyle: { color: '#1c76fcff' },
                     smooth: true,
                     symbol: 'none'
                 },
@@ -380,8 +380,8 @@ export class WeatherComponent {
             xAxis: {
                 type: 'category', 
                 data: timeLabels,
-                axisLine: { lineStyle: { color: '#6E7079' } },
-                axisLabel: { color: '#6E7079', fontSize: 10, rotate: 45 }
+                axisLine: { lineStyle: { color: '#adadadff' } },
+                axisLabel: { color: '#adadadff', fontSize: 10, rotate: 45 }
             },
             yAxis: [
                 {
@@ -389,17 +389,17 @@ export class WeatherComponent {
                     position: 'left',
                     min: 0, 
                     max: 100,
-                    axisLine: { lineStyle: { color: 'rgb(5,5,15)' } },
-                    axisLabel: { color: 'rgb(5,5,15)', fontSize: 12, formatter: '{value}' },
-                    splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
+                    axisLine: { lineStyle: { color: '#1c76fcff' } },
+                    axisLabel: { color: '#1c76fcff', fontSize: 12, formatter: '{value}' },
+                    splitLine: { lineStyle: { color: '#6E7079', opacity: 0.2 } }
                 },
                 {
                     type: 'value', 
                     position: 'right',
                     min: 0, 
                     max: 100,
-                    axisLine: { lineStyle: { color: '#0B5559' } },
-                    axisLabel: { color: '#0B5559', fontSize: 12, formatter: '{value}' },
+                    axisLine: { lineStyle: { color: '#00d6e1ff' } },
+                    axisLabel: { color: '#00d6e1ff', fontSize: 12, formatter: '{value}' },
                     splitLine: { show: false }
                 }
             ],
@@ -409,8 +409,8 @@ export class WeatherComponent {
                     type: 'line', 
                     yAxisIndex: 0,
                     data: cloudCover,
-                    lineStyle: { color: 'rgb(5,5,15)', width: 2 },
-                    itemStyle: { color: 'rgb(5,5,15)' },
+                    lineStyle: { color: '#1c76fcff', width: 2 },
+                    itemStyle: { color: '#1c76fcff' },
                     smooth: true, 
                     symbol: 'none',
                     markLine: raceStartIndex >= 0 ? {
@@ -429,8 +429,8 @@ export class WeatherComponent {
                     type: 'line', 
                     yAxisIndex: 1,
                     data: precipitationChance,
-                    lineStyle: { color: '#0B5559', width: 2 },
-                    itemStyle: { color: '#0B5559' },
+                    lineStyle: { color: '#00d6e1ff', width: 2 },
+                    itemStyle: { color: '#00d6e1ff' },
                     smooth: true, 
                     symbol: 'none'
                 },
@@ -503,7 +503,7 @@ export class WeatherComponent {
                 markArea: {
                     silent: true,
                     itemStyle: {
-                        color: 'rgba(255, 255, 0, 0.15)'  // Yellow for day - more transparent
+                        color: 'rgba(255, 225, 0, 0.07)'  // Yellow for day - more transparent
                     },
                     data: dayAreas
                 }
@@ -515,7 +515,7 @@ export class WeatherComponent {
                 markArea: {
                     silent: true,
                     itemStyle: {
-                        color: 'rgba(0, 0, 139, 0.15)'  // Dark blue for night - more transparent
+                        color: 'rgba(72, 0, 255, 0.07)'  // Dark blue for night - more transparent
                     },
                     data: nightAreas
                 }
