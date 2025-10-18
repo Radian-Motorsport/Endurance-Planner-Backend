@@ -112,9 +112,7 @@ class DriverRefreshService {
             
             // Fetch updated data from iRacing
             console.log('🌐 Fetching updated driver data from iRacing...');
-            const memberData = await this.client.makeRequest('/data/member/get', {
-                cust_ids: custIds
-            });
+            const memberData = await this.client.makeDataAPIRequest('/data/member/get?cust_ids=' + custIds.join(','));
 
             if (!memberData || !memberData.members) {
                 throw new Error('Invalid response from iRacing API');
