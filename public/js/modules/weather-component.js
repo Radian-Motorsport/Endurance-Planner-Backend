@@ -39,19 +39,33 @@ export class WeatherComponent {
             style.id = 'weather-component-styles';
             style.textContent = `
                 .weather-component-wrapper {
-                    background: #fff;
+                    background: #262626;
+                    border: 1px solid #404040;
                     border-radius: 8px;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    min-height: 400px;
                 }
                 
                 .weather-component-header {
                     display: flex;
                     align-items: center;
                     padding: 16px 24px;
-                    border-bottom: 1px solid #e0e0e0;
-                    background: #f8f9fa;
+                    border-bottom: 1px solid #404040;
+                    background: #1c1c1c;
                     border-radius: 8px 8px 0 0;
+                }
+                
+                .weather-component-header h6 {
+                    margin: 0 0 0 8px;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #d4d4d8;
+                }
+                
+                .weather-component-header svg {
+                    width: 20px;
+                    height: 20px;
+                    color: #a3a3a3;
                 }
                 
                 .weather-component-content {
@@ -64,7 +78,7 @@ export class WeatherComponent {
                 
                 .chakra-tabs__tablist {
                     display: flex;
-                    border-bottom: 2px solid #e2e8f0;
+                    border-bottom: 2px solid #404040;
                     margin-bottom: 24px;
                 }
                 
@@ -74,19 +88,19 @@ export class WeatherComponent {
                     border: none;
                     font-size: 16px;
                     font-weight: 500;
-                    color: #718096;
+                    color: #a3a3a3;
                     cursor: pointer;
                     border-bottom: 3px solid transparent;
                     transition: all 0.2s;
                 }
                 
                 .chakra-tabs__tab:hover {
-                    color: #4a5568 !important;
+                    color: #d4d4d8 !important;
                 }
                 
                 .chakra-tabs__tab[aria-selected="true"] {
-                    color: #2b6cb0 !important;
-                    border-bottom-color: #2b6cb0 !important;
+                    color: #22c55e !important;
+                    border-bottom-color: #22c55e !important;
                 }
                 
                 .chakra-tabs__tab-panel {
@@ -100,10 +114,10 @@ export class WeatherComponent {
                 .weather-chart-container {
                     width: 100%;
                     height: 350px;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid #404040;
                     border-radius: 8px;
                     padding: 16px;
-                    background: #fff;
+                    background: #1c1c1c;
                     position: relative;
                 }
                 
@@ -128,7 +142,7 @@ export class WeatherComponent {
                 
                 .weather-legend-label {
                     font-size: 14px;
-                    color: #4a5568;
+                    color: #d4d4d8;
                     font-weight: 500;
                 }
             `;
@@ -200,10 +214,10 @@ export class WeatherComponent {
         return `
             <div class="weather-component-wrapper">
                 <div class="weather-component-header">
-                    <svg style="width: 20px; height: 20px; color: #666;" viewBox="0 0 24 24" fill="currentColor">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
                     </svg>
-                    <h6 style="margin: 0 0 0 8px; font-size: 18px; font-weight: 600; color: #333;">Weather Forecast</h6>
+                    <h6>Weather Forecast</h6>
                 </div>
 
                 <div class="weather-component-content">
