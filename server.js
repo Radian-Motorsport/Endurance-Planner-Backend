@@ -416,7 +416,7 @@ app.get('/api/events/:seriesId', async (req, res) => {
         }
         
         const result = await pool.query(
-            'SELECT * FROM events WHERE series_id = $1 AND active = true ORDER BY start_date, event_name', 
+            'SELECT * FROM events WHERE series_id = $1 ORDER BY start_date, event_name', 
             [seriesId]
         );
         console.log(`✅ Found ${result.rows.length} events for series ${seriesId}`);
