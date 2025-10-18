@@ -40,15 +40,15 @@ export class TrackMapComponent {
                     <div class="flex justify-between items-start mb-4">
                         <!-- Track Map SVG Container -->
                         <div class="flex-1 ${this.options.showControls ? 'mr-4' : ''}">
-                            <div id="${this.containerId}-map" class="relative bg-white rounded-lg p-4 min-h-[300px] flex items-center justify-center">
-                            <div id="${this.containerId}-loading" class="text-neutral-600">
+                            <div id="${this.containerId}-map" class="relative bg-neutral-800 border border-neutral-600 rounded-lg p-4 min-h-[300px] flex items-center justify-center">
+                            <div id="${this.containerId}-loading" class="text-neutral-400">
                                 <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
                                 <p>Loading track map...</p>
                             </div>
                             <div id="${this.containerId}-svg" class="hidden w-full h-full">
                                 <!-- SVG track map will be loaded here -->
                             </div>
-                            <div id="${this.containerId}-error" class="hidden text-neutral-600 text-center">
+                            <div id="${this.containerId}-error" class="hidden text-neutral-400 text-center">
                                 <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
                                 <p>Track map not available</p>
                             </div>
@@ -369,38 +369,38 @@ if (!document.querySelector('#track-map-styles')) {
         
         /* Dark mode track styling with progressive shading */
         #layer-background {
-            fill: #5a5a5a !important;
-            stroke: #5a5a5a !important;
+            fill: #5a5a5a !important; /* White for track outline/boundaries */
+            stroke: #5a5a5a !important; /* Light gray for track borders */
             stroke-width: 2px !important;
         }
         
         #layer-active {
-            fill: #d1d1d1 !important;
-            stroke: #d1d1d1 !important;
+            fill: #d1d1d1 !important; /* Dark gray for racing surface */
+            stroke: #d1d1d1 !important; /* Medium gray for track edges */
             stroke-width: 1px !important;
         }
         
         #layer-inactive {
-            fill: #2b2b2b !important;
-            stroke: #2a2a2a !important;
+            fill: #111827 !important; /* Very dark gray for unused sections */
+            stroke: #1f2937 !important; /* Dark gray borders */
             stroke-width: 1px !important;
         }
         
         #layer-pitroad {
-            fill: #059669 !important;
-            stroke: #047857 !important;
+            fill: #059669 !important; /* Green for pit road */
+            stroke: #047857 !important; /* Darker green borders */
             stroke-width: 2px !important;
         }
         
         #layer-start-finish {
-            fill: #dc2626 !important;
-            stroke: #991b1b !important;
+            fill: #dc2626 !important; /* Red for start/finish line */
+            stroke: #991b1b !important; /* Darker red borders */
             stroke-width: 3px !important;
         }
         
         #layer-turns {
-            fill: #fbbf24 !important;
-            stroke: #f59e0b !important;
+            fill: #ffbf00 !important; /* Blue for turn numbers */
+            stroke: #ffea00 !important; /* Darker blue borders */
             stroke-width: 1px !important;
             font-family: Arial, sans-serif !important;
             font-size: 12px !important;
@@ -420,14 +420,18 @@ if (!document.querySelector('#track-map-styles')) {
         
         /* Ensure text elements are visible */
         .track-svg-layer text {
-            fill: #fbbf24 !important;
-            font-family: Arial, sans-serif !important;
+            fill: #ffbf00 !important;
             font-weight: bold !important;
         }
         
         /* Track map container styling */
-        .track-map-wrapper svg {
+        #track-map-svg svg {
             background: transparent !important;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+        }
             max-width: 100%;
             max-height: 100%;
             width: auto;
