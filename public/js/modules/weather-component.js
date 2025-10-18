@@ -358,7 +358,7 @@ export class WeatherComponent {
         const forecast = this.weatherData.weather_forecast;
         const timeLabels = this.generateTimeLabels(forecast);
         const cloudCover = forecast.map(item => this.convertCloudCover(item.cloud_cover));
-        const precipitationChance = forecast.map(item => item.precip_chance);
+        const precipitationChance = forecast.map(item => this.convertPrecipitationChance(item.precip_chance));
         const precipitationAmount = forecast.map(item => item.precip_amount);
         
         const raceStartIndex = forecast.findIndex((item, index) => 
@@ -547,6 +547,11 @@ export class WeatherComponent {
     convertHumidity(humidity) {
         // Humidity where 10000 = 100%
         return Math.round(humidity / 100);
+    }
+    
+    convertPrecipitationChance(precipChance) {
+        // Precipitation chance where 10000 = 100%
+        return Math.round(precipChance / 100);
     }
     
     showError(message) {
