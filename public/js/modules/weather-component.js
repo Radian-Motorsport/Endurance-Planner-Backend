@@ -30,6 +30,10 @@ export class WeatherComponent {
         
         this.container = container;
         this.injectStyles();
+        
+        // Add window resize listener for chart responsiveness
+        this.resizeListener = () => this.resize();
+        window.addEventListener('resize', this.resizeListener);
     }
     
     injectStyles() {
@@ -149,10 +153,10 @@ export class WeatherComponent {
     
     createHTML() {
         return `
-            <div class="border-t border-neutral-700 pt-6">
+            <div class="border-t border-neutral-700 pt-6" style="max-height: ${this.options.maxHeight}; overflow: hidden;">
                 <h3 class="text-lg font-medium text-neutral-300 mb-4">Weather Forecast</h3>
                 
-                <div class="bg-neutral-800 border border-neutral-700 rounded-lg p-4">
+                <div class="bg-neutral-800 border border-neutral-700 rounded-lg p-4" style="max-height: calc(${this.options.maxHeight} - 60px); overflow: auto;">
                     <div class="chakra-tabs">
                         <div class="chakra-tabs__tablist" role="tablist">
                             <button class="chakra-tabs__tab" role="tab" aria-selected="false" data-tab="temperature">
@@ -165,12 +169,12 @@ export class WeatherComponent {
 
                         <!-- Temperature Tab Panel -->
                         <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="true" id="temperature-panel">
-                            <div id="${this.containerId}-temperature-chart" style="width: 100%; height: 360px; margin-top: 16px;"></div>
+                            <div id="${this.containerId}-temperature-chart" style="width: 100%; height: 280px; margin-top: 16px;"></div>
                         </div>
 
                         <!-- Clouds & Precipitation Tab Panel -->
                         <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="false" id="clouds-panel">
-                            <div id="${this.containerId}-clouds-chart" style="width: 100%; height: 360px; margin-top: 16px;"></div>
+                            <div id="${this.containerId}-clouds-chart" style="width: 100%; height: 280px; margin-top: 16px;"></div>
                         </div>
                     </div>
                 </div>
@@ -598,5 +602,28 @@ export class WeatherComponent {
     resize() {
         if (this.temperatureChart) this.temperatureChart.resize();
         if (this.cloudsChart) this.cloudsChart.resize();
+    }
+    
+    destroy() {
+        // Clean up event listeners
+        if (this.resizeListener) {
+            window.removeEventListener('resize', this.resizeListener);
+            this.resizeListener = null;
+        }
+        
+        // Dispose charts
+        if (this.temperatureChart) {
+            this.temperatureChart.dispose();
+            this.temperatureChart = null;
+        }
+        if (this.cloudsChart) {
+            this.cloudsChart.dispose();
+            this.cloudsChart = null;
+        }
+        
+        // Clear container
+        if (this.container) {
+            this.container.innerHTML = '';
+        }
     }
 }
