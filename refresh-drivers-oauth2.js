@@ -3,7 +3,7 @@
  * Refreshes iRacing driver data for all drivers in the database
  */
 
-const iRacingOAuth2Client = require('./iracing-development/iracing-oauth2-client');
+const iRacingOAuth2Client = require('./iracing-oauth2-client.js');
 const axios = require('axios');
 
 class DriverRefreshService {
