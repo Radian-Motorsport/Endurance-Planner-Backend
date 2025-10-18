@@ -217,21 +217,22 @@ export class TrackMapComponent {
             
             // Create layer group
             const layerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            layerGroup.setAttribute('id', `${this.containerId}-layer-${layerName}`);
+            layerGroup.setAttribute('id', `layer-${layerName}`);
             layerGroup.setAttribute('class', 'track-svg-layer');
             
             // Copy all child elements from source SVG to layer group
             while (sourceSvg.firstChild) {
                 layerGroup.appendChild(sourceSvg.firstChild);
             }
-            
+
+            // Apply your exact color styles
+            this.applyLayerStyles(layerGroup, layerName);
+
             // Set initial visibility
             const isDefaultLayer = this.options.defaultLayers.includes(layerName);
             if (!isDefaultLayer) {
                 layerGroup.style.display = 'none';
-            }
-            
-            // Update container viewBox from first loaded layer (usually background)
+            }            // Update container viewBox from first loaded layer (usually background)
             if (layerName === 'background' && sourceSvg.getAttribute('viewBox')) {
                 svgContainer.setAttribute('viewBox', sourceSvg.getAttribute('viewBox'));
             }
@@ -248,7 +249,43 @@ export class TrackMapComponent {
         }
     }
     
-    toggleLayer(layerName, visible) {
+    applyLayerStyles(layerGroup, layerName) {
+        // Apply your exact color styles based on layer name
+        const styles = {
+            'background': { fill: '#5a5a5a', stroke: '#5a5a5a', strokeWidth: '2px' },
+            'active': { fill: '#d1d1d1', stroke: '#d1d1d1', strokeWidth: '1px' },
+            'inactive': { fill: '#111827', stroke: '#1f2937', strokeWidth: '1px' },
+            'pitroad': { fill: '#059669', stroke: '#047857', strokeWidth: '2px' },
+            'start-finish': { fill: '#dc2626', stroke: '#991b1b', strokeWidth: '3px' },
+            'turns': { fill: '#ffbf00', stroke: '#ffea00', strokeWidth: '1px', fontFamily: 'Arial, sans-serif', fontSize: '12px', fontWeight: 'bold' }
+        };
+
+        if (styles[layerName]) {
+            const style = styles[layerName];
+            
+            // Apply styles to all SVG elements in this layer
+            const elements = layerGroup.querySelectorAll('path, circle, rect, polygon, text');
+            elements.forEach(element => {
+                if (style.fill) element.setAttribute('fill', style.fill);
+                if (style.stroke) element.setAttribute('stroke', style.stroke);
+                if (style.strokeWidth) element.setAttribute('stroke-width', style.strokeWidth);
+                if (style.fontFamily) element.setAttribute('font-family', style.fontFamily);
+                if (style.fontSize) element.setAttribute('font-size', style.fontSize);
+                if (style.fontWeight) element.setAttribute('font-weight', style.fontWeight);
+            });
+
+            // For text elements in turns layer, make them white
+            if (layerName === 'turns') {
+                const textElements = layerGroup.querySelectorAll('text');
+                textElements.forEach(text => {
+                    text.setAttribute('fill', '#ffffff');
+                    text.setAttribute('font-weight', 'bold');
+                });
+            }
+        }
+    }
+    
+    toggleLayer(layerName) {
         const layerGroup = this.layers[layerName];
         if (layerGroup) {
             layerGroup.style.display = visible ? 'block' : 'none';
@@ -368,54 +405,87 @@ if (!document.querySelector('#track-map-styles')) {
         }
         
         /* Dark mode track styling with progressive shading */
-        #layer-background {
-            fill: #5a5a5a !important; /* White for track outline/boundaries */
+        #layer-background, [id*="background"], .background-layer {
+            fill: #5a5a5a !important; /* Gray for track outline/boundaries */
             stroke: #5a5a5a !important; /* Light gray for track borders */
             stroke-width: 2px !important;
         }
         
-        #layer-active {
-            fill: #d1d1d1 !important; /* Dark gray for racing surface */
+        #layer-active, [id*="active"], .active-layer {
+            fill: #d1d1d1 !important; /* Light gray for racing surface */
             stroke: #d1d1d1 !important; /* Medium gray for track edges */
             stroke-width: 1px !important;
         }
         
-        #layer-inactive {
+        #layer-inactive, [id*="inactive"], .inactive-layer {
             fill: #111827 !important; /* Very dark gray for unused sections */
             stroke: #1f2937 !important; /* Dark gray borders */
             stroke-width: 1px !important;
         }
         
-        #layer-pitroad {
+        #layer-pitroad, [id*="pitroad"], [id*="pit"], .pitroad-layer {
             fill: #059669 !important; /* Green for pit road */
             stroke: #047857 !important; /* Darker green borders */
             stroke-width: 2px !important;
         }
         
-        #layer-start-finish {
+        #layer-start-finish, [id*="start"], [id*="finish"], .start-finish-layer {
             fill: #dc2626 !important; /* Red for start/finish line */
             stroke: #991b1b !important; /* Darker red borders */
             stroke-width: 3px !important;
         }
         
-        #layer-turns {
-            fill: #ffbf00 !important; /* Blue for turn numbers */
-            stroke: #ffea00 !important; /* Darker blue borders */
+        #layer-turns, [id*="turn"], [id*="number"], .turns-layer {
+            fill: #ffbf00 !important; /* Yellow for turn numbers */
+            stroke: #ffea00 !important; /* Darker yellow borders */
             stroke-width: 1px !important;
             font-family: Arial, sans-serif !important;
             font-size: 12px !important;
             font-weight: bold !important;
         }
         
+        /* Broad SVG element targeting - Override all black/white SVG elements */
+        svg path[fill="#000000"], svg path[fill="black"], svg path[fill="#000"] {
+            fill: #5a5a5a !important;
+            stroke: #5a5a5a !important;
+            stroke-width: 2px !important;
+        }
+        
+        svg path[fill="#ffffff"], svg path[fill="white"], svg path[fill="#fff"] {
+            fill: #d1d1d1 !important;
+            stroke: #d1d1d1 !important;
+            stroke-width: 1px !important;
+        }
+        
+        /* Force all SVG elements to use our color scheme */
+        svg * {
+            fill: #5a5a5a !important;
+            stroke: #5a5a5a !important;
+        }
+        
         /* Override any default SVG colors and ensure visibility on dark background */
-        .track-svg-layer path,
-        .track-svg-layer circle,
-        .track-svg-layer rect,
-        .track-svg-layer polygon,
-        .track-svg-layer text {
-            fill: inherit !important;
-            stroke: inherit !important;
-            stroke-width: inherit !important;
+        svg path:not([id*="pit"]):not([id*="start"]):not([id*="finish"]):not([id*="turn"]) {
+            fill: #5a5a5a !important;
+            stroke: #5a5a5a !important;
+            stroke-width: 2px !important;
+        }
+        
+        svg g[id*="pit"] path, svg path[id*="pit"] {
+            fill: #059669 !important;
+            stroke: #047857 !important;
+            stroke-width: 2px !important;
+        }
+        
+        svg g[id*="start"] path, svg path[id*="start"], svg g[id*="finish"] path, svg path[id*="finish"] {
+            fill: #dc2626 !important;
+            stroke: #991b1b !important;
+            stroke-width: 3px !important;
+        }
+        
+        svg text {
+            fill: #ffbf00 !important;
+            font-weight: bold !important;
+            stroke: none !important;
         }
         
         /* Ensure text elements are visible */
