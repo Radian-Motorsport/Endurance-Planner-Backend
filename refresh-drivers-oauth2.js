@@ -3,14 +3,33 @@
  * Refreshes iRacing driver data for all drivers in the database
  */
 
-const iRacingOAuth2Client = require('./iracing-development/iracing-oauth2-client');
-const fs = require('fs');
-const path = require('path');
+const iRacingOAuth2Client = require('./iracing-archive/iracing-oauth2-client.js');
+const axios = require('axios');
+const { credentials } = require('./iracing-archive/iracing-credentials.js');
 
 class DriverRefreshService {
     constructor() {
-        this.client = null;
-        this.isAuthenticated = false;
+        this.client = new iRacingOAuth2Client('radian-limited', 'viewable-SALAMI-net-mortician-Fever-asparagus');
+        this.authenticated = false;
+    }
+
+    async authenticate() {
+        if (this.authenticated) return true;
+        
+        console.log('🔐 Authenticating with iRacing API...');
+        this.authenticated = await this.client.authenticate(credentials.email, credentials.password);
+        
+        if (!this.authenticated) {
+            throw new Error('Authentication failed');
+        }
+        
+        console.log('✅ Authentication successful');
+        return this.authenticated;
+    }
+
+    async fetchSignedURL(url) {
+        const response = await axios.get(url, { timeout: 30000 });
+        return response.data;
     }
 
     /**
@@ -60,44 +79,14 @@ class DriverRefreshService {
         }
     }
 
-    /**
-     * Initialize OAuth2 client with credentials from environment or config file
-     */
-    async initialize() {
-        // Try to load from private config repo first, then environment variables
-        await this.loadConfig();
-        
-        // Get OAuth2 credentials
-        const CLIENT_ID = process.env.IRACING_CLIENT_ID || 'radian-limited';
-        const CLIENT_SECRET = process.env.IRACING_CLIENT_SECRET || 'viewable-SALAMI-net-mortician-Fever-asparagus';
-        const EMAIL = process.env.IRACING_EMAIL;
-        const PASSWORD = process.env.IRACING_PASSWORD;
 
-        if (!EMAIL || !PASSWORD) {
-            throw new Error('iRacing credentials not found. Please set up environment variables or private config repo.');
-        }
-
-        this.client = new iRacingOAuth2Client(CLIENT_ID, CLIENT_SECRET);
-        
-        console.log('🔐 Authenticating with iRacing OAuth2...');
-        const authSuccess = await this.client.authenticate(EMAIL, PASSWORD);
-        
-        if (!authSuccess) {
-            throw new Error('OAuth2 authentication failed');
-        }
-        
-        this.isAuthenticated = true;
-        console.log('✅ OAuth2 authentication successful');
-    }
 
     /**
      * Refresh driver data for all drivers in database
      * @param {Object} pool - Database connection pool
      */
     async refreshAllDrivers(pool) {
-        if (!this.isAuthenticated) {
-            await this.initialize();
-        }
+        await this.authenticate();
 
         try {
             // Get all driver cust_ids from database
@@ -110,62 +99,38 @@ class DriverRefreshService {
             // Prepare cust_ids array for iRacing API
             const custIds = drivers.map(driver => driver.cust_id);
             
-            // Fetch updated data from iRacing using raw fetch (like working examples)
+            // Use the proven working pattern from fetch-driver-data-by-id.js
             console.log('🌐 Fetching updated driver data from iRacing...');
             const custIdsParam = custIds.join(',');
-            console.log('📊 Customer IDs:', custIdsParam);
             
-            const response = await fetch(`https://members-ng.iracing.com/data/member/get?cust_ids=${custIdsParam}`, {
-                headers: {
-                    'Authorization': `Bearer ${this.client.accessToken}`,
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                }
-            });
-
-            console.log('📊 Response status:', response.status);
+            const endpoint = `/data/member/get?cust_ids=${custIdsParam}&include_licenses=true`;
+            console.log(`� Requesting endpoint: ${endpoint}`);
             
-            if (!response.ok) {
-                throw new Error(`iRacing API request failed: ${response.status} ${response.statusText}`);
-            }
-
-            const result = await response.json();
-            console.log('📊 API Response received:', result ? 'SUCCESS' : 'NULL');
+            const urlResponse = await this.client.makeDataAPIRequest(endpoint);
             
-            let memberData;
-            if (result.link) {
-                console.log('📡 Got data link, fetching actual data...');
-                const actualResponse = await fetch(result.link);
-                memberData = await actualResponse.json();
-                console.log('📊 Actual data received:', memberData ? 'SUCCESS' : 'NULL');
-            } else {
-                memberData = result;
+            if (!urlResponse || !urlResponse.link) {
+                throw new Error('No signed URL received');
             }
+            
+            console.log(`� Got signed URL, fetching team member data...`);
+            
+            // Fetch the actual data from the signed URL
+            const data = await this.fetchSignedURL(urlResponse.link);
+            
+            console.log('✅ Team member data retrieved successfully!');
+            console.log(`� Retrieved data for ${data.members?.length || 0} members`);
 
-            if (memberData) {
-                if (Array.isArray(memberData)) {
-                    console.log('📊 Response is array with length:', memberData.length);
-                    // iRacing API returns members array directly
-                    memberData = { members: memberData };
-                } else {
-                    console.log('📊 Response keys:', Object.keys(memberData));
-                    if (memberData.members) {
-                        console.log('📊 Members count:', memberData.members.length);
-                    } else {
-                        console.log('📊 No members property found, full response:', memberData);
-                    }
-                }
-            }
-
-            if (!memberData || !memberData.members || !Array.isArray(memberData.members)) {
+            if (!data || !data.members || !Array.isArray(data.members)) {
                 throw new Error('Invalid response from iRacing API - no valid members data');
             }
 
-            console.log(`✅ Received data for ${memberData.members.length} drivers`);
-            
-            // Update database with fresh data
+            // Update database with fresh data using the license structure
             let updatedCount = 0;
-            for (const member of memberData.members) {
+            for (const member of data.members) {
                 try {
+                    // Extract sports car license data (like the working script does)
+                    const sportsCarLicense = member.licenses?.find(l => l.category === 'sports_car');
+                    
                     await pool.query(`
                         UPDATE drivers 
                         SET 
@@ -174,8 +139,8 @@ class DriverRefreshService {
                             updated_at = NOW()
                         WHERE cust_id = $3
                     `, [
-                        member.sports_car_irating || null,
-                        member.sports_car_safety_rating || null,
+                        sportsCarLicense?.irating || null,
+                        sportsCarLicense?.safety_rating || null,
                         member.cust_id
                     ]);
                     updatedCount++;

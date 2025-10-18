@@ -9,7 +9,8 @@ const {
     getEventsWithWeather, 
     updateEventWeather 
 } = require('./weather-api');
-const DriverRefreshService = require('./refresh-drivers-oauth2');
+const { exec } = require('child_process');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
