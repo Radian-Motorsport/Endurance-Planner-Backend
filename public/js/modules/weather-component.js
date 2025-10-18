@@ -265,8 +265,8 @@ export class WeatherComponent {
                 {
                     type: 'value',
                     position: 'left',
-                    axisLine: { lineStyle: { color: '#fbbf24' } },
-                    axisLabel: { color: '#fbbf24', fontSize: 12, formatter: '{value}' },
+                    axisLine: { lineStyle: { color: '#d6d6d6ff' } },
+                    axisLabel: { color: '#d6d6d6ff', fontSize: 12, formatter: '{value}' },
                     splitLine: { lineStyle: { color: '#6E7079', opacity: 0.2 } }
                 },
                 {
@@ -274,8 +274,8 @@ export class WeatherComponent {
                     position: 'right',
                     min: 0,
                     max: 100,
-                    axisLine: { lineStyle: { color: '#1c76fcff' } },
-                    axisLabel: { color: '#1c76fcff', fontSize: 12, formatter: '{value}' },
+                    axisLine: { lineStyle: { color: '#d6d6d6ff' } },
+                    axisLabel: { color: '#d6d6d6ff', fontSize: 12, formatter: '{value}' },
                     splitLine: { show: false }
                 }
             ],
@@ -305,8 +305,8 @@ export class WeatherComponent {
                     type: 'line',
                     yAxisIndex: 1,
                     data: humidity,
-                    lineStyle: { color: '#1c76fcff', width: 2 },
-                    itemStyle: { color: '#1c76fcff' },
+                    lineStyle: { color: '#c41cfcff', width: 2 },
+                    itemStyle: { color: '#c41cfcff' },
                     smooth: true,
                     symbol: 'none'
                 },
@@ -380,8 +380,8 @@ export class WeatherComponent {
                     position: 'left',
                     min: 0, 
                     max: 100,
-                    axisLine: { lineStyle: { color: '#1c76fcff' } },
-                    axisLabel: { color: '#1c76fcff', fontSize: 12, formatter: '{value}' },
+                    axisLine: { lineStyle: { color: '#d6d6d6ff' } },
+                    axisLabel: { color: '#d6d6d6ff', fontSize: 12, formatter: '{value}' },
                     splitLine: { lineStyle: { color: '#6E7079', opacity: 0.2 } }
                 },
                 {
@@ -389,8 +389,8 @@ export class WeatherComponent {
                     position: 'right',
                     min: 0, 
                     max: 100,
-                    axisLine: { lineStyle: { color: '#00d6e1ff' } },
-                    axisLabel: { color: '#00d6e1ff', fontSize: 12, formatter: '{value}' },
+                    axisLine: { lineStyle: { color: '#d6d6d6ff' } },
+                    axisLabel: { color: '#d6d6d6ff', fontSize: 12, formatter: '{value}' },
                     splitLine: { show: false }
                 }
             ],
