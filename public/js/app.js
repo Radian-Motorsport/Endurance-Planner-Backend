@@ -971,7 +971,7 @@ class RadianPlannerApp {
         try {
             // Initialize weather component if not already done
             if (!this.weatherComponent) {
-                this.weatherComponent = new WeatherComponent('weather-container');
+                this.weatherComponent = new WeatherComponent('weather-display');
             }
             
             // Show weather display section
