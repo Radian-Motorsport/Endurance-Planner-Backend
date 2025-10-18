@@ -282,6 +282,8 @@ export class TrackMapComponent {
                     element.style.setProperty('stroke-width', style.strokeWidth, 'important');
                 }
                 if (style.fontFamily) {
+                    // Remove existing font attributes that might override
+                    element.removeAttribute('font-family');
                     element.setAttribute('font-family', style.fontFamily);
                     element.style.setProperty('font-family', style.fontFamily, 'important');
                 }
