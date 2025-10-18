@@ -443,7 +443,6 @@ export class WeatherComponent {
                         <strong>Time:</strong> ${timestamp}<br>
                         <strong>Cloud Cover:</strong> ${cloudCover[dataIndex]}%<br>
                         <strong>Precip Chance:</strong> ${precipitationChance[dataIndex]}%<br>
-                        <strong>Precip Amount:</strong> ${precipitationAmount[dataIndex]}<br>
                         <strong>Session:</strong> ${isRace ? 'Race' : 'Practice/Quali'}
                     </div>`;
                 }
