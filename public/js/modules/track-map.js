@@ -260,18 +260,37 @@ export class TrackMapComponent {
             'turns': { fill: '#ffbf00', stroke: '#ffea00', strokeWidth: '1px', fontFamily: 'Arial, sans-serif', fontSize: '12px', fontWeight: 'bold' }
         };
 
+        console.log(`🎨 Applying ${layerName} layer styles:`, styles[layerName]);
+
         if (styles[layerName]) {
             const style = styles[layerName];
             
             // Apply styles to all SVG elements in this layer
-            const elements = layerGroup.querySelectorAll('path, circle, rect, polygon, text');
-            elements.forEach(element => {
-                if (style.fill) element.setAttribute('fill', style.fill);
-                if (style.stroke) element.setAttribute('stroke', style.stroke);
-                if (style.strokeWidth) element.setAttribute('stroke-width', style.strokeWidth);
+            const elements = layerGroup.querySelectorAll('*');
+            console.log(`🎨 Found ${elements.length} elements in ${layerName} layer`);
+            
+            elements.forEach((element, index) => {
+                // Remove any existing inline styles that might override
+                element.removeAttribute('style');
+                
+                // Force apply the colors
+                if (style.fill) {
+                    element.setAttribute('fill', style.fill);
+                    element.style.fill = style.fill + ' !important';
+                }
+                if (style.stroke) {
+                    element.setAttribute('stroke', style.stroke);
+                    element.style.stroke = style.stroke + ' !important';
+                }
+                if (style.strokeWidth) {
+                    element.setAttribute('stroke-width', style.strokeWidth);
+                    element.style.strokeWidth = style.strokeWidth + ' !important';
+                }
                 if (style.fontFamily) element.setAttribute('font-family', style.fontFamily);
                 if (style.fontSize) element.setAttribute('font-size', style.fontSize);
                 if (style.fontWeight) element.setAttribute('font-weight', style.fontWeight);
+                
+                console.log(`🎨 Applied ${layerName} styles to element ${index}:`, element.tagName, 'fill:', element.getAttribute('fill'));
             });
 
             // For text elements in turns layer, make them white
@@ -279,6 +298,7 @@ export class TrackMapComponent {
                 const textElements = layerGroup.querySelectorAll('text');
                 textElements.forEach(text => {
                     text.setAttribute('fill', '#ffffff');
+                    text.style.fill = '#ffffff !important';
                     text.setAttribute('font-weight', 'bold');
                 });
             }
