@@ -5,7 +5,8 @@
  */
 
 export class UIManager {
-    constructor() {
+    constructor(app = null) {
+        this.app = app;
         this.currentPage = 'planner';
         this.setupEventListeners();
     }
@@ -84,7 +85,7 @@ export class UIManager {
     /**
      * Show page 2 (calculations and results)
      */
-    showPage2() {
+    async showPage2() {
         console.log('🔥🔥🔥 FIRST CALCULATE BUTTON PRESSED - showPage2() 🔥🔥🔥');
         
         // Hide other pages
@@ -98,6 +99,18 @@ export class UIManager {
         
         // Update button states
         this.updateButtonStates();
+
+        // Collect page 1 data and populate page 2
+        if (this.app) {
+            try {
+                const eventData = this.app.collectPage1Data();
+                await this.app.populatePage2(eventData);
+            } catch (error) {
+                console.error('❌ Error populating page 2:', error);
+            }
+        } else {
+            console.warn('⚠️ App instance not available for data collection');
+        }
     }
 
     /**

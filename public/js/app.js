@@ -11,7 +11,7 @@ import { TrackMapComponent } from './modules/track-map.js';
 class RadianPlannerApp {
     constructor() {
         this.apiClient = new APIClient();
-        this.uiManager = new UIManager();
+        this.uiManager = new UIManager(this);
         this.strategyCalculator = new StrategyCalculator();
         this.garage61Client = new Garage61Client();
         this.weatherComponent = null; // Will be initialized when needed
@@ -1399,6 +1399,154 @@ class RadianPlannerApp {
         if (this.selectedCar?.garage61_id && this.selectedTrack?.garage61_id) {
             console.log(`🔗 Ready for Garage61 lap data: Car ${this.selectedCar.garage61_id}, Track ${this.selectedTrack.garage61_id}`);
             // TODO: Automatically fetch lap data when both car and track are selected
+        }
+    }
+
+    /**
+     * Collect all page 1 data for transition to page 2
+     * @returns {Object} Complete event data from page 1 selections
+     */
+    collectPage1Data() {
+        console.log('📋 Collecting page 1 data for transition...');
+        
+        // Collect selected track data
+        const trackData = {
+            name: this.selectedTrack?.name || 'Unknown Track',
+            id: this.selectedTrack?.id,
+            garage61_id: this.selectedTrack?.garage61_id,
+            iracing_track_id: this.selectedTrack?.iracing_track_id
+        };
+
+        // Collect selected car data
+        const carData = {
+            name: this.selectedCar?.name || 'Unknown Car',
+            id: this.selectedCar?.id,
+            garage61_id: this.selectedCar?.garage61_id,
+            iracing_car_id: this.selectedCar?.iracing_car_id,
+            weight: this.selectedCar?.weight,
+            horsepower: this.selectedCar?.horsepower
+        };
+
+        // Collect selected drivers data
+        const driversData = this.selectedDrivers.map(driver => ({
+            name: driver.name,
+            firstName: driver.firstName,
+            lastName: driver.lastName,
+            garage61_slug: driver.garage61_slug,
+            timezone: driver.timezone
+        }));
+
+        // Collect session details
+        const sessionData = this.selectedSessionDetails ? {
+            session_name: this.selectedSessionDetails.session_name,
+            session_date: this.selectedSessionDetails.session_date,
+            session_start_time: this.selectedSessionDetails.session_start_time,
+            session_length: this.selectedSessionDetails.session_length,
+            time_of_day: this.selectedSessionDetails.time_of_day,
+            weather_type: this.selectedSessionDetails.weather_type,
+            track_temp: this.selectedSessionDetails.track_temp,
+            air_temp: this.selectedSessionDetails.air_temp
+        } : null;
+
+        // Collect weather data if available
+        const weatherData = this.currentWeatherData || null;
+
+        const eventData = {
+            track: trackData,
+            car: carData,
+            drivers: driversData,
+            session: sessionData,
+            weather: weatherData,
+            timestamp: new Date().toISOString()
+        };
+
+        console.log('📋 Collected event data:', eventData);
+        return eventData;
+    }
+
+    /**
+     * Populate page 2 with event summary data
+     * @param {Object} eventData - Event data from page 1
+     */
+    async populatePage2(eventData) {
+        console.log('📄 Populating page 2 with event data...');
+
+        // Populate track information
+        const trackNameEl = document.getElementById('page2-track');
+        if (trackNameEl) trackNameEl.textContent = eventData.track.name;
+
+        // Populate car information
+        const carNameEl = document.getElementById('page2-car');
+        if (carNameEl) carNameEl.textContent = eventData.car.name;
+
+        // Populate session information
+        if (eventData.session) {
+            const sessionNameEl = document.getElementById('page2-session');
+            const sessionDateEl = document.getElementById('page2-race-date');
+            const sessionTimeEl = document.getElementById('page2-start-time');
+            const sessionLengthEl = document.getElementById('page2-duration');
+
+            if (sessionNameEl) sessionNameEl.textContent = eventData.session.session_name;
+            if (sessionDateEl) sessionDateEl.textContent = eventData.session.session_date;
+            if (sessionTimeEl) sessionTimeEl.textContent = eventData.session.session_start_time;
+            if (sessionLengthEl) sessionLengthEl.textContent = `${eventData.session.session_length} minutes`;
+        }
+
+        // Populate drivers list
+        const driversListEl = document.getElementById('page2-drivers');
+        if (driversListEl && eventData.drivers.length > 0) {
+            driversListEl.textContent = eventData.drivers.map(d => d.name).join(', ');
+        }
+
+        // Make Garage61 API call if we have the required IDs
+        if (eventData.car.garage61_id && eventData.track.garage61_id && eventData.drivers.length > 0) {
+            await this.fetchAndDisplayGarage61Data(eventData);
+        } else {
+            console.warn('⚠️ Missing required data for Garage61 API call');
+            this.garage61Client.updateUI('error', 'Missing car/track/driver data for lap times');
+        }
+    }
+
+    /**
+     * Fetch and display Garage61 lap times data
+     * @param {Object} eventData - Event data with car, track, and drivers
+     */
+    async fetchAndDisplayGarage61Data(eventData) {
+        console.log('🏁 Fetching Garage61 lap times...');
+        
+        try {
+            // Show loading state
+            this.garage61Client.updateUI('loading');
+
+            // Make API call
+            const result = await this.garage61Client.fetchLapTimes(
+                eventData.car.garage61_id,
+                eventData.track.garage61_id
+            );
+
+            if (result.success && result.data.length > 0) {
+                // Filter laps by selected drivers
+                const filteredLaps = this.garage61Client.filterLapsByDrivers(result.data, eventData.drivers);
+                
+                // Get best laps per driver
+                const bestLaps = this.garage61Client.getDriverBestLaps(filteredLaps);
+
+                // Display results
+                const tbody = document.querySelector('#garage61-lap-times table tbody');
+                if (tbody) {
+                    this.garage61Client.displayLapTimes(bestLaps, tbody);
+                    this.garage61Client.updateUI('content');
+                }
+
+                console.log(`✅ Displayed ${bestLaps.length} best lap times`);
+            } else {
+                console.warn('⚠️ No lap data found');
+                this.garage61Client.updateUI('error', 'No lap data found for this car/track combination');
+            }
+
+        } catch (error) {
+            console.error('❌ Garage61 fetch error:', error);
+            this.garage61Client.updateUI('error', error.message);
         }
     }
 
