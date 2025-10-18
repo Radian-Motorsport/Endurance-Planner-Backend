@@ -822,7 +822,8 @@ class RadianPlannerApp {
                 
                 /* Ensure text elements are visible */
                 .track-svg-layer text {
-                    fill: #ffffff !important;
+                    fill: #fbbf24 !important;
+                    font-family: Arial, sans-serif !important;
                     font-weight: bold !important;
                 }
                 
@@ -970,7 +971,7 @@ class RadianPlannerApp {
         try {
             // Initialize weather component if not already done
             if (!this.weatherComponent) {
-                this.weatherComponent = new WeatherComponent('weather-display');
+                this.weatherComponent = new WeatherComponent('weather-container');
             }
             
             // Show weather display section

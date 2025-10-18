@@ -65,8 +65,8 @@ export class WeatherComponent {
                 }
                 
                 .chakra-tabs__tab[aria-selected="true"] {
-                    color: #22c55e !important;
-                    border-bottom-color: #22c55e !important;
+                    color: #2563eb !important;
+                    border-bottom-color: #2563eb !important;
                 }
                 
                 .chakra-tabs__tab-panel {
@@ -75,17 +75,6 @@ export class WeatherComponent {
                 
                 .chakra-tabs__tab-panel[aria-hidden="false"] {
                     display: block;
-                }
-                
-                .weather-chart-container {
-                    width: 100%;
-                    height: 400px;
-                    border: 1px solid #404040;
-                    border-radius: 8px;
-                    padding: 16px;
-                    background: #262626;
-                    position: relative;
-                    min-height: 400px;
                 }
             `;
             document.head.appendChild(style);
@@ -154,34 +143,24 @@ export class WeatherComponent {
     
     createHTML() {
         return `
-            <div class="border-t border-neutral-700 pt-6">
-                <h3 class="text-lg font-medium text-neutral-300 mb-4">Weather Forecast</h3>
-                
-                <div class="bg-neutral-800 p-4">
-                    <div class="chakra-tabs">
-                        <div class="chakra-tabs__tablist" role="tablist">
-                            <button class="chakra-tabs__tab" role="tab" aria-selected="false" data-tab="temperature">
-                                Temperature
-                            </button>
-                            <button class="chakra-tabs__tab" role="tab" aria-selected="true" data-tab="clouds">
-                                Clouds & Precipitation
-                            </button>
-                        </div>
+            <div class="chakra-tabs">
+                <div class="chakra-tabs__tablist" role="tablist">
+                    <button class="chakra-tabs__tab" role="tab" aria-selected="false" data-tab="temperature">
+                        Temperature
+                    </button>
+                    <button class="chakra-tabs__tab" role="tab" aria-selected="true" data-tab="clouds">
+                        Clouds & Precipitation
+                    </button>
+                </div>
 
-                        <!-- Temperature Tab Panel -->
-                        <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="true" id="temperature-panel">
-                            <div class="weather-chart-container">
-                                <div id="${this.containerId}-temperature-chart" style="width: 100%; height: 360px;"></div>
-                            </div>
-                        </div>
+                <!-- Temperature Tab Panel -->
+                <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="true" id="temperature-panel">
+                    <div id="${this.containerId}-temperature-chart" style="width: 100%; height: 360px; margin-top: 16px;"></div>
+                </div>
 
-                        <!-- Clouds & Precipitation Tab Panel -->
-                        <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="false" id="clouds-panel">
-                            <div class="weather-chart-container">
-                                <div id="${this.containerId}-clouds-chart" style="width: 100%; height: 360px;"></div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Clouds & Precipitation Tab Panel -->
+                <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="false" id="clouds-panel">
+                    <div id="${this.containerId}-clouds-chart" style="width: 100%; height: 360px; margin-top: 16px;"></div>
                 </div>
             </div>
         `;
@@ -503,7 +482,7 @@ export class WeatherComponent {
                 markArea: {
                     silent: true,
                     itemStyle: {
-                        color: 'rgba(255, 225, 0, 0.07)'  // Yellow for day - more transparent
+                        color: 'rgba(255, 225, 0, 0.02)'  // Yellow for day - more transparent
                     },
                     data: dayAreas
                 }
@@ -515,7 +494,7 @@ export class WeatherComponent {
                 markArea: {
                     silent: true,
                     itemStyle: {
-                        color: 'rgba(72, 0, 255, 0.07)'  // Dark blue for night - more transparent
+                        color: 'rgba(72, 0, 255, 0.02)'  // Dark blue for night - more transparent
                     },
                     data: nightAreas
                 }
