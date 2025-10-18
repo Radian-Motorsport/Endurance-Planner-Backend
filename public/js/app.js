@@ -1155,6 +1155,7 @@ class RadianPlannerApp {
             const forecast = weatherData.weather_forecast;
             const timeLabels = this.generateTimeLabels(forecast);
             const temperatures = forecast.map(item => this.convertTemperature(item.raw_air_temp));
+            const humidity = forecast.map(item => this.convertHumidity(item.rel_humidity));
             
             // Find race start index - first point where affects_session becomes true
             const raceStartIndex = forecast.findIndex((item, index) => 
@@ -1162,43 +1163,69 @@ class RadianPlannerApp {
             );
 
             const option = {
-                grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
+                grid: { left: '60px', right: '60px', top: '40px', bottom: '60px' },
                 xAxis: {
                     type: 'category',
                     data: timeLabels,
                     axisLine: { lineStyle: { color: '#6E7079' } },
                     axisLabel: { color: '#6E7079', fontSize: 10, rotate: 45 }
                 },
-                yAxis: {
-                    type: 'value',
-                    axisLine: { lineStyle: { color: '#6E7079' } },
-                    axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}°F' },
-                    splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
-                },
-                series: [{
-                    name: 'Temperature',
-                    type: 'line',
-                    data: temperatures,
-                    lineStyle: { color: '#ff6b6b', width: 2 },
-                    itemStyle: { color: '#ff6b6b' },
-                    smooth: true,
-                    symbol: 'none',
-                    markLine: raceStartIndex >= 0 ? {
-                        data: [{
-                            name: 'Race Start',
-                            xAxis: raceStartIndex,
-                            lineStyle: { color: '#00ff00', width: 3 },
-                            label: { formatter: 'Race Start', color: '#00ff00' }
-                        }]
-                    } : undefined
-                }],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: 'Temperature (°F)',
+                        position: 'left',
+                        axisLine: { lineStyle: { color: '#ff6b6b' } },
+                        axisLabel: { color: '#ff6b6b', fontSize: 12, formatter: '{value}°F' },
+                        splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
+                    },
+                    {
+                        type: 'value',
+                        name: 'Humidity (%)',
+                        position: 'right',
+                        min: 0,
+                        max: 100,
+                        axisLine: { lineStyle: { color: '#4ecdc4' } },
+                        axisLabel: { color: '#4ecdc4', fontSize: 12, formatter: '{value}%' },
+                        splitLine: { show: false }
+                    }
+                ],
+                series: [
+                    {
+                        name: 'Temperature',
+                        type: 'line',
+                        yAxisIndex: 0,
+                        data: temperatures,
+                        lineStyle: { color: '#ff6b6b', width: 2 },
+                        itemStyle: { color: '#ff6b6b' },
+                        smooth: true,
+                        symbol: 'none',
+                        markLine: raceStartIndex >= 0 ? {
+                            data: [{
+                                name: 'Race Start',
+                                xAxis: raceStartIndex,
+                                lineStyle: { color: '#00ff00', width: 3 },
+                                label: { formatter: 'Race Start', color: '#00ff00' }
+                            }]
+                        } : undefined
+                    },
+                    {
+                        name: 'Humidity',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        data: humidity,
+                        lineStyle: { color: '#4ecdc4', width: 2 },
+                        itemStyle: { color: '#4ecdc4' },
+                        smooth: true,
+                        symbol: 'none'
+                    },
+                    ...this.createDayNightMarkings(forecast, timeLabels)
+                ],
                 tooltip: {
                     trigger: 'axis',
                     formatter: (params) => {
-                        const point = params[0];
-                        const forecastItem = forecast[point.dataIndex];
+                        const forecastItem = forecast[params[0].dataIndex];
                         const isRace = forecastItem.affects_session;
-                        const sunStatus = forecastItem.is_sun_up ? '☀️ Day' : '🌙 Night';
                         
                         // Format time offset for display
                         const offsetHours = Math.floor(forecastItem.time_offset / 60);
@@ -1216,12 +1243,16 @@ class RadianPlannerApp {
                             hour: 'numeric', minute: '2-digit', hour12: true
                         });
                         
+                        // Get values from all series
+                        const tempValue = params.find(p => p.seriesName === 'Temperature')?.value || 'N/A';
+                        const humidityValue = params.find(p => p.seriesName === 'Humidity')?.value || 'N/A';
+                        
                         return `<div style="color: black;">
                             <strong>Race Time:</strong> ${timeOffset}<br>
                             <strong>Real Time:</strong> ${timestamp}<br>
-                            <strong>Temperature:</strong> ${point.value}°F<br>
-                            <strong>Session:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
-                            <strong>Sun:</strong> ${sunStatus}
+                            <strong>Temperature:</strong> ${tempValue}°F<br>
+                            <strong>Humidity:</strong> ${humidityValue}%<br>
+                            <strong>Session:</strong> ${isRace ? 'Race' : 'Practice/Quali'}
                         </div>`;
                     }
                 }
@@ -1267,7 +1298,8 @@ class RadianPlannerApp {
             const forecast = weatherData.weather_forecast;
             const timeLabels = this.generateTimeLabels(forecast);
             const cloudCover = forecast.map(item => this.convertCloudCover(item.cloud_cover));
-            const precipitation = forecast.map(item => this.convertPrecipitation(item.rel_humidity));
+            const precipitationChance = forecast.map(item => item.precip_chance); // Use actual precip_chance (0%)
+            const precipitationAmount = forecast.map(item => item.precip_amount); // Use actual precip_amount (0)
             
             // Find race start index - first point where affects_session becomes true
             const raceStartIndex = forecast.findIndex((item, index) => 
@@ -1311,12 +1343,22 @@ class RadianPlannerApp {
                     {
                         name: 'Precipitation Chance', 
                         type: 'line', 
-                        data: precipitation,
+                        data: precipitationChance,
                         lineStyle: { color: '#0B5559', width: 2 },
                         itemStyle: { color: '#0B5559' },
                         smooth: true, 
                         symbol: 'none'
-                    }
+                    },
+                    {
+                        name: 'Precipitation Amount', 
+                        type: 'line', 
+                        data: precipitationAmount,
+                        lineStyle: { color: '#1a8faa', width: 2, type: 'dashed' },
+                        itemStyle: { color: '#1a8faa' },
+                        smooth: true, 
+                        symbol: 'none'
+                    },
+                    ...this.createDayNightMarkings(forecast, timeLabels)
                 ],
                 tooltip: {
                     trigger: 'axis',
@@ -1324,7 +1366,6 @@ class RadianPlannerApp {
                         const dataIndex = params[0].dataIndex;
                         const forecastItem = forecast[dataIndex];
                         const isRace = forecastItem.affects_session;
-                        const sunStatus = forecastItem.is_sun_up ? '☀️ Day' : '🌙 Night';
                         
                         // Format time offset for display
                         const offsetHours = Math.floor(forecastItem.time_offset / 60);
@@ -1346,9 +1387,9 @@ class RadianPlannerApp {
                             <strong>Race Time:</strong> ${timeOffset}<br>
                             <strong>Real Time:</strong> ${timestamp}<br>
                             <strong>Cloud Cover:</strong> ${cloudCover[dataIndex]}%<br>
-                            <strong>Precipitation:</strong> ${precipitation[dataIndex]}%<br>
-                            <strong>Session:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
-                            <strong>Sun:</strong> ${sunStatus}
+                            <strong>Precip Chance:</strong> ${precipitationChance[dataIndex]}%<br>
+                            <strong>Precip Amount:</strong> ${precipitationAmount[dataIndex]}<br>
+                            <strong>Session:</strong> ${isRace ? 'Race' : 'Practice/Quali'}
                         </div>`;
                     }
                 }
@@ -1473,6 +1514,13 @@ class RadianPlannerApp {
     convertPrecipitation(humidity) {
         // Based on actual data: rel_humidity ranges from ~4000-7000
         // Convert to precipitation chance 0-100%
+        const minHumidity = 4000, maxHumidity = 7000;
+        const percentage = Math.round(((humidity - minHumidity) / (maxHumidity - minHumidity)) * 100);
+        return Math.max(0, Math.min(100, percentage));
+    }
+
+    convertHumidity(humidity) {
+        // Convert rel_humidity values to 0-100% humidity
         const minHumidity = 4000, maxHumidity = 7000;
         const percentage = Math.round(((humidity - minHumidity) / (maxHumidity - minHumidity)) * 100);
         return Math.max(0, Math.min(100, percentage));
