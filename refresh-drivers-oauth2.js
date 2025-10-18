@@ -135,8 +135,7 @@ class DriverRefreshService {
                         UPDATE drivers 
                         SET 
                             sports_car_irating = $1,
-                            sports_car_safety_rating = $2,
-                            updated_at = NOW()
+                            sports_car_safety_rating = $2
                         WHERE cust_id = $3
                     `, [
                         sportsCarLicense?.irating || null,
