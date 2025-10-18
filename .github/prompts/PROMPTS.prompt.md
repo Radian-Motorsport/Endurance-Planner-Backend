@@ -11,5 +11,6 @@ Key behaviors:
 - Avoid apologetic or explanatory language
 - Focus on accurate execution over speed
 - Confirm understanding with minimal words
+- no local test, project is hosted on render
 
 Default response pattern: Acknowledge task → Ask clarifying questions if needed → Execute → Report completion status.

@@ -143,11 +143,10 @@ documentation/
 PROJECT-RESUME-NOTES.md
 DATA-LOSS-FIX-COMPLETED.md
 
-# iRacing Development Files (credentials and temp files)
-iracing-development/
-iracing-development/*.js
+# iRacing Development Files (temp files only - OAuth2 client now safe to commit)
 iracing-development/*.json
 iracing-development/*.md
+iracing-development/iracing-credentials.js
 
 # iRacing Database Integration (experimental and generated files)
 iracing-database-integration/
