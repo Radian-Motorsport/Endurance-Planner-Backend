@@ -1163,7 +1163,12 @@ class RadianPlannerApp {
             );
 
             const option = {
-                grid: { left: '60px', right: '60px', top: '40px', bottom: '60px' },
+                grid: { left: '60px', right: '60px', top: '60px', bottom: '60px' },
+                legend: {
+                    data: ['Temperature (°F)', 'Humidity (%)'],
+                    top: '10px',
+                    textStyle: { color: '#6E7079' }
+                },
                 xAxis: {
                     type: 'category',
                     data: timeLabels,
@@ -1173,26 +1178,24 @@ class RadianPlannerApp {
                 yAxis: [
                     {
                         type: 'value',
-                        name: 'Temperature (°F)',
                         position: 'left',
                         axisLine: { lineStyle: { color: '#ff6b6b' } },
-                        axisLabel: { color: '#ff6b6b', fontSize: 12, formatter: '{value}°F' },
+                        axisLabel: { color: '#ff6b6b', fontSize: 12, formatter: '{value}' },
                         splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
                     },
                     {
                         type: 'value',
-                        name: 'Humidity (%)',
                         position: 'right',
                         min: 0,
                         max: 100,
                         axisLine: { lineStyle: { color: '#4ecdc4' } },
-                        axisLabel: { color: '#4ecdc4', fontSize: 12, formatter: '{value}%' },
+                        axisLabel: { color: '#4ecdc4', fontSize: 12, formatter: '{value}' },
                         splitLine: { show: false }
                     }
                 ],
                 series: [
                     {
-                        name: 'Temperature',
+                        name: 'Temperature (°F)',
                         type: 'line',
                         yAxisIndex: 0,
                         data: temperatures,
@@ -1202,15 +1205,14 @@ class RadianPlannerApp {
                         symbol: 'none',
                         markLine: raceStartIndex >= 0 ? {
                             data: [{
-                                name: 'Race Start',
                                 xAxis: raceStartIndex,
-                                lineStyle: { color: '#00ff00', width: 3 },
-                                label: { formatter: 'Race Start', color: '#00ff00' }
+                                lineStyle: { color: '#00ff00', width: 1 },
+                                label: { show: false }
                             }]
                         } : undefined
                     },
                     {
-                        name: 'Humidity',
+                        name: 'Humidity (%)',
                         type: 'line',
                         yAxisIndex: 1,
                         data: humidity,
@@ -1227,29 +1229,18 @@ class RadianPlannerApp {
                         const forecastItem = forecast[params[0].dataIndex];
                         const isRace = forecastItem.affects_session;
                         
-                        // Format time offset for display
-                        const offsetHours = Math.floor(forecastItem.time_offset / 60);
-                        const offsetMinutes = Math.abs(forecastItem.time_offset % 60);
-                        let timeOffset;
-                        if (forecastItem.time_offset < 0) {
-                            timeOffset = `-${Math.abs(offsetHours)}:${offsetMinutes.toString().padStart(2, '0')} (before race)`;
-                        } else {
-                            timeOffset = `+${offsetHours}:${offsetMinutes.toString().padStart(2, '0')} (race time)`;
-                        }
-                        
-                        // Also show actual timestamp
+                        // Show actual timestamp
                         const timestamp = new Date(forecastItem.timestamp).toLocaleString('en-US', {
                             month: 'short', day: 'numeric', 
                             hour: 'numeric', minute: '2-digit', hour12: true
                         });
                         
                         // Get values from all series
-                        const tempValue = params.find(p => p.seriesName === 'Temperature')?.value || 'N/A';
-                        const humidityValue = params.find(p => p.seriesName === 'Humidity')?.value || 'N/A';
+                        const tempValue = params.find(p => p.seriesName === 'Temperature (°F)')?.value || 'N/A';
+                        const humidityValue = params.find(p => p.seriesName === 'Humidity (%)')?.value || 'N/A';
                         
                         return `<div style="color: black;">
-                            <strong>Race Time:</strong> ${timeOffset}<br>
-                            <strong>Real Time:</strong> ${timestamp}<br>
+                            <strong>Time:</strong> ${timestamp}<br>
                             <strong>Temperature:</strong> ${tempValue}°F<br>
                             <strong>Humidity:</strong> ${humidityValue}%<br>
                             <strong>Session:</strong> ${isRace ? 'Race' : 'Practice/Quali'}
@@ -1333,10 +1324,9 @@ class RadianPlannerApp {
                         symbol: 'none',
                         markLine: raceStartIndex >= 0 ? {
                             data: [{
-                                name: 'Race Start',
                                 xAxis: raceStartIndex,
-                                lineStyle: { color: '#00ff00', width: 3 },
-                                label: { formatter: 'Race Start', color: '#00ff00' }
+                                lineStyle: { color: '#00ff00', width: 1 },
+                                label: { show: false }
                             }]
                         } : undefined
                     },
@@ -1367,25 +1357,14 @@ class RadianPlannerApp {
                         const forecastItem = forecast[dataIndex];
                         const isRace = forecastItem.affects_session;
                         
-                        // Format time offset for display
-                        const offsetHours = Math.floor(forecastItem.time_offset / 60);
-                        const offsetMinutes = Math.abs(forecastItem.time_offset % 60);
-                        let timeOffset;
-                        if (forecastItem.time_offset < 0) {
-                            timeOffset = `-${Math.abs(offsetHours)}:${offsetMinutes.toString().padStart(2, '0')} (before race)`;
-                        } else {
-                            timeOffset = `+${offsetHours}:${offsetMinutes.toString().padStart(2, '0')} (race time)`;
-                        }
-                        
-                        // Also show actual timestamp
+                        // Show actual timestamp
                         const timestamp = new Date(forecastItem.timestamp).toLocaleString('en-US', {
                             month: 'short', day: 'numeric', 
                             hour: 'numeric', minute: '2-digit', hour12: true
                         });
                         
                         return `<div style="color: black;">
-                            <strong>Race Time:</strong> ${timeOffset}<br>
-                            <strong>Real Time:</strong> ${timestamp}<br>
+                            <strong>Time:</strong> ${timestamp}<br>
                             <strong>Cloud Cover:</strong> ${cloudCover[dataIndex]}%<br>
                             <strong>Precip Chance:</strong> ${precipitationChance[dataIndex]}%<br>
                             <strong>Precip Amount:</strong> ${precipitationAmount[dataIndex]}<br>
@@ -1469,27 +1448,15 @@ class RadianPlannerApp {
 
     generateTimeLabels(forecast) {
         return forecast.map((item, index) => {
-            // Use time_offset for more accurate relative timing
-            const offsetHours = Math.floor(item.time_offset / 60);
-            const offsetMinutes = Math.abs(item.time_offset % 60);
+            const timestamp = new Date(item.timestamp);
             
-            // Create readable time labels
-            let timeLabel;
-            if (item.time_offset < 0) {
-                timeLabel = `-${Math.abs(offsetHours)}:${offsetMinutes.toString().padStart(2, '0')}`;
-            } else {
-                timeLabel = `+${offsetHours}:${offsetMinutes.toString().padStart(2, '0')}`;
-            }
-            
-            // Mark race start clearly
-            if (item.affects_session && item.time_offset >= 0 && 
-                (index === 0 || !forecast[index-1].affects_session)) {
-                timeLabel += ' (RACE START)';
-            }
-            
-            // Show fewer labels for cleaner display - every 2 hours
-            if (index % 8 === 0) { // Every 8 intervals = 2 hours (15min intervals)
-                return timeLabel;
+            // Show labels every hour (every 4 intervals = 1 hour at 15min intervals)
+            if (index % 4 === 0) {
+                // Format as clock time (5am, 6pm, etc.)
+                return timestamp.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    hour12: true
+                }).toLowerCase();
             }
             
             return '';
