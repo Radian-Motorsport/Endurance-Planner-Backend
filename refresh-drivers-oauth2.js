@@ -3,9 +3,8 @@
  * Refreshes iRacing driver data for all drivers in the database
  */
 
-const iRacingOAuth2Client = require('./iracing-archive/iracing-oauth2-client.js');
+const iRacingOAuth2Client = require('./iracing-development/iracing-oauth2-client');
 const axios = require('axios');
-const { credentials } = require('./iracing-archive/iracing-credentials.js');
 
 class DriverRefreshService {
     constructor() {
@@ -16,8 +15,15 @@ class DriverRefreshService {
     async authenticate() {
         if (this.authenticated) return true;
         
+        const email = process.env.IRACING_EMAIL;
+        const password = process.env.IRACING_PASSWORD;
+        
+        if (!email || !password) {
+            throw new Error('iRacing credentials not set in environment variables');
+        }
+        
         console.log('🔐 Authenticating with iRacing API...');
-        this.authenticated = await this.client.authenticate(credentials.email, credentials.password);
+        this.authenticated = await this.client.authenticate(email, password);
         
         if (!this.authenticated) {
             throw new Error('Authentication failed');

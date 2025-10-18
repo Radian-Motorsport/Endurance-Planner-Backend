@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-10-18T18:30:00.220Z",
+  "error": "iRacing credentials not set. Set IRACING_EMAIL and IRACING_PASSWORD environment variables.",
+  "rateLimitStatus": {
+    "requestsUsed": 0,
+    "requestsRemaining": 12,
+    "minutesInCurrentWindow": 0,
+    "tokenExpiry": null
+  }
+}

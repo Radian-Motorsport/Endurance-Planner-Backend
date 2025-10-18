@@ -509,7 +509,7 @@ export class WeatherComponent {
                 markArea: {
                     silent: true,
                     itemStyle: {
-                        color: 'rgba(72, 0, 255, 0.05)'  // Dark blue for night - more transparent
+                        color: 'rgba(29, 29, 29, 0.61)'  // Dark grey for night - more transparent
                     },
                     data: nightAreas
                 }
