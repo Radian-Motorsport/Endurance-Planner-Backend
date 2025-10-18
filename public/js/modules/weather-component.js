@@ -38,40 +38,6 @@ export class WeatherComponent {
             const style = document.createElement('style');
             style.id = 'weather-component-styles';
             style.textContent = `
-                .weather-component-wrapper {
-                    background: #262626;
-                    border: 1px solid #404040;
-                    border-radius: 8px;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    width: 100%;
-                }
-                
-                .weather-component-header {
-                    display: flex;
-                    align-items: center;
-                    padding: 16px 24px;
-                    border-bottom: 1px solid #404040;
-                    background: transparent;
-                    border-radius: 8px 8px 0 0;
-                }
-                
-                .weather-component-header h6 {
-                    margin: 0 0 0 8px;
-                    font-size: 18px;
-                    font-weight: 600;
-                    color: #d4d4d8;
-                }
-                
-                .weather-component-header svg {
-                    width: 20px;
-                    height: 20px;
-                    color: #a3a3a3;
-                }
-                
-                .weather-component-content {
-                    padding: 24px;
-                }
-                
                 .chakra-tabs {
                     width: 100%;
                 }
@@ -117,34 +83,9 @@ export class WeatherComponent {
                     border: 1px solid #404040;
                     border-radius: 8px;
                     padding: 16px;
-                    background: #1c1c1c;
+                    background: #262626;
                     position: relative;
                     min-height: 400px;
-                }
-                
-                .weather-legend {
-                    display: flex;
-                    gap: 32px;
-                    margin-bottom: 16px;
-                    align-items: center;
-                }
-                
-                .weather-legend-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                
-                .weather-legend-color {
-                    width: 24px;
-                    height: 3px;
-                    border-radius: 2px;
-                }
-                
-                .weather-legend-label {
-                    font-size: 14px;
-                    color: #d4d4d8;
-                    font-weight: 500;
                 }
             `;
             document.head.appendChild(style);
@@ -213,9 +154,10 @@ export class WeatherComponent {
     
     createHTML() {
         return `
-            <h3 class="text-lg font-medium text-neutral-300 mb-4">Weather Forecast</h3>
-            <div class="weather-component-wrapper">
-                <div class="weather-component-content">
+            <div class="border-t border-neutral-700 pt-6">
+                <h3 class="text-lg font-medium text-neutral-300 mb-4">Weather Forecast</h3>
+                
+                <div class="bg-neutral-800 border border-neutral-700 rounded-lg p-4">
                     <div class="chakra-tabs">
                         <div class="chakra-tabs__tablist" role="tablist">
                             <button class="chakra-tabs__tab" role="tab" aria-selected="false" data-tab="temperature">
@@ -332,8 +274,8 @@ export class WeatherComponent {
                 {
                     type: 'value',
                     position: 'left',
-                    axisLine: { lineStyle: { color: '#ff6b6b' } },
-                    axisLabel: { color: '#ff6b6b', fontSize: 12, formatter: '{value}' },
+                    axisLine: { lineStyle: { color: '#fbbf24' } },
+                    axisLabel: { color: '#fbbf24', fontSize: 12, formatter: '{value}' },
                     splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
                 },
                 {
@@ -352,8 +294,8 @@ export class WeatherComponent {
                     type: 'line',
                     yAxisIndex: 0,
                     data: temperatures,
-                    lineStyle: { color: '#ff6b6b', width: 2 },
-                    itemStyle: { color: '#ff6b6b' },
+                    lineStyle: { color: '#fbbf24', width: 2 },
+                    itemStyle: { color: '#fbbf24' },
                     smooth: true,
                     symbol: 'none',
                     markLine: raceStartIndex >= 0 ? {
@@ -429,9 +371,9 @@ export class WeatherComponent {
         );
 
         const option = {
-            grid: { left: '60px', right: '40px', top: '60px', bottom: '60px' },
+            grid: { left: '60px', right: '60px', top: '60px', bottom: '60px' },
             legend: {
-                data: ['Cloud Cover (%)', 'Precipitation Chance (%)', 'Precipitation Amount'],
+                data: ['Cloud Cover (%)', 'Precipitation Chance (%)'],
                 top: '10px',
                 textStyle: { color: '#d4d4d8' }
             },
@@ -441,18 +383,31 @@ export class WeatherComponent {
                 axisLine: { lineStyle: { color: '#6E7079' } },
                 axisLabel: { color: '#6E7079', fontSize: 10, rotate: 45 }
             },
-            yAxis: {
-                type: 'value', 
-                min: 0, 
-                max: 100,
-                axisLine: { lineStyle: { color: '#6E7079' } },
-                axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}' },
-                splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
-            },
+            yAxis: [
+                {
+                    type: 'value', 
+                    position: 'left',
+                    min: 0, 
+                    max: 100,
+                    axisLine: { lineStyle: { color: 'rgb(5,5,15)' } },
+                    axisLabel: { color: 'rgb(5,5,15)', fontSize: 12, formatter: '{value}' },
+                    splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
+                },
+                {
+                    type: 'value', 
+                    position: 'right',
+                    min: 0, 
+                    max: 100,
+                    axisLine: { lineStyle: { color: '#0B5559' } },
+                    axisLabel: { color: '#0B5559', fontSize: 12, formatter: '{value}' },
+                    splitLine: { show: false }
+                }
+            ],
             series: [
                 {
                     name: 'Cloud Cover (%)', 
                     type: 'line', 
+                    yAxisIndex: 0,
                     data: cloudCover,
                     lineStyle: { color: 'rgb(5,5,15)', width: 2 },
                     itemStyle: { color: 'rgb(5,5,15)' },
@@ -472,18 +427,10 @@ export class WeatherComponent {
                 {
                     name: 'Precipitation Chance (%)', 
                     type: 'line', 
+                    yAxisIndex: 1,
                     data: precipitationChance,
                     lineStyle: { color: '#0B5559', width: 2 },
                     itemStyle: { color: '#0B5559' },
-                    smooth: true, 
-                    symbol: 'none'
-                },
-                {
-                    name: 'Precipitation Amount', 
-                    type: 'line', 
-                    data: precipitationAmount,
-                    lineStyle: { color: '#1a8faa', width: 2, type: 'dashed' },
-                    itemStyle: { color: '#1a8faa' },
                     smooth: true, 
                     symbol: 'none'
                 },
@@ -556,7 +503,7 @@ export class WeatherComponent {
                 markArea: {
                     silent: true,
                     itemStyle: {
-                        color: 'rgba(255, 255, 0, 0.25)'  // Yellow for day
+                        color: 'rgba(255, 255, 0, 0.15)'  // Yellow for day - more transparent
                     },
                     data: dayAreas
                 }
@@ -568,7 +515,7 @@ export class WeatherComponent {
                 markArea: {
                     silent: true,
                     itemStyle: {
-                        color: 'rgba(0, 0, 139, 0.25)'  // Dark blue for night
+                        color: 'rgba(0, 0, 139, 0.15)'  // Dark blue for night - more transparent
                     },
                     data: nightAreas
                 }
