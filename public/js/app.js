@@ -191,7 +191,8 @@ class RadianPlannerApp {
         const eventsSelect = document.getElementById('event-select');
         if (!eventsSelect) return;
 
-        console.log('🔍 Loading events for series ID:', seriesId, 'Type:', typeof seriesId);
+        console.log('� POPULATE EVENTS CALLED with seriesId:', seriesId);
+        console.trace('🔵 Call stack for populateEventsDropdown');
         eventsSelect.innerHTML = '<option value="">Loading events...</option>';
         
         // Also populate the new event names dropdown
