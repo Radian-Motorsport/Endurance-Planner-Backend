@@ -665,7 +665,7 @@ class RadianPlannerApp {
         // Populate track logo overlay
         const trackLogoOverlay = document.getElementById('track-logo-overlay');
         if (trackLogoOverlay && sessionDetails.logo) {
-            const logoUrl = `https://ir-core-sites.iracing.com${sessionDetails.logo}`;
+            const logoUrl = `https://images-static.iracing.com${sessionDetails.logo}`;
             trackLogoOverlay.src = logoUrl;
             trackLogoOverlay.alt = `${sessionDetails.track_name} Logo` || 'Track Logo';
             trackLogoOverlay.classList.remove('hidden');
