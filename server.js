@@ -9,6 +9,7 @@ const {
     getEventsWithWeather, 
     updateEventWeather 
 } = require('./weather-api');
+const DriverRefreshService = require('./refresh-drivers-oauth2');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1000,6 +1001,34 @@ app.post('/api/daylight/bulk', async (req, res) => {
 // 🚧 iRacing service integration (COMMENTED OUT - WORK IN PROGRESS)
 // const iracingRoutes = require('./iracing-routes');
 // app.use('/api/iracing', iracingRoutes);
+
+// Driver data refresh endpoints
+const driverRefreshService = new DriverRefreshService();
+
+// Refresh all drivers
+app.post('/api/drivers/refresh-all', async (req, res) => {
+    try {
+        if (!pool) {
+            return res.status(500).json({ error: 'Database not available' });
+        }
+
+        console.log('🔄 Starting refresh of all drivers...');
+        const result = await driverRefreshService.refreshAllDrivers(pool);
+        
+        res.json({
+            message: 'Driver refresh completed',
+            ...result
+        });
+    } catch (error) {
+        console.error('Driver refresh failed:', error.message);
+        res.status(500).json({ 
+            error: 'Driver refresh failed',
+            message: error.message 
+        });
+    }
+});
+
+
 
 // Start the server
 app.listen(PORT, () => {

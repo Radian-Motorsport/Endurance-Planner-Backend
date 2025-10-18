@@ -1075,6 +1075,11 @@ class RadianPlannerApp {
             addDriverBtn.addEventListener('click', () => this.addSelectedDriver());
         }
 
+        const refreshDriversBtn = document.getElementById('refresh-drivers-btn');
+        if (refreshDriversBtn) {
+            refreshDriversBtn.addEventListener('click', () => this.refreshAllDrivers());
+        }
+
         // Track selection
         const trackSelect = document.getElementById('track-select');
         if (trackSelect) {
@@ -1281,7 +1286,13 @@ class RadianPlannerApp {
             const li = document.createElement('li');
             li.className = 'flex items-center justify-between bg-neutral-700 p-3 rounded';
             li.innerHTML = `
-                <span class="text-neutral-200">${driver.name}</span>
+                <div class="flex items-center space-x-3">
+                    <span class="text-neutral-200">${driver.name}</span>
+                    <div class="text-xs text-neutral-400">
+                        iR: ${driver.sports_car_irating || 'N/A'} | 
+                        SR: ${driver.sports_car_safety_rating || 'N/A'}
+                    </div>
+                </div>
                 <button onclick="window.radianPlanner.removeSelectedDriver('${driver.name}')" 
                         class="text-red-400 hover:text-red-300">
                     <i class="fas fa-times"></i>
@@ -1290,6 +1301,56 @@ class RadianPlannerApp {
             driversList.appendChild(li);
         });
     }
+
+    async refreshAllDrivers() {
+        const refreshBtn = document.getElementById('refresh-drivers-btn');
+        const originalHtml = refreshBtn.innerHTML;
+        
+        try {
+            // Update button to show loading state
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            refreshBtn.disabled = true;
+            
+            this.uiManager.showNotification('Refreshing all driver data...', 'info');
+            
+            const response = await fetch('/api/drivers/refresh-all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.message || 'Refresh failed');
+            }
+            
+            // Reload driver data
+            await this.fetchData();
+            this.populateDriversDropdown();
+            
+            this.uiManager.showNotification(
+                `Successfully refreshed ${result.updatedCount}/${result.totalDrivers} drivers`, 
+                'success'
+            );
+            
+            console.log(`✅ Driver refresh completed: ${result.updatedCount}/${result.totalDrivers} updated`);
+            
+        } catch (error) {
+            console.error('❌ Driver refresh failed:', error);
+            this.uiManager.showNotification(
+                `Driver refresh failed: ${error.message}`, 
+                'error'
+            );
+        } finally {
+            // Restore button
+            refreshBtn.innerHTML = originalHtml;
+            refreshBtn.disabled = false;
+        }
+    }
+
+
 
     handleTrackSelection(trackName) {
         if (!trackName) {

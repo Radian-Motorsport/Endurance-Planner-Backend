@@ -1,0 +1,7 @@
+# Private configuration folder
+# This folder contains sensitive credentials and should never be committed to git
+
+/config/
+*.env
+credentials.*
+secrets.*

@@ -4,6 +4,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Private configuration and credentials
+config/.env
+config/credentials.*
+config/secrets.*
+.env
+
 # Runtime data
 pids
 *.pid
