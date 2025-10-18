@@ -693,6 +693,23 @@
     <!-- Weather Integration -->
     <!-- <script src="public/weather-integration.js"></script> -->
     
+    <!-- Debug Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('🔍 DEBUG: DOM loaded, checking button...');
+        const continueBtn = document.getElementById('continue-button');
+        console.log('🔍 DEBUG: Continue button found:', !!continueBtn);
+        
+        if (continueBtn) {
+            console.log('🔍 DEBUG: Button element:', continueBtn);
+            continueBtn.addEventListener('click', () => {
+                console.log('🔍 DEBUG: Button clicked directly!');
+            });
+            console.log('🔍 DEBUG: Direct click listener added');
+        }
+    });
+    </script>
+    
     <!-- JavaScript Modules -->
     <script type="module" src="public/js/app.js"></script>
 </body>
