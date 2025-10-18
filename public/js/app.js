@@ -195,20 +195,11 @@ class RadianPlannerApp {
         console.trace('🔵 Call stack for populateEventsDropdown');
         eventsSelect.innerHTML = '<option value="">Loading events...</option>';
         
-        // Also populate the new event names dropdown
-        this.populateEventNamesDropdown(seriesId);
+
         
         try {
-            const url = `/api/events/${seriesId}`;
-            console.log('🌐 Fetching URL:', url);
-            const response = await fetch(url);
-            console.log('🔍 Response status:', response.status, response.statusText);
-            console.log('🔍 Response headers:', response.headers.get('content-type'));
-            
-            const responseText = await response.text();
-            console.log('🔍 Raw response:', responseText.substring(0, 200));
-            
-            const events = JSON.parse(responseText);
+            const response = await fetch(`/api/events/${seriesId}`);
+            const events = await response.json();
             
             eventsSelect.innerHTML = '<option value="">Select Event</option>';
             
@@ -245,37 +236,7 @@ class RadianPlannerApp {
         }
     }
 
-    async populateEventNamesDropdown(seriesId) {
-        const eventNamesSelect = document.getElementById('event-names-select');
-        if (!eventNamesSelect) return;
 
-        console.log('🟢 Loading EVENT NAMES for series ID:', seriesId);
-        eventNamesSelect.innerHTML = '<option value="">Loading event names...</option>';
-        
-        try {
-            const url = `/api/events/${seriesId}`;
-            const response = await fetch(url);
-            const events = JSON.parse(await response.text());
-            
-            eventNamesSelect.innerHTML = '<option value="">Select Event Name</option>';
-            
-            if (!Array.isArray(events)) {
-                eventNamesSelect.innerHTML = '<option value="">Error: Invalid response</option>';
-                return;
-            }
-            
-            events.forEach(event => {
-                const option = document.createElement('option');
-                option.value = event.event_id || event.id;
-                option.textContent = event.event_name; // ONLY event_name
-                eventNamesSelect.appendChild(option);
-                console.log('🟢 Added event:', event.event_name);
-            });
-        } catch (error) {
-            console.error('🔴 Error fetching event names:', error);
-            eventNamesSelect.innerHTML = '<option value="">Error loading event names</option>';
-        }
-    }
 
     async populateSessionsDropdown(eventId) {
         const sessionsSelect = document.getElementById('session-select');
