@@ -114,8 +114,18 @@ class DriverRefreshService {
             console.log('🌐 Fetching updated driver data from iRacing...');
             const memberData = await this.client.makeDataAPIRequest('/data/member/get?cust_ids=' + custIds.join(','));
 
+            console.log('📊 API Response received:', memberData ? 'SUCCESS' : 'NULL');
+            if (memberData) {
+                console.log('📊 Response keys:', Object.keys(memberData));
+                if (memberData.members) {
+                    console.log('📊 Members count:', memberData.members.length);
+                } else {
+                    console.log('📊 No members property found');
+                }
+            }
+
             if (!memberData || !memberData.members) {
-                throw new Error('Invalid response from iRacing API');
+                throw new Error('Invalid response from iRacing API - no members data');
             }
 
             console.log(`✅ Received data for ${memberData.members.length} drivers`);
