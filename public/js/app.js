@@ -1479,23 +1479,36 @@ class RadianPlannerApp {
         const carNameEl = document.getElementById('page2-car');
         if (carNameEl) carNameEl.textContent = eventData.car.name;
 
-        // Populate session information
+        // Populate session information using correct element IDs
         if (eventData.session) {
-            const sessionNameEl = document.getElementById('page2-session');
             const sessionDateEl = document.getElementById('page2-race-date');
-            const sessionTimeEl = document.getElementById('page2-start-time');
-            const sessionLengthEl = document.getElementById('page2-duration');
+            const sessionTimeEl = document.getElementById('page2-race-time');
 
-            if (sessionNameEl) sessionNameEl.textContent = eventData.session.session_name;
-            if (sessionDateEl) sessionDateEl.textContent = eventData.session.session_date;
-            if (sessionTimeEl) sessionTimeEl.textContent = eventData.session.session_start_time;
-            if (sessionLengthEl) sessionLengthEl.textContent = `${eventData.session.session_length} minutes`;
+            if (sessionDateEl) {
+                const formattedDate = eventData.session.session_date 
+                    ? new Date(eventData.session.session_date).toLocaleDateString()
+                    : 'Not selected';
+                sessionDateEl.textContent = formattedDate;
+            }
+            
+            if (sessionTimeEl) {
+                sessionTimeEl.textContent = eventData.session.session_start_time || 'Not selected';
+            }
         }
 
         // Populate drivers list
         const driversListEl = document.getElementById('page2-drivers');
         if (driversListEl && eventData.drivers.length > 0) {
-            driversListEl.textContent = eventData.drivers.map(d => d.name).join(', ');
+            // Create a nice formatted drivers display
+            driversListEl.innerHTML = `
+                <div class="text-center">
+                    <i class="fas fa-users text-purple-400 text-2xl mb-2"></i>
+                    <div class="text-sm text-neutral-500 mb-1">Team Drivers</div>
+                    <div class="text-neutral-300 font-medium">
+                        ${eventData.drivers.map(d => d.name).join('<br>')}
+                    </div>
+                </div>
+            `;
         }
 
         // Make Garage61 API call if we have the required IDs
