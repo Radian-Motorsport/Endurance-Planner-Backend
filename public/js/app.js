@@ -1327,7 +1327,7 @@ class RadianPlannerApp {
             }
             
             // Reload driver data
-            await this.fetchData();
+            this.allData = await this.apiClient.fetchAllData();
             this.populateDriversDropdown();
             
             this.uiManager.showNotification(
