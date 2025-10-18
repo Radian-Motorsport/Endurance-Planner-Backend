@@ -921,9 +921,25 @@ class RadianPlannerApp {
             const weatherData = await response.json();
             console.log('🌦️ Weather data received:', weatherData);
             
+            // Handle different weather data formats
+            let processedWeatherData;
+            if (Array.isArray(weatherData)) {
+                // If it's an array, wrap it in the expected format
+                processedWeatherData = { weather_forecast: weatherData };
+                console.log('🌦️ Converted array to object format');
+            } else if (weatherData.weather_forecast) {
+                // If it's already in the correct format
+                processedWeatherData = weatherData;
+            } else {
+                console.error('❌ Unexpected weather data format:', weatherData);
+                return;
+            }
+            
+            console.log('🌦️ Processed weather data:', processedWeatherData);
+            
             // Create the COMPLETE weather interface exactly like weather-forecast.html
             const weatherDisplay = document.getElementById('weather-display');
-            if (weatherDisplay && weatherData) {
+            if (weatherDisplay && processedWeatherData) {
                 // Show the weather display
                 weatherDisplay.classList.remove('hidden');
                 
@@ -994,7 +1010,7 @@ class RadianPlannerApp {
                 // Wait a moment for DOM to be ready, then render charts
                 setTimeout(() => {
                     console.log('🌦️ Rendering weather charts...');
-                    this.renderWeatherCharts(weatherData);
+                    this.renderWeatherCharts(processedWeatherData);
                 }, 100);
             }
         } catch (error) {
