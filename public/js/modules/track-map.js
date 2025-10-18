@@ -259,7 +259,7 @@ export class TrackMapComponent {
             'inactive': { fill: '#111827', stroke: '#1f2937', strokeWidth: '1px' },
             'pitroad': { fill: '#059669', stroke: '#047857', strokeWidth: '2px' },
             'start-finish': { fill: '#dc2626', stroke: '#991b1b', strokeWidth: '3px' },
-            'turns': { fill: '#ffbf00', stroke: '#ffea00', strokeWidth: '1px', fontFamily: 'Arial, sans-serif', fontSize: '12px', fontWeight: 'bold' }
+            'turns': { fill: '#ffbf00', stroke: '#ffea00', strokeWidth: '1px', fontFamily: 'Arial, sans-serif', fontSize: '18px', fontWeight: 'bold' }
         };
 
         if (styles[layerName]) {
@@ -293,9 +293,9 @@ export class TrackMapComponent {
                     text.style.setProperty('fill', '#ffffff', 'important');
                     text.setAttribute('font-weight', 'bold');
                     text.setAttribute('font-family', 'Arial, sans-serif');
-                    text.setAttribute('font-size', '12px');
+                    text.setAttribute('font-size', '18px');
                     text.style.setProperty('font-family', 'Arial, sans-serif', 'important');
-                    text.style.setProperty('font-size', '12px', 'important');
+                    text.style.setProperty('font-size', '18px', 'important');
                     text.style.setProperty('font-weight', 'bold', 'important');
                     console.log('🔤 Applied font styles to turn number:', text.textContent, 'fill:', text.getAttribute('fill'));
                 });
