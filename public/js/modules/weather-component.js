@@ -488,7 +488,7 @@ export class WeatherComponent {
                 markArea: {
                     silent: true,
                     itemStyle: {
-                        color: 'rgba(255, 225, 0, 0.02)'  // Yellow for day - more transparent
+                        color: 'rgba(255, 225, 0, 0.05)'  // Yellow for day - more transparent
                     },
                     data: dayAreas
                 }
@@ -500,7 +500,7 @@ export class WeatherComponent {
                 markArea: {
                     silent: true,
                     itemStyle: {
-                        color: 'rgba(72, 0, 255, 0.02)'  // Dark blue for night - more transparent
+                        color: 'rgba(72, 0, 255, 0.05)'  // Dark blue for night - more transparent
                     },
                     data: nightAreas
                 }
