@@ -1,4 +1,30 @@
 <!DOCTYPE html>
+<!--
+    RadianPlanner - Race Strategy Planning Application
+    
+    COMPONENT LAYOUT:
+    1. Driver Selection
+    2. iRacing Series Selection  
+    3. Race Information
+       - Race/Event Date & Time
+       - Track Details
+       - TRACK MAP COMPONENT (lines ~170-250)
+         * Self-contained SVG visualization
+         * Layer controls and interactivity
+         * Styles injected by app.js when loaded
+    4. WEATHER COMPONENT (lines ~254-262)
+       * Dynamic weather charts using ECharts
+       * HTML structure & styles injected by app.js
+       * Only shown when weather data available
+    5. Car Selection
+       - Class selection
+       - Car details
+    6. Strategy Calculation (Page 2)
+       - Race inputs
+       - Strategy summary
+       - Dynamic adjustments
+       - Stint breakdown
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -22,132 +48,7 @@
         }
     </script>
     
-    <style>
-        /* Track Layer Toggle Styles */
-        .track-layer-toggle input:checked + label {
-            background-color: #22c55e !important; /* green-500 */
-        }
-        
-        .track-layer-toggle input:checked + label span {
-            transform: translateX(100%) !important;
-        }
-        
-        .track-layer-toggle input:not(:checked) + label {
-            background-color: #525252 !important; /* neutral-600 */
-        }
-        
-        .track-layer-toggle input:not(:checked) + label span {
-            transform: translateX(0%) !important;
-        }
-        
-        /* SVG Track Map Layer Styling - Dark Mode */
-        .track-svg-layer {
-            transition: opacity 0.3s ease;
-        }
-        
-        /* Dark mode track styling with progressive shading */
-        #layer-background {
-            fill: #5a5a5a !important; /* White for track outline/boundaries */
-            stroke: #5a5a5a !important; /* Light gray for track borders */
-            stroke-width: 2px !important;
-        }
-        
-        #layer-active {
-            fill: #d1d1d1 !important; /* Dark gray for racing surface */
-            stroke: #d1d1d1 !important; /* Medium gray for track edges */
-            stroke-width: 1px !important;
-        }
-        
-        #layer-inactive {
-            fill: #2b2b2b !important; /* Very dark gray for unused sections */
-            stroke: #2a2a2a !important; /* Dark gray borders */
-            stroke-width: 1px !important;
-        }
-        
-        #layer-pitroad {
-            fill: #059669 !important; /* Green for pit road */
-            stroke: #047857 !important; /* Darker green borders */
-            stroke-width: 2px !important;
-        }
-        
-        #layer-start-finish {
-            fill: #dc2626 !important; /* Red for start/finish line */
-            stroke: #991b1b !important; /* Darker red borders */
-            stroke-width: 3px !important;
-        }
-        
-        #layer-turns {
-            fill: #fbbf24 !important; /* Bold yellow for turn numbers */
-            stroke: #f59e0b !important; /* Darker yellow borders */
-            stroke-width: 1px !important;
-            font-family: Arial, sans-serif !important;
-            font-size: 12px !important;
-            font-weight: bold !important;
-        }
-        
-        /* Override any default SVG colors and ensure visibility on dark background */
-        .track-svg-layer path,
-        .track-svg-layer circle,
-        .track-svg-layer rect,
-        .track-svg-layer polygon,
-        .track-svg-layer text {
-            fill: inherit !important;
-            stroke: inherit !important;
-            stroke-width: inherit !important;
-        }
-        
-        /* Ensure text elements are visible */
-        .track-svg-layer text {
-            fill: #ffffff !important;
-            font-weight: bold !important;
-        }
-        
-        /* Track map container styling */
-        #track-map-svg svg {
-            background: transparent !important;
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-        }
-    </style>
-    
-    <style>
-        /* Custom toggle switch styles for track map layers */
-        .track-layer-toggle input:checked + label {
-            background-color: #22c55e; /* green-500 */
-        }
-        
-        .track-layer-toggle input:checked + label span {
-            transform: translateX(100%);
-        }
-        
-        .track-layer-toggle input:not(:checked) + label {
-            background-color: #525252; /* neutral-600 */
-        }
-        
-        /* Track map SVG layer styles */
-        .track-svg-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-        
-        .track-svg-layer.hidden {
-            display: none;
-        }
-        
-        /* Track map container responsiveness */
-        #track-map-svg svg {
-            max-width: 100%;
-            max-height: 100%;
-            height: auto;
-            width: auto;
-        }
-    </style>
+
 </head>
 <body class="bg-neutral-900 text-neutral-200 p-4">
     
@@ -293,7 +194,12 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Interactive Track Map -->
+                                <!-- ================================ -->
+                                <!-- TRACK MAP COMPONENT CONTAINER -->
+                                <!-- Self-contained SVG track visualization -->
+                                <!-- with layer controls and interactivity -->
+                                <!-- Styles injected by app.js when loaded -->
+                                <!-- ================================ -->
                                 <div id="track-map-section" class="hidden mt-6">
                                     <div class="border-t border-neutral-700 pt-6">
                                         <h3 class="text-lg font-medium text-neutral-300 mb-4">Track Map</h3>
@@ -371,19 +277,14 @@
                         </div>
                     </div>
                     
-                    <!-- Weather Display -->
+                    <!-- ================================ -->
+                    <!-- WEATHER COMPONENT CONTAINER -->
+                    <!-- Dynamic weather charts using ECharts -->
+                    <!-- HTML structure & styles injected by app.js -->
+                    <!-- when weather data is available for event -->
+                    <!-- ================================ -->
                     <div id="weather-display" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg mb-6 hidden">
-                        <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <div id="temp-chart-container" class="hidden">
-                                <h4 class="text-lg font-bold text-white mb-2">Temperature</h4>
-                                <img id="temp-chart" src="" alt="Temperature Chart" class="w-full rounded-lg border border-neutral-700">
-                            </div>
-                            <div id="clouds-chart-container" class="hidden">
-                                <h4 class="text-lg font-bold text-white mb-2">Clouds & Precipitation</h4>
-                                <img id="clouds-chart" src="" alt="Clouds & Precipitation Chart" class="w-full rounded-lg border border-neutral-700">
-                            </div>
-                        </div>
+                        <!-- Content will be dynamically generated by app.js -->
                     </div>
                     
                     <div id="race-info-placeholder" class="text-center text-neutral-500 py-8">

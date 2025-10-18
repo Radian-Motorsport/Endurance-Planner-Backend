@@ -5,6 +5,7 @@ import { APIClient } from './modules/api-client.js';
 import { UIManager } from './modules/ui-manager.js';
 import { StrategyCalculator } from './modules/strategy-calculator.js';
 import { Garage61Client } from './modules/garage61-client.js';
+import { WeatherComponent } from './modules/weather-component.js';
 
 class RadianPlannerApp {
     constructor() {
@@ -12,6 +13,7 @@ class RadianPlannerApp {
         this.uiManager = new UIManager();
         this.strategyCalculator = new StrategyCalculator();
         this.garage61Client = new Garage61Client();
+        this.weatherComponent = null; // Will be initialized when needed
         
         this.currentStrategies = [];
         this.allData = {};
@@ -20,9 +22,6 @@ class RadianPlannerApp {
         this.selectedTrack = null;
         this.selectedCar = null;
         
-        // Weather chart instances
-        this.temperatureChart = null;
-        this.cloudsChart = null;
         this.disposables = [];
         
         this.init();
@@ -671,6 +670,9 @@ class RadianPlannerApp {
     async loadTrackMap(sessionDetails) {
         console.log('🗺️ Loading track map for:', sessionDetails.track_name);
         
+        // Inject track map styles if not already present
+        this.injectTrackMapStyles();
+        
         const mapContainer = document.getElementById('track-map-svg');
         const loadingElement = document.getElementById('track-map-loading');
         const errorElement = document.getElementById('track-map-error');
@@ -726,6 +728,114 @@ class RadianPlannerApp {
             // Show error state
             loadingElement.classList.add('hidden');
             errorElement.classList.remove('hidden');
+        }
+    }
+    
+    injectTrackMapStyles() {
+        // Add track map styles if not already present
+        if (!document.getElementById('track-map-styles')) {
+            const style = document.createElement('style');
+            style.id = 'track-map-styles';
+            style.textContent = `
+                /* Track Layer Toggle Styles */
+                .track-layer-toggle input:checked + label {
+                    background-color: #22c55e !important; /* green-500 */
+                }
+                
+                .track-layer-toggle input:checked + label span {
+                    transform: translateX(100%) !important;
+                }
+                
+                .track-layer-toggle input:not(:checked) + label {
+                    background-color: #525252 !important; /* neutral-600 */
+                }
+                
+                .track-layer-toggle input:not(:checked) + label span {
+                    transform: translateX(0%) !important;
+                }
+                
+                /* SVG Track Map Layer Styling - Dark Mode */
+                .track-svg-layer {
+                    transition: opacity 0.3s ease;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    pointer-events: none;
+                }
+                
+                .track-svg-layer.hidden {
+                    display: none;
+                }
+                
+                /* Dark mode track styling with progressive shading */
+                #layer-background {
+                    fill: #5a5a5a !important;
+                    stroke: #5a5a5a !important;
+                    stroke-width: 2px !important;
+                }
+                
+                #layer-active {
+                    fill: #d1d1d1 !important;
+                    stroke: #d1d1d1 !important;
+                    stroke-width: 1px !important;
+                }
+                
+                #layer-inactive {
+                    fill: #2b2b2b !important;
+                    stroke: #2a2a2a !important;
+                    stroke-width: 1px !important;
+                }
+                
+                #layer-pitroad {
+                    fill: #059669 !important;
+                    stroke: #047857 !important;
+                    stroke-width: 2px !important;
+                }
+                
+                #layer-start-finish {
+                    fill: #dc2626 !important;
+                    stroke: #991b1b !important;
+                    stroke-width: 3px !important;
+                }
+                
+                #layer-turns {
+                    fill: #fbbf24 !important;
+                    stroke: #f59e0b !important;
+                    stroke-width: 1px !important;
+                    font-family: Arial, sans-serif !important;
+                    font-size: 12px !important;
+                    font-weight: bold !important;
+                }
+                
+                /* Override any default SVG colors and ensure visibility on dark background */
+                .track-svg-layer path,
+                .track-svg-layer circle,
+                .track-svg-layer rect,
+                .track-svg-layer polygon,
+                .track-svg-layer text {
+                    fill: inherit !important;
+                    stroke: inherit !important;
+                    stroke-width: inherit !important;
+                }
+                
+                /* Ensure text elements are visible */
+                .track-svg-layer text {
+                    fill: #ffffff !important;
+                    font-weight: bold !important;
+                }
+                
+                /* Track map container styling */
+                #track-map-svg svg {
+                    background: transparent !important;
+                    max-width: 100%;
+                    max-height: 100%;
+                    width: auto;
+                    height: auto;
+                }
+            `;
+            document.head.appendChild(style);
         }
     }
     
@@ -856,27 +966,19 @@ class RadianPlannerApp {
     
     async loadWeatherForecast(sessionDetails) {
         console.log('🌦️ Loading weather forecast for event:', sessionDetails.event_id);
-        console.log('🌦️ Session details:', sessionDetails);
-        
-        // Show weather display section regardless - for testing
-        const weatherDisplay = document.getElementById('weather-display');
-        console.log('🌦️ Weather display element:', weatherDisplay);
-        
-        if (weatherDisplay) {
-            console.log('🌦️ Showing weather display section');
-            weatherDisplay.classList.remove('hidden');
-            weatherDisplay.innerHTML = `
-                <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
-                <div class="text-sm text-neutral-400">
-                    <p>Testing weather display for event ${sessionDetails.event_id}</p>
-                    <p>Weather box is working!</p>
-                </div>
-            `;
-        } else {
-            console.error('❌ Weather display element not found');
-        }
         
         try {
+            // Initialize weather component if not already done
+            if (!this.weatherComponent) {
+                this.weatherComponent = new WeatherComponent('weather-display');
+            }
+            
+            // Show weather display section
+            const weatherDisplay = document.getElementById('weather-display');
+            if (weatherDisplay) {
+                weatherDisplay.classList.remove('hidden');
+            }
+            
             // Check if event has weather_url
             const weatherUrl = `/api/events/${sessionDetails.event_id}/weather`;
             console.log('🌦️ Fetching weather from:', weatherUrl);
@@ -895,615 +997,20 @@ class RadianPlannerApp {
             if (eventWeather && eventWeather.weather_url) {
                 console.log('✅ Event has weather URL:', eventWeather.weather_url);
                 
-                // Load actual weather data and display it
-                await this.displayWeatherData(eventWeather.weather_url);
+                // Load weather data using the weather component
+                await this.weatherComponent.loadWeatherData(eventWeather.weather_url);
             } else {
                 console.log('ℹ️ Event does not have weather URL');
-                console.log('ℹ️ Event weather response:', eventWeather);
+                // Show a message that no weather data is available
+                this.weatherComponent.render({ message: 'No weather data available for this event' });
             }
             
         } catch (error) {
             console.error('❌ Failed to load weather forecast:', error);
-        }
-    }
-    
-    async displayWeatherData(weatherUrl) {
-        try {
-            console.log('🌦️ Loading weather data via proxy from:', weatherUrl);
-            
-            // Use the weather proxy to avoid CORS issues
-            const response = await fetch(`/api/weather-proxy?url=${encodeURIComponent(weatherUrl)}`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const weatherData = await response.json();
-            console.log('🌦️ Weather data received:', weatherData);
-            
-            // Handle different weather data formats
-            let processedWeatherData;
-            if (Array.isArray(weatherData)) {
-                // If it's an array, wrap it in the expected format
-                processedWeatherData = { weather_forecast: weatherData };
-                console.log('🌦️ Converted array to object format');
-            } else if (weatherData.weather_forecast) {
-                // If it's already in the correct format
-                processedWeatherData = weatherData;
-            } else {
-                console.error('❌ Unexpected weather data format:', weatherData);
-                return;
-            }
-            
-            console.log('🌦️ Processed weather data:', processedWeatherData);
-            
-            // Create the COMPLETE weather interface exactly like weather-forecast.html
-            const weatherDisplay = document.getElementById('weather-display');
-            if (weatherDisplay && processedWeatherData) {
-                // Show the weather display
-                weatherDisplay.classList.remove('hidden');
-                
-                // First add the complete CSS styles
-                this.addWeatherStyles();
-                
-                // Then add the complete HTML structure
-                weatherDisplay.innerHTML = `
-                    <div style="background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                        <div style="display: flex; align-items: center; padding: 16px 24px; border-bottom: 1px solid #e0e0e0; background: #f8f9fa; border-radius: 8px 8px 0 0;">
-                            <svg style="width: 20px; height: 20px; color: #666;" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
-                            </svg>
-                            <h6 style="margin: 0 0 0 8px; font-size: 18px; font-weight: 600; color: #333;">Weather Forecast</h6>
-                        </div>
-
-                        <div style="padding: 24px;">
-                            <div class="chakra-tabs" style="width: 100%;">
-                                <div class="chakra-tabs__tablist" role="tablist" style="display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 24px;">
-                                    <button class="chakra-tabs__tab" role="tab" aria-selected="false" data-tab="temperature" style="padding: 12px 24px; background: none; border: none; font-size: 16px; font-weight: 500; color: #718096; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
-                                        Temperature
-                                    </button>
-                                    <button class="chakra-tabs__tab" role="tab" aria-selected="true" data-tab="clouds" style="padding: 12px 24px; background: none; border: none; font-size: 16px; font-weight: 500; color: #2b6cb0; cursor: pointer; border-bottom: 3px solid #2b6cb0; transition: all 0.2s;">
-                                        Clouds & Precipitation
-                                    </button>
-                                </div>
-
-                                <!-- Temperature Tab Panel -->
-                                <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="true" id="temperature-panel" style="display: none;">
-                                    <div style="display: flex; gap: 32px; margin-bottom: 16px; align-items: center;">
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <div style="width: 24px; height: 3px; border-radius: 2px; background: #ff6b6b;"></div>
-                                            <span style="font-size: 14px; color: #4a5568; font-weight: 500;">Temperature</span>
-                                        </div>
-                                    </div>
-                                    <div style="width: 100%; height: 350px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; background: #fff; position: relative;">
-                                        <div id="temperature-chart" style="width: 100%; height: 300px;"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Clouds & Precipitation Tab Panel -->
-                                <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="false" id="clouds-panel" style="display: block;">
-                                    <div style="display: flex; gap: 32px; margin-bottom: 16px; align-items: center;">
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <div style="width: 24px; height: 3px; border-radius: 2px; background: rgb(5,5,15);"></div>
-                                            <span style="font-size: 14px; color: #4a5568; font-weight: 500;">Clouds</span>
-                                        </div>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <div style="width: 24px; height: 3px; border-radius: 2px; background: #0B5559;"></div>
-                                            <span style="font-size: 14px; color: #4a5568; font-weight: 500;">Chance of Precipitation</span>
-                                        </div>
-                                    </div>
-                                    <div style="width: 100%; height: 350px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; background: #fff; position: relative;">
-                                        <div id="clouds-chart" style="width: 100%; height: 300px;"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                // Import ECharts if not loaded
-                await this.loadECharts();
-                
-                // Initialize tabs functionality
-                this.initializeWeatherTabs();
-                
-                // Wait a moment for DOM to be ready, then render charts
-                setTimeout(() => {
-                    console.log('🌦️ Rendering weather charts...');
-                    this.renderWeatherCharts(processedWeatherData);
-                }, 100);
-            }
-        } catch (error) {
-            console.error('❌ Failed to display weather data:', error);
-            
-            const weatherDisplay = document.getElementById('weather-display');
-            if (weatherDisplay) {
-                weatherDisplay.innerHTML = `
-                    <h1 class="text-xl mb-4 road-rage-font">🌦️ WEATHER FORECAST</h1>
-                    <div class="text-sm text-red-400">
-                        <p>Error loading weather data: ${error.message}</p>
-                    </div>
-                `;
+            if (this.weatherComponent) {
+                this.weatherComponent.render({ error: error.message });
             }
         }
-    }
-    
-    addWeatherStyles() {
-        // Add CSS styles for weather tabs if not already added
-        if (!document.getElementById('weather-styles')) {
-            const style = document.createElement('style');
-            style.id = 'weather-styles';
-            style.textContent = `
-                .chakra-tabs__tab:hover {
-                    color: #4a5568 !important;
-                }
-                .chakra-tabs__tab[aria-selected="true"] {
-                    color: #2b6cb0 !important;
-                    border-bottom-color: #2b6cb0 !important;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-    }
-    
-    initializeWeatherTabs() {
-        const tabs = document.querySelectorAll('.chakra-tabs__tab');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => this.switchWeatherTab(tab.dataset.tab));
-        });
-    }
-    
-    switchWeatherTab(tabName) {
-        // Update tab states
-        document.querySelectorAll('.chakra-tabs__tab').forEach(tab => {
-            const isSelected = tab.dataset.tab === tabName;
-            tab.setAttribute('aria-selected', isSelected);
-            tab.style.color = isSelected ? '#2b6cb0' : '#718096';
-            tab.style.borderBottomColor = isSelected ? '#2b6cb0' : 'transparent';
-        });
-
-        // Update panel visibility
-        document.querySelectorAll('.chakra-tabs__tab-panel').forEach(panel => {
-            const isVisible = panel.id === `${tabName}-panel`;
-            panel.setAttribute('aria-hidden', !isVisible);
-            panel.style.display = isVisible ? 'block' : 'none';
-        });
-
-        // Resize charts when switching tabs
-        setTimeout(() => {
-            if (tabName === 'temperature' && this.temperatureChart) {
-                this.temperatureChart.resize();
-            } else if (tabName === 'clouds' && this.cloudsChart) {
-                this.cloudsChart.resize();
-            }
-        }, 100);
-    }
-    
-    async loadECharts() {
-        if (typeof echarts !== 'undefined') return;
-        
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js';
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-    }
-    
-    renderWeatherCharts(weatherData) {
-        console.log('🌦️ renderWeatherCharts called with data:', weatherData);
-        
-        if (!weatherData || !weatherData.weather_forecast) {
-            console.error('Invalid weather data format');
-            return;
-        }
-
-        // Check if ECharts is available
-        if (typeof echarts === 'undefined') {
-            console.error('ECharts is not loaded');
-            return;
-        }
-
-        // Check if chart containers exist
-        const tempContainer = document.getElementById('temperature-chart');
-        const cloudsContainer = document.getElementById('clouds-chart');
-        
-        console.log('🌦️ Temperature chart container:', tempContainer);
-        console.log('🌦️ Clouds chart container:', cloudsContainer);
-
-        if (!tempContainer || !cloudsContainer) {
-            console.error('Chart containers not found');
-            return;
-        }
-
-        this.renderTemperatureChart(weatherData);
-        this.renderCloudsChart(weatherData);
-    }
-
-    renderTemperatureChart(weatherData) {
-        console.log('🌡️ Rendering temperature chart...');
-        
-        // Dispose existing chart if it exists
-        if (this.temperatureChart) {
-            this.temperatureChart.dispose();
-        }
-        
-        const container = document.getElementById('temperature-chart');
-        if (!container) {
-            console.error('Temperature chart container not found');
-            return;
-        }
-        
-        // Ensure container has dimensions and is visible
-        container.style.width = '100%';
-        container.style.height = '300px';
-        container.style.display = 'block';
-        
-        console.log('🌡️ Container dimensions:', container.offsetWidth, 'x', container.offsetHeight);
-        
-        // Wait a moment for container to be properly sized
-        setTimeout(() => {
-            console.log('🌡️ Initializing temperature chart...');
-            this.temperatureChart = echarts.init(container);
-            
-            if (!this.temperatureChart) {
-                console.error('Failed to initialize temperature chart');
-                return;
-            }
-
-            const forecast = weatherData.weather_forecast;
-            const timeLabels = this.generateTimeLabels(forecast);
-            const temperatures = forecast.map(item => this.convertTemperature(item.raw_air_temp));
-            const humidity = forecast.map(item => this.convertHumidity(item.rel_humidity));
-            
-            // Find race start index - first point where affects_session becomes true
-            const raceStartIndex = forecast.findIndex((item, index) => 
-                item.affects_session && (index === 0 || !forecast[index-1].affects_session)
-            );
-
-            const option = {
-                grid: { left: '60px', right: '60px', top: '60px', bottom: '60px' },
-                legend: {
-                    data: ['Temperature (°F)', 'Humidity (%)'],
-                    top: '10px',
-                    textStyle: { color: '#6E7079' }
-                },
-                xAxis: {
-                    type: 'category',
-                    data: timeLabels,
-                    axisLine: { lineStyle: { color: '#6E7079' } },
-                    axisLabel: { color: '#6E7079', fontSize: 10, rotate: 45 }
-                },
-                yAxis: [
-                    {
-                        type: 'value',
-                        position: 'left',
-                        axisLine: { lineStyle: { color: '#ff6b6b' } },
-                        axisLabel: { color: '#ff6b6b', fontSize: 12, formatter: '{value}' },
-                        splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
-                    },
-                    {
-                        type: 'value',
-                        position: 'right',
-                        min: 0,
-                        max: 100,
-                        axisLine: { lineStyle: { color: '#4ecdc4' } },
-                        axisLabel: { color: '#4ecdc4', fontSize: 12, formatter: '{value}' },
-                        splitLine: { show: false }
-                    }
-                ],
-                series: [
-                    {
-                        name: 'Temperature (°F)',
-                        type: 'line',
-                        yAxisIndex: 0,
-                        data: temperatures,
-                        lineStyle: { color: '#ff6b6b', width: 2 },
-                        itemStyle: { color: '#ff6b6b' },
-                        smooth: true,
-                        symbol: 'none',
-                        markLine: raceStartIndex >= 0 ? {
-                            data: [{
-                                xAxis: raceStartIndex,
-                                lineStyle: { color: '#00ff00', width: 1 },
-                                label: { show: false }
-                            }]
-                        } : undefined
-                    },
-                    {
-                        name: 'Humidity (%)',
-                        type: 'line',
-                        yAxisIndex: 1,
-                        data: humidity,
-                        lineStyle: { color: '#4ecdc4', width: 2 },
-                        itemStyle: { color: '#4ecdc4' },
-                        smooth: true,
-                        symbol: 'none'
-                    },
-                    ...this.createDayNightMarkings(forecast, timeLabels)
-                ],
-                tooltip: {
-                    trigger: 'axis',
-                    formatter: (params) => {
-                        const forecastItem = forecast[params[0].dataIndex];
-                        const isRace = forecastItem.affects_session;
-                        
-                        // Show actual timestamp
-                        const timestamp = new Date(forecastItem.timestamp).toLocaleString('en-US', {
-                            month: 'short', day: 'numeric', 
-                            hour: 'numeric', minute: '2-digit', hour12: true
-                        });
-                        
-                        // Get values from all series
-                        const tempValue = params.find(p => p.seriesName === 'Temperature (°F)')?.value || 'N/A';
-                        const humidityValue = params.find(p => p.seriesName === 'Humidity (%)')?.value || 'N/A';
-                        
-                        return `<div style="color: black;">
-                            <strong>Time:</strong> ${timestamp}<br>
-                            <strong>Temperature:</strong> ${tempValue}°F<br>
-                            <strong>Humidity:</strong> ${humidityValue}%<br>
-                            <strong>Session:</strong> ${isRace ? 'Race' : 'Practice/Quali'}
-                        </div>`;
-                    }
-                }
-            };
-
-            console.log('🌡️ Setting temperature chart options');
-            this.temperatureChart.setOption(option);
-            console.log('🌡️ Temperature chart rendered successfully');
-        }, 50);
-    }
-
-    renderCloudsChart(weatherData) {
-        console.log('☁️ Rendering clouds chart...');
-        
-        // Dispose existing chart if it exists
-        if (this.cloudsChart) {
-            this.cloudsChart.dispose();
-        }
-        
-        const cloudsContainer = document.getElementById('clouds-chart');
-        if (!cloudsContainer) {
-            console.error('Clouds chart container not found');
-            return;
-        }
-        
-        // Ensure container has dimensions and is visible
-        cloudsContainer.style.width = '100%';
-        cloudsContainer.style.height = '300px';
-        cloudsContainer.style.display = 'block';
-        
-        console.log('☁️ Container dimensions:', cloudsContainer.offsetWidth, 'x', cloudsContainer.offsetHeight);
-        
-        // Wait a moment for container to be properly sized
-        setTimeout(() => {
-            console.log('☁️ Initializing clouds chart...');
-            this.cloudsChart = echarts.init(cloudsContainer);
-            
-            if (!this.cloudsChart) {
-                console.error('Failed to initialize clouds chart');
-                return;
-            }
-
-            const forecast = weatherData.weather_forecast;
-            const timeLabels = this.generateTimeLabels(forecast);
-            const cloudCover = forecast.map(item => this.convertCloudCover(item.cloud_cover));
-            const precipitationChance = forecast.map(item => item.precip_chance); // Use actual precip_chance (0%)
-            const precipitationAmount = forecast.map(item => item.precip_amount); // Use actual precip_amount (0)
-            
-            // Find race start index - first point where affects_session becomes true
-            const raceStartIndex = forecast.findIndex((item, index) => 
-                item.affects_session && (index === 0 || !forecast[index-1].affects_session)
-            );
-
-            const option = {
-                grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
-                xAxis: {
-                    type: 'category', 
-                    data: timeLabels,
-                    axisLine: { lineStyle: { color: '#6E7079' } },
-                    axisLabel: { color: '#6E7079', fontSize: 10, rotate: 45 }
-                },
-                yAxis: {
-                    type: 'value', 
-                    min: 0, 
-                    max: 100,
-                    axisLine: { lineStyle: { color: '#6E7079' } },
-                    axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}%' },
-                    splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
-                },
-                series: [
-                    {
-                        name: 'Cloud Cover', 
-                        type: 'line', 
-                        data: cloudCover,
-                        lineStyle: { color: 'rgb(5,5,15)', width: 2 },
-                        itemStyle: { color: 'rgb(5,5,15)' },
-                        smooth: true, 
-                        symbol: 'none',
-                        markLine: raceStartIndex >= 0 ? {
-                            data: [{
-                                xAxis: raceStartIndex,
-                                lineStyle: { color: '#00ff00', width: 1 },
-                                label: { show: false }
-                            }]
-                        } : undefined
-                    },
-                    {
-                        name: 'Precipitation Chance', 
-                        type: 'line', 
-                        data: precipitationChance,
-                        lineStyle: { color: '#0B5559', width: 2 },
-                        itemStyle: { color: '#0B5559' },
-                        smooth: true, 
-                        symbol: 'none'
-                    },
-                    {
-                        name: 'Precipitation Amount', 
-                        type: 'line', 
-                        data: precipitationAmount,
-                        lineStyle: { color: '#1a8faa', width: 2, type: 'dashed' },
-                        itemStyle: { color: '#1a8faa' },
-                        smooth: true, 
-                        symbol: 'none'
-                    },
-                    ...this.createDayNightMarkings(forecast, timeLabels)
-                ],
-                tooltip: {
-                    trigger: 'axis',
-                    formatter: (params) => {
-                        const dataIndex = params[0].dataIndex;
-                        const forecastItem = forecast[dataIndex];
-                        const isRace = forecastItem.affects_session;
-                        
-                        // Show actual timestamp
-                        const timestamp = new Date(forecastItem.timestamp).toLocaleString('en-US', {
-                            month: 'short', day: 'numeric', 
-                            hour: 'numeric', minute: '2-digit', hour12: true
-                        });
-                        
-                        return `<div style="color: black;">
-                            <strong>Time:</strong> ${timestamp}<br>
-                            <strong>Cloud Cover:</strong> ${cloudCover[dataIndex]}%<br>
-                            <strong>Precip Chance:</strong> ${precipitationChance[dataIndex]}%<br>
-                            <strong>Precip Amount:</strong> ${precipitationAmount[dataIndex]}<br>
-                            <strong>Session:</strong> ${isRace ? 'Race' : 'Practice/Quali'}
-                        </div>`;
-                    }
-                }
-            };
-
-            console.log('☁️ Setting clouds chart options');
-            this.cloudsChart.setOption(option);
-            console.log('☁️ Clouds chart rendered successfully');
-        }, 50);
-    }
-
-    dispose() {
-        if (this.temperatureChart) {
-            this.temperatureChart.dispose();
-            this.temperatureChart = null;
-        }
-        if (this.cloudsChart) {
-            this.cloudsChart.dispose();
-            this.cloudsChart = null;
-        }
-        this.disposables.forEach(disposable => {
-            if (disposable && typeof disposable.dispose === 'function') {
-                disposable.dispose();
-            }
-        });
-        this.disposables = [];
-    }
-
-    createDayNightMarkings(forecast, timeLabels) {
-        // Create background shading for day/night periods
-        const markAreas = [];
-        let currentPeriod = null;
-        let periodStart = 0;
-        
-        forecast.forEach((item, index) => {
-            const isDay = item.is_sun_up;
-            
-            if (currentPeriod === null) {
-                currentPeriod = isDay;
-                periodStart = index;
-            } else if (currentPeriod !== isDay) {
-                // Period changed, add the previous period
-                markAreas.push([
-                    { name: currentPeriod ? 'Day' : 'Night', xAxis: periodStart },
-                    { xAxis: index - 1 }
-                ]);
-                currentPeriod = isDay;
-                periodStart = index;
-            }
-        });
-        
-        // Add the final period
-        if (currentPeriod !== null) {
-            markAreas.push([
-                { name: currentPeriod ? 'Day' : 'Night', xAxis: periodStart },
-                { xAxis: forecast.length - 1 }
-            ]);
-        }
-        
-        return [{
-            name: 'Day/Night',
-            type: 'line',
-            data: [], // No actual data
-            markArea: {
-                silent: true,
-                itemStyle: {
-                    color: function(params) {
-                        return params.name === 'Day' ? 
-                            'rgba(255, 255, 0, 0.1)' :  // Light yellow for day
-                            'rgba(0, 0, 100, 0.1)';     // Light blue for night
-                    }
-                },
-                data: markAreas
-            }
-        }];
-    }
-
-    generateTimeLabels(forecast) {
-        return forecast.map((item, index) => {
-            const timestamp = new Date(item.timestamp);
-            
-            // Show labels every hour (every 4 intervals = 1 hour at 15min intervals)
-            if (index % 4 === 0) {
-                // Format as clock time (5am, 6pm, etc.)
-                return timestamp.toLocaleTimeString('en-US', {
-                    hour: 'numeric',
-                    hour12: true
-                }).toLowerCase();
-            }
-            
-            return '';
-        });
-    }
-
-    convertTemperature(temp) {
-        // Based on actual data: raw_air_temp ranges from ~1200-1850
-        // Convert to realistic Fahrenheit range (60-85°F)
-        const minTemp = 1200, maxTemp = 1850, minF = 60, maxF = 85;
-        return Math.round(((temp - minTemp) / (maxTemp - minTemp)) * (maxF - minF) + minF);
-    }
-
-    convertCloudCover(cloudCover) {
-        // Based on actual data: cloud_cover ranges from ~400-1000
-        // Convert to 0-100% with proper clamping
-        const minCloud = 400, maxCloud = 1000;
-        const percentage = Math.round(((cloudCover - minCloud) / (maxCloud - minCloud)) * 100);
-        return Math.max(0, Math.min(100, percentage));
-    }
-
-    convertPrecipitation(humidity) {
-        // Based on actual data: rel_humidity ranges from ~4000-7000
-        // Convert to precipitation chance 0-100%
-        const minHumidity = 4000, maxHumidity = 7000;
-        const percentage = Math.round(((humidity - minHumidity) / (maxHumidity - minHumidity)) * 100);
-        return Math.max(0, Math.min(100, percentage));
-    }
-
-    convertHumidity(humidity) {
-        // Convert rel_humidity values to 0-100% humidity
-        const minHumidity = 4000, maxHumidity = 7000;
-        const percentage = Math.round(((humidity - minHumidity) / (maxHumidity - minHumidity)) * 100);
-        return Math.max(0, Math.min(100, percentage));
-    }
-
-    convertWindSpeed(windSpeed) {
-        const minWind = 147, maxWind = 306;
-        return Math.round(((windSpeed - minWind) / (maxWind - minWind)) * 20 + 5);
-    }
-
-    getWeatherDescription(forecastItem) {
-        const cloudCover = this.convertCloudCover(forecastItem.cloud_cover);
-        if (cloudCover < 25) return 'Clear';
-        if (cloudCover < 50) return 'Partly Cloudy';
-        if (cloudCover < 75) return 'Mostly Cloudy';
-        return 'Overcast';
     }
     
     clearWeatherDisplay() {
@@ -1512,6 +1019,12 @@ class RadianPlannerApp {
         if (weatherDisplay) {
             weatherDisplay.classList.add('hidden');
             weatherDisplay.innerHTML = ''; // Clear content
+        }
+        
+        // Dispose weather component if it exists
+        if (this.weatherComponent) {
+            this.weatherComponent.dispose();
+            this.weatherComponent = null;
         }
         
         console.log('✅ Weather display cleared');
