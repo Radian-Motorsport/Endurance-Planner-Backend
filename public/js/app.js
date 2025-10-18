@@ -1152,118 +1152,63 @@ class RadianPlannerApp {
                 return;
             }
 
-        const forecast = weatherData.weather_forecast;
-        const timeLabels = this.generateTimeLabels(forecast);
-        const temperatures = forecast.map(item => this.convertTemperature(item.raw_air_temp));
-        
-        // Find race start index (where time_offset >= 0 and affects_session becomes true)
-        const raceStartIndex = forecast.findIndex(item => item.time_offset >= 0 && item.affects_session);
-        
-        // Create day/night background markings
-        const dayNightMarkings = this.createDayNightMarkings(forecast, timeLabels);
+            const forecast = weatherData.weather_forecast;
+            const timeLabels = this.generateTimeLabels(forecast);
+            const temperatures = forecast.map(item => this.convertTemperature(item.raw_air_temp));
+            
+            // Find race start index
+            const raceStartIndex = forecast.findIndex(item => item.time_offset >= 0 && item.affects_session);
 
-        const option = {
-            title: {
-                text: '24-Hour Temperature Forecast',
-                left: 'center',
-                textStyle: { color: '#333', fontSize: 16 }
-            },
-            grid: { left: '60px', right: '40px', top: '60px', bottom: '80px' },
-            toolbox: {
-                feature: {
-                    dataZoom: { yAxisIndex: 'none' },
-                    restore: {},
-                    saveAsImage: {}
-                }
-            },
-            dataZoom: [
-                {
-                    type: 'inside',
-                    start: 0,
-                    end: 100
+            const option = {
+                grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
+                xAxis: {
+                    type: 'category',
+                    data: timeLabels,
+                    axisLine: { lineStyle: { color: '#6E7079' } },
+                    axisLabel: { color: '#6E7079', fontSize: 10, rotate: 45 }
                 },
-                {
-                    start: 0,
-                    end: 100,
-                    height: 30,
-                    bottom: 40
-                }
-            ],
-
-        const option = {
-            xAxis: {
-                type: 'category',
-                data: timeLabels,
-                axisLine: { lineStyle: { color: '#6E7079' } },
-                axisLabel: { 
-                    color: '#6E7079', 
-                    fontSize: 10,
-                    rotate: 45,
-                    interval: Math.floor(timeLabels.length / 12) // Show ~12 labels max
-                }
-            },
-            yAxis: {
-                type: 'value',
-                name: 'Temperature (°F)',
-                nameLocation: 'middle',
-                nameGap: 40,
-                axisLine: { lineStyle: { color: '#6E7079' } },
-                axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}°F' },
-                splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
-            },
-            series: [
-                {
+                yAxis: {
+                    type: 'value',
+                    axisLine: { lineStyle: { color: '#6E7079' } },
+                    axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}°F' },
+                    splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
+                },
+                series: [{
                     name: 'Temperature',
                     type: 'line',
                     data: temperatures,
                     lineStyle: { color: '#ff6b6b', width: 2 },
                     itemStyle: { color: '#ff6b6b' },
-                    areaStyle: { 
-                        color: {
-                            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-                            colorStops: [
-                                { offset: 0, color: 'rgba(255, 107, 107, 0.3)' },
-                                { offset: 1, color: 'rgba(255, 107, 107, 0.05)' }
-                            ]
-                        }
-                    },
-                    smooth: true, 
+                    smooth: true,
                     symbol: 'none',
                     markLine: raceStartIndex >= 0 ? {
                         data: [{
                             name: 'Race Start',
                             xAxis: raceStartIndex,
-                            lineStyle: { color: '#00ff00', width: 3, type: 'solid' },
-                            label: { 
-                                position: 'end',
-                                formatter: 'Race Start',
-                                color: '#00ff00',
-                                fontWeight: 'bold'
-                            }
+                            lineStyle: { color: '#00ff00', width: 3 },
+                            label: { formatter: 'Race Start', color: '#00ff00' }
                         }]
                     } : undefined
+                }],
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: (params) => {
+                        const point = params[0];
+                        const forecastItem = forecast[point.dataIndex];
+                        const isRace = forecastItem.affects_session;
+                        const sunStatus = forecastItem.is_sun_up ? '☀️ Day' : '🌙 Night';
+                        
+                        return `<div style="color: black;">
+                            <strong>Time:</strong> ${timeLabels[point.dataIndex]}<br>
+                            <strong>Temperature:</strong> ${point.value}°F<br>
+                            <strong>Period:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
+                            <strong>Sun:</strong> ${sunStatus}
+                        </div>`;
+                    }
                 }
-            ].concat(dayNightMarkings),
-            tooltip: {
-                trigger: 'axis',
-                formatter: (params) => {
-                    const point = params[0];
-                    const forecastItem = forecast[point.dataIndex];
-                    const isRace = forecastItem.affects_session;
-                    const sunStatus = forecastItem.is_sun_up ? '☀️ Day' : '🌙 Night';
-                    
-                    return `<div style="color: black;">
-                        <strong>Time:</strong> ${timeLabels[point.dataIndex]}<br>
-                        <strong>Temperature:</strong> ${point.value}°F<br>
-                        <strong>Period:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
-                        <strong>Sun:</strong> ${sunStatus}<br>
-                        <strong>Weather:</strong> ${this.getWeatherDescription(forecastItem)}
-                    </div>`;
-                }
-            }
-        };
+            };
 
-            console.log('🌡️ Setting temperature chart options:', option);
+            console.log('🌡️ Setting temperature chart options');
             this.temperatureChart.setOption(option);
             console.log('🌡️ Temperature chart rendered successfully');
         }, 50);
@@ -1300,127 +1245,80 @@ class RadianPlannerApp {
                 return;
             }
 
-        const forecast = weatherData.weather_forecast;
-        const timeLabels = this.generateTimeLabels(forecast);
-        const cloudCover = forecast.map(item => this.convertCloudCover(item.cloud_cover));
-        const precipitation = forecast.map(item => this.convertPrecipitation(item.rel_humidity));
-        
-        // Find race start index
-        const raceStartIndex = forecast.findIndex(item => item.time_offset >= 0 && item.affects_session);
-        
-        // Create day/night background markings
-        const dayNightMarkings = this.createDayNightMarkings(forecast, timeLabels);
+            const forecast = weatherData.weather_forecast;
+            const timeLabels = this.generateTimeLabels(forecast);
+            const cloudCover = forecast.map(item => this.convertCloudCover(item.cloud_cover));
+            const precipitation = forecast.map(item => this.convertPrecipitation(item.rel_humidity));
+            
+            // Find race start index
+            const raceStartIndex = forecast.findIndex(item => item.time_offset >= 0 && item.affects_session);
 
-        const option = {
-            title: {
-                text: '24-Hour Clouds & Precipitation Forecast',
-                left: 'center',
-                textStyle: { color: '#333', fontSize: 16 }
-            },
-            grid: { left: '60px', right: '40px', top: '60px', bottom: '80px' },
-            toolbox: {
-                feature: {
-                    dataZoom: { yAxisIndex: 'none' },
-                    restore: {},
-                    saveAsImage: {}
-                }
-            },
-            dataZoom: [
-                {
-                    type: 'inside',
-                    start: 0,
-                    end: 100
+            const option = {
+                grid: { left: '60px', right: '40px', top: '40px', bottom: '60px' },
+                xAxis: {
+                    type: 'category', 
+                    data: timeLabels,
+                    axisLine: { lineStyle: { color: '#6E7079' } },
+                    axisLabel: { color: '#6E7079', fontSize: 10, rotate: 45 }
                 },
-                {
-                    start: 0,
-                    end: 100,
-                    height: 30,
-                    bottom: 40
-                }
-            ],
-
-        const option = {
-            xAxis: {
-                type: 'category', 
-                data: timeLabels,
-                axisLine: { lineStyle: { color: '#6E7079' } },
-                axisLabel: { 
-                    color: '#6E7079', 
-                    fontSize: 10,
-                    rotate: 45,
-                    interval: Math.floor(timeLabels.length / 12)
-                }
-            },
-            yAxis: {
-                type: 'value', 
-                min: 0, 
-                max: 100,
-                name: 'Percentage (%)',
-                nameLocation: 'middle',
-                nameGap: 40,
-                axisLine: { lineStyle: { color: '#6E7079' } },
-                axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}%' },
-                splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
-            },
-            series: [
-                {
-                    name: 'Cloud Cover', 
-                    type: 'line', 
-                    data: cloudCover,
-                    lineStyle: { color: 'rgb(5,5,15)', width: 2 },
-                    itemStyle: { color: 'rgb(5,5,15)' },
-                    areaStyle: { color: 'rgba(5,5,15,0.04)' },
-                    smooth: true, 
-                    symbol: 'none',
-                    markLine: raceStartIndex >= 0 ? {
-                        data: [{
-                            name: 'Race Start',
-                            xAxis: raceStartIndex,
-                            lineStyle: { color: '#00ff00', width: 3, type: 'solid' },
-                            label: { 
-                                position: 'end',
-                                formatter: 'Race Start',
-                                color: '#00ff00',
-                                fontWeight: 'bold'
-                            }
-                        }]
-                    } : undefined
+                yAxis: {
+                    type: 'value', 
+                    min: 0, 
+                    max: 100,
+                    axisLine: { lineStyle: { color: '#6E7079' } },
+                    axisLabel: { color: '#6E7079', fontSize: 12, formatter: '{value}%' },
+                    splitLine: { lineStyle: { color: '#6E7079', opacity: 0.3 } }
                 },
-                {
-                    name: 'Precipitation Chance', 
-                    type: 'line', 
-                    data: precipitation,
-                    lineStyle: { color: '#0B5559', width: 2 },
-                    itemStyle: { color: '#0B5559' },
-                    areaStyle: { color: 'rgba(15,138,138,0.04)' },
-                    smooth: true, 
-                    symbol: 'none'
+                series: [
+                    {
+                        name: 'Cloud Cover', 
+                        type: 'line', 
+                        data: cloudCover,
+                        lineStyle: { color: 'rgb(5,5,15)', width: 2 },
+                        itemStyle: { color: 'rgb(5,5,15)' },
+                        smooth: true, 
+                        symbol: 'none',
+                        markLine: raceStartIndex >= 0 ? {
+                            data: [{
+                                name: 'Race Start',
+                                xAxis: raceStartIndex,
+                                lineStyle: { color: '#00ff00', width: 3 },
+                                label: { formatter: 'Race Start', color: '#00ff00' }
+                            }]
+                        } : undefined
+                    },
+                    {
+                        name: 'Precipitation Chance', 
+                        type: 'line', 
+                        data: precipitation,
+                        lineStyle: { color: '#0B5559', width: 2 },
+                        itemStyle: { color: '#0B5559' },
+                        smooth: true, 
+                        symbol: 'none'
+                    }
+                ],
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: (params) => {
+                        const dataIndex = params[0].dataIndex;
+                        const forecastItem = forecast[dataIndex];
+                        const isRace = forecastItem.affects_session;
+                        const sunStatus = forecastItem.is_sun_up ? '☀️ Day' : '🌙 Night';
+                        
+                        return `<div style="color: black;">
+                            <strong>Time:</strong> ${timeLabels[dataIndex]}<br>
+                            <strong>Cloud Cover:</strong> ${cloudCover[dataIndex]}%<br>
+                            <strong>Precipitation:</strong> ${precipitation[dataIndex]}%<br>
+                            <strong>Period:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
+                            <strong>Sun:</strong> ${sunStatus}
+                        </div>`;
+                    }
                 }
-            ].concat(dayNightMarkings),
-            tooltip: {
-                trigger: 'axis',
-                formatter: (params) => {
-                    const dataIndex = params[0].dataIndex;
-                    const forecastItem = forecast[dataIndex];
-                    const isRace = forecastItem.affects_session;
-                    const sunStatus = forecastItem.is_sun_up ? '☀️ Day' : '🌙 Night';
-                    
-                    return `<div style="color: black;">
-                        <strong>Time:</strong> ${timeLabels[dataIndex]}<br>
-                        <strong>Temperature:</strong> ${this.convertTemperature(forecastItem.raw_air_temp)}°F<br>
-                        <strong>Cloud Cover:</strong> ${cloudCover[dataIndex]}%<br>
-                        <strong>Precipitation Chance:</strong> ${precipitation[dataIndex]}%<br>
-                        <strong>Period:</strong> ${isRace ? 'Race' : 'Practice/Quali'}<br>
-                        <strong>Sun:</strong> ${sunStatus}<br>
-                        <strong>Wind:</strong> ${this.convertWindSpeed(forecastItem.wind_speed)} mph
-                    </div>`;
-                }
-            }
-        };
+            };
 
-        console.log('☁️ Setting clouds chart options:', option);
-        this.cloudsChart.setOption(option);
-        console.log('☁️ Clouds chart rendered successfully');
+            console.log('☁️ Setting clouds chart options');
+            this.cloudsChart.setOption(option);
+            console.log('☁️ Clouds chart rendered successfully');
         }, 50);
     }
 
