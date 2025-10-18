@@ -529,20 +529,20 @@ export class WeatherComponent {
     }
     
     convertTemperature(temp) {
-        const minTemp = 1200, maxTemp = 1850, minF = 60, maxF = 85;
+        // Based on sample data: 1260=67°F, 1843=70°F
+        // TODO: Verify these ranges with other weather data - seems oddly specific
+        const minTemp = 1260, maxTemp = 1843, minF = 67, maxF = 70;
         return Math.round(((temp - minTemp) / (maxTemp - minTemp)) * (maxF - minF) + minF);
     }
     
     convertCloudCover(cloudCover) {
-        const minCloud = 400, maxCloud = 1000;
-        const percentage = Math.round(((cloudCover - minCloud) / (maxCloud - minCloud)) * 100);
-        return Math.max(0, Math.min(100, percentage));
+        // Cloud cover is already a percentage (407-1000 represents ~40.7%-100%)
+        return Math.round(cloudCover / 10);
     }
     
     convertHumidity(humidity) {
-        const minHumidity = 4000, maxHumidity = 7000;
-        const percentage = Math.round(((humidity - minHumidity) / (maxHumidity - minHumidity)) * 100);
-        return Math.max(0, Math.min(100, percentage));
+        // Humidity where 10000 = 100%
+        return Math.round(humidity / 100);
     }
     
     showError(message) {
