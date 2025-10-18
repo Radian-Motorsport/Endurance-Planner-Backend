@@ -6,6 +6,7 @@ import { UIManager } from './modules/ui-manager.js';
 import { StrategyCalculator } from './modules/strategy-calculator.js';
 import { Garage61Client } from './modules/garage61-client.js';
 import { WeatherComponent } from './modules/weather-component.js';
+import { TrackMapComponent } from './modules/track-map.js';
 
 class RadianPlannerApp {
     constructor() {
@@ -14,6 +15,7 @@ class RadianPlannerApp {
         this.strategyCalculator = new StrategyCalculator();
         this.garage61Client = new Garage61Client();
         this.weatherComponent = null; // Will be initialized when needed
+        this.trackMapComponent = null; // Will be initialized when needed
         
         this.currentStrategies = [];
         this.allData = {};
@@ -670,173 +672,26 @@ class RadianPlannerApp {
     async loadTrackMap(sessionDetails) {
         console.log('🗺️ Loading track map for:', sessionDetails.track_name);
         
-        // Inject track map styles if not already present
-        this.injectTrackMapStyles();
-        
-        const mapContainer = document.getElementById('track-map-svg');
-        const loadingElement = document.getElementById('track-map-loading');
-        const errorElement = document.getElementById('track-map-error');
-        
-        // Show loading state
-        mapContainer.classList.add('hidden');
-        errorElement.classList.add('hidden');
-        loadingElement.classList.remove('hidden');
-        
         try {
-            // Fetch track assets data via API endpoint
-            const response = await fetch(`/api/track-assets/${sessionDetails.track_id}`);
-            
-            if (response.status === 404) {
-                throw new Error('Track map data not available for this track');
+            // Initialize track map component if not already done
+            if (!this.trackMapComponent) {
+                this.trackMapComponent = new TrackMapComponent('track-map-container');
             }
             
-            if (!response.ok) {
-                throw new Error(`Failed to fetch track assets: ${response.status}`);
+            // Show track map section
+            const trackMapSection = document.getElementById('track-map-section');
+            if (trackMapSection) {
+                trackMapSection.classList.remove('hidden');
             }
             
-            const trackAssets = await response.json();
-            
-            if (!trackAssets || !trackAssets.track_map || !trackAssets.track_map_layers) {
-                throw new Error('Track map data not available');
-            }
-            
-            // Setup layer toggle event listeners
-            this.setupTrackMapLayerToggles();
-            
-            // Load SVG layers
-            await this.loadTrackMapLayers(trackAssets);
-            
-            // Show the map
-            loadingElement.classList.add('hidden');
-            mapContainer.classList.remove('hidden');
+            // Load track map from API
+            await this.trackMapComponent.loadTrackFromAPI(sessionDetails.track_id);
             
             console.log('✅ Track map loaded successfully');
             
         } catch (error) {
             console.warn('❌ Failed to load track map:', error.message);
-            
-            // Update error message to be more helpful
-            const errorTextElement = errorElement.querySelector('p');
-            if (errorTextElement) {
-                if (error.message.includes('not available')) {
-                    errorTextElement.textContent = 'Track map not available for this track';
-                } else {
-                    errorTextElement.textContent = 'Track map temporarily unavailable';
-                }
-            }
-            
-            // Show error state
-            loadingElement.classList.add('hidden');
-            errorElement.classList.remove('hidden');
-        }
-    }
-    
-    injectTrackMapStyles() {
-        // Add track map styles if not already present
-        if (!document.getElementById('track-map-styles')) {
-            const style = document.createElement('style');
-            style.id = 'track-map-styles';
-            style.textContent = `
-                /* Track Layer Toggle Styles */
-                .track-layer-toggle input:checked + label {
-                    background-color: #22c55e !important; /* green-500 */
-                }
-                
-                .track-layer-toggle input:checked + label span {
-                    transform: translateX(100%) !important;
-                }
-                
-                .track-layer-toggle input:not(:checked) + label {
-                    background-color: #525252 !important; /* neutral-600 */
-                }
-                
-                .track-layer-toggle input:not(:checked) + label span {
-                    transform: translateX(0%) !important;
-                }
-                
-                /* SVG Track Map Layer Styling - Dark Mode */
-                .track-svg-layer {
-                    transition: opacity 0.3s ease;
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    pointer-events: none;
-                }
-                
-                .track-svg-layer.hidden {
-                    display: none;
-                }
-                
-                /* Dark mode track styling with progressive shading */
-                #layer-background {
-                    fill: #5a5a5a !important;
-                    stroke: #5a5a5a !important;
-                    stroke-width: 2px !important;
-                }
-                
-                #layer-active {
-                    fill: #d1d1d1 !important;
-                    stroke: #d1d1d1 !important;
-                    stroke-width: 1px !important;
-                }
-                
-                #layer-inactive {
-                    fill: #2b2b2b !important;
-                    stroke: #2a2a2a !important;
-                    stroke-width: 1px !important;
-                }
-                
-                #layer-pitroad {
-                    fill: #059669 !important;
-                    stroke: #047857 !important;
-                    stroke-width: 2px !important;
-                }
-                
-                #layer-start-finish {
-                    fill: #dc2626 !important;
-                    stroke: #991b1b !important;
-                    stroke-width: 3px !important;
-                }
-                
-                #layer-turns {
-                    fill: #fbbf24 !important;
-                    stroke: #f59e0b !important;
-                    stroke-width: 1px !important;
-                    font-family: Arial, sans-serif !important;
-                    font-size: 12px !important;
-                    font-weight: bold !important;
-                }
-                
-                /* Override any default SVG colors and ensure visibility on dark background */
-                .track-svg-layer path,
-                .track-svg-layer circle,
-                .track-svg-layer rect,
-                .track-svg-layer polygon,
-                .track-svg-layer text {
-                    fill: inherit !important;
-                    stroke: inherit !important;
-                    stroke-width: inherit !important;
-                }
-                
-                /* Ensure text elements are visible */
-                .track-svg-layer text {
-                    fill: #fbbf24 !important;
-                    font-family: Arial, sans-serif !important;
-                    font-weight: bold !important;
-                }
-                
-                /* Track map container styling */
-                #track-map-svg svg {
-                    background: transparent !important;
-                    max-width: 100%;
-                    max-height: 100%;
-                    width: auto;
-                    height: auto;
-                }
-            `;
-            document.head.appendChild(style);
+            // Track map component handles its own error display
         }
     }
     

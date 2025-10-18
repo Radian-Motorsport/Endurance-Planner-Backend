@@ -315,6 +315,38 @@ export class TrackMapComponent {
             }
         });
     }
+
+    async loadTrackFromAPI(trackId) {
+        console.log('🗺️ Loading track map from API for track:', trackId);
+        
+        try {
+            // Fetch track assets data via API endpoint
+            const response = await fetch(`/api/track-assets/${trackId}`);
+            
+            if (response.status === 404) {
+                throw new Error('Track map data not available for this track');
+            }
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch track assets: ${response.status}`);
+            }
+            
+            const trackAssets = await response.json();
+            
+            if (!trackAssets || !trackAssets.track_map || !trackAssets.track_map_layers) {
+                throw new Error('Track map data not available');
+            }
+
+            // Load the track map
+            await this.loadTrackMap(trackAssets);
+            
+            console.log('✅ Track map loaded successfully from API');
+            
+        } catch (error) {
+            console.warn('❌ Failed to load track map from API:', error.message);
+            throw error;
+        }
+    }
     
     destroy() {
         const container = document.getElementById(this.containerId);
@@ -332,7 +364,7 @@ if (!document.querySelector('#track-map-styles')) {
     const style = document.createElement('style');
     style.id = 'track-map-styles';
     style.textContent = `
-        /* Track Map Component Styles */
+        /* Track Layer Toggle Styles */
         .track-layer-toggle input:checked + label {
             background-color: #22c55e !important; /* green-500 */
         }
@@ -345,7 +377,13 @@ if (!document.querySelector('#track-map-styles')) {
             background-color: #525252 !important; /* neutral-600 */
         }
         
+        .track-layer-toggle input:not(:checked) + label span {
+            transform: translateX(0%) !important;
+        }
+
+        /* SVG Track Map Layer Styling - Dark Mode */
         .track-svg-layer {
+            transition: opacity 0.3s ease;
             position: absolute;
             top: 0;
             left: 0;
@@ -354,11 +392,75 @@ if (!document.querySelector('#track-map-styles')) {
             pointer-events: none;
         }
         
+        .track-svg-layer.hidden {
+            display: none;
+        }
+        
+        /* Dark mode track styling with progressive shading */
+        #layer-background {
+            fill: #5a5a5a !important;
+            stroke: #5a5a5a !important;
+            stroke-width: 2px !important;
+        }
+        
+        #layer-active {
+            fill: #d1d1d1 !important;
+            stroke: #d1d1d1 !important;
+            stroke-width: 1px !important;
+        }
+        
+        #layer-inactive {
+            fill: #2b2b2b !important;
+            stroke: #2a2a2a !important;
+            stroke-width: 1px !important;
+        }
+        
+        #layer-pitroad {
+            fill: #059669 !important;
+            stroke: #047857 !important;
+            stroke-width: 2px !important;
+        }
+        
+        #layer-start-finish {
+            fill: #dc2626 !important;
+            stroke: #991b1b !important;
+            stroke-width: 3px !important;
+        }
+        
+        #layer-turns {
+            fill: #fbbf24 !important;
+            stroke: #f59e0b !important;
+            stroke-width: 1px !important;
+            font-family: Arial, sans-serif !important;
+            font-size: 12px !important;
+            font-weight: bold !important;
+        }
+        
+        /* Override any default SVG colors and ensure visibility on dark background */
+        .track-svg-layer path,
+        .track-svg-layer circle,
+        .track-svg-layer rect,
+        .track-svg-layer polygon,
+        .track-svg-layer text {
+            fill: inherit !important;
+            stroke: inherit !important;
+            stroke-width: inherit !important;
+        }
+        
+        /* Ensure text elements are visible */
+        .track-svg-layer text {
+            fill: #fbbf24 !important;
+            font-family: Arial, sans-serif !important;
+            font-weight: bold !important;
+        }
+        
+        /* Track map container styling */
         .track-map-wrapper svg {
+            background: transparent !important;
             max-width: 100%;
             max-height: 100%;
-            height: auto;
             width: auto;
+            height: auto;
         }
     `;
     document.head.appendChild(style);
