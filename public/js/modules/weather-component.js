@@ -44,7 +44,6 @@ export class WeatherComponent {
                 
                 .chakra-tabs__tablist {
                     display: flex;
-                    border-bottom: 2px solid #404040;
                     margin-bottom: 24px;
                 }
                 
@@ -58,15 +57,22 @@ export class WeatherComponent {
                     cursor: pointer;
                     border-bottom: 3px solid transparent;
                     transition: all 0.2s;
-                }
-                
-                .chakra-tabs__tab:hover {
-                    color: #d4d4d8 !important;
+                    position: relative;
                 }
                 
                 .chakra-tabs__tab[aria-selected="true"] {
-                    color: #2563eb !important;
-                    border-bottom-color: #2563eb !important;
+                    color: #a3a3a3 !important;
+                }
+                
+                .chakra-tabs__tab[aria-selected="true"]::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 50%;
+                    height: 3px;
+                    background-color: #2563eb;
                 }
                 
                 .chakra-tabs__tab-panel {
