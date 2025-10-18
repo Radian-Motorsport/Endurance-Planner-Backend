@@ -194,6 +194,9 @@ class RadianPlannerApp {
         console.log('🔍 Loading events for series ID:', seriesId, 'Type:', typeof seriesId);
         eventsSelect.innerHTML = '<option value="">Loading events...</option>';
         
+        // Also populate the new event names dropdown
+        this.populateEventNamesDropdown(seriesId);
+        
         try {
             const url = `/api/events/${seriesId}`;
             console.log('🌐 Fetching URL:', url);
@@ -238,6 +241,38 @@ class RadianPlannerApp {
         const sessionsSelect = document.getElementById('session-select');
         if (sessionsSelect) {
             sessionsSelect.innerHTML = '<option value="">Select Session</option>';
+        }
+    }
+
+    async populateEventNamesDropdown(seriesId) {
+        const eventNamesSelect = document.getElementById('event-names-select');
+        if (!eventNamesSelect) return;
+
+        console.log('🟢 Loading EVENT NAMES for series ID:', seriesId);
+        eventNamesSelect.innerHTML = '<option value="">Loading event names...</option>';
+        
+        try {
+            const url = `/api/events/${seriesId}`;
+            const response = await fetch(url);
+            const events = JSON.parse(await response.text());
+            
+            eventNamesSelect.innerHTML = '<option value="">Select Event Name</option>';
+            
+            if (!Array.isArray(events)) {
+                eventNamesSelect.innerHTML = '<option value="">Error: Invalid response</option>';
+                return;
+            }
+            
+            events.forEach(event => {
+                const option = document.createElement('option');
+                option.value = event.event_id || event.id;
+                option.textContent = event.event_name; // ONLY event_name
+                eventNamesSelect.appendChild(option);
+                console.log('🟢 Added event:', event.event_name);
+            });
+        } catch (error) {
+            console.error('🔴 Error fetching event names:', error);
+            eventNamesSelect.innerHTML = '<option value="">Error loading event names</option>';
         }
     }
 
