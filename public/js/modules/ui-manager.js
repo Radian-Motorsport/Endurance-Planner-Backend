@@ -36,21 +36,37 @@ export class UIManager {
      * Setup button event listeners
      */
     setupButtonListeners() {
+        console.log('🔧 Setting up button listeners...');
+        
         // Navigation buttons
         const raceDetailsBtn = document.getElementById('race-details-btn');
         const adminBtn = document.getElementById('admin-btn');
         const continueBtn = document.getElementById('continue-button');
         
+        console.log('🔍 Found buttons:', {
+            raceDetailsBtn: !!raceDetailsBtn,
+            adminBtn: !!adminBtn,
+            continueBtn: !!continueBtn
+        });
+        
         if (raceDetailsBtn) {
             raceDetailsBtn.addEventListener('click', () => this.showPlannerPage());
+            console.log('✅ Race details button listener added');
         }
         
         if (adminBtn) {
             adminBtn.addEventListener('click', () => this.showAdminPage());
+            console.log('✅ Admin button listener added');
         }
         
         if (continueBtn) {
-            continueBtn.addEventListener('click', () => this.showPage2());
+            continueBtn.addEventListener('click', () => {
+                console.log('🚀 Continue button clicked - calling showPage2()');
+                this.showPage2();
+            });
+            console.log('✅ Continue button listener added');
+        } else {
+            console.warn('⚠️ Continue button not found!');
         }
 
         // Back button in page 2
@@ -88,28 +104,35 @@ export class UIManager {
     async showPage2() {
         console.log('🔥🔥🔥 FIRST CALCULATE BUTTON PRESSED - showPage2() 🔥🔥🔥');
         
-        // Hide other pages
-        this.hideElement('planner-page');
-        this.hideElement('admin-page');
-        
-        // Show page 2
-        this.showElement('page-2');
-        
-        this.currentPage = 'page2';
-        
-        // Update button states
-        this.updateButtonStates();
+        try {
+            // Hide other pages
+            this.hideElement('planner-page');
+            this.hideElement('admin-page');
+            
+            // Show page 2
+            this.showElement('page-2');
+            
+            this.currentPage = 'page2';
+            
+            // Update button states
+            this.updateButtonStates();
 
-        // Collect page 1 data and populate page 2
-        if (this.app) {
-            try {
-                const eventData = this.app.collectPage1Data();
-                await this.app.populatePage2(eventData);
-            } catch (error) {
-                console.error('❌ Error populating page 2:', error);
+            // Collect page 1 data and populate page 2
+            if (this.app) {
+                console.log('📋 App instance available, collecting page 1 data...');
+                try {
+                    const eventData = this.app.collectPage1Data();
+                    console.log('📋 Event data collected:', eventData);
+                    await this.app.populatePage2(eventData);
+                    console.log('✅ Page 2 populated successfully');
+                } catch (error) {
+                    console.error('❌ Error during data collection/population:', error);
+                }
+            } else {
+                console.warn('⚠️ App instance not available for data collection');
             }
-        } else {
-            console.warn('⚠️ App instance not available for data collection');
+        } catch (error) {
+            console.error('❌ Error in showPage2():', error);
         }
     }
 

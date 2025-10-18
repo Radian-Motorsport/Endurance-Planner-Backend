@@ -1583,8 +1583,10 @@ class RadianPlannerApp {
 }
 
 // Initialize the application when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🌐 DOM loaded, initializing RadianPlanner...');
     window.radianPlanner = new RadianPlannerApp();
+    await window.radianPlanner.init();
 });
 
 // Export for use in other modules if needed
