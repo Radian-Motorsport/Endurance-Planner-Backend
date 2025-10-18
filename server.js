@@ -447,6 +447,29 @@ app.get('/api/sessions/:eventId', async (req, res) => {
     }
 });
 
+// Get all session types for an event (practice, qualifying, race)
+app.get('/api/event-sessions/:eventId', async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        console.log('🔍 Fetching all sessions for event ID:', eventId);
+        
+        if (!pool) {
+            console.error('❌ Database pool is null');
+            return res.status(500).json({ error: 'Database connection not available' });
+        }
+        
+        const result = await pool.query(
+            'SELECT session_type, session_length FROM sessions WHERE event_id = $1 AND active = true', 
+            [eventId]
+        );
+        console.log(`✅ Found ${result.rows.length} session types for event ${eventId}`);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('❌ Error fetching event sessions:', err);
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
+    }
+});
+
 // Get detailed session information including event data
 app.get('/api/session-details/:sessionId', async (req, res) => {
     try {

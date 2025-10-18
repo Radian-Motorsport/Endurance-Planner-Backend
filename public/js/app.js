@@ -336,6 +336,9 @@ class RadianPlannerApp {
                     `${hours}h ${minutes}m` : `${minutes} minutes`;
             }
             
+            // Fetch and populate practice/qualifying lengths
+            await this.populateAllSessionLengths(sessionDetails.event_id);
+            
             // Populate track details
             await this.populateTrackDetails(sessionDetails);
             
@@ -345,6 +348,43 @@ class RadianPlannerApp {
         } catch (error) {
             console.error('❌ Error fetching session details:', error);
             this.clearRaceInformation();
+        }
+    }
+    
+    async populateAllSessionLengths(eventId) {
+        try {
+            const response = await fetch(`/api/event-sessions/${eventId}`);
+            if (!response.ok) return;
+            
+            const sessions = await response.json();
+            
+            // Find practice and qualifying sessions
+            const practiceSession = sessions.find(s => s.session_type === 'practice');
+            const qualifyingSession = sessions.find(s => s.session_type === 'qualifying');
+            
+            // Update practice length
+            const practiceElement = document.getElementById('practice-length');
+            if (practiceElement && practiceSession?.session_length) {
+                const hours = Math.floor(practiceSession.session_length / 60);
+                const minutes = practiceSession.session_length % 60;
+                practiceElement.textContent = hours > 0 ? 
+                    `${hours}h ${minutes}m` : `${minutes} minutes`;
+            } else if (practiceElement) {
+                practiceElement.textContent = '-';
+            }
+            
+            // Update qualifying length
+            const qualifyingElement = document.getElementById('qualifying-length');
+            if (qualifyingElement && qualifyingSession?.session_length) {
+                const hours = Math.floor(qualifyingSession.session_length / 60);
+                const minutes = qualifyingSession.session_length % 60;
+                qualifyingElement.textContent = hours > 0 ? 
+                    `${hours}h ${minutes}m` : `${minutes} minutes`;
+            } else if (qualifyingElement) {
+                qualifyingElement.textContent = '-';
+            }
+        } catch (error) {
+            console.error('Error fetching session lengths:', error);
         }
     }
 
@@ -357,7 +397,7 @@ class RadianPlannerApp {
         if (raceInfoPlaceholder) raceInfoPlaceholder.classList.remove('hidden');
         
         // Clear all the content
-        const elements = ['race-datetime', 'event-datetime', 'session-length'];
+        const elements = ['race-datetime', 'event-datetime', 'session-length', 'practice-length', 'qualifying-length'];
         elements.forEach(id => {
             const element = document.getElementById(id);
             if (element) element.textContent = '-';
