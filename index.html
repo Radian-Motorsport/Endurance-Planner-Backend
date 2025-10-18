@@ -710,7 +710,24 @@
                 if (plannerPage && page2) {
                     plannerPage.classList.add('hidden');
                     page2.classList.remove('hidden');
-                    console.log('✅ Switched to page 2');
+                    
+                    // Show all sections EXCEPT stint table
+                    const sectionsToShow = [
+                        'garage61-lap-times',
+                        'race-inputs-container', 
+                        'overall-summary',
+                        'sliders-container'
+                    ];
+                    
+                    sectionsToShow.forEach(sectionId => {
+                        const section = document.getElementById(sectionId);
+                        if (section) {
+                            section.classList.remove('hidden');
+                            console.log(`✅ Showed section: ${sectionId}`);
+                        }
+                    });
+                    
+                    console.log('✅ Switched to page 2 with all sections visible');
                     
                     // Add test content to make sure page 2 is visible
                     const trackSpan = document.getElementById('page2-track');
