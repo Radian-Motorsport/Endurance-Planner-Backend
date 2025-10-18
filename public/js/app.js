@@ -991,8 +991,11 @@ class RadianPlannerApp {
                 // Initialize tabs functionality
                 this.initializeWeatherTabs();
                 
-                // Use your exact weather processing logic
-                this.renderWeatherCharts(weatherData);
+                // Wait a moment for DOM to be ready, then render charts
+                setTimeout(() => {
+                    console.log('🌦️ Rendering weather charts...');
+                    this.renderWeatherCharts(weatherData);
+                }, 100);
             }
         } catch (error) {
             console.error('❌ Failed to display weather data:', error);
@@ -1073,8 +1076,28 @@ class RadianPlannerApp {
     }
     
     renderWeatherCharts(weatherData) {
+        console.log('🌦️ renderWeatherCharts called with data:', weatherData);
+        
         if (!weatherData || !weatherData.weather_forecast) {
             console.error('Invalid weather data format');
+            return;
+        }
+
+        // Check if ECharts is available
+        if (typeof echarts === 'undefined') {
+            console.error('ECharts is not loaded');
+            return;
+        }
+
+        // Check if chart containers exist
+        const tempContainer = document.getElementById('temperature-chart');
+        const cloudsContainer = document.getElementById('clouds-chart');
+        
+        console.log('🌦️ Temperature chart container:', tempContainer);
+        console.log('🌦️ Clouds chart container:', cloudsContainer);
+
+        if (!tempContainer || !cloudsContainer) {
+            console.error('Chart containers not found');
             return;
         }
 
@@ -1083,12 +1106,20 @@ class RadianPlannerApp {
     }
 
     renderTemperatureChart(weatherData) {
+        console.log('🌡️ Rendering temperature chart...');
+        
         // Dispose existing chart if it exists
         if (this.temperatureChart) {
             this.temperatureChart.dispose();
         }
         
         const container = document.getElementById('temperature-chart');
+        if (!container) {
+            console.error('Temperature chart container not found');
+            return;
+        }
+        
+        console.log('🌡️ Initializing temperature chart...');
         this.temperatureChart = echarts.init(container);
 
         const forecast = weatherData.weather_forecast;
@@ -1140,7 +1171,9 @@ class RadianPlannerApp {
             }
         };
 
+        console.log('🌡️ Setting temperature chart options:', option);
         this.temperatureChart.setOption(option);
+        console.log('🌡️ Temperature chart rendered successfully');
     }
 
     renderCloudsChart(weatherData) {
