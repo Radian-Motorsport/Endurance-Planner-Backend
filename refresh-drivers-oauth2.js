@@ -110,22 +110,54 @@ class DriverRefreshService {
             // Prepare cust_ids array for iRacing API
             const custIds = drivers.map(driver => driver.cust_id);
             
-            // Fetch updated data from iRacing
+            // Fetch updated data from iRacing using raw fetch (like working examples)
             console.log('🌐 Fetching updated driver data from iRacing...');
-            const memberData = await this.client.makeDataAPIRequest('/data/member/get?cust_ids=' + custIds.join(','));
+            const custIdsParam = custIds.join(',');
+            console.log('📊 Customer IDs:', custIdsParam);
+            
+            const response = await fetch(`https://members-ng.iracing.com/data/member/get?cust_ids=${custIdsParam}`, {
+                headers: {
+                    'Authorization': `Bearer ${this.client.accessToken}`,
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
 
-            console.log('📊 API Response received:', memberData ? 'SUCCESS' : 'NULL');
+            console.log('📊 Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`iRacing API request failed: ${response.status} ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log('📊 API Response received:', result ? 'SUCCESS' : 'NULL');
+            
+            let memberData;
+            if (result.link) {
+                console.log('📡 Got data link, fetching actual data...');
+                const actualResponse = await fetch(result.link);
+                memberData = await actualResponse.json();
+                console.log('📊 Actual data received:', memberData ? 'SUCCESS' : 'NULL');
+            } else {
+                memberData = result;
+            }
+
             if (memberData) {
-                console.log('📊 Response keys:', Object.keys(memberData));
-                if (memberData.members) {
-                    console.log('📊 Members count:', memberData.members.length);
+                if (Array.isArray(memberData)) {
+                    console.log('📊 Response is array with length:', memberData.length);
+                    // iRacing API returns members array directly
+                    memberData = { members: memberData };
                 } else {
-                    console.log('📊 No members property found');
+                    console.log('📊 Response keys:', Object.keys(memberData));
+                    if (memberData.members) {
+                        console.log('📊 Members count:', memberData.members.length);
+                    } else {
+                        console.log('📊 No members property found, full response:', memberData);
+                    }
                 }
             }
 
-            if (!memberData || !memberData.members) {
-                throw new Error('Invalid response from iRacing API - no members data');
+            if (!memberData || !memberData.members || !Array.isArray(memberData.members)) {
+                throw new Error('Invalid response from iRacing API - no valid members data');
             }
 
             console.log(`✅ Received data for ${memberData.members.length} drivers`);
