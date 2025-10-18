@@ -1119,8 +1119,22 @@ class RadianPlannerApp {
             return;
         }
         
-        console.log('🌡️ Initializing temperature chart...');
-        this.temperatureChart = echarts.init(container);
+        // Ensure container has dimensions and is visible
+        container.style.width = '100%';
+        container.style.height = '300px';
+        container.style.display = 'block';
+        
+        console.log('🌡️ Container dimensions:', container.offsetWidth, 'x', container.offsetHeight);
+        
+        // Wait a moment for container to be properly sized
+        setTimeout(() => {
+            console.log('🌡️ Initializing temperature chart...');
+            this.temperatureChart = echarts.init(container);
+            
+            if (!this.temperatureChart) {
+                console.error('Failed to initialize temperature chart');
+                return;
+            }
 
         const forecast = weatherData.weather_forecast;
         const timeLabels = this.generateTimeLabels(forecast);
@@ -1171,19 +1185,42 @@ class RadianPlannerApp {
             }
         };
 
-        console.log('🌡️ Setting temperature chart options:', option);
-        this.temperatureChart.setOption(option);
-        console.log('🌡️ Temperature chart rendered successfully');
+            console.log('🌡️ Setting temperature chart options:', option);
+            this.temperatureChart.setOption(option);
+            console.log('🌡️ Temperature chart rendered successfully');
+        }, 50);
     }
 
     renderCloudsChart(weatherData) {
+        console.log('☁️ Rendering clouds chart...');
+        
         // Dispose existing chart if it exists
         if (this.cloudsChart) {
             this.cloudsChart.dispose();
         }
         
-        const container = document.getElementById('clouds-chart');
-        this.cloudsChart = echarts.init(container);
+        const cloudsContainer = document.getElementById('clouds-chart');
+        if (!cloudsContainer) {
+            console.error('Clouds chart container not found');
+            return;
+        }
+        
+        // Ensure container has dimensions and is visible
+        cloudsContainer.style.width = '100%';
+        cloudsContainer.style.height = '300px';
+        cloudsContainer.style.display = 'block';
+        
+        console.log('☁️ Container dimensions:', cloudsContainer.offsetWidth, 'x', cloudsContainer.offsetHeight);
+        
+        // Wait a moment for container to be properly sized
+        setTimeout(() => {
+            console.log('☁️ Initializing clouds chart...');
+            this.cloudsChart = echarts.init(cloudsContainer);
+            
+            if (!this.cloudsChart) {
+                console.error('Failed to initialize clouds chart');
+                return;
+            }
 
         const forecast = weatherData.weather_forecast;
         const timeLabels = this.generateTimeLabels(forecast);
@@ -1235,7 +1272,10 @@ class RadianPlannerApp {
             }
         };
 
+        console.log('☁️ Setting clouds chart options:', option);
         this.cloudsChart.setOption(option);
+        console.log('☁️ Clouds chart rendered successfully');
+        }, 50);
     }
 
     dispose() {
