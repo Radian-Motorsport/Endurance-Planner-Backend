@@ -696,16 +696,16 @@
     <!-- Debug Script -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('🔍 DEBUG: DOM loaded, checking button...');
+        console.log('🔍 DEBUG: DOM loaded, checking buttons...');
+        
+        // CONTINUE BUTTON (Page 1 -> Page 2)
         const continueBtn = document.getElementById('continue-button');
         console.log('🔍 DEBUG: Continue button found:', !!continueBtn);
         
         if (continueBtn) {
-            console.log('🔍 DEBUG: Button element:', continueBtn);
             continueBtn.addEventListener('click', () => {
-                console.log('🔍 DEBUG: Button clicked directly!');
+                console.log('🔍 DEBUG: Continue button clicked!');
                 
-                // DIRECT PAGE SWITCH - NO COMPLEX LOGIC
                 const plannerPage = document.getElementById('planner-page');
                 const page2 = document.getElementById('page-2');
                 
@@ -713,21 +713,36 @@
                 console.log('🔍 Found page-2:', !!page2);
                 
                 if (plannerPage && page2) {
-                    console.log('🔍 Before: planner-page hidden =', plannerPage.classList.contains('hidden'));
-                    console.log('🔍 Before: page-2 hidden =', page2.classList.contains('hidden'));
-                    
+                    console.log('🔍 Switching: planner-page -> hidden, page-2 -> visible');
                     plannerPage.classList.add('hidden');
                     page2.classList.remove('hidden');
-                    
-                    console.log('🔍 After: planner-page hidden =', plannerPage.classList.contains('hidden'));
-                    console.log('🔍 After: page-2 hidden =', page2.classList.contains('hidden'));
-                    console.log('✅ Switched to page 2 directly!');
+                    console.log('✅ Switched to page 2!');
                 } else {
                     console.log('❌ Page elements not found');
-                    console.log('Available elements with IDs:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
                 }
             });
-            console.log('🔍 DEBUG: Direct click listener added');
+            console.log('✅ Continue button listener added');
+        }
+        
+        // BACK BUTTON (Page 2 -> Page 1)
+        const backBtn = document.getElementById('back-button');
+        console.log('🔍 DEBUG: Back button found:', !!backBtn);
+        
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                console.log('🔍 DEBUG: Back button clicked!');
+                
+                const plannerPage = document.getElementById('planner-page');
+                const page2 = document.getElementById('page-2');
+                
+                if (plannerPage && page2) {
+                    console.log('🔍 Switching: page-2 -> hidden, planner-page -> visible');
+                    page2.classList.add('hidden');
+                    plannerPage.classList.remove('hidden');
+                    console.log('✅ Switched back to page 1!');
+                }
+            });
+            console.log('✅ Back button listener added');
         }
     });
     </script>
