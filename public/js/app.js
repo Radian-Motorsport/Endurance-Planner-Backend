@@ -1230,13 +1230,16 @@ class RadianPlannerApp {
         const driverSelect = document.getElementById('driver-select');
         const driverName = driverSelect.value;
         
-        console.log('🔍 DEBUG addSelectedDriver:');
+        console.log('🔍 DEBUG addSelectedDriver called at:', new Date().toISOString());
         console.log('   - driverSelect element:', driverSelect);
         console.log('   - driverSelect.value:', driverName);
+        console.log('   - driverName type:', typeof driverName);
+        console.log('   - driverName length:', driverName?.length);
         console.log('   - allData.drivers length:', this.allData.drivers?.length);
+        console.log('   - Stack trace:', new Error().stack);
         
-        if (!driverName) {
-            console.log('❌ No driver name selected');
+        if (!driverName || driverName.trim() === '') {
+            console.log('❌ No driver name selected - empty or whitespace only');
             this.uiManager.showNotification('Please select a driver first', 'error');
             return;
         }
