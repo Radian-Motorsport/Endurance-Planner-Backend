@@ -1775,6 +1775,20 @@ class RadianPlannerApp {
             carLogoEl.classList.add('hidden');
         }
 
+        // Populate series information with logo
+        const seriesNameEl = document.getElementById('page2-series');
+        const seriesLogoEl = document.getElementById('page2-series-logo');
+        
+        if (seriesNameEl) seriesNameEl.textContent = eventData.series?.name || 'Unknown Series';
+        
+        // Set series logo image
+        if (seriesLogoEl && eventData.series?.logo) {
+            seriesLogoEl.src = eventData.series.logo;
+            seriesLogoEl.classList.remove('hidden');
+        } else if (seriesLogoEl) {
+            seriesLogoEl.classList.add('hidden');
+        }
+
         // Populate session information using correct element IDs
         if (eventData.session) {
             const sessionDateEl = document.getElementById('page2-race-date');
@@ -1837,20 +1851,20 @@ class RadianPlannerApp {
                     }
                     
                     return `
-                        <div class="bg-neutral-700 rounded-lg p-3 mb-3">
+                        <div class="bg-neutral-700 rounded-lg p-3">
                             <div class="flex items-center">
-                                <div class="flex items-center justify-between w-32 px-3 py-2 rounded-full ${groupColorClass}">
-                                    <span class="font-bold text-xs">${groupName}</span>
-                                    <span class="text-sm">${safetyRating}</span>
-                                    <span class="text-sm">${iRating}</span>
+                                <div class="flex items-center justify-between w-24 px-2 py-1 rounded-full ${groupColorClass} text-xs">
+                                    <span class="font-bold">${groupName}</span>
+                                    <span>${safetyRating}</span>
+                                    <span>${iRating}</span>
                                 </div>
-                                <div class="ml-4 w-8 flex justify-center">
-                                    <span class="text-lg flag-emoji">${countryFlag}</span>
+                                <div class="ml-3 w-6 flex justify-center">
+                                    <span class="text-base flag-emoji">${countryFlag}</span>
                                 </div>
                                 <div class="flex-1 px-2">
-                                    <span class="text-neutral-200 font-medium">${name}</span>
+                                    <span class="text-neutral-200 font-medium text-sm">${name}</span>
                                 </div>
-                                <div class="text-neutral-400 text-sm min-w-max">
+                                <div class="text-neutral-400 text-xs">
                                     ${country}
                                 </div>
                             </div>
