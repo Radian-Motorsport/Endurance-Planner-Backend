@@ -1431,7 +1431,7 @@ class RadianPlannerApp {
                         <span class="text-sm">${iRating}</span>
                     </div>
                     <div class="ml-4 w-8 flex justify-center">
-                        <span class="text-lg">${countryFlag}</span>
+                        <span class="text-lg flag-emoji">${countryFlag}</span>
                     </div>
                     <div class="flex-1 px-2">
                         <span class="text-neutral-200 font-medium">${driver.name}</span>
@@ -1808,7 +1808,8 @@ class RadianPlannerApp {
                     
                     // Get color for group name
                     let groupColorClass = '';
-                    switch(groupName.toUpperCase()) {
+                    const groupLetter = groupName.replace(/^Class\s*/i, '').trim().toUpperCase();
+                    switch(groupLetter) {
                         case 'A':
                             groupColorClass = 'bg-blue-400 text-blue-900';
                             break;
@@ -1834,7 +1835,7 @@ class RadianPlannerApp {
                                     <span class="text-sm">${iRating}</span>
                                 </div>
                                 <div class="ml-4 w-8 flex justify-center">
-                                    <span class="text-lg">${countryFlag}</span>
+                                    <span class="text-lg flag-emoji">${countryFlag}</span>
                                 </div>
                                 <div class="flex-1 px-2">
                                     <span class="text-neutral-200 font-medium">${name}</span>
