@@ -236,6 +236,9 @@
                         <i class="fas fa-info-circle mb-2 text-2xl"></i>
                         <p>Select a session above to view race information</p>
                     </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Car Selection -->
@@ -299,7 +302,7 @@
 
                 <!-- Continue Button -->
                 <div class="mt-8">
-                    <button id="continue-button" class="w-full bg-blue-700 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                    <button id="continue-button" onclick="window.radianPlanner && window.radianPlanner.uiManager ? window.radianPlanner.uiManager.showPage2() : console.error('RadianPlanner or UIManager not available')" class="w-full bg-blue-700 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                         Calculate <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                 </div>
@@ -688,10 +691,6 @@
                         <ul id="admin-track-list" class="space-y-2 mt-4"></ul>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
             </div>
         </div>
     </div>
