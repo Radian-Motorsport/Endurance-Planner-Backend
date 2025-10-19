@@ -7,6 +7,7 @@ import { StrategyCalculator } from './modules/strategy-calculator.js';
 import { Garage61Client } from './modules/garage61-client.js';
 import { WeatherComponent } from './modules/weather-component.js';
 import { TrackMapComponent } from './modules/track-map.js';
+import { getCountryFlag } from './modules/country-flags.js';
 
 class RadianPlannerApp {
     constructor() {
@@ -57,6 +58,12 @@ class RadianPlannerApp {
             
             // Load all data from server
             this.allData = await this.apiClient.fetchAllData();
+            
+            // Debug: Log sample driver data to check if country is included
+            if (this.allData.drivers && this.allData.drivers.length > 0) {
+                console.log('🔍 DEBUG: Sample driver data:', this.allData.drivers[0]);
+                console.log('🔍 DEBUG: Driver fields:', Object.keys(this.allData.drivers[0]));
+            }
             
             // Populate dropdowns with loaded data
             this.populateSeriesDropdown();
@@ -1394,13 +1401,41 @@ class RadianPlannerApp {
         this.selectedDrivers.forEach(driver => {
             const li = document.createElement('li');
             li.className = 'flex items-center justify-between bg-neutral-700 p-3 rounded';
+            
+            // Get country flag
+            const countryFlag = getCountryFlag(driver.country);
+            
+            // Get safety rating class from database field
+            const srClass = driver.sports_car_group_name || 'D';
+            const safetyRating = driver.sports_car_safety_rating || 'D';
+            
+            // Determine color based on safety rating class
+            let srColorClass = '';
+            switch(srClass.toUpperCase()) {
+                case 'A':
+                    srColorClass = 'bg-blue-600 text-white';
+                    break;
+                case 'B':
+                    srColorClass = 'bg-green-600 text-white';
+                    break;
+                case 'C':
+                    srColorClass = 'bg-yellow-500 text-black';
+                    break;
+                case 'D':
+                    srColorClass = 'bg-red-600 text-white';
+                    break;
+                default:
+                    srColorClass = 'bg-neutral-600 text-white';
+            }
+            
             li.innerHTML = `
                 <div class="flex items-center space-x-3">
-                    <span class="text-neutral-200">${driver.name}</span>
-                    <div class="text-xs text-neutral-400">
-                        iR: ${driver.sports_car_irating || 'N/A'} | 
-                        SR: ${driver.sports_car_safety_rating || 'N/A'} |
-                        G61: ${driver.garage61_slug || 'N/A'}
+                    <span class="text-lg">${countryFlag}</span>
+                    <span class="text-neutral-200 font-medium">${driver.name}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-1 rounded text-xs font-bold ${srColorClass}">${srClass.toUpperCase()}</span>
+                        <span class="text-xs text-neutral-400">${safetyRating}</span>
+                        <span class="text-xs text-neutral-400">${driver.sports_car_irating || 'N/A'}</span>
                     </div>
                 </div>
                 <button onclick="window.radianPlanner.removeSelectedDriver('${driver.name}')" 
@@ -1572,7 +1607,9 @@ class RadianPlannerApp {
             garage61_slug: driver.garage61_slug,
             timezone: driver.timezone,
             safety_rating: driver.sports_car_safety_rating || driver.safety_rating,
-            irating: driver.sports_car_irating || driver.irating
+            irating: driver.sports_car_irating || driver.irating,
+            country: driver.country,
+            sports_car_group_name: driver.sports_car_group_name
         }));
         
         console.log('🔍 DEBUG: Collected data structures:');
@@ -1756,17 +1793,43 @@ class RadianPlannerApp {
         const driversListEl = document.getElementById('page2-drivers');
         if (driversListEl) {
             if (eventData.drivers && eventData.drivers.length > 0) {
-                // Create detailed drivers display with ratings
+                // Create detailed drivers display with ratings and flags
                 const driversHtml = eventData.drivers.map(driver => {
                     const name = driver.name || 'Unknown Driver';
-                    const safetyRating = driver.safety_rating ? `SR: ${driver.safety_rating}` : '';
-                    const iRating = driver.irating ? `iR: ${driver.irating}` : '';
+                    const safetyRating = driver.safety_rating || 'D';
+                    const iRating = driver.irating || 'N/A';
+                    const countryFlag = getCountryFlag(driver.country);
+                    
+                    // Get safety rating class from database field
+                    const srClass = driver.sports_car_group_name || 'D';
+                    let srColorClass = '';
+                    switch(srClass.toUpperCase()) {
+                        case 'A':
+                            srColorClass = 'bg-blue-600 text-white';
+                            break;
+                        case 'B':
+                            srColorClass = 'bg-green-600 text-white';
+                            break;
+                        case 'C':
+                            srColorClass = 'bg-yellow-500 text-black';
+                            break;
+                        case 'D':
+                            srColorClass = 'bg-red-600 text-white';
+                            break;
+                        default:
+                            srColorClass = 'bg-neutral-600 text-white';
+                    }
                     
                     return `
                         <div class="bg-neutral-700 rounded-lg p-3 mb-2">
-                            <div class="text-neutral-200 font-medium text-sm">${name}</div>
-                            <div class="text-neutral-400 text-xs mt-1">
-                                ${safetyRating}${safetyRating && iRating ? ' • ' : ''}${iRating}
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="text-lg">${countryFlag}</span>
+                                <div class="text-neutral-200 font-medium text-sm">${name}</div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 rounded text-xs font-bold ${srColorClass}">${srClass.toUpperCase()}</span>
+                                <span class="text-xs text-neutral-400">${safetyRating}</span>
+                                <span class="text-xs text-neutral-400">${iRating}</span>
                             </div>
                         </div>
                     `;

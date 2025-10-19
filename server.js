@@ -68,7 +68,12 @@ async function createTables() {
                 name VARCHAR(255) NOT NULL UNIQUE,
                 garage61_slug VARCHAR(255),
                 firstName VARCHAR(255),
-                lastName VARCHAR(255)
+                lastName VARCHAR(255),
+                country VARCHAR(255),
+                timezone VARCHAR(255),
+                sports_car_irating INTEGER,
+                sports_car_safety_rating VARCHAR(10),
+                sports_car_group_name VARCHAR(1)
             );
         `;
         const createCarsTable = `
@@ -216,6 +221,14 @@ app.get('/api/data', async (req, res) => {
 app.get('/api/drivers', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM drivers');
+        
+        // Debug: Log what columns and data we actually have
+        if (result.rows.length > 0) {
+            console.log('🔍 DEBUG: Driver table columns:', Object.keys(result.rows[0]));
+            console.log('🔍 DEBUG: Sample driver data:', result.rows[0]);
+            console.log('🔍 DEBUG: Total drivers returned:', result.rows.length);
+        }
+        
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching drivers:', err);
