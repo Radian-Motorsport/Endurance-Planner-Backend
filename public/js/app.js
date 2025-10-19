@@ -1570,7 +1570,9 @@ class RadianPlannerApp {
             firstName: driver.firstName,
             lastName: driver.lastName,
             garage61_slug: driver.garage61_slug,
-            timezone: driver.timezone
+            timezone: driver.timezone,
+            safety_rating: driver.sports_car_safety_rating || driver.safety_rating,
+            irating: driver.sports_car_irating || driver.irating
         }));
         
         console.log('🔍 DEBUG: Collected data structures:');
