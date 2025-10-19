@@ -1830,9 +1830,11 @@ class RadianPlannerApp {
                     const countryFlag = getCountryFlagOrCode(country);
                     console.log(`🏁 Page2: Flag result: ${countryFlag}`);
                     
-                    // Get color for group name
+                    // Get color for group name and clean display name
                     let groupColorClass = '';
                     const groupLetter = groupName.replace(/^Class\s*/i, '').trim().toUpperCase();
+                    const displayGroupName = groupLetter; // Remove "Class" from display
+                    
                     switch(groupLetter) {
                         case 'A':
                             groupColorClass = 'bg-blue-400 text-blue-900';
@@ -1851,12 +1853,12 @@ class RadianPlannerApp {
                     }
                     
                     return `
-                        <div class="bg-neutral-700 rounded-lg p-3">
+                        <div class="bg-neutral-700 rounded-lg p-2">
                             <div class="flex items-center">
-                                <div class="flex items-center justify-between w-24 px-2 py-1 rounded-full ${groupColorClass} text-xs">
-                                    <span class="font-bold">${groupName}</span>
-                                    <span>${safetyRating}</span>
-                                    <span>${iRating}</span>
+                                <div class="flex items-center justify-between w-28 px-2 py-1 rounded-full ${groupColorClass} text-xs">
+                                    <span class="font-bold">${displayGroupName}</span>
+                                    <span class="mx-1">${safetyRating}</span>
+                                    <span class="font-bold">${iRating}</span>
                                 </div>
                                 <div class="ml-3 w-6 flex justify-center">
                                     ${countryFlag}
