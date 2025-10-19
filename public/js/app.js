@@ -1810,32 +1810,38 @@ class RadianPlannerApp {
                     let groupColorClass = '';
                     switch(groupName.toUpperCase()) {
                         case 'A':
-                            groupColorClass = 'bg-blue-600 text-white';
+                            groupColorClass = 'bg-blue-400 text-blue-900';
                             break;
                         case 'B':
-                            groupColorClass = 'bg-green-600 text-white';
+                            groupColorClass = 'bg-green-400 text-green-900';
                             break;
                         case 'C':
-                            groupColorClass = 'bg-yellow-500 text-black';
+                            groupColorClass = 'bg-yellow-400 text-yellow-900';
                             break;
                         case 'D':
-                            groupColorClass = 'bg-red-600 text-white';
+                            groupColorClass = 'bg-red-400 text-red-900';
                             break;
                         default:
-                            groupColorClass = 'bg-neutral-600 text-white';
+                            groupColorClass = 'bg-neutral-400 text-neutral-900';
                     }
                     
                     return `
                         <div class="bg-neutral-700 rounded-lg p-3 mb-3">
-                            <div class="flex items-center space-x-2 mb-2 px-3 py-2 rounded ${groupColorClass}">
-                                <span class="font-bold text-xs">${groupName}</span>
-                                <span class="text-sm">${safetyRating}</span>
-                                <span class="text-sm">${iRating}</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-lg">${countryFlag}</span>
-                                <span class="text-neutral-200 font-medium">${name}</span>
-                                <span class="text-neutral-400 text-sm">${country}</span>
+                            <div class="flex items-center">
+                                <div class="flex items-center justify-between w-32 px-3 py-2 rounded-full ${groupColorClass}">
+                                    <span class="font-bold text-xs">${groupName}</span>
+                                    <span class="text-sm">${safetyRating}</span>
+                                    <span class="text-sm">${iRating}</span>
+                                </div>
+                                <div class="ml-4 w-8 flex justify-center">
+                                    <span class="text-lg">${countryFlag}</span>
+                                </div>
+                                <div class="flex-1 px-2">
+                                    <span class="text-neutral-200 font-medium">${name}</span>
+                                </div>
+                                <div class="text-neutral-400 text-sm min-w-max">
+                                    ${country}
+                                </div>
                             </div>
                         </div>
                     `;
