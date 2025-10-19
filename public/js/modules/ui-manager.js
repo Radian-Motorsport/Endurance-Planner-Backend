@@ -160,10 +160,9 @@ export class UIManager {
                 console.warn('⚠️ App instance not available for data collection');
             }
 
-            // QUICK FIX: Force show Garage61 section and populate with test data
-            console.log('🚀 QUICK FIX: Forcing Garage61 section to show...');
-            this.forceShowGarage61Section();
-            console.log('🔧 forceShowGarage61Section completed');
+            // REMOVED: Force show Garage61 section (was overwriting real API data)
+            // Let the real API call in populatePage2 handle Garage61 data
+            console.log('🔧 Allowing real Garage61 API data to display...');
         } catch (error) {
             console.error('❌ Error in showPage2():', error);
             console.error('❌ Error stack:', error.stack);
