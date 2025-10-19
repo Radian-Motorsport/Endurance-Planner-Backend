@@ -1449,6 +1449,10 @@ class RadianPlannerApp {
         console.log('   trackData:', trackData);
         console.log('   carData:', carData);
         console.log('   driversData:', driversData);
+        console.log('🔍 DEBUG: Detailed data inspection:');
+        console.log('   trackData.garage61_id:', trackData.garage61_id);
+        console.log('   carData.garage61_id:', carData.garage61_id);
+        console.log('   sessionDetails exists:', !!this.selectedSessionDetails);
 
         // Collect session details
         const sessionData = this.selectedSessionDetails ? {
