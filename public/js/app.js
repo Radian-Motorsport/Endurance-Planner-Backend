@@ -1394,7 +1394,7 @@ class RadianPlannerApp {
 
         this.selectedDrivers.forEach(driver => {
             const li = document.createElement('li');
-            li.className = 'flex items-center justify-between bg-neutral-700 p-3 rounded';
+            li.className = 'bg-neutral-700 rounded-lg p-3 mb-3';
             
             // Get country flag
             const countryFlag = getCountryFlag(driver.country);
@@ -1402,40 +1402,48 @@ class RadianPlannerApp {
             // Get safety rating class from database field
             const srClass = driver.sports_car_group_name || 'D';
             const safetyRating = driver.sports_car_safety_rating || 'D';
+            const iRating = driver.sports_car_irating || 'N/A';
             
             // Determine color based on safety rating class
             let srColorClass = '';
             switch(srClass.toUpperCase()) {
                 case 'A':
-                    srColorClass = 'bg-blue-600 text-white';
+                    srColorClass = 'bg-blue-400 text-blue-900';
                     break;
                 case 'B':
-                    srColorClass = 'bg-green-600 text-white';
+                    srColorClass = 'bg-green-400 text-green-900';
                     break;
                 case 'C':
-                    srColorClass = 'bg-yellow-500 text-black';
+                    srColorClass = 'bg-yellow-400 text-yellow-900';
                     break;
                 case 'D':
-                    srColorClass = 'bg-red-600 text-white';
+                    srColorClass = 'bg-red-400 text-red-900';
                     break;
                 default:
-                    srColorClass = 'bg-neutral-600 text-white';
+                    srColorClass = 'bg-neutral-400 text-neutral-900';
             }
             
             li.innerHTML = `
-                <div class="flex items-center space-x-3">
-                    <span class="text-lg">${countryFlag}</span>
-                    <span class="text-neutral-200 font-medium">${driver.name}</span>
-                    <div class="flex items-center space-x-2">
-                        <span class="px-2 py-1 rounded text-xs font-bold ${srColorClass}">${srClass.toUpperCase()}</span>
-                        <span class="text-xs text-neutral-400">${safetyRating}</span>
-                        <span class="text-xs text-neutral-400">${driver.sports_car_irating || 'N/A'}</span>
+                <div class="flex items-center">
+                    <div class="flex items-center justify-between w-32 px-3 py-2 rounded-full ${srColorClass}">
+                        <span class="font-bold text-xs">${srClass.toUpperCase()}</span>
+                        <span class="text-sm">${safetyRating}</span>
+                        <span class="text-sm">${iRating}</span>
                     </div>
+                    <div class="ml-4 w-8 flex justify-center">
+                        <span class="text-lg">${countryFlag}</span>
+                    </div>
+                    <div class="flex-1 px-2">
+                        <span class="text-neutral-200 font-medium">${driver.name}</span>
+                    </div>
+                    <div class="text-neutral-400 text-sm min-w-max">
+                        ${driver.country}
+                    </div>
+                    <button onclick="window.radianPlanner.removeSelectedDriver('${driver.name}')" 
+                            class="ml-4 text-red-400 hover:text-red-300">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <button onclick="window.radianPlanner.removeSelectedDriver('${driver.name}')" 
-                        class="text-red-400 hover:text-red-300">
-                    <i class="fas fa-times"></i>
-                </button>
             `;
             driversList.appendChild(li);
         });
@@ -1819,14 +1827,15 @@ class RadianPlannerApp {
                     
                     return `
                         <div class="bg-neutral-700 rounded-lg p-3 mb-3">
-                            <div class="flex items-center space-x-2 mb-2">
-                                <span class="text-lg">${countryFlag}</span>
-                                <span class="text-neutral-200 font-medium">${name}</span>
+                            <div class="flex items-center space-x-2 mb-2 px-3 py-2 rounded ${groupColorClass}">
+                                <span class="font-bold text-xs">${groupName}</span>
+                                <span class="text-sm">${safetyRating}</span>
+                                <span class="text-sm">${iRating}</span>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <span class="px-3 py-1 rounded-full text-xs font-bold ${groupColorClass}">CLASS ${groupName}</span>
-                                <span class="text-neutral-300 text-sm">${safetyRating}</span>
-                                <span class="text-neutral-300 text-sm">${iRating}</span>
+                                <span class="text-lg">${countryFlag}</span>
+                                <span class="text-neutral-200 font-medium">${name}</span>
+                                <span class="text-neutral-400 text-sm">${country}</span>
                             </div>
                         </div>
                     `;
