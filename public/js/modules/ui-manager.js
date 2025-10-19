@@ -66,7 +66,14 @@ export class UIManager {
         if (continueBtn) {
             continueBtn.addEventListener('click', () => {
                 console.log('🚀 Continue button clicked - calling showPage2()');
-                this.showPage2();
+                console.log('🔧 DEBUG: this object:', this);
+                console.log('🔧 DEBUG: showPage2 method exists:', typeof this.showPage2);
+                console.log('🔧 DEBUG: showPage2 function:', this.showPage2);
+                try {
+                    this.showPage2();
+                } catch (error) {
+                    console.error('❌ ERROR in showPage2 call:', error);
+                }
             });
             console.log('✅ Continue button listener added');
         } else {
@@ -107,26 +114,43 @@ export class UIManager {
      */
     async showPage2() {
         console.log('🔥🔥🔥 FIRST CALCULATE BUTTON PRESSED - showPage2() 🔥🔥🔥');
+        console.log('🔧 DEBUG: Method showPage2 started execution');
         
         try {
+            console.log('🔧 About to hide other pages...');
             // Hide other pages
+            console.log('🔧 Calling hideElement for planner-page...');
             this.hideElement('planner-page');
+            console.log('🔧 Planner page hidden');
+            console.log('🔧 Calling hideElement for admin-page...');
             this.hideElement('admin-page');
+            console.log('🔧 Admin page hidden');
             
+            console.log('🔧 About to show page-2...');
             // Show page 2
+            console.log('🔧 Calling showElement for page-2...');
             this.showElement('page-2');
+            console.log('🔧 showElement page-2 called');
             
+            console.log('🔧 Setting currentPage to page2...');
             this.currentPage = 'page2';
+            console.log('🔧 currentPage set');
             
+            console.log('🔧 About to update button states...');
             // Update button states
             this.updateButtonStates();
+            console.log('🔧 Button states updated');
 
             // Collect page 1 data and populate page 2
+            console.log('🔧 About to check app instance...');
             if (this.app) {
                 console.log('📋 App instance available, collecting page 1 data...');
+                console.log('🔧 DEBUG: this.app object:', this.app);
                 try {
+                    console.log('🔧 Calling collectPage1Data...');
                     const eventData = this.app.collectPage1Data();
                     console.log('📋 Event data collected:', eventData);
+                    console.log('🔧 Calling populatePage2...');
                     await this.app.populatePage2(eventData);
                     console.log('✅ Page 2 populated successfully');
                 } catch (error) {
@@ -139,9 +163,12 @@ export class UIManager {
             // QUICK FIX: Force show Garage61 section and populate with test data
             console.log('🚀 QUICK FIX: Forcing Garage61 section to show...');
             this.forceShowGarage61Section();
+            console.log('🔧 forceShowGarage61Section completed');
         } catch (error) {
             console.error('❌ Error in showPage2():', error);
+            console.error('❌ Error stack:', error.stack);
         }
+        console.log('🔧 DEBUG: showPage2 method completed');
     }
 
     /**
@@ -232,9 +259,13 @@ export class UIManager {
      * @param {string} elementId - Element ID to hide
      */
     hideElement(elementId) {
+        console.log(`🔍 hideElement called for: ${elementId}`);
         const element = document.getElementById(elementId);
         if (element) {
+            console.log(`✅ Element found: ${elementId}, adding hidden class`);
             element.classList.add('hidden');
+        } else {
+            console.log(`❌ Element NOT found: ${elementId}`);
         }
     }
 
