@@ -133,14 +133,12 @@
                     <!-- Header -->
                     <div class="flex justify-between items-center mb-4">
                         <h1 class="text-xl road-rage-font">Race Information</h1>
-                        <!-- Series Name (Top Right) -->
-                        <div id="series-name" class="text-lg font-medium text-neutral-200 hidden"></div>
                     </div>
                     
                     <div id="race-info-content" class="hidden">
                         <!-- Two Column Layout -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-                            <!-- Left: Race and Event Times -->
+                            <!-- Left: Race Times, Event Times, and Session Lengths -->
                             <div class="space-y-4">
                                 <div class="flex flex-col w-full">
                                     <label class="text-sm font-medium text-neutral-500 mb-2">Race Date & Time <span class="text-xs text-neutral-400">(Simulator Time)</span></label>
@@ -162,31 +160,25 @@
                                         Select a session to view event information
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Right: Series Logo and Session Lengths -->
-                            <div class="flex flex-col items-center space-y-4">
-                                <!-- Series Logo -->
-                                <img id="series-logo" src="" alt="Series Logo" class="w-24 h-24 object-contain rounded-lg">
                                 
                                 <!-- Session Lengths -->
-                                <div class="w-full">
-                                    <label class="text-sm font-medium text-neutral-500 mb-2 block text-center">Session Lengths</label>
-                                    <div class="space-y-1 text-center">
-                                        <div class="flex justify-between items-center">
+                                <div class="flex flex-col w-full">
+                                    <label class="text-sm font-medium text-neutral-500 mb-2">Session Lengths</label>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2">
                                             <span class="text-sm text-neutral-400">Practice:</span>
                                             <span id="practice-length" class="text-neutral-200 text-sm"
                                                   data-practice-minutes=""
                                                   data-practice-hours="">-</span>
                                         </div>
-                                        <div class="flex justify-between items-center">
+                                        <div class="flex items-center gap-2">
                                             <span class="text-sm text-neutral-400">Qualifying:</span>
                                             <span id="qualifying-length" class="text-neutral-200 text-sm"
                                                   data-qualifying-minutes=""
                                                   data-qualifying-hours=""
                                                   data-qualifying-laps="">-</span>
                                         </div>
-                                        <div class="flex justify-between items-center">
+                                        <div class="flex items-center gap-2">
                                             <span class="text-sm text-neutral-400">Race:</span>
                                             <span id="session-length" class="text-neutral-200 text-sm"
                                                   data-session-type=""
@@ -197,6 +189,15 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            
+                            <!-- Right: Series Name and Logo Only -->
+                            <div class="flex flex-col items-center space-y-4">
+                                <!-- Series Name -->
+                                <div id="series-name" class="text-lg font-medium text-neutral-200 text-center hidden"></div>
+                                
+                                <!-- Series Logo -->
+                                <img id="series-logo" src="" alt="Series Logo" class="w-32 h-32 object-contain rounded-lg">
                             </div>
                         </div>
                         
