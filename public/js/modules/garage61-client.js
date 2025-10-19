@@ -166,24 +166,24 @@ export class Garage61Client {
 
     /**
      * Format lap time for display
-     * @param {number} lapTimeMs - Lap time in milliseconds
+     * @param {number} lapTimeSeconds - Lap time in seconds (from Garage61 API)
      * @returns {string} Formatted lap time
      */
-    formatLapTime(lapTimeMs) {
-        // Handle both milliseconds and already formatted strings
-        if (typeof lapTimeMs === 'string') {
-            return lapTimeMs; // Already formatted
+    formatLapTime(lapTimeSeconds) {
+        // Handle both seconds and already formatted strings
+        if (typeof lapTimeSeconds === 'string') {
+            return lapTimeSeconds; // Already formatted
         }
         
-        if (!lapTimeMs || lapTimeMs <= 0) {
+        if (!lapTimeSeconds || lapTimeSeconds <= 0) {
             return "Invalid";
         }
         
-        // Convert milliseconds to M:SS.sss format like backup version
-        const totalMs = lapTimeMs;
-        const minutes = Math.floor(totalMs / 60000);
-        const seconds = Math.floor((totalMs % 60000) / 1000);
-        const milliseconds = totalMs % 1000;
+        // Convert seconds to M:SS.sss format (README specifies seconds, not milliseconds)
+        const totalSeconds = lapTimeSeconds;
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = Math.floor(totalSeconds % 60);
+        const milliseconds = Math.floor((totalSeconds % 1) * 1000);
         
         return `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
     }
