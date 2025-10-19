@@ -130,21 +130,18 @@
                 
                 <!-- Race Date & Time -->
                 <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
-                    <!-- Header with Series Info -->
-                    <div class="flex justify-between items-start mb-4">
+                    <!-- Header -->
+                    <div class="flex justify-between items-center mb-4">
                         <h1 class="text-xl road-rage-font">Race Information</h1>
-                        <!-- Series Name and Logo (Top Right) -->
-                        <div class="flex flex-col items-center">
-                            <div id="series-name" class="text-lg font-medium text-neutral-200 text-center hidden mb-2"></div>
-                            <img id="series-logo" src="" alt="Series Logo" class="h-12 object-contain hidden">
-                        </div>
+                        <!-- Series Name (Top Right) -->
+                        <div id="series-name" class="text-lg font-medium text-neutral-200 hidden"></div>
                     </div>
                     
                     <div id="race-info-content" class="hidden">
-                        <!-- Race Date & Time Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <!-- Left Column: Race and Event Times -->
-                            <div class="space-y-4">
+                        <!-- Main Content Grid -->
+                        <div class="flex justify-between items-start gap-6">
+                            <!-- Left Side: Session Times -->
+                            <div class="flex-1 space-y-4">
                                 <div class="flex flex-col w-full">
                                     <label class="text-sm font-medium text-neutral-500 mb-2">Race Date & Time <span class="text-xs text-neutral-400">(Simulator Time)</span></label>
                                     <div id="race-datetime" class="text-neutral-200 text-sm"
@@ -165,35 +162,40 @@
                                         Select a session to view event information
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Right Column: Session Lengths -->
-                            <div class="flex flex-col w-full">
-                                <label class="text-sm font-medium text-neutral-500 mb-2">Session Lengths</label>
-                                <div class="bg-neutral-800 p-3 rounded-lg space-y-2">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-sm text-neutral-400">Practice:</span>
-                                        <span id="practice-length" class="text-neutral-200 text-sm"
-                                              data-practice-minutes=""
-                                              data-practice-hours="">-</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-sm text-neutral-400">Qualifying:</span>
-                                        <span id="qualifying-length" class="text-neutral-200 text-sm"
-                                              data-qualifying-minutes=""
-                                              data-qualifying-hours=""
-                                              data-qualifying-laps="">-</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-sm text-neutral-400">Race:</span>
-                                        <span id="session-length" class="text-neutral-200 text-sm"
-                                              data-session-type=""
-                                              data-session-time=""
-                                              data-session-laps=""
-                                              data-session-minutes=""
-                                              data-session-hours="">-</span>
+                                
+                                <!-- Session Lengths -->
+                                <div class="flex flex-col w-full">
+                                    <label class="text-sm font-medium text-neutral-500 mb-2">Session Lengths</label>
+                                    <div class="bg-neutral-700 p-3 rounded-lg space-y-2">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-neutral-400">Practice:</span>
+                                            <span id="practice-length" class="text-neutral-200 text-sm"
+                                                  data-practice-minutes=""
+                                                  data-practice-hours="">-</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-neutral-400">Qualifying:</span>
+                                            <span id="qualifying-length" class="text-neutral-200 text-sm"
+                                                  data-qualifying-minutes=""
+                                                  data-qualifying-hours=""
+                                                  data-qualifying-laps="">-</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-neutral-400">Race:</span>
+                                            <span id="session-length" class="text-neutral-200 text-sm"
+                                                  data-session-type=""
+                                                  data-session-time=""
+                                                  data-session-laps=""
+                                                  data-session-minutes=""
+                                                  data-session-hours="">-</span>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+                            
+                            <!-- Right Side: Series Logo -->
+                            <div class="flex justify-center items-center">
+                                <img id="series-logo" src="" alt="Series Logo" class="h-20 w-20 object-contain hidden rounded-lg">
                             </div>
                         </div>
                         

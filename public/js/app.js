@@ -1004,6 +1004,8 @@ class RadianPlannerApp {
                     const seriesId = parseInt(e.target.value);
                     this.selectedSeries = this.allData.series.find(s => s.series_id === seriesId);
                     console.log('🏁 Selected series object:', this.selectedSeries);
+                    console.log('🔍 Series logo field:', this.selectedSeries?.logo);
+                    console.log('🔍 All series fields:', Object.keys(this.selectedSeries || {}));
                     
                     // Display series logo
                     this.displaySeriesLogo();

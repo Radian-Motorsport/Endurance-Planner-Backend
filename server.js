@@ -393,7 +393,7 @@ app.get('/api/series', async (req, res) => {
             return res.status(500).json({ error: 'Database connection not available' });
         }
         
-        const result = await pool.query('SELECT series_id, series_name FROM series WHERE active = true ORDER BY series_name');
+        const result = await pool.query('SELECT series_id, series_name, logo FROM series WHERE active = true ORDER BY series_name');
         console.log('📊 Series query result:', result.rows.length, 'rows found');
         if (result.rows.length > 0) {
             console.log('📋 First series:', result.rows[0]);
