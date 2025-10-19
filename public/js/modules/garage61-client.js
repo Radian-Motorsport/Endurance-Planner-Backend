@@ -25,7 +25,9 @@ export class Garage61Client {
             
             const response = await this.callAPI(carId, trackId);
             
-            console.log('🔥 API Response:', response);
+            console.log('🔥 RAW API Response:', JSON.stringify(response, null, 2));
+            console.log('🔥 API Response data array:', response.data);
+            console.log('🔥 First lap item:', response.data?.[0]);
             
             if (!response.success) {
                 throw new Error(response.error || 'API call failed');
@@ -142,17 +144,24 @@ export class Garage61Client {
      * @returns {Array} Best laps per driver
      */
     getDriverBestLaps(laps) {
+        console.log('🔍 DEBUG: getDriverBestLaps called with:', laps.length, 'laps');
+        
         const driverLaps = {};
         
         laps.forEach(lap => {
             const driverName = lap.driver ? lap.driver.name : 'Unknown';
+            console.log(`🔍 DEBUG: Processing lap for driver: "${driverName}", lapTime: ${lap.lapTime}`);
             
             if (!driverLaps[driverName] || lap.lapTime < driverLaps[driverName].lapTime) {
                 driverLaps[driverName] = lap;
+                console.log(`🔍 DEBUG: New best lap for ${driverName}: ${lap.lapTime}`);
             }
         });
         
-        return Object.values(driverLaps).sort((a, b) => a.lapTime - b.lapTime);
+        const result = Object.values(driverLaps).sort((a, b) => a.lapTime - b.lapTime);
+        console.log('🔍 DEBUG: Final best laps:', result);
+        
+        return result;
     }
 
     /**
@@ -161,10 +170,22 @@ export class Garage61Client {
      * @returns {string} Formatted lap time
      */
     formatLapTime(lapTimeMs) {
-        const totalSeconds = lapTimeMs / 1000;
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = (totalSeconds % 60).toFixed(3);
-        return `${minutes}:${seconds.padStart(6, '0')}`;
+        // Handle both milliseconds and already formatted strings
+        if (typeof lapTimeMs === 'string') {
+            return lapTimeMs; // Already formatted
+        }
+        
+        if (!lapTimeMs || lapTimeMs <= 0) {
+            return "Invalid";
+        }
+        
+        // Convert milliseconds to M:SS.sss format like backup version
+        const totalMs = lapTimeMs;
+        const minutes = Math.floor(totalMs / 60000);
+        const seconds = Math.floor((totalMs % 60000) / 1000);
+        const milliseconds = totalMs % 1000;
+        
+        return `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
     }
 
     /**
@@ -195,11 +216,24 @@ export class Garage61Client {
                                  index === 2 ? 'text-amber-600 font-semibold' : 
                                  'text-neutral-300';
             
+            // Use backup version's driver name format 
+            const driverName = lap.driver ? 
+                `${lap.driver.firstName || ''} ${lap.driver.lastName || ''}`.trim() : 
+                'Unknown';
+            
+            // Format fuel used properly
+            const fuelUsed = lap.fuelUsed ? parseFloat(lap.fuelUsed).toFixed(2) + 'L' : 'N/A';
+            
+            // Format conditions like backup version
+            const cloudMap = {1: 'Clear', 2: 'Partly Cloudy', 3: 'Mostly Cloudy', 4: 'Overcast'};
+            const weather = cloudMap[lap.clouds] || 'Unknown';
+            const airTemp = lap.airTemp ? `${lap.airTemp.toFixed(1)}°C` : '?°C';
+            
             row.innerHTML = `
                 <td class="py-3 px-6 ${positionClass}">${index + 1}</td>
-                <td class="py-3 px-6 text-neutral-200 font-medium">${lap.driver?.name || 'Unknown'}</td>
+                <td class="py-3 px-6 text-neutral-200 font-medium">${driverName}</td>
                 <td class="py-3 px-6 text-blue-400 font-mono">${this.formatLapTime(lap.lapTime)}</td>
-                <td class="py-3 px-6 text-neutral-400 text-sm">${new Date(lap.date).toLocaleDateString()}</td>
+                <td class="py-3 px-6 text-neutral-400 text-sm">${weather} / ${airTemp}</td>
             `;
             
             tbody.appendChild(row);
