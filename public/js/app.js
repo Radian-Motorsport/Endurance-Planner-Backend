@@ -1108,8 +1108,8 @@ class RadianPlannerApp {
             desktopModeBtn.addEventListener('click', () => this.toggleDesktopMode());
         }
 
-        // Setup additional UI event listeners
-        this.uiManager.setupEventListeners();
+        // Setup additional UI event listeners (but not driver events which are already set up above)
+        // this.uiManager.setupEventListeners(); // REMOVED - causing duplicate event listeners
     }
 
     async calculateStrategy() {
@@ -1230,26 +1230,37 @@ class RadianPlannerApp {
         const driverSelect = document.getElementById('driver-select');
         const driverName = driverSelect.value;
         
+        console.log('🔍 DEBUG addSelectedDriver:');
+        console.log('   - driverSelect element:', driverSelect);
+        console.log('   - driverSelect.value:', driverName);
+        console.log('   - allData.drivers length:', this.allData.drivers?.length);
+        
         if (!driverName) {
+            console.log('❌ No driver name selected');
             this.uiManager.showNotification('Please select a driver first', 'error');
             return;
         }
 
         // Find the driver object
         const driver = this.allData.drivers.find(d => d.name === driverName);
+        console.log('   - Found driver object:', driver);
+        
         if (!driver) {
+            console.log('❌ Driver not found in allData.drivers');
             this.uiManager.showNotification('Driver not found', 'error');
             return;
         }
 
         // Check if driver is already selected
         if (this.selectedDrivers.some(d => d.name === driverName)) {
+            console.log('⚠️ Driver already selected');
             this.uiManager.showNotification('Driver already selected', 'warning');
             return;
         }
 
         // Check max drivers limit (6 for endurance racing)
         if (this.selectedDrivers.length >= 6) {
+            console.log('⚠️ Max drivers limit reached');
             this.uiManager.showNotification('Maximum 6 drivers allowed', 'warning');
             return;
         }
@@ -1548,13 +1559,37 @@ class RadianPlannerApp {
             }
         }
 
-        // Populate track information
+        // Populate track information with image
         const trackNameEl = document.getElementById('page2-track');
+        const trackConfigEl = document.getElementById('page2-track-config');
+        const trackLogoEl = document.getElementById('track-logo');
+        
         if (trackNameEl) trackNameEl.textContent = eventData.track?.name || 'Unknown Track';
+        if (trackConfigEl) trackConfigEl.textContent = eventData.track?.config || '';
+        
+        // Set track logo image
+        if (trackLogoEl && eventData.track?.logo) {
+            trackLogoEl.src = eventData.track.logo;
+            trackLogoEl.classList.remove('hidden');
+        } else if (trackLogoEl) {
+            trackLogoEl.classList.add('hidden');
+        }
 
-        // Populate car information
+        // Populate car information with image
         const carNameEl = document.getElementById('page2-car');
+        const carClassEl = document.getElementById('page2-car-class');
+        const carLogoEl = document.getElementById('car-logo');
+        
         if (carNameEl) carNameEl.textContent = eventData.car?.name || 'Unknown Car';
+        if (carClassEl) carClassEl.textContent = eventData.car?.class || '';
+        
+        // Set car logo image
+        if (carLogoEl && eventData.car?.logo) {
+            carLogoEl.src = eventData.car.logo;
+            carLogoEl.classList.remove('hidden');
+        } else if (carLogoEl) {
+            carLogoEl.classList.add('hidden');
+        }
 
         // Populate session information using correct element IDs
         if (eventData.session) {
@@ -1563,39 +1598,50 @@ class RadianPlannerApp {
 
             if (sessionDateEl) {
                 const formattedDate = eventData.session.session_date 
-                    ? new Date(eventData.session.session_date).toLocaleDateString()
+                    ? new Date(eventData.session.session_date).toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    })
                     : 'Not selected';
                 sessionDateEl.textContent = formattedDate;
             }
             
             if (sessionTimeEl) {
-                sessionTimeEl.textContent = eventData.session.session_start_time || 'Not selected';
+                const timeText = eventData.session.session_start_time || 'Not selected';
+                const timezone = eventData.session.timezone || '';
+                sessionTimeEl.textContent = timezone ? `${timeText} ${timezone}` : timeText;
             }
         }
 
-        // Populate drivers list
+        // Populate drivers list with safety rating and iRating
         const driversListEl = document.getElementById('page2-drivers');
         if (driversListEl) {
             if (eventData.drivers && eventData.drivers.length > 0) {
-                // Create a nice formatted drivers display
-                driversListEl.innerHTML = `
-                    <div class="text-center">
-                        <i class="fas fa-users text-purple-400 text-2xl mb-2"></i>
-                        <div class="text-sm text-neutral-500 mb-1">Team Drivers</div>
-                        <div class="text-neutral-300 font-medium">
-                            ${eventData.drivers.map(d => d.name || 'Unknown Driver').join('<br>')}
+                // Create detailed drivers display with ratings
+                const driversHtml = eventData.drivers.map(driver => {
+                    const name = driver.name || 'Unknown Driver';
+                    const safetyRating = driver.safety_rating ? `SR: ${driver.safety_rating}` : '';
+                    const iRating = driver.irating ? `iR: ${driver.irating}` : '';
+                    
+                    return `
+                        <div class="bg-neutral-700 rounded-lg p-3 mb-2">
+                            <div class="text-neutral-200 font-medium text-sm">${name}</div>
+                            <div class="text-neutral-400 text-xs mt-1">
+                                ${safetyRating}${safetyRating && iRating ? ' • ' : ''}${iRating}
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }).join('');
+                
+                driversListEl.innerHTML = driversHtml;
             } else {
                 // Show placeholder when no drivers selected
                 driversListEl.innerHTML = `
-                    <div class="text-center">
+                    <div class="text-center text-neutral-500">
                         <i class="fas fa-users text-neutral-600 text-2xl mb-2"></i>
-                        <div class="text-sm text-neutral-500 mb-1">Team Drivers</div>
-                        <div class="text-neutral-500 font-medium">
-                            No drivers selected
-                        </div>
+                        <div class="text-sm">No drivers selected</div>
                     </div>
                 `;
             }

@@ -352,26 +352,27 @@
 
             <!-- Page 2: Race Strategy -->
             <div id="page-2" class="space-y-6 hidden">
-                <div class="flex items-center space-x-4 mb-6">
-                    <button id="back-button" class="bg-neutral-800 hover:bg-red-500 text-black font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
-                        <i class="fas fa-arrow-left mr-2"></i> Back
-                    </button>
-                </div>
-
                 <!-- Event Summary -->
                 <div id="event-summary" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="flex flex-col items-center text-center justify-between h-full">
                             <img id="track-logo" src="" alt="Track Logo" class="w-40 h-40 mb-2 object-contain hidden">
-                            <span id="page2-track" class="text-neutral-400 mt-auto"></span>
+                            <div class="text-center">
+                                <div id="page2-track" class="text-neutral-200 font-medium text-lg"></div>
+                                <div id="page2-track-config" class="text-neutral-400 text-sm"></div>
+                            </div>
                         </div>
                         <div class="flex flex-col items-center text-center">
                             <img id="car-logo" src="" alt="Car Logo" class="w-40 h-40 mb-2 object-contain hidden">
-                            <span id="page2-car" class="text-neutral-400 mt-auto"></span>
+                            <div class="text-center">
+                                <div id="page2-car" class="text-neutral-200 font-medium text-lg"></div>
+                                <div id="page2-car-class" class="text-neutral-400 text-sm"></div>
+                            </div>
                         </div>
                         <div class="flex flex-col items-center text-center">
-                            <div id="page2-drivers" class="text-neutral-400 mt-1">
-                                <!-- Drivers will be populated here -->
+                            <div class="text-neutral-200 font-medium text-lg mb-2">Team Drivers</div>
+                            <div id="page2-drivers" class="text-neutral-400 space-y-2">
+                                <!-- Drivers will be populated here with safety rating and iRating -->
                             </div>
                         </div>
                     </div>
@@ -382,22 +383,22 @@
                             <div class="flex flex-col items-center">
                                 <i class="fas fa-calendar-alt text-blue-400 text-2xl mb-2"></i>
                                 <span class="text-sm text-neutral-500">Race Date</span>
-                                <span id="page2-race-date" class="text-neutral-400 font-medium">Not selected</span>
+                                <span id="page2-race-date" class="text-neutral-200 font-medium">Not selected</span>
                             </div>
                             <div class="flex flex-col items-center">
                                 <i class="fas fa-clock text-green-400 text-2xl mb-2"></i>
                                 <span class="text-sm text-neutral-500">Start Time</span>
-                                <span id="page2-race-time" class="text-neutral-400 font-medium">Not selected</span>
+                                <span id="page2-race-time" class="text-neutral-200 font-medium">Not selected</span>
                             </div>
                             <div class="flex flex-col items-center">
                                 <i class="fas fa-sun text-orange-400 text-2xl mb-2"></i>
                                 <span class="text-sm text-neutral-500">Sunrise</span>
-                                <span id="page2-sunrise" class="text-neutral-400 font-medium">Calculating...</span>
+                                <span id="page2-sunrise" class="text-neutral-200 font-medium">Calculating...</span>
                             </div>
                             <div class="flex flex-col items-center">
                                 <i class="fas fa-moon text-purple-400 text-2xl mb-2"></i>
                                 <span class="text-sm text-neutral-500">Sunset</span>
-                                <span id="page2-sunset" class="text-neutral-400 font-medium">Calculating...</span>
+                                <span id="page2-sunset" class="text-neutral-200 font-medium">Calculating...</span>
                             </div>
                         </div>
                     </div>
