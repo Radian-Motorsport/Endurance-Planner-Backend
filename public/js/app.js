@@ -1863,10 +1863,10 @@ class RadianPlannerApp {
                                 <div class="ml-3 w-6 flex justify-center">
                                     ${countryFlag}
                                 </div>
-                                <div class="flex-1 px-2">
-                                    <span class="text-neutral-200 font-medium text-sm">${name}</span>
+                                <div class="flex-1 px-2 min-w-0">
+                                    <div class="text-neutral-200 font-medium text-sm leading-tight line-clamp-2 break-words">${name}</div>
                                 </div>
-                                <div class="text-neutral-400 text-xs">
+                                <div class="text-neutral-400 text-xs text-right min-w-max ml-2">
                                     ${country}
                                 </div>
                             </div>
