@@ -1227,6 +1227,14 @@ class RadianPlannerApp {
     }
 
     addSelectedDriver() {
+        // Prevent multiple rapid calls
+        if (this._addingDriver) {
+            console.log('🔒 Already adding driver, ignoring duplicate call');
+            return;
+        }
+        
+        this._addingDriver = true;
+        
         const driverSelect = document.getElementById('driver-select');
         const driverName = driverSelect.value;
         
@@ -1236,11 +1244,11 @@ class RadianPlannerApp {
         console.log('   - driverName type:', typeof driverName);
         console.log('   - driverName length:', driverName?.length);
         console.log('   - allData.drivers length:', this.allData.drivers?.length);
-        console.log('   - Stack trace:', new Error().stack);
         
         if (!driverName || driverName.trim() === '') {
             console.log('❌ No driver name selected - empty or whitespace only');
             this.uiManager.showNotification('Please select a driver first', 'error');
+            this._addingDriver = false;
             return;
         }
 
@@ -1251,6 +1259,7 @@ class RadianPlannerApp {
         if (!driver) {
             console.log('❌ Driver not found in allData.drivers');
             this.uiManager.showNotification('Driver not found', 'error');
+            this._addingDriver = false;
             return;
         }
 
@@ -1258,6 +1267,7 @@ class RadianPlannerApp {
         if (this.selectedDrivers.some(d => d.name === driverName)) {
             console.log('⚠️ Driver already selected');
             this.uiManager.showNotification('Driver already selected', 'warning');
+            this._addingDriver = false;
             return;
         }
 
@@ -1265,6 +1275,7 @@ class RadianPlannerApp {
         if (this.selectedDrivers.length >= 6) {
             console.log('⚠️ Max drivers limit reached');
             this.uiManager.showNotification('Maximum 6 drivers allowed', 'warning');
+            this._addingDriver = false;
             return;
         }
 
@@ -1276,6 +1287,9 @@ class RadianPlannerApp {
         driverSelect.value = '';
         
         console.log(`✅ Added driver: ${driverName}`);
+        
+        // Reset the lock
+        this._addingDriver = false;
     }
 
     removeSelectedDriver(driverName) {
