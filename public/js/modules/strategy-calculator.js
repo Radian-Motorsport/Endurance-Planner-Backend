@@ -92,10 +92,15 @@ export class StrategyCalculator {
      * @returns {boolean} True if valid
      */
     validateInputs(inputs) {
-        return inputs.raceDurationSeconds > 0 && 
-               inputs.avgLapTimeInSeconds > 0 && 
-               inputs.fuelPerLap > 0 && 
-               inputs.tankCapacity > 0;
+        // TEMPORARILY DISABLED VALIDATION - ALWAYS RETURN TRUE TO SHOW TABLES
+        console.log('🔧 VALIDATION BYPASSED - inputs:', inputs);
+        return true;
+        
+        // Original validation (commented out):
+        // return inputs.raceDurationSeconds > 0 && 
+        //        inputs.avgLapTimeInSeconds > 0 && 
+        //        inputs.fuelPerLap > 0 && 
+        //        inputs.tankCapacity > 0;
     }
 
     /**

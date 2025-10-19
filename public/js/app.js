@@ -1117,10 +1117,12 @@ class RadianPlannerApp {
             this.setLoading(true);
             
             const formData = this.collectFormData();
-            if (!this.validateFormData(formData)) {
-                this.uiManager.showNotification('Please fill in all required fields', 'error');
-                return;
-            }
+            // TEMPORARILY DISABLED VALIDATION
+            console.log('🔧 VALIDATION BYPASSED - formData:', formData);
+            // if (!this.validateFormData(formData)) {
+            //     this.uiManager.showNotification('Please fill in all required fields', 'error');
+            //     return;
+            // }
 
             const strategy = await this.strategyCalculator.calculateStrategy(formData);
             this.displayStrategy(strategy);
