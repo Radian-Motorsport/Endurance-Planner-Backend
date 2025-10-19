@@ -59,12 +59,6 @@ class RadianPlannerApp {
             // Load all data from server
             this.allData = await this.apiClient.fetchAllData();
             
-            // Debug: Log sample driver data to check if country is included
-            if (this.allData.drivers && this.allData.drivers.length > 0) {
-                console.log('🔍 DEBUG: Sample driver data:', this.allData.drivers[0]);
-                console.log('🔍 DEBUG: Driver fields:', Object.keys(this.allData.drivers[0]));
-            }
-            
             // Populate dropdowns with loaded data
             this.populateSeriesDropdown();
             this.populateDriversDropdown();
@@ -1796,40 +1790,43 @@ class RadianPlannerApp {
                 // Create detailed drivers display with ratings and flags
                 const driversHtml = eventData.drivers.map(driver => {
                     const name = driver.name || 'Unknown Driver';
-                    const safetyRating = driver.safety_rating || 'D';
-                    const iRating = driver.irating || 'N/A';
-                    const countryFlag = getCountryFlag(driver.country);
+                    const safetyRating = driver.safety_rating || '';
+                    const iRating = driver.irating || '';
+                    const country = driver.country || '';
+                    const groupName = driver.sports_car_group_name || '';
                     
-                    // Get safety rating class from database field
-                    const srClass = driver.sports_car_group_name || 'D';
-                    let srColorClass = '';
-                    switch(srClass.toUpperCase()) {
+                    // Get country flag
+                    const countryFlag = getCountryFlag(country);
+                    
+                    // Get color for group name
+                    let groupColorClass = '';
+                    switch(groupName.toUpperCase()) {
                         case 'A':
-                            srColorClass = 'bg-blue-600 text-white';
+                            groupColorClass = 'bg-blue-600 text-white';
                             break;
                         case 'B':
-                            srColorClass = 'bg-green-600 text-white';
+                            groupColorClass = 'bg-green-600 text-white';
                             break;
                         case 'C':
-                            srColorClass = 'bg-yellow-500 text-black';
+                            groupColorClass = 'bg-yellow-500 text-black';
                             break;
                         case 'D':
-                            srColorClass = 'bg-red-600 text-white';
+                            groupColorClass = 'bg-red-600 text-white';
                             break;
                         default:
-                            srColorClass = 'bg-neutral-600 text-white';
+                            groupColorClass = 'bg-neutral-600 text-white';
                     }
                     
                     return `
-                        <div class="bg-neutral-700 rounded-lg p-3 mb-2">
+                        <div class="bg-neutral-700 rounded-lg p-3 mb-3">
                             <div class="flex items-center space-x-2 mb-2">
                                 <span class="text-lg">${countryFlag}</span>
-                                <div class="text-neutral-200 font-medium text-sm">${name}</div>
+                                <span class="text-neutral-200 font-medium">${name}</span>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <span class="px-2 py-1 rounded text-xs font-bold ${srColorClass}">${srClass.toUpperCase()}</span>
-                                <span class="text-xs text-neutral-400">${safetyRating}</span>
-                                <span class="text-xs text-neutral-400">${iRating}</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold ${groupColorClass}">CLASS ${groupName}</span>
+                                <span class="text-neutral-300 text-sm">${safetyRating}</span>
+                                <span class="text-neutral-300 text-sm">${iRating}</span>
                             </div>
                         </div>
                     `;

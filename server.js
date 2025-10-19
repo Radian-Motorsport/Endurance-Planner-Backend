@@ -221,14 +221,6 @@ app.get('/api/data', async (req, res) => {
 app.get('/api/drivers', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM drivers');
-        
-        // Debug: Log what columns and data we actually have
-        if (result.rows.length > 0) {
-            console.log('🔍 DEBUG: Driver table columns:', Object.keys(result.rows[0]));
-            console.log('🔍 DEBUG: Sample driver data:', result.rows[0]);
-            console.log('🔍 DEBUG: Total drivers returned:', result.rows.length);
-        }
-        
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching drivers:', err);
