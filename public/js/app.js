@@ -26,7 +26,7 @@ class RadianPlannerApp {
         
         this.disposables = [];
         
-        this.init();
+        // Note: init() will be called manually after DOM is loaded
     }
 
     async init() {
@@ -1236,17 +1236,33 @@ class RadianPlannerApp {
         this._addingDriver = true;
         
         const driverSelect = document.getElementById('driver-select');
+        
+        console.log('🔍 DETAILED DEBUG - Button clicked:');
+        console.log('   - Time:', new Date().toISOString());
+        console.log('   - driverSelect element exists:', !!driverSelect);
+        console.log('   - driverSelect.options.length:', driverSelect?.options?.length);
+        console.log('   - driverSelect.selectedIndex:', driverSelect?.selectedIndex);
+        console.log('   - driverSelect.value BEFORE anything:', `"${driverSelect?.value}"`);
+        console.log('   - driverSelect.value.length:', driverSelect?.value?.length);
+        
+        // Let's see all the options
+        if (driverSelect && driverSelect.options) {
+            console.log('   - Available options:');
+            for (let i = 0; i < driverSelect.options.length; i++) {
+                console.log(`     [${i}] value: "${driverSelect.options[i].value}", text: "${driverSelect.options[i].text}", selected: ${driverSelect.options[i].selected}`);
+            }
+        }
+        
         const driverName = driverSelect.value;
         
-        console.log('🔍 DEBUG addSelectedDriver called at:', new Date().toISOString());
-        console.log('   - driverSelect element:', driverSelect);
-        console.log('   - driverSelect.value:', driverName);
-        console.log('   - driverName type:', typeof driverName);
-        console.log('   - driverName length:', driverName?.length);
-        console.log('   - allData.drivers length:', this.allData.drivers?.length);
+        console.log('   - Final driverName after assignment:', `"${driverName}"`);
+        console.log('   - driverName === "":', driverName === "");
+        console.log('   - !driverName:', !driverName);
+        console.log('   - driverName.trim() === "":', driverName?.trim() === "");
         
         if (!driverName || driverName.trim() === '') {
-            console.log('❌ No driver name selected - empty or whitespace only');
+            console.log('❌ VALIDATION FAILED - No driver name selected');
+            console.log('   - This is why the error message appears!');
             this.uiManager.showNotification('Please select a driver first', 'error');
             this._addingDriver = false;
             return;
