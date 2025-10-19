@@ -1,0 +1,117 @@
+WHERE THE CODE EXPECTS TO GET DATA FROM
+=======================================
+
+This file lists exactly where the RadianPlanner code thinks it's getting
+data from, based on the actual JavaScript code analysis.
+
+PAGE 1 DATA - WHERE CODE LOOKS FOR SELECTIONS:
+==============================================
+
+1. TRACK DATA SOURCES:
+----------------------
+Primary Source: this.selectedTrack (app instance property)
+Fallback Source: this.selectedSessionDetails
+
+Track data extraction logic:
+- const trackDetails = this.selectedSessionDetails || this.selectedTrack;
+- name: trackDetails?.track_name || this.selectedTrack?.name || 'Unknown Track'
+- id: trackDetails?.track_id || this.selectedTrack?.id || null
+- garage61_id: trackDetails?.track_garage61_id || this.selectedTrack?.garage61_id || null
+- iracing_track_id: trackDetails?.iracing_track_id || this.selectedTrack?.iracing_track_id || null
+
+WHERE this.selectedTrack GETS SET:
+- Line 24: this.selectedTrack = null; (initialization)
+- Line 1351: this.selectedTrack = null; (reset)
+- Line 1364: this.selectedTrack = track; (actual assignment)
+
+2. CAR DATA SOURCES:
+--------------------
+Primary Source: this.selectedCar (app instance property)
+Fallback Source: this.selectedCar?.details
+
+Car data extraction logic:
+- const carDetails = this.selectedCar?.details || this.selectedCar;
+- name: this.selectedCar?.name || carDetails?.car_name || carDetails?.name || 'Unknown Car'
+- id: this.selectedCar?.id || carDetails?.id || carDetails?.car_id || null
+- garage61_id: carDetails?.garage61_id || null
+- iracing_car_id: carDetails?.iracing_car_id || null
+- weight: carDetails?.car_weight || carDetails?.weight || null
+- horsepower: carDetails?.hp || carDetails?.horsepower || null
+
+WHERE this.selectedCar GETS SET:
+- Line 25: this.selectedCar = null; (initialization)
+- Line 585: this.selectedCar = { ... } (object assignment)
+- Line 617: this.selectedCar = null; (reset)
+- Line 1378: this.selectedCar = null; (reset)
+- Line 1391: this.selectedCar = car; (actual assignment)
+
+3. DRIVERS DATA SOURCES:
+-------------------------
+Primary Source: this.selectedDrivers (app instance array)
+
+Drivers data extraction logic:
+- const driversData = (this.selectedDrivers || []).map(driver => ({ ... }))
+- name: driver.name
+- firstName: driver.firstName
+- lastName: driver.lastName
+- garage61_slug: driver.garage61_slug
+- timezone: driver.timezone
+
+WHERE this.selectedDrivers GETS MODIFIED:
+- Line 23: this.selectedDrivers = []; (initialization)
+- Line 1246: Check if driver already selected
+- Line 1252: Check if max drivers reached (6)
+- Line 1258: this.selectedDrivers.push(driver); (add driver)
+- Line 1268: this.selectedDrivers = this.selectedDrivers.filter(...); (remove driver)
+
+PAGE 2 FORM DATA - WHERE CODE LOOKS FOR INPUTS:
+===============================================
+
+4. STRATEGY CALCULATOR INPUT SOURCES:
+--------------------------------------
+The strategy calculator extractInputs() method looks for these HTML IDs:
+
+- 'race-duration-hours' → raceDurationHours
+- 'race-duration-minutes' → raceDurationMinutes  
+- 'avg-lap-time-minutes' → avgLapTimeMinutes
+- 'avg-lap-time-seconds' → avgLapTimeSeconds
+- 'fuel-per-lap-display-input' → fuelPerLap
+- 'tank-capacity-display-input' → tankCapacity
+- 'pit-stop-time' → pitStopTime
+
+5. LEGACY FORM DATA COLLECTION (app.js collectFormData):
+--------------------------------------------------------
+The app.js also has a collectFormData() method that looks for these HTML IDs:
+(These may be from an older version and might not exist in current HTML)
+
+- 'trackName' → trackName
+- 'raceLength' → raceLength
+- 'lapTime' → lapTime (parsed as time)
+- 'fuelPerLap' → fuelPerLap
+- 'tankCapacity' → tankCapacity
+- 'pitStopTime' → pitStopTime (parsed as time)
+- 'startTime' → startTime
+- 'startDate' → startDate
+
+6. LEGACY DRIVER DATA COLLECTION:
+----------------------------------
+The collectDriverData() method looks for these HTML IDs:
+(These may not exist in current HTML)
+
+- 'driver1Name' through 'driver8Name'
+- 'driver1Time' through 'driver8Time'
+
+CURRENT ISSUES:
+===============
+❌ this.selectedTrack = null (never gets set properly)
+❌ this.selectedCar = null (never gets set properly)  
+❌ this.selectedDrivers = [] (empty array, never populated)
+❌ Legacy HTML IDs in collectFormData() may not exist in current HTML
+❌ HTML form uses different IDs than what legacy code expects
+
+PRIORITY FIXES:
+===============
+1. Find where track selection should set this.selectedTrack
+2. Find where car selection should set this.selectedCar
+3. Find where driver selection should populate this.selectedDrivers
+4. Verify Page 2 form IDs match what strategy calculator expects

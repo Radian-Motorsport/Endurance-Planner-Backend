@@ -1284,7 +1284,8 @@ class RadianPlannerApp {
                     <span class="text-neutral-200">${driver.name}</span>
                     <div class="text-xs text-neutral-400">
                         iR: ${driver.sports_car_irating || 'N/A'} | 
-                        SR: ${driver.sports_car_safety_rating || 'N/A'}
+                        SR: ${driver.sports_car_safety_rating || 'N/A'} |
+                        G61: ${driver.garage61_slug || 'N/A'}
                     </div>
                 </div>
                 <button onclick="window.radianPlanner.removeSelectedDriver('${driver.name}')" 
@@ -1504,6 +1505,47 @@ class RadianPlannerApp {
         if (!eventData) {
             console.error('❌ No event data provided to populatePage2');
             return;
+        }
+
+        // AUTO-POPULATE FORM FIELDS FROM PAGE 1 SESSION DATA
+        console.log('🔧 Auto-populating form fields from page 1 data...');
+        
+        // 1. Extract and populate race duration from session length
+        const sessionLengthEl = document.getElementById('session-length');
+        if (sessionLengthEl) {
+            const sessionHours = sessionLengthEl.dataset.sessionHours || '';
+            const sessionMinutes = sessionLengthEl.dataset.sessionMinutes || '';
+            
+            console.log(`📊 Session duration found: ${sessionHours}h ${sessionMinutes}m`);
+            
+            // Auto-populate the race duration form fields
+            const raceDurationHoursEl = document.getElementById('race-duration-hours');
+            const raceDurationMinutesEl = document.getElementById('race-duration-minutes');
+            
+            if (raceDurationHoursEl && sessionHours) {
+                raceDurationHoursEl.value = sessionHours;
+                console.log(`✅ Set race-duration-hours to: ${sessionHours}`);
+            }
+            if (raceDurationMinutesEl && sessionMinutes) {
+                raceDurationMinutesEl.value = sessionMinutes;
+                console.log(`✅ Set race-duration-minutes to: ${sessionMinutes}`);
+            }
+        }
+
+        // 2. Extract and populate race start time from race datetime
+        const raceDatetimeEl = document.getElementById('race-datetime');
+        if (raceDatetimeEl) {
+            const raceTime = raceDatetimeEl.dataset.raceTime || '';
+            const raceDate = raceDatetimeEl.dataset.raceDate || '';
+            
+            console.log(`📊 Race start time found: ${raceDate} ${raceTime}`);
+            
+            // Auto-populate the race start time form field
+            const raceStartTimeEl = document.getElementById('race-start-time-page2');
+            if (raceStartTimeEl && raceTime) {
+                raceStartTimeEl.value = raceTime;
+                console.log(`✅ Set race-start-time-page2 to: ${raceTime}`);
+            }
         }
 
         // Populate track information

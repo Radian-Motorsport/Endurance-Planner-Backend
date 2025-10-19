@@ -136,19 +136,29 @@
                         <div class="space-y-4 w-full mb-6">
                             <div class="flex flex-col w-full">
                                 <label class="text-sm font-medium text-neutral-500 mb-2">Race Date & Time <span class="text-xs text-neutral-400">(Simulator Time)</span></label>
-                                <div id="race-datetime" class="text-neutral-200 text-sm">
+                                <div id="race-datetime" class="text-neutral-200 text-sm"
+                                     data-race-date=""
+                                     data-race-time=""
+                                     data-race-timezone=""
+                                     data-race-timestamp="">
                                     Select a session to view race information
                                 </div>
                             </div>
                             <div class="flex flex-col w-full">
                                 <label class="text-sm font-medium text-neutral-500 mb-2">Event Date & Time <span class="text-xs text-neutral-400">(Real World Time)</span></label>
-                                <div id="event-datetime" class="text-neutral-200 text-sm">
+                                <div id="event-datetime" class="text-neutral-200 text-sm"
+                                     data-event-date=""
+                                     data-event-time=""
+                                     data-event-timezone=""
+                                     data-event-timestamp="">
                                     Select a session to view event information
                                 </div>
                             </div>
                             <div class="flex flex-col w-full">
                                 <label class="text-sm font-medium text-neutral-500 mb-2">Practice Length</label>
-                                <div id="practice-length" class="text-neutral-200 text-sm">
+                                <div id="practice-length" class="text-neutral-200 text-sm"
+                                     data-practice-minutes=""
+                                     data-practice-hours="">
                                     -
                                 </div>
                             </div>
@@ -157,11 +167,19 @@
                                 <div class="bg-neutral-800 p-3 rounded-lg space-y-2">
                                     <div class="flex justify-between items-center">
                                         <span class="text-sm text-neutral-400">Qualifying:</span>
-                                        <span id="qualifying-length" class="text-neutral-200 text-sm">-</span>
+                                        <span id="qualifying-length" class="text-neutral-200 text-sm"
+                                              data-qualifying-minutes=""
+                                              data-qualifying-hours=""
+                                              data-qualifying-laps="">-</span>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <span class="text-sm text-neutral-400">Race:</span>
-                                        <span id="session-length" class="text-neutral-200 text-sm">-</span>
+                                        <span id="session-length" class="text-neutral-200 text-sm"
+                                              data-session-type=""
+                                              data-session-time=""
+                                              data-session-laps=""
+                                              data-session-minutes=""
+                                              data-session-hours="">-</span>
                                     </div>
                                 </div>
                             </div>
@@ -177,12 +195,22 @@
                                         <div class="flex items-center space-x-4">
                                             <div class="relative w-32 h-32">
                                                 <!-- Background track image -->
-                                                <img id="track-image" src="" alt="Track Image" class="w-32 h-32 object-cover rounded-lg bg-neutral-700 hidden">
+                                                <img id="track-image" src="" alt="Track Image" 
+                                                     class="w-32 h-32 object-cover rounded-lg bg-neutral-700 hidden"
+                                                     data-image-url=""
+                                                     data-image-source="">
                                                 <!-- Track logo overlay -->
-                                                <img id="track-logo-overlay" src="" alt="Track Logo" class="absolute inset-0 w-32 h-32 object-contain rounded-lg hidden" style="z-index: 10; background: rgba(0,0,0,0.5); padding: 8px;">
+                                                <img id="track-logo-overlay" src="" alt="Track Logo" 
+                                                     class="absolute inset-0 w-32 h-32 object-contain rounded-lg hidden" 
+                                                     style="z-index: 10; background: rgba(0,0,0,0.5); padding: 8px;"
+                                                     data-logo-url=""
+                                                     data-logo-source="">
                                             </div>
                                             <div class="flex-1">
-                                                <div id="track-name" class="text-lg font-medium text-neutral-200 mb-1">-</div>
+                                                <div id="track-name" class="text-lg font-medium text-neutral-200 mb-1" 
+                                                     data-track-id="" 
+                                                     data-iracing-track-id="" 
+                                                     data-track-database-id="">-</div>
                                                 <div id="track-garage61-id" class="text-sm text-neutral-400 mb-1">Garage61 ID: -</div>
                                                 <div id="track-config" class="text-xs text-neutral-500">-</div>
                                             </div>
@@ -193,15 +221,15 @@
                                     <div class="space-y-3">
                                         <div class="flex justify-between">
                                             <span class="text-sm text-neutral-500">Location:</span>
-                                            <span id="track-location" class="text-sm text-neutral-200">-</span>
+                                            <span id="track-location" class="text-sm text-neutral-200" data-country="" data-region="">-</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-sm text-neutral-500">Coordinates:</span>
-                                            <span id="track-coordinates" class="text-sm text-neutral-200">-</span>
+                                            <span id="track-coordinates" class="text-sm text-neutral-200" data-latitude="" data-longitude="">-</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-sm text-neutral-500">Track Length:</span>
-                                            <span id="track-length" class="text-sm text-neutral-200">-</span>
+                                            <span id="track-length" class="text-sm text-neutral-200" data-length-km="" data-length-miles="">-</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-sm text-neutral-500">Corners:</span>
@@ -269,10 +297,18 @@
                                     <!-- Car Image and Basic Info -->
                                     <div class="flex flex-col space-y-4">
                                         <div class="flex items-center space-x-4">
-                                            <img id="car-image" src="" alt="Car Image" class="w-32 h-20 object-contain rounded-lg bg-neutral-700 hidden">
+                                            <img id="car-image" src="" alt="Car Image" class="w-32 h-20 object-contain rounded-lg bg-neutral-700 hidden"
+                                                 data-car-image-url="">
                                             <div class="flex-1">
-                                                <div id="car-name" class="text-lg font-medium text-neutral-200 mb-1">-</div>
-                                                <div id="garage61-id" class="text-sm text-neutral-400">Garage61 ID: -</div>
+                                                <div id="car-name" class="text-lg font-medium text-neutral-200 mb-1"
+                                                     data-car-id=""
+                                                     data-car-database-id=""
+                                                     data-car-garage61-id=""
+                                                     data-car-name=""
+                                                     data-car-class=""
+                                                     data-car-series="">-</div>
+                                                <div id="garage61-id" class="text-sm text-neutral-400"
+                                                     data-garage61-id="">Garage61 ID: -</div>
                                             </div>
                                         </div>
                                     </div>
@@ -281,11 +317,15 @@
                                     <div class="space-y-3">
                                         <div class="flex justify-between">
                                             <span class="text-sm text-neutral-500">Weight:</span>
-                                            <span id="car-weight" class="text-sm text-neutral-200">-</span>
+                                            <span id="car-weight" class="text-sm text-neutral-200"
+                                                  data-car-weight-kg=""
+                                                  data-car-weight-lbs="">-</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-sm text-neutral-500">Horsepower:</span>
-                                            <span id="car-hp" class="text-sm text-neutral-200">-</span>
+                                            <span id="car-hp" class="text-sm text-neutral-200"
+                                                  data-car-horsepower=""
+                                                  data-car-torque="">-</span>
                                         </div>
                                     </div>
                                 </div>

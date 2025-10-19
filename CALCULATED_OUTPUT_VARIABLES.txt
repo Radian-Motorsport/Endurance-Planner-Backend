@@ -1,0 +1,62 @@
+CALCULATED STRATEGY OUTPUT VARIABLES
+====================================
+
+This file lists all the variables that are calculated by the strategy
+calculator and displayed in the Page 2 results sections.
+
+CORE CALCULATIONS:
+------------------
+totalStints                 // Total number of pit stops/stints needed
+lapsPerStint               // Average laps per stint
+lapsInLastStint            // Laps in the final stint
+totalLaps                  // Total estimated laps in race
+totalFuelNeeded            // Total fuel consumption for race
+totalPitStopTime           // Total time spent in pit stops
+
+STRATEGY SUMMARY DISPLAY VALUES:
+---------------------------------
+est-laps-display           // HTML ID for estimated total laps
+stint-duration-display     // HTML ID for stint duration  
+laps-per-stint-display     // HTML ID for laps per stint
+pit-stops-display          // HTML ID for number of pit stops
+total-fuel-display         // HTML ID for total fuel needed
+fuel-per-lap-display       // HTML ID for fuel per lap
+lap-time-display           // HTML ID for lap time
+pit-stop-duration-display  // HTML ID for pit stop duration
+
+STINT BREAKDOWN TABLE DATA:
+---------------------------
+stintNumber                // Stint number (1, 2, 3, etc.)
+assignedDriver             // Driver assigned to this stint
+lapsInStint               // Number of laps in this stint
+stintStartTime            // Start time of stint (race time or local time)
+stintEndTime              // End time of stint (race time or local time)
+daylightCondition         // Daylight status (Day/Twilight/Night)
+fuelAtStart               // Fuel level at stint start
+fuelAtEnd                 // Fuel level at stint end
+
+SLIDER ADJUSTMENT VALUES:
+-------------------------
+fuelSliderValue           // Adjustment to fuel per lap (+/- liters)
+lapTimeSliderValue        // Adjustment to lap time (+/- seconds)
+adjustedFuelPerLap        // Base fuel + slider adjustment
+adjustedLapTime           // Base lap time + slider adjustment
+
+HIDDEN SECTIONS TO SHOW:
+------------------------
+overall-summary           // HTML ID: Strategy summary section
+stint-breakdown-display   // HTML ID: Stint table section  
+sliders-container         // HTML ID: Dynamic adjustment sliders
+share-link-container      // HTML ID: Share/save strategy section
+
+CURRENT STATUS:
+---------------
+✅ Sections are now visible on page 2
+❓ Values may be empty/zero due to missing Page 1 data
+❓ Need to verify calculations work with test input values
+
+DEPENDENCIES:
+-------------
+- Requires Page 1 data (track, car, drivers)
+- Requires Page 2 form inputs (duration, lap time, fuel, pit time)
+- Requires selectedDrivers array for stint assignments

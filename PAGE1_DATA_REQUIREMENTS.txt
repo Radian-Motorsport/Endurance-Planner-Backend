@@ -1,0 +1,71 @@
+PAGE 1 DATA REQUIREMENTS FOR PAGE 2 CALCULATIONS
+==============================================
+
+This file lists all the data that must be collected from Page 1 selections
+and passed to Page 2 for strategy calculations.
+
+TRACK DATA (from track selection):
+----------------------------------
+trackData: {
+    name                    // Track name (e.g., "Circuit des 24 Heures du Mans")
+    id                      // Track database ID 
+    garage61_id             // Garage61 track ID (for lap time data)
+    iracing_track_id        // iRacing track ID
+    track_length            // Track length in km/miles
+    location                // Track location/country
+    coordinates             // Lat/long coordinates
+    corners                 // Number of corners
+}
+
+CAR DATA (from car selection):
+------------------------------
+carData: {
+    name                    // Car name (e.g., "Porsche 963 GTP")
+    id                      // Car database ID
+    garage61_id             // Garage61 car ID (for lap time data)
+    iracing_car_id          // iRacing car ID
+    weight                  // Car weight
+    horsepower              // Car horsepower/power
+    fuel_capacity           // Tank capacity (if available)
+    fuel_consumption        // Fuel consumption rate (if available)
+}
+
+DRIVERS DATA (from driver selection):
+-------------------------------------
+driversData: [              // Array of selected drivers
+    {
+        name                // Full name (e.g., "Corey Wideman")
+        firstName           // First name
+        lastName            // Last name
+        garage61_slug       // Garage61 slug for API calls
+        timezone            // Driver timezone for stint calculations
+        id                  // Driver database ID
+    }
+]
+
+SESSION DATA (from series/event/session selection):
+---------------------------------------------------
+sessionData: {
+    session_name            // Session name (e.g., "25/10/2025")
+    session_date            // Session date
+    session_start_time      // Session start time
+    session_length          // Session duration
+    series_name             // Series name
+    event_name              // Event name
+    practice_length         // Practice session length
+    qualifying_length       // Qualifying session length
+}
+
+CURRENT STATUS:
+---------------
+❌ trackData.garage61_id: null
+❌ carData.garage61_id: null  
+❌ driversData: Array(0) (empty)
+❌ sessionData: missing/incomplete
+
+PRIORITY FIXES NEEDED:
+---------------------
+1. Fix track selection to populate garage61_id
+2. Fix car selection to populate garage61_id
+3. Fix driver selection to populate drivers array
+4. Ensure session selection populates all session data
