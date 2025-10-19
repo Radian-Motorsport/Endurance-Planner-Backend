@@ -1640,20 +1640,17 @@ class RadianPlannerApp {
             );
 
             if (result.success && result.data.length > 0) {
-                // Filter laps by selected drivers
+                // Filter laps by selected drivers like backup version
                 const filteredLaps = this.garage61Client.filterLapsByDrivers(result.data, eventData.drivers);
                 
-                // Get best laps per driver
-                const bestLaps = this.garage61Client.getDriverBestLaps(filteredLaps);
-
-                // Display results
+                // DISPLAY ALL FILTERED LAPS (like backup) instead of just best per driver
                 const tbody = document.querySelector('#garage61-lap-times table tbody');
                 if (tbody) {
-                    this.garage61Client.displayLapTimes(bestLaps, tbody);
+                    this.garage61Client.displayLapTimes(filteredLaps, tbody);
                     this.garage61Client.updateUI('content');
                 }
 
-                console.log(`✅ Displayed ${bestLaps.length} best lap times`);
+                console.log(`✅ Displayed ${filteredLaps.length} lap times`);
             } else {
                 console.warn('⚠️ No lap data found');
                 this.garage61Client.updateUI('error', 'No lap data found for this car/track combination');

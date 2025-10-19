@@ -209,35 +209,69 @@ export class Garage61Client {
 
         bestLaps.forEach((lap, index) => {
             const row = document.createElement('tr');
-            row.className = 'bg-neutral-750 hover:bg-neutral-700 transition-colors';
+            row.className = 'hover:bg-neutral-600 transition-colors duration-200';
             
-            const positionClass = index === 0 ? 'text-yellow-400 font-bold' : 
-                                 index === 1 ? 'text-gray-400 font-semibold' : 
-                                 index === 2 ? 'text-amber-600 font-semibold' : 
-                                 'text-neutral-300';
+            // Use CORRECT variables from README-G61.md  
+            const driverName = lap.driver ? `${lap.driver.firstName || ''} ${lap.driver.lastName || ''}`.trim() : 'Unknown Driver';
             
-            // Use backup version's driver name format 
-            const driverName = lap.driver ? 
-                `${lap.driver.firstName || ''} ${lap.driver.lastName || ''}`.trim() : 
-                'Unknown';
+            // Format lap time and add sector times below
+            const lapTime = lap.lapTime ? this.formatLapTime(lap.lapTime) : 'N/A';
+            const sectorTimes = lap.sectors && lap.sectors.length > 0 ? 
+                lap.sectors.map((sector, i) => `S${i+1}: ${sector.sectorTime.toFixed(3)}`).join(' | ') : 
+                '';
             
-            // Format fuel used properly
-            const fuelUsed = lap.fuelUsed ? parseFloat(lap.fuelUsed).toFixed(2) + 'L' : 'N/A';
+            const fuelUsed = lap.fuelUsed ? parseFloat(lap.fuelUsed).toFixed(2) : 'N/A';
             
-            // Format conditions like backup version
+            // Weather conditions from README
             const cloudMap = {1: 'Clear', 2: 'Partly Cloudy', 3: 'Mostly Cloudy', 4: 'Overcast'};
             const weather = cloudMap[lap.clouds] || 'Unknown';
             const airTemp = lap.airTemp ? `${lap.airTemp.toFixed(1)}°C` : '?°C';
+            const trackTemp = lap.trackTemp ? `${lap.trackTemp.toFixed(1)}°C` : '?°C';
+            
+            // WIND DATA - Convert radians to compass direction and m/s to mph
+            const windSpeedMph = lap.windVel ? (lap.windVel * 2.237).toFixed(1) : '0';
+            const windDir = lap.windDir ? this.getWindDirection(lap.windDir) : 'N';
+            const humidity = lap.relativeHumidity ? `${(lap.relativeHumidity * 100).toFixed(0)}%` : '0%';
+            
+            // TRACK CONDITIONS
+            const trackUsage = lap.trackUsage ? `${lap.trackUsage}%` : '0%';
+            const trackWetness = lap.trackWetness ? `${lap.trackWetness}%` : '0%';
             
             row.innerHTML = `
-                <td class="py-3 px-6 ${positionClass}">${index + 1}</td>
-                <td class="py-3 px-6 text-neutral-200 font-medium">${driverName}</td>
-                <td class="py-3 px-6 text-blue-400 font-mono">${this.formatLapTime(lap.lapTime)}</td>
-                <td class="py-3 px-6 text-neutral-400 text-sm">${weather} / ${airTemp}</td>
+                <td class="py-2 px-3 border-r border-neutral-700 text-xs">${driverName}</td>
+                <td class="py-2 px-3 border-r border-neutral-700 font-mono text-blue-400 text-xs">
+                    <div>${lapTime}</div>
+                    <div class="text-neutral-400 text-xs">${sectorTimes}</div>
+                </td>
+                <td class="py-2 px-3 border-r border-neutral-700 text-xs">${fuelUsed}L</td>
+                <td class="py-2 px-3 text-xs">
+                    <div class="leading-tight">
+                        <div>${weather} / ${humidity}</div>
+                        <div class="text-neutral-400">Air: ${airTemp} / Track: ${trackTemp}</div>
+                        <div class="text-neutral-300">Wind: ${windSpeedMph}mph ${windDir}</div>
+                        <div class="text-neutral-300">Usage: ${trackUsage} / Wet: ${trackWetness}</div>
+                    </div>
+                </td>
             `;
             
             tbody.appendChild(row);
         });
+    }
+
+    /**
+     * Convert wind direction from radians to compass direction
+     * @param {number} radians - Wind direction in radians
+     * @returns {string} Compass direction (N, NE, E, SE, S, SW, W, NW)
+     */
+    getWindDirection(radians) {
+        // Convert radians to degrees
+        let degrees = (radians * 180 / Math.PI) % 360;
+        if (degrees < 0) degrees += 360;
+        
+        // Convert to compass directions
+        const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        const index = Math.round(degrees / 45) % 8;
+        return directions[index];
     }
 
     /**
