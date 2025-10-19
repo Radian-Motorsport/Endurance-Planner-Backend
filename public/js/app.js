@@ -1603,6 +1603,13 @@ class RadianPlannerApp {
             available_car_classes: []
         };
 
+        // Collect series data
+        const seriesData = this.selectedSeries ? {
+            name: this.selectedSeries.series_name || 'Unknown Series',
+            id: this.selectedSeries.series_id || null,
+            logo: this.selectedSeries.logo ? `https://images-static.iracing.com${this.selectedSeries.logo}` : null
+        } : null;
+
         // Collect weather data if available
         const weatherData = this.currentWeatherData || null;
 
@@ -1614,6 +1621,7 @@ class RadianPlannerApp {
             car: carData,
             drivers: driversData,
             session: sessionData,
+            series: seriesData,
             weather: weatherData,
             strategies: strategyData,
             timestamp: new Date().toISOString()
