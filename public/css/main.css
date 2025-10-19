@@ -6,23 +6,17 @@ body {
     background-color: #808080;
 }
 
-/* Emoji and Flag Support */
-.flag-emoji, .text-lg, span[class*="flag-emoji"] {
-    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols", "Twemoji Mozilla", sans-serif !important;
-    font-style: normal !important;
-    font-variant: normal !important;
-    text-rendering: auto !important;
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-    font-feature-settings: "liga" off !important;
-    font-size: inherit !important;
-    line-height: 1 !important;
-    display: inline-block !important;
-    vertical-align: middle !important;
+/* Flag Image Support */
+.flag-image {
+    width: 24px;
+    height: 18px;
+    object-fit: cover;
+    border-radius: 2px;
+    display: inline-block;
+    vertical-align: middle;
 }
 
-/* Fallback styling for country codes when emojis don't work */
-.flag-emoji[data-fallback="true"] {
+.flag-fallback {
     background: linear-gradient(45deg, #3b82f6, #1d4ed8);
     color: white;
     font-size: 0.75rem;
@@ -32,6 +26,8 @@ body {
     font-family: 'Inter', monospace !important;
     min-width: 24px;
     text-align: center;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 h1 {

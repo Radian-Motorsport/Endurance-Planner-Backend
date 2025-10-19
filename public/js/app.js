@@ -1433,7 +1433,7 @@ class RadianPlannerApp {
                         <span class="text-sm">${iRating}</span>
                     </div>
                     <div class="ml-4 w-8 flex justify-center">
-                        <span class="text-lg flag-emoji">${countryFlag}</span>
+                        ${countryFlag}
                     </div>
                     <div class="flex-1 px-2">
                         <span class="text-neutral-200 font-medium">${driver.name}</span>
@@ -1859,7 +1859,7 @@ class RadianPlannerApp {
                                     <span>${iRating}</span>
                                 </div>
                                 <div class="ml-3 w-6 flex justify-center">
-                                    <span class="text-base flag-emoji">${countryFlag}</span>
+                                    ${countryFlag}
                                 </div>
                                 <div class="flex-1 px-2">
                                     <span class="text-neutral-200 font-medium text-sm">${name}</span>
