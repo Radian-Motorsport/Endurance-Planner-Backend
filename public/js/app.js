@@ -23,6 +23,7 @@ class RadianPlannerApp {
         this.selectedDrivers = [];
         this.selectedTrack = null;
         this.selectedCar = null;
+        this.selectedSeries = null;
         
         this.disposables = [];
         
@@ -995,7 +996,20 @@ class RadianPlannerApp {
                 if (e.target.value) {
                     console.log('🔍 Series selected:', e.target.value, 'Type:', typeof e.target.value);
                     console.log('🔍 Selected option text:', e.target.selectedOptions[0]?.textContent);
+                    
+                    // Find and store the selected series object
+                    const seriesId = parseInt(e.target.value);
+                    this.selectedSeries = this.allData.series.find(s => s.series_id === seriesId);
+                    console.log('🏁 Selected series object:', this.selectedSeries);
+                    
+                    // Display series logo
+                    this.displaySeriesLogo();
+                    
                     this.populateEventsDropdown(e.target.value);
+                } else {
+                    // Clear series selection
+                    this.selectedSeries = null;
+                    this.hideSeriesLogo();
                 }
             });
         }
@@ -1314,6 +1328,40 @@ class RadianPlannerApp {
         console.log(`❌ Removed driver: ${driverName}`);
     }
 
+    /**
+     * Display the selected series logo
+     */
+    displaySeriesLogo() {
+        const seriesLogoEl = document.getElementById('series-logo');
+        if (!seriesLogoEl) return;
+
+        if (this.selectedSeries && this.selectedSeries.logo) {
+            const logoUrl = `https://images-static.iracing.com${this.selectedSeries.logo}`;
+            seriesLogoEl.src = logoUrl;
+            seriesLogoEl.classList.remove('hidden');
+            console.log('🏁 Displaying series logo:', logoUrl);
+            
+            // Handle logo load errors
+            seriesLogoEl.onerror = function() {
+                console.warn('❌ Failed to load series logo:', logoUrl);
+                seriesLogoEl.classList.add('hidden');
+            };
+        } else {
+            this.hideSeriesLogo();
+        }
+    }
+
+    /**
+     * Hide the series logo
+     */
+    hideSeriesLogo() {
+        const seriesLogoEl = document.getElementById('series-logo');
+        if (seriesLogoEl) {
+            seriesLogoEl.classList.add('hidden');
+            seriesLogoEl.src = '';
+        }
+    }
+
     updateDriversList() {
         const driversList = document.getElementById('driver-list');
         if (!driversList) return;
@@ -1469,7 +1517,15 @@ class RadianPlannerApp {
             name: trackDetails?.track_name || this.selectedTrack?.name || 'Unknown Track',
             id: trackDetails?.track_id || this.selectedTrack?.id || null,
             garage61_id: trackDetails?.track_garage61_id || this.selectedTrack?.garage61_id || null,
-            iracing_track_id: trackDetails?.iracing_track_id || this.selectedTrack?.iracing_track_id || null
+            iracing_track_id: trackDetails?.iracing_track_id || this.selectedTrack?.iracing_track_id || null,
+            config_name: trackDetails?.config_name || null,
+            location: trackDetails?.location || null,
+            latitude: trackDetails?.latitude || null,
+            longitude: trackDetails?.longitude || null,
+            track_config_length: trackDetails?.track_config_length || null,
+            logo: trackDetails?.logo ? `https://images-static.iracing.com${trackDetails.logo}` : null,
+            track_image: (trackDetails?.track_small_image && trackDetails?.track_folder) ? 
+                `https://images-static.iracing.com/${trackDetails.track_folder}/${trackDetails.track_small_image}` : null
         };
 
         // Collect selected car data (handle both nested and direct structures)
@@ -1480,7 +1536,9 @@ class RadianPlannerApp {
             garage61_id: carDetails?.garage61_id || null,
             iracing_car_id: carDetails?.iracing_car_id || null,
             weight: carDetails?.car_weight || carDetails?.weight || null,
-            horsepower: carDetails?.hp || carDetails?.horsepower || null
+            horsepower: carDetails?.hp || carDetails?.horsepower || null,
+            logo: (carDetails?.small_image && carDetails?.folder) ? 
+                `https://images-static.iracing.com/${carDetails.folder}/${carDetails.small_image}` : null
         };
 
         // Collect selected drivers data
@@ -1508,22 +1566,25 @@ class RadianPlannerApp {
             session_start_time: this.selectedSessionDetails.session_start_time || 'Not selected',
             session_length: this.selectedSessionDetails.session_length || null,
             time_of_day: this.selectedSessionDetails.time_of_day || null,
-            weather_type: this.selectedSessionDetails.weather_type || null,
-            track_temp: this.selectedSessionDetails.track_temp || null,
-            air_temp: this.selectedSessionDetails.air_temp || null
+            simulated_start_time: this.selectedSessionDetails.simulated_start_time || null,
+            event_id: this.selectedSessionDetails.event_id || null,
+            available_car_classes: this.selectedSessionDetails.available_car_classes || []
         } : {
             session_name: 'Unknown Session',
             session_date: null,
             session_start_time: 'Not selected',
             session_length: null,
             time_of_day: null,
-            weather_type: null,
-            track_temp: null,
-            air_temp: null
+            simulated_start_time: null,
+            event_id: null,
+            available_car_classes: []
         };
 
         // Collect weather data if available
         const weatherData = this.currentWeatherData || null;
+
+        // Collect strategy data if available
+        const strategyData = this.currentStrategies || [];
 
         const eventData = {
             track: trackData,
@@ -1531,6 +1592,7 @@ class RadianPlannerApp {
             drivers: driversData,
             session: sessionData,
             weather: weatherData,
+            strategies: strategyData,
             timestamp: new Date().toISOString()
         };
 
@@ -1592,15 +1654,24 @@ class RadianPlannerApp {
             }
         }
 
-        // Populate track information with image
+        // Populate track information with images
         const trackNameEl = document.getElementById('page2-track');
         const trackConfigEl = document.getElementById('page2-track-config');
+        const trackImageEl = document.getElementById('track-image');
         const trackLogoEl = document.getElementById('track-logo');
         
         if (trackNameEl) trackNameEl.textContent = eventData.track?.name || 'Unknown Track';
-        if (trackConfigEl) trackConfigEl.textContent = eventData.track?.config || '';
+        if (trackConfigEl) trackConfigEl.textContent = eventData.track?.config_name || '';
         
-        // Set track logo image
+        // Set track background image
+        if (trackImageEl && eventData.track?.track_image) {
+            trackImageEl.src = eventData.track.track_image;
+            trackImageEl.classList.remove('hidden');
+        } else if (trackImageEl) {
+            trackImageEl.classList.add('hidden');
+        }
+        
+        // Set track logo overlay
         if (trackLogoEl && eventData.track?.logo) {
             trackLogoEl.src = eventData.track.logo;
             trackLogoEl.classList.remove('hidden');

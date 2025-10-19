@@ -131,6 +131,12 @@
                 <!-- Race Date & Time -->
                 <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
                     <h1 class="text-xl mb-4 road-rage-font">Race Information</h1>
+                    
+                    <!-- Series Logo -->
+                    <div class="flex justify-center mb-4">
+                        <img id="series-logo" src="" alt="Series Logo" class="h-16 object-contain hidden">
+                    </div>
+                    
                     <div id="race-info-content" class="hidden">
                         <!-- Race Date & Time Grid -->
                         <div class="space-y-4 w-full mb-6">
@@ -356,7 +362,10 @@
                 <div id="event-summary" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="flex flex-col items-center text-center justify-between h-full">
-                            <img id="track-logo" src="" alt="Track Logo" class="w-40 h-40 mb-2 object-contain hidden">
+                            <div class="relative w-40 h-40 mb-2">
+                                <img id="track-image" src="" alt="Track Image" class="w-40 h-40 object-contain hidden">
+                                <img id="track-logo" src="" alt="Track Logo" class="absolute inset-0 w-40 h-40 object-contain hidden">
+                            </div>
                             <div class="text-center">
                                 <div id="page2-track" class="text-neutral-200 font-medium text-lg"></div>
                                 <div id="page2-track-config" class="text-neutral-400 text-sm"></div>
