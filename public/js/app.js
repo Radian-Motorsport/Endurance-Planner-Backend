@@ -7,7 +7,7 @@ import { StrategyCalculator } from './modules/strategy-calculator.js';
 import { Garage61Client } from './modules/garage61-client.js';
 import { WeatherComponent } from './modules/weather-component.js';
 import { TrackMapComponent } from './modules/track-map.js';
-import { getCountryFlag } from './modules/country-flags.js';
+import { getCountryFlag, getCountryFlagOrCode } from './modules/country-flags.js';
 
 class RadianPlannerApp {
     constructor() {
@@ -1397,7 +1397,9 @@ class RadianPlannerApp {
             li.className = 'bg-neutral-700 rounded-lg p-3 mb-3';
             
             // Get country flag
-            const countryFlag = getCountryFlag(driver.country);
+            console.log(`🏁 Getting flag for driver ${driver.name} from ${driver.country}`);
+            const countryFlag = getCountryFlagOrCode(driver.country);
+            console.log(`🏁 Flag result: ${countryFlag}`);
             
             // Get safety rating class from database field
             const srClass = driver.sports_car_group_name || 'D';
@@ -1622,13 +1624,19 @@ class RadianPlannerApp {
         console.log('   trackData.garage61_id:', trackData.garage61_id);
         console.log('   carData.garage61_id:', carData.garage61_id);
         console.log('   sessionDetails exists:', !!this.selectedSessionDetails);
+        if (this.selectedSessionDetails) {
+            console.log('   sessionDetails.start_time:', this.selectedSessionDetails.start_time);
+            console.log('   sessionDetails.start_date:', this.selectedSessionDetails.start_date);
+            console.log('   sessionDetails.session_name:', this.selectedSessionDetails.session_name);
+            console.log('   sessionDetails keys:', Object.keys(this.selectedSessionDetails));
+        }
 
         // Collect session details
         const sessionData = this.selectedSessionDetails ? {
             session_name: this.selectedSessionDetails.session_name || 'Unknown Session',
-            session_date: this.selectedSessionDetails.session_date || null,
-            session_start_time: this.selectedSessionDetails.session_start_time || 'Not selected',
-            session_length: this.selectedSessionDetails.session_length || null,
+            session_date: this.selectedSessionDetails.start_date || null,
+            session_start_time: this.selectedSessionDetails.start_time || 'Not selected',
+            session_length: this.selectedSessionDetails.duration_minutes || null,
             time_of_day: this.selectedSessionDetails.time_of_day || null,
             simulated_start_time: this.selectedSessionDetails.simulated_start_time || null,
             event_id: this.selectedSessionDetails.event_id || null,
@@ -1804,7 +1812,9 @@ class RadianPlannerApp {
                     const groupName = driver.sports_car_group_name || '';
                     
                     // Get country flag
-                    const countryFlag = getCountryFlag(country);
+                    console.log(`🏁 Page2: Getting flag for driver ${name} from ${country}`);
+                    const countryFlag = getCountryFlagOrCode(country);
+                    console.log(`🏁 Page2: Flag result: ${countryFlag}`);
                     
                     // Get color for group name
                     let groupColorClass = '';

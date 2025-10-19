@@ -159,14 +159,20 @@ export const countryToFlag = {
 export function getCountryFlag(country) {
     if (!country) return '🏁'; // Racing flag as default
     
+    console.log(`🔍 Looking up flag for country: "${country}"`);
+    
     // Try exact match first
     const exactMatch = countryToFlag[country];
-    if (exactMatch) return exactMatch;
+    if (exactMatch) {
+        console.log(`✅ Found exact match: ${exactMatch}`);
+        return exactMatch;
+    }
     
     // Try case-insensitive match
     const lowerCountry = country.toLowerCase();
     for (const [key, flag] of Object.entries(countryToFlag)) {
         if (key.toLowerCase() === lowerCountry) {
+            console.log(`✅ Found case-insensitive match: ${flag}`);
             return flag;
         }
     }
@@ -174,10 +180,12 @@ export function getCountryFlag(country) {
     // Try partial match
     for (const [key, flag] of Object.entries(countryToFlag)) {
         if (key.toLowerCase().includes(lowerCountry) || lowerCountry.includes(key.toLowerCase())) {
+            console.log(`✅ Found partial match: ${flag}`);
             return flag;
         }
     }
     
+    console.log(`❌ No flag found for "${country}", using default`);
     // Default to racing flag
     return '🏁';
 }
@@ -194,4 +202,51 @@ export function getCountryFlagWithStatus(country) {
         found: flag !== '🏁',
         country: country
     };
+}
+
+/**
+ * Alternative flag rendering for systems with poor emoji support
+ * @param {string} country - Country name
+ * @returns {string} Country code or emoji
+ */
+export function getCountryFlagOrCode(country) {
+    const flag = getCountryFlag(country);
+    
+    // Test if emoji is supported by checking if it renders properly
+    const testDiv = document.createElement('div');
+    testDiv.style.fontFamily = '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji"';
+    testDiv.textContent = flag;
+    document.body.appendChild(testDiv);
+    
+    // If emoji width is very small, it's probably not rendering
+    const emojiSupported = testDiv.offsetWidth > 10;
+    document.body.removeChild(testDiv);
+    
+    if (!emojiSupported && flag !== '🏁') {
+        // Fallback to country codes for common countries
+        const countryCodes = {
+            'United States': 'US',
+            'United Kingdom': 'GB', 
+            'Germany': 'DE',
+            'France': 'FR',
+            'Italy': 'IT',
+            'Spain': 'ES',
+            'Netherlands': 'NL',
+            'Belgium': 'BE',
+            'Austria': 'AT',
+            'Canada': 'CA',
+            'Australia': 'AU',
+            'Japan': 'JP',
+            'Brazil': 'BR',
+            'Jamaica': 'JM',
+            'Venezuela': 'VE'
+        };
+        
+        const code = countryCodes[country];
+        if (code) {
+            return `[${code}]`;
+        }
+    }
+    
+    return flag;
 }
