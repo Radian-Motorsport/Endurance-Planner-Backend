@@ -1420,24 +1420,24 @@ class RadianPlannerApp {
         const trackDetails = this.selectedSessionDetails || this.selectedTrack;
         const trackData = {
             name: trackDetails?.track_name || this.selectedTrack?.name || 'Unknown Track',
-            id: trackDetails?.track_id || this.selectedTrack?.id,
-            garage61_id: trackDetails?.track_garage61_id || this.selectedTrack?.garage61_id,
-            iracing_track_id: trackDetails?.iracing_track_id || this.selectedTrack?.iracing_track_id
+            id: trackDetails?.track_id || this.selectedTrack?.id || null,
+            garage61_id: trackDetails?.track_garage61_id || this.selectedTrack?.garage61_id || null,
+            iracing_track_id: trackDetails?.iracing_track_id || this.selectedTrack?.iracing_track_id || null
         };
 
         // Collect selected car data (handle both nested and direct structures)
         const carDetails = this.selectedCar?.details || this.selectedCar;
         const carData = {
             name: this.selectedCar?.name || carDetails?.car_name || carDetails?.name || 'Unknown Car',
-            id: this.selectedCar?.id || carDetails?.id || carDetails?.car_id,
-            garage61_id: carDetails?.garage61_id,
-            iracing_car_id: carDetails?.iracing_car_id,
-            weight: carDetails?.car_weight || carDetails?.weight,
-            horsepower: carDetails?.hp || carDetails?.horsepower
+            id: this.selectedCar?.id || carDetails?.id || carDetails?.car_id || null,
+            garage61_id: carDetails?.garage61_id || null,
+            iracing_car_id: carDetails?.iracing_car_id || null,
+            weight: carDetails?.car_weight || carDetails?.weight || null,
+            horsepower: carDetails?.hp || carDetails?.horsepower || null
         };
 
         // Collect selected drivers data
-        const driversData = this.selectedDrivers.map(driver => ({
+        const driversData = (this.selectedDrivers || []).map(driver => ({
             name: driver.name,
             firstName: driver.firstName,
             lastName: driver.lastName,
@@ -1456,15 +1456,24 @@ class RadianPlannerApp {
 
         // Collect session details
         const sessionData = this.selectedSessionDetails ? {
-            session_name: this.selectedSessionDetails.session_name,
-            session_date: this.selectedSessionDetails.session_date,
-            session_start_time: this.selectedSessionDetails.session_start_time,
-            session_length: this.selectedSessionDetails.session_length,
-            time_of_day: this.selectedSessionDetails.time_of_day,
-            weather_type: this.selectedSessionDetails.weather_type,
-            track_temp: this.selectedSessionDetails.track_temp,
-            air_temp: this.selectedSessionDetails.air_temp
-        } : null;
+            session_name: this.selectedSessionDetails.session_name || 'Unknown Session',
+            session_date: this.selectedSessionDetails.session_date || null,
+            session_start_time: this.selectedSessionDetails.session_start_time || 'Not selected',
+            session_length: this.selectedSessionDetails.session_length || null,
+            time_of_day: this.selectedSessionDetails.time_of_day || null,
+            weather_type: this.selectedSessionDetails.weather_type || null,
+            track_temp: this.selectedSessionDetails.track_temp || null,
+            air_temp: this.selectedSessionDetails.air_temp || null
+        } : {
+            session_name: 'Unknown Session',
+            session_date: null,
+            session_start_time: 'Not selected',
+            session_length: null,
+            time_of_day: null,
+            weather_type: null,
+            track_temp: null,
+            air_temp: null
+        };
 
         // Collect weather data if available
         const weatherData = this.currentWeatherData || null;
@@ -1489,13 +1498,19 @@ class RadianPlannerApp {
     async populatePage2(eventData) {
         console.log('📄 Populating page 2 with event data...');
 
+        // Guard clause - ensure eventData exists
+        if (!eventData) {
+            console.error('❌ No event data provided to populatePage2');
+            return;
+        }
+
         // Populate track information
         const trackNameEl = document.getElementById('page2-track');
-        if (trackNameEl) trackNameEl.textContent = eventData.track.name;
+        if (trackNameEl) trackNameEl.textContent = eventData.track?.name || 'Unknown Track';
 
         // Populate car information
         const carNameEl = document.getElementById('page2-car');
-        if (carNameEl) carNameEl.textContent = eventData.car.name;
+        if (carNameEl) carNameEl.textContent = eventData.car?.name || 'Unknown Car';
 
         // Populate session information using correct element IDs
         if (eventData.session) {
@@ -1516,35 +1531,50 @@ class RadianPlannerApp {
 
         // Populate drivers list
         const driversListEl = document.getElementById('page2-drivers');
-        if (driversListEl && eventData.drivers.length > 0) {
-            // Create a nice formatted drivers display
-            driversListEl.innerHTML = `
-                <div class="text-center">
-                    <i class="fas fa-users text-purple-400 text-2xl mb-2"></i>
-                    <div class="text-sm text-neutral-500 mb-1">Team Drivers</div>
-                    <div class="text-neutral-300 font-medium">
-                        ${eventData.drivers.map(d => d.name).join('<br>')}
+        if (driversListEl) {
+            if (eventData.drivers && eventData.drivers.length > 0) {
+                // Create a nice formatted drivers display
+                driversListEl.innerHTML = `
+                    <div class="text-center">
+                        <i class="fas fa-users text-purple-400 text-2xl mb-2"></i>
+                        <div class="text-sm text-neutral-500 mb-1">Team Drivers</div>
+                        <div class="text-neutral-300 font-medium">
+                            ${eventData.drivers.map(d => d.name || 'Unknown Driver').join('<br>')}
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                // Show placeholder when no drivers selected
+                driversListEl.innerHTML = `
+                    <div class="text-center">
+                        <i class="fas fa-users text-neutral-600 text-2xl mb-2"></i>
+                        <div class="text-sm text-neutral-500 mb-1">Team Drivers</div>
+                        <div class="text-neutral-500 font-medium">
+                            No drivers selected
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         // Make Garage61 API call if we have the required IDs
         console.log('🔍 DEBUG: Checking Garage61 data requirements:');
-        console.log('   Car garage61_id:', eventData.car.garage61_id);
-        console.log('   Track garage61_id:', eventData.track.garage61_id);
-        console.log('   Drivers count:', eventData.drivers.length);
+        console.log('   Car garage61_id:', eventData.car?.garage61_id);
+        console.log('   Track garage61_id:', eventData.track?.garage61_id);
+        console.log('   Drivers count:', eventData.drivers?.length || 0);
         console.log('   Drivers data:', eventData.drivers);
         
-        if (eventData.car.garage61_id && eventData.track.garage61_id && eventData.drivers.length > 0) {
+        if (eventData.car?.garage61_id && eventData.track?.garage61_id && eventData.drivers?.length > 0) {
             console.log('✅ All required data present - making Garage61 API call');
             await this.fetchAndDisplayGarage61Data(eventData);
         } else {
             console.warn('⚠️ Missing required data for Garage61 API call');
-            console.warn('   Missing car garage61_id:', !eventData.car.garage61_id);
-            console.warn('   Missing track garage61_id:', !eventData.track.garage61_id);
-            console.warn('   Missing drivers:', eventData.drivers.length === 0);
-            this.garage61Client.updateUI('error', 'Missing car/track/driver data for lap times');
+            console.warn('   Missing car garage61_id:', !eventData.car?.garage61_id);
+            console.warn('   Missing track garage61_id:', !eventData.track?.garage61_id);
+            console.warn('   Missing drivers:', (eventData.drivers?.length || 0) === 0);
+            if (this.garage61Client) {
+                this.garage61Client.updateUI('error', 'Missing car/track/driver data for lap times');
+            }
         }
     }
 

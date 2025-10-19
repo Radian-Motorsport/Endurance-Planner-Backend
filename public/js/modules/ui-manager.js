@@ -215,9 +215,15 @@ export class UIManager {
      * @param {string} elementId - Element ID to show
      */
     showElement(elementId) {
+        console.log(`🔍 showElement called for: ${elementId}`);
         const element = document.getElementById(elementId);
         if (element) {
+            console.log(`✅ Element found: ${elementId}`);
+            console.log(`   Current classes:`, element.className);
             element.classList.remove('hidden');
+            console.log(`   Classes after removal:`, element.className);
+        } else {
+            console.error(`❌ Element NOT found: ${elementId}`);
         }
     }
 
