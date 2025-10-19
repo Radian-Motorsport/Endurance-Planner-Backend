@@ -296,6 +296,9 @@ class RadianPlannerApp {
             if (raceInfoContent) raceInfoContent.classList.remove('hidden');
             if (raceInfoPlaceholder) raceInfoPlaceholder.classList.add('hidden');
             
+            // Display series logo and name when race info is shown
+            this.displaySeriesLogo();
+            
             // Populate race datetime (simulated_start_time)
             const raceDatetimeElement = document.getElementById('race-datetime');
             if (raceDatetimeElement && sessionDetails.simulated_start_time) {
@@ -1329,36 +1332,54 @@ class RadianPlannerApp {
     }
 
     /**
-     * Display the selected series logo
+     * Display the selected series logo and name
      */
     displaySeriesLogo() {
         const seriesLogoEl = document.getElementById('series-logo');
-        if (!seriesLogoEl) return;
+        const seriesNameEl = document.getElementById('series-name');
 
-        if (this.selectedSeries && this.selectedSeries.logo) {
-            const logoUrl = `https://images-static.iracing.com${this.selectedSeries.logo}`;
-            seriesLogoEl.src = logoUrl;
-            seriesLogoEl.classList.remove('hidden');
-            console.log('🏁 Displaying series logo:', logoUrl);
-            
-            // Handle logo load errors
-            seriesLogoEl.onerror = function() {
-                console.warn('❌ Failed to load series logo:', logoUrl);
+        if (this.selectedSeries) {
+            // Display series name
+            if (seriesNameEl) {
+                seriesNameEl.textContent = this.selectedSeries.series_name || 'Unknown Series';
+                seriesNameEl.classList.remove('hidden');
+            }
+
+            // Display series logo if available
+            if (seriesLogoEl && this.selectedSeries.logo) {
+                const logoUrl = `https://images-static.iracing.com${this.selectedSeries.logo}`;
+                seriesLogoEl.src = logoUrl;
+                seriesLogoEl.classList.remove('hidden');
+                console.log('🏁 Displaying series logo:', logoUrl);
+                
+                // Handle logo load errors
+                seriesLogoEl.onerror = function() {
+                    console.warn('❌ Failed to load series logo:', logoUrl);
+                    seriesLogoEl.classList.add('hidden');
+                };
+            } else if (seriesLogoEl) {
                 seriesLogoEl.classList.add('hidden');
-            };
+            }
         } else {
             this.hideSeriesLogo();
         }
     }
 
     /**
-     * Hide the series logo
+     * Hide the series logo and name
      */
     hideSeriesLogo() {
         const seriesLogoEl = document.getElementById('series-logo');
+        const seriesNameEl = document.getElementById('series-name');
+        
         if (seriesLogoEl) {
             seriesLogoEl.classList.add('hidden');
             seriesLogoEl.src = '';
+        }
+        
+        if (seriesNameEl) {
+            seriesNameEl.classList.add('hidden');
+            seriesNameEl.textContent = '';
         }
     }
 
