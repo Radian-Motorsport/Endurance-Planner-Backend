@@ -33,8 +33,8 @@ export class TrackMapComponent {
     
     createHTML(container) {
         container.innerHTML = `
-            <div class="border-t border-neutral-700 pt-6">
-                <div class="bg-neutral-800 border border-neutral-700 rounded-lg p-4">
+            <div>
+                <div class="bg-neutral-800 rounded-lg p-4">
                     <div class="flex justify-between items-start mb-4">
                         <!-- Track Map SVG Container -->
                         <div class="flex-1 ${this.options.showControls ? 'mr-4' : ''}">
