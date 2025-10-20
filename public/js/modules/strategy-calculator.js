@@ -14,6 +14,10 @@ export class StrategyCalculator {
         this.selectedDrivers = [];
         this.isLocalTimeMode = false;
         this.selectedDriverForLocalTime = null;
+        this.trackId = null;
+        this.eventId = null;
+        this.weatherComponent = null;
+        this.trackMapComponent = null;
     }
 
     /**
@@ -629,6 +633,17 @@ export class StrategyCalculator {
      */
     setSelectedDrivers(drivers) {
         this.selectedDrivers = drivers;
+    }
+
+    /**
+     * Set session metadata (track_id and event_id) for loading weather and track map
+     * @param {number} trackId - Track ID from session details
+     * @param {number} eventId - Event ID from session details
+     */
+    setSessionMetadata(trackId, eventId) {
+        this.trackId = trackId;
+        this.eventId = eventId;
+        console.log(`📍 Session metadata set: trackId=${trackId}, eventId=${eventId}`);
     }
 
     /**

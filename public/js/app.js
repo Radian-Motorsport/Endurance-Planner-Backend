@@ -1237,6 +1237,15 @@ class RadianPlannerApp {
                     console.log('🚗 Passed drivers to strategy calculator:', this.selectedDrivers);
                 }
 
+                // Pass session metadata (track and event IDs) for weather and track map
+                if (this.strategyCalculator && this.selectedSessionDetails) {
+                    this.strategyCalculator.setSessionMetadata(
+                        this.selectedSessionDetails.track_id,
+                        this.selectedSessionDetails.event_id
+                    );
+                    console.log('📍 Passed session metadata to strategy calculator');
+                }
+
                 const formData = this.collectFormData();
 
                 const strategy = await this.strategyCalculator.calculateStrategy(formData);
