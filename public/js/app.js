@@ -1828,6 +1828,23 @@ class RadianPlannerApp {
 
         // Populate drivers list with safety rating and iRating
         const driversListEl = document.getElementById('page2-drivers');
+        // Compute Projected SOF (average iRating of drivers list)
+        try {
+            const sofEl = document.getElementById('page2-projected-sof');
+            if (sofEl && eventData.drivers && eventData.drivers.length > 0) {
+                const ratings = eventData.drivers.map(d => parseInt(d.irating || d.iRating || d.irating || 0, 10)).filter(Boolean);
+                if (ratings.length > 0) {
+                    const avg = Math.round(ratings.reduce((a,b) => a+b, 0) / ratings.length);
+                    sofEl.textContent = avg.toString();
+                } else {
+                    sofEl.textContent = '-';
+                }
+            } else if (sofEl) {
+                sofEl.textContent = '-';
+            }
+        } catch (e) {
+            console.warn('Failed to compute Projected SOF', e);
+        }
         if (driversListEl) {
             if (eventData.drivers && eventData.drivers.length > 0) {
                 // Create detailed drivers display with ratings and flags
@@ -1901,14 +1918,14 @@ class RadianPlannerApp {
                         // update UI highlight: reset all name backgrounds to light grey
                         const allNames = driversListEl.querySelectorAll('.driver-name');
                         allNames.forEach(n => {
-                            n.style.backgroundColor = '#4b5563'; // neutral-600 (less blue)
+                            n.style.backgroundColor = '#707070ff'; // neutral-600 (less blue)
                             n.style.padding = '0.1rem 0.25rem';
                             n.style.borderRadius = '4px';
                         });
                         // set selected name background to neutral dark grey
                         const nameEl = card.querySelector('.driver-name');
                         if (nameEl) {
-                            nameEl.style.backgroundColor = '#1f2937'; // neutral-800
+                            nameEl.style.backgroundColor = '#3a3a3aff'; // neutral-800
                             nameEl.style.padding = '0.1rem 0.25rem';
                             nameEl.style.borderRadius = '4px';
                         }
