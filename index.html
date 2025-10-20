@@ -637,7 +637,10 @@
                         <div class="flex flex-col">
                             <div class="flex items-center justify-between mb-2">
                                 <label for="fuel-slider" class="text-sm font-medium text-neutral-400">Fuel per Lap</label>
-                                <span id="fuel-per-lap-adjustment" class="text-sm font-mono text-neutral-200">0.00 L</span>
+                                <div class="flex items-center space-x-3">
+                                    <span id="fuel-original-value" class="text-sm font-mono text-neutral-500">-- L</span>
+                                    <span id="fuel-adjusted-value" class="text-sm font-mono text-neutral-200 transition-colors duration-300">-- L</span>
+                                </div>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <button class="p-1 rounded-full text-white bg-neutral-700 hover:bg-neutral-600 transition-colors duration-200" data-adjust="fuel" data-value="-0.05">-</button>
@@ -651,7 +654,10 @@
                         <div class="flex flex-col">
                             <div class="flex items-center justify-between mb-2">
                                 <label for="lap-time-slider" class="text-sm font-medium text-neutral-400">Lap Time</label>
-                                <span id="lap-time-adjustment" class="text-sm font-mono text-neutral-200">0.00s</span>
+                                <div class="flex items-center space-x-3">
+                                    <span id="lap-time-original-value" class="text-sm font-mono text-neutral-500">--:--</span>
+                                    <span id="lap-time-adjusted-value" class="text-sm font-mono text-neutral-200 transition-colors duration-300">--:--</span>
+                                </div>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <button class="p-1 rounded-full text-white bg-neutral-700 hover:bg-neutral-600 transition-colors duration-200" data-adjust="lapTime" data-value="-0.05">-</button>

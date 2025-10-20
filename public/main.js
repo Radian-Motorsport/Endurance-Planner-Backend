@@ -98,7 +98,7 @@ const fuelSlider = document.getElementById('fuel-slider');
 const lapTimeSlider = document.getElementById('lap-time-slider');
 
 function updateAdjustmentDisplay() {
-    // Get base values from form
+    // Get base values from form (original Garage61 data)
     const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value) || 0;
     const lapTimeMinutes = parseInt(document.getElementById('avg-lap-time-minutes')?.value) || 0;
     const lapTimeSeconds = parseInt(document.getElementById('avg-lap-time-seconds')?.value) || 0;
@@ -111,17 +111,46 @@ function updateAdjustmentDisplay() {
     const effectiveFuel = fuelPerLap + fuelAdjustment;
     const effectiveLapTime = (lapTimeMinutes * 60) + lapTimeSeconds + lapTimeAdjustment;
     
-    // Update displays
-    const fuelDisplay = document.getElementById('fuel-per-lap-adjustment');
-    const lapTimeDisplay = document.getElementById('lap-time-adjustment');
+    // Update original value displays
+    const fuelOriginal = document.getElementById('fuel-original-value');
+    const lapTimeOriginal = document.getElementById('lap-time-original-value');
     
-    if (fuelDisplay) {
-        fuelDisplay.textContent = effectiveFuel.toFixed(2) + ' L';
+    if (fuelOriginal) {
+        fuelOriginal.textContent = fuelPerLap.toFixed(2) + ' L';
     }
-    if (lapTimeDisplay) {
+    if (lapTimeOriginal) {
+        const origMinutes = Math.floor((lapTimeMinutes * 60 + lapTimeSeconds) / 60);
+        const origSeconds = (lapTimeMinutes * 60 + lapTimeSeconds) % 60;
+        lapTimeOriginal.textContent = `${origMinutes}:${String(origSeconds).padStart(2, '0')}`;
+    }
+    
+    // Update adjusted value displays with color change (purple when adjusted)
+    const fuelAdjusted = document.getElementById('fuel-adjusted-value');
+    const lapTimeAdjusted = document.getElementById('lap-time-adjusted-value');
+    
+    if (fuelAdjusted) {
+        fuelAdjusted.textContent = effectiveFuel.toFixed(2) + ' L';
+        // Change to purple if adjustment is not 0
+        if (fuelAdjustment !== 0) {
+            fuelAdjusted.classList.add('text-purple-400');
+            fuelAdjusted.classList.remove('text-neutral-200');
+        } else {
+            fuelAdjusted.classList.remove('text-purple-400');
+            fuelAdjusted.classList.add('text-neutral-200');
+        }
+    }
+    if (lapTimeAdjusted) {
         const minutes = Math.floor(effectiveLapTime / 60);
         const seconds = (effectiveLapTime % 60).toFixed(0);
-        lapTimeDisplay.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
+        lapTimeAdjusted.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
+        // Change to purple if adjustment is not 0
+        if (lapTimeAdjustment !== 0) {
+            lapTimeAdjusted.classList.add('text-purple-400');
+            lapTimeAdjusted.classList.remove('text-neutral-200');
+        } else {
+            lapTimeAdjusted.classList.remove('text-purple-400');
+            lapTimeAdjusted.classList.add('text-neutral-200');
+        }
     }
 }
 
