@@ -4,6 +4,9 @@
  * Extracted from monolithic index.html to improve maintainability
  */
 
+import { WeatherComponent } from './weather-component.js';
+import { TrackMapComponent } from './track-map.js';
+
 export class StrategyCalculator {
     constructor() {
         this.totalStints = 0;
