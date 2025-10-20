@@ -2090,6 +2090,11 @@ class RadianPlannerApp {
                 const fuelInput = document.getElementById('fuel-per-lap-display-input');
                 if (fuelInput) fuelInput.value = parseFloat(fuelText) || '';
             }
+            
+            // Update the adjustment display now that values are populated
+            if (window.updateAdjustmentDisplay) {
+                window.updateAdjustmentDisplay();
+            }
         } catch (e) {
             console.warn('Could not prefill race inputs from Garage61 adjusted values', e);
         }
