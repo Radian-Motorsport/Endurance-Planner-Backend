@@ -1819,34 +1819,11 @@ class RadianPlannerApp {
             seriesLogoEl.classList.add('hidden');
         }
 
-        // Populate session information using correct element IDs
+        // Populate session information using render helper so the date/time are formatted
+        // in the current timezone (selected driver or session timezone)
         if (eventData.session) {
-            const sessionDateEl = document.getElementById('page2-race-date');
-            const sessionTimeEl = document.getElementById('page2-race-time');
-            const timezoneEl = document.getElementById('page2-timezone');
-
-            if (sessionDateEl) {
-                const formattedDate = eventData.session.session_date 
-                    ? new Date(eventData.session.session_date).toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                    })
-                    : 'Not selected';
-                sessionDateEl.textContent = formattedDate;
-            }
-            
-            if (sessionTimeEl) {
-                const timeText = eventData.session.session_start_time || 'Not selected';
-                // Timezone is shown in the right-hand column (`#page2-timezone`), avoid repeating here
-                sessionTimeEl.textContent = timeText;
-            }
-
-            // Show default timezone label (Europe/London) if not otherwise set
-            if (timezoneEl) {
-                timezoneEl.textContent = eventData.session.timezone || 'Europe/London';
-            }
+            const selectedDriver = window.radianPlanner && window.radianPlanner.selectedDriverForTime ? window.radianPlanner.selectedDriverForTime : null;
+            this.renderPage2TimeWithDriver(selectedDriver, eventData.session);
         }
 
         // Populate drivers list with safety rating and iRating
