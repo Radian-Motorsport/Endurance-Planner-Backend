@@ -1848,7 +1848,6 @@ class RadianPlannerApp {
             if (timezoneEl) {
                 timezoneEl.textContent = eventData.session.timezone || 'Europe/London';
             }
-            }
         }
 
         // Populate drivers list with safety rating and iRating
