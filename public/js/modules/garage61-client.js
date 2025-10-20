@@ -217,8 +217,9 @@ export class Garage61Client {
         const analysisEl = document.getElementById('garage61-analysis');
         const avgLapEl = document.getElementById('g61-avg-laptime');
         const avgFuelEl = document.getElementById('g61-avg-fuel');
-        const adjustedLapEl = document.getElementById('g61-adjusted-laptime');
-        const safetyInput = document.getElementById('g61-safety-margin');
+    const adjustedLapEl = document.getElementById('g61-adjusted-laptime');
+    const adjustedFuelEl = document.getElementById('g61-adjusted-fuel');
+    const safetyInput = document.getElementById('g61-safety-margin');
 
         if (analysisEl) analysisEl.classList.remove('hidden');
         if (avgLapEl) avgLapEl.textContent = avgLapSeconds ? this.formatLapTime(avgLapSeconds) : '-';
@@ -232,6 +233,14 @@ export class Garage61Client {
                     adjustedLapEl.textContent = this.formatLapTime(adjusted);
                 } else {
                     adjustedLapEl.textContent = '-';
+                }
+            }
+            if (adjustedFuelEl) {
+                if (avgFuel !== null) {
+                    const adjustedFuel = avgFuel * (1 + margin/100);
+                    adjustedFuelEl.textContent = `${adjustedFuel.toFixed(2)}L`;
+                } else {
+                    adjustedFuelEl.textContent = '-';
                 }
             }
         };
