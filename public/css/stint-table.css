@@ -1,0 +1,66 @@
+/* Stint table styles (extracted from RadianApp telemetry styles) */
+.stint-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+
+/* Mobile responsive table wrapper */
+@media (max-width: 768px) {
+  .stint-table {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stint-table {
+    font-size: 0.8rem;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .stint-table th,
+  .stint-table td {
+    padding: 6px 8px;
+    min-width: 80px;
+  }
+}
+
+.stint-table th, 
+.stint-table td {
+  padding: 8px 12px;
+  border: 1px solid #333;
+  text-align: center;
+}
+
+.stint-table th {
+  background-color: #222;
+  color: #ffc800;
+}
+
+.stint-table .stint-row {
+  background-color: #1a1a1a;
+}
+
+/* support both pit-row and pit-stop-row names */
+.stint-table .pit-row,
+.stint-table .pit-stop-row {
+  background-color: #222;
+  font-size: 0.9em;
+}
+
+.stint-table .current-stint {
+  background-color: #585500;
+  color: #fff;
+}
+
+.stint-table .current-pit {
+  background-color: #8B4000;
+  color: #fff;
+}
+
+/* Simple utility color classes used for daylight cells in legacy JS */
+.text-yellow-400 { color:#f59e0b }
+.text-blue-400 { color:#60a5fa }
+.text-orange-400 { color:#fb923c }

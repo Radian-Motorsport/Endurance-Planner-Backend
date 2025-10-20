@@ -1146,17 +1146,44 @@ class RadianPlannerApp {
         try {
             this.setLoading(true);
             
-            const formData = this.collectFormData();
-            // TEMPORARILY DISABLED VALIDATION
-            console.log('🔧 VALIDATION BYPASSED - formData:', formData);
-            // if (!this.validateFormData(formData)) {
-            //     this.uiManager.showNotification('Please fill in all required fields', 'error');
-            //     return;
-            // }
+                this.setLoading(true);
 
-            const strategy = await this.strategyCalculator.calculateStrategy(formData);
-            this.displayStrategy(strategy);
-            
+                // Validate key Page 2 inputs to avoid crashes when fields are empty.
+                // Required: race duration, avg lap time > 0, fuel per lap > 0, tank capacity > 0, at least one driver
+                const raceDurHours = parseInt(document.getElementById('race-duration-hours')?.value) || 0;
+                const raceDurMins = parseInt(document.getElementById('race-duration-minutes')?.value) || 0;
+                const totalRaceMinutes = (raceDurHours * 60) + raceDurMins;
+
+                const avgLapM = parseInt(document.getElementById('avg-lap-time-minutes')?.value);
+                const avgLapS = parseInt(document.getElementById('avg-lap-time-seconds')?.value);
+                const avgLapSecs = (isNaN(avgLapM) ? 0 : avgLapM * 60) + (isNaN(avgLapS) ? 0 : avgLapS);
+
+                const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value);
+                const tankCapacity = parseFloat(document.getElementById('tank-capacity-display-input')?.value);
+                const driversCount = Array.isArray(this.selectedDrivers) ? this.selectedDrivers.length : 0;
+
+                const missing = [];
+                if (!totalRaceMinutes || totalRaceMinutes <= 0) missing.push('Race duration');
+                if (!avgLapSecs || avgLapSecs <= 0) missing.push('Avg. lap time');
+                if (isNaN(fuelPerLap) || fuelPerLap <= 0) missing.push('Fuel per lap');
+                if (isNaN(tankCapacity) || tankCapacity <= 0) missing.push('Tank capacity');
+                if (driversCount === 0) missing.push('At least one driver');
+
+                if (missing.length > 0) {
+                    const message = 'Please fill in required race inputs: ' + missing.join(', ');
+                    // Popup for immediate UX
+                    alert(message);
+                    // In-app non-blocking notification as well
+                    if (this.uiManager && typeof this.uiManager.showNotification === 'function') {
+                        this.uiManager.showNotification(message, 'error');
+                    }
+                    this.setLoading(false);
+                    return;
+                }
+
+                const formData = this.collectFormData();
+
+                const strategy = await this.strategyCalculator.calculateStrategy(formData);
             this.uiManager.showNotification('Strategy calculated successfully!', 'success');
         } catch (error) {
             console.error('❌ Strategy calculation failed:', error);

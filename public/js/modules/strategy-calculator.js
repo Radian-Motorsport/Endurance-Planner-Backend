@@ -504,6 +504,37 @@ export class StrategyCalculator {
     }
 
     /**
+     * Display a previously-calculated strategy object returned from calculateStrategy
+     * This is a compatibility wrapper so callers (app.js) can ask the calculator to render
+     * a strategy object without knowing internal method names.
+     * @param {Object} strategy - { success, calculations, inputs }
+     */
+    async displayStrategy(strategy) {
+        try {
+            if (!strategy) return;
+
+            const inputs = strategy.inputs || {};
+            const calculations = strategy.calculations || {};
+
+            // Ensure selected drivers are current (app stores them on window.radianPlanner)
+            if (window.radianPlanner && Array.isArray(window.radianPlanner.selectedDrivers)) {
+                this.setSelectedDrivers(window.radianPlanner.selectedDrivers);
+            }
+
+            // Update the summary displays
+            this.updateDisplays(calculations, inputs);
+
+            // Populate the stint table (preserve driver assignments where possible)
+            await this.populateStintTable(inputs.avgLapTimeInSeconds || 0);
+
+            // Reveal result sections
+            this.showResultsSections();
+        } catch (error) {
+            console.error('❌ Failed to display strategy:', error);
+        }
+    }
+
+    /**
      * Update calculations when sliders change (preserve driver assignments)
      * @param {Object} sliderValues - Current slider values
      */
