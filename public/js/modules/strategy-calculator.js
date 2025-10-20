@@ -263,9 +263,13 @@ export class StrategyCalculator {
             // Increment lap counter for next stint
             currentLap += stintLaps;
 
-            // Add pit stop time for next stint (except last stint)
+            // Add pit stop row for next stint (except last stint)
             if (i < this.totalStints - 1) {
-                currentTime = new Date(stintEndTime.getTime() + (this.pitStopTime * 1000));
+                const pitStartTime = new Date(stintEndTime.getTime());
+                const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
+                const pitRow = this.createPitStopRow(pitStartTime, pitEndTime, displayTimeZone);
+                tbody.appendChild(pitRow);
+                currentTime = pitEndTime;
             }
         }
     }
@@ -284,25 +288,25 @@ export class StrategyCalculator {
     createStintRow(stintNumber, driverName, stintLaps, startTime, endTime, startLap, endLap, timeZone, daylightStatus) {
         const row = document.createElement('tr');
         row.setAttribute('data-role', 'stint');
-        row.className = 'bg-neutral-750 hover:bg-neutral-700 transition-colors';
+        row.className = 'bg-neutral-800 hover:bg-neutral-700 transition-colors';
 
         row.innerHTML = `
-            <td class="py-3 px-3 text-center text-neutral-200 font-mono">${this.formatTimeForDisplay(startTime, timeZone)}</td>
-            <td class="py-3 px-3 text-center text-neutral-200 font-mono">${this.formatTimeForDisplay(endTime, timeZone)}</td>
-            <td class="py-3 px-3 text-center text-neutral-200 font-mono">${startLap}</td>
-            <td class="py-3 px-3 text-center text-neutral-200 font-mono">${endLap}</td>
-            <td class="py-3 px-3 text-center text-blue-400 font-mono">${stintLaps}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm">${this.formatTimeForDisplay(startTime, timeZone)}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm">${this.formatTimeForDisplay(endTime, timeZone)}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm">${startLap}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm">${endLap}</td>
+            <td class="py-2 px-2 text-center text-blue-400 font-mono text-sm">${stintLaps}</td>
             <td class="w-2 px-1">
                 <div class="driver-color-strip" data-stint="${stintNumber - 1}" style="width:12px;height:40px;margin:0 auto;background:linear-gradient(to bottom, rgba(168,85,247,1), rgba(251,191,36,1));"></div>
             </td>
-            <td class="py-3 px-3 text-center">
-                <select class="driver-select-stint bg-neutral-800 text-neutral-200 p-2 rounded w-full border border-neutral-600" 
+            <td class="py-2 px-3 text-center">
+                <select class="driver-select-stint bg-neutral-700 text-neutral-200 p-2 rounded-md w-full border border-neutral-600" 
                         data-stint="${stintNumber - 1}">
                     ${this.generateDriverOptions(driverName)}
                 </select>
             </td>
-            <td class="py-3 px-3 text-center">
-                <select class="backup-select-stint bg-neutral-800 text-neutral-200 p-2 rounded w-full border border-neutral-600" 
+            <td class="py-2 px-3 text-center">
+                <select class="backup-select-stint bg-neutral-700 text-neutral-200 p-2 rounded-md w-full border border-neutral-600" 
                         data-stint="${stintNumber - 1}">
                     <option value="">Select...</option>
                 </select>
@@ -316,6 +320,31 @@ export class StrategyCalculator {
                 this.handleDriverSelectionChange(e.target);
             });
         }
+
+        return row;
+    }
+
+    /**
+     * Create pit stop table row
+     * @param {Date} startTime - Pit start time
+     * @param {Date} endTime - Pit end time
+     * @param {string} timeZone - Display timezone
+     * @returns {HTMLElement} Table row element
+     */
+    createPitStopRow(startTime, endTime, timeZone) {
+        const row = document.createElement('tr');
+        row.setAttribute('data-role', 'pit');
+        row.className = 'bg-neutral-900 transition-colors';
+
+        row.innerHTML = `
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs">${this.formatTimeForDisplay(startTime, timeZone)}</td>
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs">${this.formatTimeForDisplay(endTime, timeZone)}</td>
+            <td class="py-1 px-2 text-center text-neutral-500 road-rage-font text-xs" colspan="2">PIT</td>
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs">${this.pitStopTime > 60 ? `01:30` : `${this.pitStopTime} sec`}</td>
+            <td class="w-2 px-1"></td>
+            <td class="py-1 px-2 text-center text-neutral-600 text-xs">-</td>
+            <td class="py-1 px-2 text-center text-neutral-600 text-xs">-</td>
+        `;
 
         return row;
     }
@@ -599,11 +628,12 @@ export class StrategyCalculator {
         const tbody = document.getElementById('stint-table-body');
         if (!tbody) return;
 
-        const rows = tbody.querySelectorAll('tr');
+        const rows = tbody.querySelectorAll('tr[data-role="stint"]');
         const raceStartTime = this.getRaceStartTime();
         const displayTimeZone = this.getDisplayTimeZone();
         
         let currentTime = new Date(raceStartTime);
+        let currentLap = 1;
 
         rows.forEach((row, index) => {
             const stintLaps = (index === this.totalStints - 1) && (this.lapsInLastStint !== 0) 
@@ -614,22 +644,36 @@ export class StrategyCalculator {
             const stintStartTime = new Date(currentTime);
             const stintEndTime = new Date(currentTime.getTime() + stintDuration);
 
-            // Update time cells (now columns 0 and 1)
+            // Update time cells
             const cells = row.querySelectorAll('td');
             if (cells.length >= 8) {
                 cells[0].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
                 cells[1].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
-                // startLap and endLap are columns 2 and 3 - recalc
-                const startLap = (index * this.lapsPerStint) + 1;
+                // Update lap numbers
+                const startLap = currentLap;
                 const endLap = startLap + stintLaps - 1;
                 cells[2].textContent = startLap;
                 cells[3].textContent = endLap;
                 cells[4].textContent = stintLaps;
             }
 
-            // Move to next stint start time
+            currentLap += stintLaps;
+
+            // Update pit stop row if it exists
             if (index < this.totalStints - 1) {
-                currentTime = new Date(stintEndTime.getTime() + (this.pitStopTime * 1000));
+                const nextRow = row.nextElementSibling;
+                if (nextRow && nextRow.getAttribute('data-role') === 'pit') {
+                    const pitStartTime = new Date(stintEndTime.getTime());
+                    const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
+                    const pitCells = nextRow.querySelectorAll('td');
+                    if (pitCells.length >= 2) {
+                        pitCells[0].textContent = this.formatTimeForDisplay(pitStartTime, displayTimeZone);
+                        pitCells[1].textContent = this.formatTimeForDisplay(pitEndTime, displayTimeZone);
+                    }
+                    currentTime = pitEndTime;
+                } else {
+                    currentTime = new Date(stintEndTime.getTime() + (this.pitStopTime * 1000));
+                }
             }
         });
     }
