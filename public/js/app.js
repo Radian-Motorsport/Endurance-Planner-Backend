@@ -402,16 +402,34 @@ class RadianPlannerApp {
             // Update practice length
             const practiceElement = document.getElementById('practice-length');
             if (practiceElement && practiceSession?.session_length) {
-                practiceElement.textContent = `${practiceSession.session_length} minutes`;
+                const practiceMinutes = parseInt(practiceSession.session_length) || 0;
+                const practiceHours = Math.floor(practiceMinutes / 60);
+                const practiceMinsRemainder = practiceMinutes % 60;
+                
+                practiceElement.dataset.practiceMinutes = practiceMinutes;
+                practiceElement.dataset.practiceHours = practiceHours;
+                practiceElement.textContent = `${practiceHours}h ${practiceMinsRemainder}m`;
+                console.log(`🏁 Practice session: ${practiceMinutes} minutes total (${practiceHours}h ${practiceMinsRemainder}m)`);
             } else if (practiceElement) {
+                practiceElement.dataset.practiceMinutes = '';
+                practiceElement.dataset.practiceHours = '';
                 practiceElement.textContent = '-';
             }
             
             // Update qualifying length
             const qualifyingElement = document.getElementById('qualifying-length');
             if (qualifyingElement && qualifyingSession?.session_length) {
-                qualifyingElement.textContent = `${qualifyingSession.session_length} minutes`;
+                const qualifyingMinutes = parseInt(qualifyingSession.session_length) || 0;
+                const qualifyingHours = Math.floor(qualifyingMinutes / 60);
+                const qualifyingMinsRemainder = qualifyingMinutes % 60;
+                
+                qualifyingElement.dataset.qualifyingMinutes = qualifyingMinutes;
+                qualifyingElement.dataset.qualifyingHours = qualifyingHours;
+                qualifyingElement.textContent = `${qualifyingHours}h ${qualifyingMinsRemainder}m`;
+                console.log(`🏁 Qualifying session: ${qualifyingMinutes} minutes total (${qualifyingHours}h ${qualifyingMinsRemainder}m)`);
             } else if (qualifyingElement) {
+                qualifyingElement.dataset.qualifyingMinutes = '';
+                qualifyingElement.dataset.qualifyingHours = '';
                 qualifyingElement.textContent = '-';
             }
         } catch (error) {

@@ -253,6 +253,13 @@ export class StrategyCalculator {
         // Add practice + qualifying offset to get actual first stint start time
         const practiceQualifyingOffset = this.getPracticeQualifyingOffset();
         let currentTime = new Date(raceStartTime.getTime() + practiceQualifyingOffset);
+        
+        console.log(`\n🏁 STINT TABLE GENERATION`);
+        console.log(`   Race Start: ${raceStartTime.toISOString()}`);
+        console.log(`   Practice+Qual offset: ${practiceQualifyingOffset}ms`);
+        console.log(`   First stint starts: ${currentTime.toISOString()}`);
+        console.log(`   Pit stop duration: ${this.pitStopTime}s`);
+        
         let currentLap = 1; // Initialize lap counter
 
         for (let i = 0; i < this.totalStints; i++) {
@@ -277,6 +284,8 @@ export class StrategyCalculator {
             const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, startLap, endLap, displayTimeZone, daylightStatus);
             tbody.appendChild(row);
 
+            console.log(`   Stint ${i + 1}: ${stintStartTime.toISOString()} → ${stintEndTime.toISOString()} (${stintLaps} laps)`);
+
             // Increment lap counter for next stint
             currentLap += stintLaps;
 
@@ -288,6 +297,8 @@ export class StrategyCalculator {
                 tbody.appendChild(pitRow);
                 // IMPORTANT: Advance currentTime to AFTER the pit stop so next stint starts after pit completes
                 currentTime = pitEndTime;
+                
+                console.log(`      Pit stop: ${pitStartTime.toISOString()} → ${pitEndTime.toISOString()} (${this.pitStopTime}s)`);
             }
         }
     }
@@ -511,24 +522,30 @@ export class StrategyCalculator {
     getPracticeQualifyingOffset() {
         let totalOffsetMs = 0;
 
-        // Get practice duration
+        // Get practice duration (session_length is in total minutes)
         const practiceElement = document.getElementById('practice-length');
         if (practiceElement) {
-            const practiceHours = parseInt(practiceElement.dataset.practiceHours) || 0;
             const practiceMinutes = parseInt(practiceElement.dataset.practiceMinutes) || 0;
-            totalOffsetMs += (practiceHours * 60 + practiceMinutes) * 60 * 1000;
+            if (practiceMinutes > 0) {
+                totalOffsetMs += practiceMinutes * 60 * 1000; // Convert minutes to milliseconds
+                console.log(`🏁 Practice offset: ${practiceMinutes} minutes = ${practiceMinutes * 60 * 1000}ms`);
+            }
         }
 
-        // Get qualifying duration
+        // Get qualifying duration (session_length is in total minutes)
         const qualifyingElement = document.getElementById('qualifying-length');
         if (qualifyingElement) {
-            const qualifyingHours = parseInt(qualifyingElement.dataset.qualifyingHours) || 0;
             const qualifyingMinutes = parseInt(qualifyingElement.dataset.qualifyingMinutes) || 0;
-            totalOffsetMs += (qualifyingHours * 60 + qualifyingMinutes) * 60 * 1000;
+            if (qualifyingMinutes > 0) {
+                totalOffsetMs += qualifyingMinutes * 60 * 1000; // Convert minutes to milliseconds
+                console.log(`🏁 Qualifying offset: ${qualifyingMinutes} minutes = ${qualifyingMinutes * 60 * 1000}ms`);
+            }
         }
 
         if (totalOffsetMs > 0) {
-            console.log(`⏱️ Practice + Qualifying offset: ${totalOffsetMs}ms (${(totalOffsetMs / 60000).toFixed(1)} minutes)`);
+            console.log(`⏱️ Practice + Qualifying TOTAL offset: ${totalOffsetMs}ms (${(totalOffsetMs / 60000).toFixed(1)} minutes)`);
+        } else {
+            console.warn(`⚠️ No practice or qualifying offset found`);
         }
 
         return totalOffsetMs;
