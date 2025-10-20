@@ -250,7 +250,9 @@ export class StrategyCalculator {
         const displayTimeZone = this.getDisplayTimeZoneForToggle();
         const daylightCalculationMode = this.getDaylightCalculationMode();
 
-        let currentTime = new Date(raceStartTime);
+        // Add practice + qualifying offset to get actual first stint start time
+        const practiceQualifyingOffset = this.getPracticeQualifyingOffset();
+        let currentTime = new Date(raceStartTime.getTime() + practiceQualifyingOffset);
         let currentLap = 1; // Initialize lap counter
 
         for (let i = 0; i < this.totalStints; i++) {
@@ -284,6 +286,7 @@ export class StrategyCalculator {
                 const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                 const pitRow = this.createPitStopRow(pitStartTime, pitEndTime, displayTimeZone);
                 tbody.appendChild(pitRow);
+                // IMPORTANT: Advance currentTime to AFTER the pit stop so next stint starts after pit completes
                 currentTime = pitEndTime;
             }
         }
@@ -498,6 +501,37 @@ export class StrategyCalculator {
         // Fallback: Use race start time if event time not available
         console.warn('⚠️ No event start time found, falling back to race start time');
         return this.getRaceStartTime();
+    }
+
+    /**
+     * Get practice + qualifying offset in milliseconds
+     * Adds this to the base race/event time to get the first real stint start time
+     * @returns {number} Total offset in milliseconds
+     */
+    getPracticeQualifyingOffset() {
+        let totalOffsetMs = 0;
+
+        // Get practice duration
+        const practiceElement = document.getElementById('practice-length');
+        if (practiceElement) {
+            const practiceHours = parseInt(practiceElement.dataset.practiceHours) || 0;
+            const practiceMinutes = parseInt(practiceElement.dataset.practiceMinutes) || 0;
+            totalOffsetMs += (practiceHours * 60 + practiceMinutes) * 60 * 1000;
+        }
+
+        // Get qualifying duration
+        const qualifyingElement = document.getElementById('qualifying-length');
+        if (qualifyingElement) {
+            const qualifyingHours = parseInt(qualifyingElement.dataset.qualifyingHours) || 0;
+            const qualifyingMinutes = parseInt(qualifyingElement.dataset.qualifyingMinutes) || 0;
+            totalOffsetMs += (qualifyingHours * 60 + qualifyingMinutes) * 60 * 1000;
+        }
+
+        if (totalOffsetMs > 0) {
+            console.log(`⏱️ Practice + Qualifying offset: ${totalOffsetMs}ms (${(totalOffsetMs / 60000).toFixed(1)} minutes)`);
+        }
+
+        return totalOffsetMs;
     }
 
     /**
@@ -780,7 +814,9 @@ export class StrategyCalculator {
         const raceStartTime = this.isLocalTimeMode ? this.getEventStartTime() : this.getRaceStartTime();
         const displayTimeZone = this.getDisplayTimeZoneForToggle();
         
-        let currentTime = new Date(raceStartTime);
+        // Add practice + qualifying offset to get actual first stint start time
+        const practiceQualifyingOffset = this.getPracticeQualifyingOffset();
+        let currentTime = new Date(raceStartTime.getTime() + practiceQualifyingOffset);
         let currentLap = 1;
 
         rows.forEach((row, index) => {
@@ -818,6 +854,7 @@ export class StrategyCalculator {
                         pitCells[0].textContent = this.formatTimeForDisplay(pitStartTime, displayTimeZone);
                         pitCells[1].textContent = this.formatTimeForDisplay(pitEndTime, displayTimeZone);
                     }
+                    // IMPORTANT: Advance currentTime to AFTER the pit stop so next stint starts after pit completes
                     currentTime = pitEndTime;
                 } else {
                     currentTime = new Date(stintEndTime.getTime() + (this.pitStopTime * 1000));
