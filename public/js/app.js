@@ -1635,26 +1635,52 @@ class RadianPlannerApp {
             console.log('   sessionDetails keys:', Object.keys(this.selectedSessionDetails));
         }
 
-        // Collect session details
-        const sessionData = this.selectedSessionDetails ? {
-            session_name: this.selectedSessionDetails.session_name || 'Unknown Session',
-            session_date: this.selectedSessionDetails.start_date || null,
-            session_start_time: this.selectedSessionDetails.start_time || 'Not selected',
-            session_length: this.selectedSessionDetails.duration_minutes || null,
-            time_of_day: this.selectedSessionDetails.time_of_day || null,
-            simulated_start_time: this.selectedSessionDetails.simulated_start_time || null,
-            event_id: this.selectedSessionDetails.event_id || null,
-            available_car_classes: this.selectedSessionDetails.available_car_classes || []
-        } : {
-            session_name: 'Unknown Session',
-            session_date: null,
-            session_start_time: 'Not selected',
-            session_length: null,
-            time_of_day: null,
-            simulated_start_time: null,
-            event_id: null,
-            available_car_classes: []
-        };
+        // Collect session details (tolerant to varying API field names)
+        let sessionData;
+        if (this.selectedSessionDetails) {
+            const raw = this.selectedSessionDetails;
+
+            // Try several possible field names for the real-world event datetime
+            const sessionDateRaw = raw.session_date || raw.start_date || raw.startDate || raw.sessionDate || raw.event_date || null;
+
+            // Try several possible fields for a start time (real-world or simulated fallback)
+            let sessionStartRaw = raw.session_start_time || raw.start_time || raw.startTime || raw.simulated_start_time || raw.simulated_start || null;
+
+            // If there is no explicit start time but we have a combined datetime, extract the time portion
+            if (!sessionStartRaw && sessionDateRaw) {
+                try {
+                    sessionStartRaw = new Date(sessionDateRaw).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                } catch (e) {
+                    sessionStartRaw = null;
+                }
+            }
+
+            // Timezone if provided by API
+            const timezoneRaw = raw.timezone || raw.event_timezone || raw.timezone_name || raw.tz || null;
+
+            sessionData = {
+                session_name: raw.session_name || raw.session || 'Unknown Session',
+                session_date: sessionDateRaw || null,
+                session_start_time: sessionStartRaw || 'Not selected',
+                session_length: raw.duration_minutes || raw.session_length || null,
+                time_of_day: raw.time_of_day || null,
+                simulated_start_time: raw.simulated_start_time || null,
+                event_id: raw.event_id || raw.id || null,
+                timezone: timezoneRaw,
+                available_car_classes: raw.available_car_classes || []
+            };
+        } else {
+            sessionData = {
+                session_name: 'Unknown Session',
+                session_date: null,
+                session_start_time: 'Not selected',
+                session_length: null,
+                time_of_day: null,
+                simulated_start_time: null,
+                event_id: null,
+                available_car_classes: []
+            };
+        }
 
         // Collect series data
         const seriesData = this.selectedSeries ? {
@@ -1797,6 +1823,7 @@ class RadianPlannerApp {
         if (eventData.session) {
             const sessionDateEl = document.getElementById('page2-race-date');
             const sessionTimeEl = document.getElementById('page2-race-time');
+            const timezoneEl = document.getElementById('page2-timezone');
 
             if (sessionDateEl) {
                 const formattedDate = eventData.session.session_date 
@@ -1813,7 +1840,14 @@ class RadianPlannerApp {
             if (sessionTimeEl) {
                 const timeText = eventData.session.session_start_time || 'Not selected';
                 const timezone = eventData.session.timezone || '';
-                sessionTimeEl.textContent = timezone ? `${timeText} ${timezone}` : timeText;
+                // If timezone is an IANA name, prefer to show only short name when available
+                sessionTimeEl.textContent = timezone ? `${timeText} (${timezone})` : timeText;
+            }
+
+            // Show default timezone label (Europe/London) if not otherwise set
+            if (timezoneEl) {
+                timezoneEl.textContent = eventData.session.timezone || 'Europe/London';
+            }
             }
         }
 
@@ -1822,7 +1856,7 @@ class RadianPlannerApp {
         if (driversListEl) {
             if (eventData.drivers && eventData.drivers.length > 0) {
                 // Create detailed drivers display with ratings and flags
-                const driversHtml = eventData.drivers.map(driver => {
+                const driversHtml = eventData.drivers.map((driver, idx) => {
                     const name = driver.name || 'Unknown Driver';
                     const safetyRating = driver.safety_rating || '';
                     const iRating = driver.irating || '';
@@ -1856,8 +1890,9 @@ class RadianPlannerApp {
                             groupColorClass = 'bg-neutral-400 text-neutral-800';
                     }
                     
+                    // Make each driver card clickable; include a data-index for identification
                     return `
-                        <div class="bg-neutral-700 rounded-lg p-2">
+                        <div class="driver-card bg-neutral-700 rounded-lg p-2 cursor-pointer" data-driver-index="${idx}">
                             <div class="flex items-center">
                                 <div class="flex items-center justify-between w-28 px-2 py-1 rounded-full ${groupColorClass} text-xs">
                                     <span class="font-bold">${displayGroupName}</span>
@@ -1868,7 +1903,7 @@ class RadianPlannerApp {
                                     ${countryFlag}
                                 </div>
                                 <div class="flex-1 px-2 min-w-0">
-                                    <div class="text-neutral-200 font-medium text-sm leading-tight line-clamp-2 break-words">${name}</div>
+                                    <div class="driver-name text-neutral-200 font-medium text-sm leading-tight line-clamp-2 break-words">${name}</div>
                                 </div>
                                 <div class="text-neutral-400 text-xs text-right min-w-max ml-2">
                                     ${country}
@@ -1879,6 +1914,33 @@ class RadianPlannerApp {
                 }).join('');
                 
                 driversListEl.innerHTML = driversHtml;
+                
+                // Attach click handlers to driver cards to set selected driver timezone
+                const driverCards = driversListEl.querySelectorAll('.driver-card');
+                driverCards.forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        const idx = parseInt(card.dataset.driverIndex, 10);
+                        const selected = eventData.drivers[idx];
+                        // store selected driver for time display
+                        window.radianPlanner.selectedDriverForTime = selected;
+                        // update UI highlight: reset all name backgrounds to light grey
+                        const allNames = driversListEl.querySelectorAll('.driver-name');
+                        allNames.forEach(n => {
+                            n.style.backgroundColor = '#374151'; // tailwind neutral-700
+                            n.style.padding = '0.1rem 0.25rem';
+                            n.style.borderRadius = '4px';
+                        });
+                        // set selected name background to dark grey
+                        const nameEl = card.querySelector('.driver-name');
+                        if (nameEl) {
+                            nameEl.style.backgroundColor = '#111827'; // tailwind neutral-900
+                            nameEl.style.padding = '0.1rem 0.25rem';
+                            nameEl.style.borderRadius = '4px';
+                        }
+                        // re-render the page2 time display using selected driver's timezone
+                        this.renderPage2TimeWithDriver(selected, eventData.session);
+                    });
+                });
             } else {
                 // Show placeholder when no drivers selected
                 driversListEl.innerHTML = `
@@ -1948,6 +2010,44 @@ class RadianPlannerApp {
         } catch (error) {
             console.error('❌ Garage61 fetch error:', error);
             this.garage61Client.updateUI('error', error.message);
+        }
+    }
+
+    /**
+     * Render page 2 event date/time using a driver's timezone (or session timezone fallback)
+     * @param {Object} selectedDriver - driver object containing a `timezone` field (IANA)
+     * @param {Object} session - session object with `session_date` or `simulated_start_time`
+     */
+    renderPage2TimeWithDriver(selectedDriver, session) {
+        const sessionDateEl = document.getElementById('page2-race-date');
+        const sessionTimeEl = document.getElementById('page2-race-time');
+        const timezoneEl = document.getElementById('page2-timezone');
+
+        const tz = (selectedDriver && selectedDriver.timezone) || (session && session.timezone) || 'Europe/London';
+
+        const rawDate = session?.session_date || session?.simulated_start_time || session?.session_start_time || null;
+
+        if (!rawDate) {
+            if (sessionDateEl) sessionDateEl.textContent = 'Not selected';
+            if (sessionTimeEl) sessionTimeEl.textContent = 'Not selected';
+            if (timezoneEl) timezoneEl.textContent = tz;
+            return;
+        }
+
+        const dt = new Date(rawDate);
+        // Format date and time in selected timezone
+        try {
+            const dateFormatter = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            const timeFormatter = new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false });
+
+            if (sessionDateEl) sessionDateEl.textContent = dateFormatter.format(dt);
+            if (sessionTimeEl) sessionTimeEl.textContent = timeFormatter.format(dt) + ` (${tz})`;
+            if (timezoneEl) timezoneEl.textContent = tz;
+        } catch (e) {
+            // Fallback to UTC/local formatting
+            if (sessionDateEl) sessionDateEl.textContent = dt.toLocaleDateString('en-US');
+            if (sessionTimeEl) sessionTimeEl.textContent = dt.toLocaleTimeString('en-US');
+            if (timezoneEl) timezoneEl.textContent = tz;
         }
     }
 
