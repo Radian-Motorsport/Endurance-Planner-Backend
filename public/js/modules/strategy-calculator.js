@@ -236,31 +236,7 @@ export class StrategyCalculator {
         const daylightCalculationMode = this.getDaylightCalculationMode();
 
         let currentTime = new Date(raceStartTime);
-        // Initialize lap counter
-        let currentLap = 1;
-
-        // Build selectedDrivers list (prefer internal state, fallback to textarea if empty)
-        let selectedDrivers = Array.isArray(this.selectedDrivers) && this.selectedDrivers.length ? this.selectedDrivers : [];
-        if (selectedDrivers.length === 0) {
-            const driversTextEl = document.getElementById('drivers-input');
-            if (driversTextEl) {
-                selectedDrivers = driversTextEl.value.trim().split('\n').map((n,i) => ({ name: n.trim(), id: i+1, timezone: 'Europe/London' })).filter(d => d.name);
-            }
-        }
-
-        // If totals weren't calculated earlier, derive them now from inputs
-        if (!this.totalStints || this.totalStints <= 0) {
-            try {
-                const inputs = this.extractInputs();
-                const calc = this.performCalculations(inputs);
-                // ensure instance state updated
-                this.totalStints = calc.totalStints || this.totalStints;
-                this.lapsPerStint = calc.lapsPerStint || this.lapsPerStint;
-                this.lapsInLastStint = calc.lapsInLastStint || this.lapsInLastStint;
-            } catch (e) {
-                console.warn('Could not auto-calc stints in populateStintTable:', e);
-            }
-        }
+        let currentLap = 1; // Initialize lap counter
 
         for (let i = 0; i < this.totalStints; i++) {
             const stintLaps = (i === this.totalStints - 1) && (this.lapsInLastStint !== 0) 
@@ -278,10 +254,14 @@ export class StrategyCalculator {
             // Calculate daylight status
             const daylightStatus = this.getDaylightStatus(stintStartTime, displayTimeZone, daylightCalculationMode, selectedDriverName);
 
-                const startLap = currentLap; // Added startLap
-                const endLap = startLap + stintLaps - 1; // Added endLap
-                const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, startLap, endLap, displayTimeZone, daylightStatus);
+            // Calculate lap numbers for this stint
+            const startLap = currentLap;
+            const endLap = startLap + stintLaps - 1;
+            const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, startLap, endLap, displayTimeZone, daylightStatus);
             tbody.appendChild(row);
+
+            // Increment lap counter for next stint
+            currentLap += stintLaps;
 
             // Add pit stop time for next stint (except last stint)
             if (i < this.totalStints - 1) {
