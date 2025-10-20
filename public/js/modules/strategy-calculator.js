@@ -223,6 +223,17 @@ export class StrategyCalculator {
     }
 
     /**
+     * Format pit stop time in MM:SS format
+     * @param {number} seconds - Pit stop duration in seconds
+     * @returns {string} Formatted pit stop time (MM:SS)
+     */
+    formatPitStopTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = (seconds % 60).toString().padStart(2, '0');
+        return `${minutes.toString().padStart(2, '0')}:${secs}`;
+    }
+
+    /**
      * Generate and populate stint breakdown table
      * @param {number} avgLapTimeInSeconds - Average lap time
      */
@@ -342,7 +353,7 @@ export class StrategyCalculator {
             <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs">${this.formatTimeForDisplay(startTime, timeZone)}</td>
             <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs">${this.formatTimeForDisplay(endTime, timeZone)}</td>
             <td class="py-1 px-2 text-center text-neutral-500 road-rage-font text-xs" colspan="2">PIT</td>
-            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs">${this.pitStopTime > 60 ? `01:30` : `${this.pitStopTime} sec`}</td>
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs">${this.formatPitStopTime(this.pitStopTime)}</td>
             <td class="w-2 px-1"></td>
             <td class="py-1 px-2 text-center text-neutral-600 text-xs">-</td>
             <td class="py-1 px-2 text-center text-neutral-600 text-xs">-</td>
@@ -441,6 +452,7 @@ export class StrategyCalculator {
      * @returns {Date} Race start time
      */
     getRaceStartTime() {
+        // First try to get from race-start-date/time inputs (Page 2 populated fields)
         const dateInput = document.getElementById('race-start-date-page2');
         const timeInput = document.getElementById('race-start-time-page2');
         
@@ -448,6 +460,19 @@ export class StrategyCalculator {
             return new Date(`${dateInput.value}T${timeInput.value}`);
         }
         
+        // Fallback: Try to get from race-datetime data attributes (from Page 1 race information)
+        const raceDatetimeEl = document.getElementById('race-datetime');
+        if (raceDatetimeEl) {
+            const raceDate = raceDatetimeEl.dataset.raceDate;
+            const raceTime = raceDatetimeEl.dataset.raceTime;
+            
+            if (raceDate && raceTime) {
+                console.log(`📅 Using race start time from data attributes: ${raceDate}T${raceTime}`);
+                return new Date(`${raceDate}T${raceTime}`);
+            }
+        }
+        
+        console.warn('⚠️ No race start time found, using current time');
         return new Date(); // Fallback to current time
     }
 

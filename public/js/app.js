@@ -313,6 +313,17 @@ class RadianPlannerApp {
                     minute: '2-digit',
                     timeZoneName: 'short'
                 });
+                
+                // Store date and time as data attributes for Page 2 StrategyCalculator
+                const dateStr = raceDateTime.getFullYear() + '-' + 
+                    String(raceDateTime.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(raceDateTime.getDate()).padStart(2, '0');
+                const timeStr = String(raceDateTime.getHours()).padStart(2, '0') + ':' + 
+                    String(raceDateTime.getMinutes()).padStart(2, '0');
+                
+                raceDatetimeElement.dataset.raceDate = dateStr;
+                raceDatetimeElement.dataset.raceTime = timeStr;
+                console.log(`📅 Stored race start time data: ${dateStr} ${timeStr}`);
             }
             
             // Populate event datetime (session_date)
@@ -1187,6 +1198,12 @@ class RadianPlannerApp {
                     }
                     this.setLoading(false);
                     return;
+                }
+
+                // Pass selected drivers to strategy calculator
+                if (this.strategyCalculator && this.selectedDrivers) {
+                    this.strategyCalculator.setSelectedDrivers(this.selectedDrivers);
+                    console.log('🚗 Passed drivers to strategy calculator:', this.selectedDrivers);
                 }
 
                 const formData = this.collectFormData();
