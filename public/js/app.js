@@ -1265,6 +1265,64 @@ class RadianPlannerApp {
      * Setup adjustment sliders for Page 2 strategy adjustments
      * Displays original and adjusted values, updates when sliders move
      */
+    /**
+     * Update adjustment display values (called when form data changes)
+     * Separate from setupAdjustmentSliders to avoid duplicate listeners
+     */
+    updateAdjustmentDisplayOnly() {
+        const fuelSlider = document.getElementById('fuel-slider');
+        const lapTimeSlider = document.getElementById('lap-time-slider');
+        const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value) || 0;
+        const lapTimeMinutes = parseInt(document.getElementById('avg-lap-time-minutes')?.value) || 0;
+        const lapTimeSeconds = parseInt(document.getElementById('avg-lap-time-seconds')?.value) || 0;
+        
+        const fuelAdjustment = parseFloat(fuelSlider?.value) || 0;
+        const lapTimeAdjustment = parseFloat(lapTimeSlider?.value) || 0;
+        
+        const effectiveFuel = fuelPerLap + fuelAdjustment;
+        const effectiveLapTime = (lapTimeMinutes * 60) + lapTimeSeconds + lapTimeAdjustment;
+        
+        const fuelOriginal = document.getElementById('fuel-original-value');
+        const lapTimeOriginal = document.getElementById('lap-time-original-value');
+        
+        if (fuelOriginal) {
+            fuelOriginal.textContent = fuelPerLap.toFixed(2) + ' L';
+        }
+        if (lapTimeOriginal) {
+            const origMinutes = Math.floor((lapTimeMinutes * 60 + lapTimeSeconds) / 60);
+            const origSeconds = (lapTimeMinutes * 60 + lapTimeSeconds) % 60;
+            lapTimeOriginal.textContent = `${origMinutes}:${String(Math.floor(origSeconds)).padStart(2, '0')}.000`;
+        }
+        
+        const fuelAdjusted = document.getElementById('fuel-adjusted-value');
+        const lapTimeAdjusted = document.getElementById('lap-time-adjusted-value');
+        
+        if (fuelAdjusted) {
+            fuelAdjusted.textContent = effectiveFuel.toFixed(2) + ' L';
+            if (fuelAdjustment !== 0) {
+                fuelAdjusted.classList.add('text-purple-400');
+                fuelAdjusted.classList.remove('text-neutral-200');
+            } else {
+                fuelAdjusted.classList.remove('text-purple-400');
+                fuelAdjusted.classList.add('text-neutral-200');
+            }
+        }
+        if (lapTimeAdjusted) {
+            const minutes = Math.floor(effectiveLapTime / 60);
+            const seconds = effectiveLapTime % 60;
+            const wholeSeconds = Math.floor(seconds);
+            const milliseconds = Math.round((seconds - wholeSeconds) * 1000);
+            lapTimeAdjusted.textContent = `${minutes}:${String(wholeSeconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+            if (lapTimeAdjustment !== 0) {
+                lapTimeAdjusted.classList.add('text-purple-400');
+                lapTimeAdjusted.classList.remove('text-neutral-200');
+            } else {
+                lapTimeAdjusted.classList.remove('text-purple-400');
+                lapTimeAdjusted.classList.add('text-neutral-200');
+            }
+        }
+    }
+
     setupAdjustmentSliders() {
         const fuelSlider = document.getElementById('fuel-slider');
         const lapTimeSlider = document.getElementById('lap-time-slider');
@@ -2220,9 +2278,9 @@ class RadianPlannerApp {
             }
             
             // Update the adjustment display now that values are populated
-            // Re-trigger the slider setup to update displays
-            if (window.radianPlanner && window.radianPlanner.setupAdjustmentSliders) {
-                window.radianPlanner.setupAdjustmentSliders();
+            // Use the display-only function to avoid duplicate event listeners
+            if (window.radianPlanner && window.radianPlanner.updateAdjustmentDisplayOnly) {
+                window.radianPlanner.updateAdjustmentDisplayOnly();
             }
         } catch (e) {
             console.warn('Could not prefill race inputs from Garage61 adjusted values', e);
