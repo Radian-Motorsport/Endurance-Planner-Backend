@@ -253,8 +253,9 @@ export class StrategyCalculator {
             // Calculate daylight status
             const daylightStatus = this.getDaylightStatus(stintStartTime, displayTimeZone, daylightCalculationMode, selectedDriverName);
 
-            // Create table row
-            const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, displayTimeZone, daylightStatus);
+                const startLap = currentLap; // Added startLap
+                const endLap = startLap + stintLaps - 1; // Added endLap
+                const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, startLap, endLap, displayTimeZone, daylightStatus);
             tbody.appendChild(row);
 
             // Add pit stop time for next stint (except last stint)
@@ -275,27 +276,30 @@ export class StrategyCalculator {
      * @param {string} daylightStatus - Daylight status
      * @returns {HTMLElement} Table row element
      */
-    createStintRow(stintNumber, driverName, stintLaps, startTime, endTime, timeZone, daylightStatus) {
+    createStintRow(stintNumber, driverName, stintLaps, startTime, endTime, startLap, endLap, timeZone, daylightStatus) {
         const row = document.createElement('tr');
         row.className = 'bg-neutral-750 hover:bg-neutral-700 transition-colors';
-        
+
         row.innerHTML = `
-            <td class="py-3 px-6 text-center font-medium text-neutral-200">${stintNumber}</td>
-            <td class="py-3 px-6 text-neutral-200 driver-cell">
+            <td class="py-3 px-3 text-center text-neutral-200 font-mono">${this.formatTimeForDisplay(startTime, timeZone)}</td>
+            <td class="py-3 px-3 text-center text-neutral-200 font-mono">${this.formatTimeForDisplay(endTime, timeZone)}</td>
+            <td class="py-3 px-3 text-center text-neutral-200 font-mono">${startLap}</td>
+            <td class="py-3 px-3 text-center text-neutral-200 font-mono">${endLap}</td>
+            <td class="py-3 px-3 text-center text-blue-400 font-mono">${stintLaps}</td>
+            <td class="w-2 px-1">
+                <div class="driver-color-strip" data-stint="${stintNumber - 1}" style="width:12px;height:40px;margin:0 auto;background:linear-gradient(to bottom, rgba(168,85,247,1), rgba(251,191,36,1));"></div>
+            </td>
+            <td class="py-3 px-3 text-center">
                 <select class="driver-select-stint bg-neutral-800 text-neutral-200 p-2 rounded w-full border border-neutral-600" 
                         data-stint="${stintNumber - 1}">
                     ${this.generateDriverOptions(driverName)}
                 </select>
             </td>
-            <td class="py-3 px-6 text-center text-blue-400 font-mono">${stintLaps}</td>
-            <td class="py-3 px-6 text-center text-neutral-300 font-mono">
-                ${this.formatTimeForDisplay(startTime, timeZone)}
-            </td>
-            <td class="py-3 px-6 text-center text-neutral-300 font-mono">
-                ${this.formatTimeForDisplay(endTime, timeZone)}
-            </td>
-            <td class="py-3 px-6 text-center ${this.getDaylightStatusClass(daylightStatus)}">
-                ${daylightStatus}
+            <td class="py-3 px-3 text-center">
+                <select class="backup-select-stint bg-neutral-800 text-neutral-200 p-2 rounded w-full border border-neutral-600" 
+                        data-stint="${stintNumber - 1}">
+                    <option value="">Select...</option>
+                </select>
             </td>
         `;
 
@@ -489,6 +493,23 @@ export class StrategyCalculator {
     }
 
     /**
+     * Populate driver and backup select elements for a given stint index
+     * Compatible with legacy populateStintDrivers behavior
+     */
+    populateStintDrivers(i, selectedDrivers) {
+        const driverSel = document.querySelector(`#stint-table-body select.driver-select-stint[data-stint\="${i}"]`);
+        const backupSel = document.querySelector(`#stint-table-body select.backup-select-stint[data-stint\="${i}"]`);
+        const makeOpts = (sel) => {
+            if (!sel) return;
+            sel.innerHTML = '';
+            const empty = document.createElement('option'); empty.value=''; empty.textContent='Select...'; sel.appendChild(empty);
+            selectedDrivers.forEach(d => { const o=document.createElement('option'); o.value=d.name; o.textContent=d.name; sel.appendChild(o); });
+        };
+        makeOpts(driverSel);
+        makeOpts(backupSel);
+    }
+
+    /**
      * Get current calculation state
      * @returns {Object} Current state
      */
@@ -587,11 +608,17 @@ export class StrategyCalculator {
             const stintStartTime = new Date(currentTime);
             const stintEndTime = new Date(currentTime.getTime() + stintDuration);
 
-            // Update time cells (4th and 5th columns)
+            // Update time cells (now columns 0 and 1)
             const cells = row.querySelectorAll('td');
-            if (cells.length >= 6) {
-                cells[3].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
-                cells[4].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
+            if (cells.length >= 8) {
+                cells[0].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
+                cells[1].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
+                // startLap and endLap are columns 2 and 3 - recalc
+                const startLap = (index * this.lapsPerStint) + 1;
+                const endLap = startLap + stintLaps - 1;
+                cells[2].textContent = startLap;
+                cells[3].textContent = endLap;
+                cells[4].textContent = stintLaps;
             }
 
             // Move to next stint start time
