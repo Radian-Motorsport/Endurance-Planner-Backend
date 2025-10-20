@@ -333,7 +333,17 @@ class RadianPlannerApp {
             // Populate session length
             const sessionLengthElement = document.getElementById('session-length');
             if (sessionLengthElement && sessionDetails.session_length) {
+                // Display the human-readable text
                 sessionLengthElement.textContent = `${sessionDetails.session_length} minutes`;
+                // Also export numeric values to dataset so other pages/modules can consume them
+                try {
+                    const totalMinutes = parseInt(sessionDetails.session_length, 10) || 0;
+                    sessionLengthElement.dataset.sessionLength = totalMinutes.toString();
+                    sessionLengthElement.dataset.sessionMinutes = (totalMinutes % 60).toString();
+                    sessionLengthElement.dataset.sessionHours = Math.floor(totalMinutes / 60).toString();
+                } catch (e) {
+                    // ignore dataset write failures
+                }
             }
             
             // Fetch and populate practice/qualifying lengths
@@ -1739,12 +1749,34 @@ class RadianPlannerApp {
             const raceDurationMinutesEl = document.getElementById('race-duration-minutes');
             
             // Convert to total minutes and set display
-            const totalMinutes = (parseInt(sessionHours || 0, 10) * 60) + (parseInt(sessionMinutes || 0, 10));
+            // NOTE: some data sources populate data-session-hours with minutes (e.g. 1440)
+            // so be defensive: if hours field looks like minutes (>=24) and minutes is empty,
+            // treat that value as total minutes.
+            const rawHours = parseInt(sessionHours || 0, 10);
+            const rawMinutes = parseInt(sessionMinutes || 0, 10);
+            let totalMinutes = 0;
+
+            if (rawMinutes === 0 && rawHours > 23) {
+                // hours field actually contains minutes
+                totalMinutes = rawHours;
+            } else {
+                totalMinutes = (rawHours * 60) + rawMinutes;
+            }
+
             const raceDurationDisplay = document.getElementById('race-duration-minutes-display');
             if (raceDurationDisplay) raceDurationDisplay.textContent = totalMinutes ? `${totalMinutes} minutes` : '-';
-            // Keep hidden inputs for compatibility
-            if (raceDurationHoursEl) raceDurationHoursEl.value = sessionHours || 0;
-            if (raceDurationMinutesEl) raceDurationMinutesEl.value = sessionMinutes || 0;
+
+            // Keep hidden inputs for compatibility and also normalize dataset values
+            if (raceDurationHoursEl) raceDurationHoursEl.value = Math.floor(totalMinutes / 60) || 0;
+            if (raceDurationMinutesEl) raceDurationMinutesEl.value = totalMinutes % 60 || 0;
+            try {
+                if (sessionLengthEl) {
+                    sessionLengthEl.dataset.sessionMinutes = (totalMinutes % 60).toString();
+                    sessionLengthEl.dataset.sessionHours = Math.floor(totalMinutes / 60).toString();
+                }
+            } catch (e) {
+                // ignore dataset write failures
+            }
         }
 
         // 2. Extract and populate race start time from race datetime
