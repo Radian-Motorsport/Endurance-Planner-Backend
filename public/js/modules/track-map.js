@@ -125,6 +125,18 @@ export class TrackMapComponent {
         
         const layerNames = ['background', 'active', 'pitroad', 'start-finish', 'turns'];
         
+        // Use event delegation on the controls container for better reliability
+        const controlsContainer = document.getElementById(`${this.containerId}-controls`);
+        if (controlsContainer) {
+            controlsContainer.addEventListener('change', (e) => {
+                if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
+                    const layerName = e.target.id.replace('layer-', '');
+                    this.toggleLayer(layerName, e.target.checked);
+                }
+            });
+        }
+        
+        // Also set up direct listeners for each checkbox as fallback
         layerNames.forEach(layerName => {
             const checkbox = document.getElementById(`layer-${layerName}`);
             if (checkbox) {
@@ -154,6 +166,9 @@ export class TrackMapComponent {
             // Show the map
             this.loadingElement.classList.add('hidden');
             this.svgContainer.classList.remove('hidden');
+            
+            // Re-attach event listeners after map loads
+            this.setupEventListeners();
             
             console.log('✅ Track map loaded successfully');
             

@@ -231,3 +231,30 @@ select {
 .toggle-switch.active #time-toggle-slider {
     transform: translateX(16px);
 }
+
+/* Collapsible Container Styles */
+.weather-collapsible,
+.track-map-collapsible {
+    max-height: 600px;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+    padding: 1rem;
+}
+
+.weather-collapsible.collapsed,
+.track-map-collapsible.collapsed {
+    max-height: 0;
+    padding: 0 1rem;
+    transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+}
+
+/* Toggle Icon Rotation */
+.weather-toggle-icon,
+.track-map-toggle-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+#weather-display-page2.collapsed .weather-toggle-icon,
+#track-map-container-page2.collapsed .track-map-toggle-icon {
+    transform: rotate(-90deg);
+}

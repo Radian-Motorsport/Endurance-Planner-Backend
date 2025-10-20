@@ -476,6 +476,9 @@ export class StrategyCalculator {
         if (page3Button) {
             page3Button.classList.remove('hidden');
         }
+
+        // Set up collapsible handlers for weather and track map
+        this.setupCollapsibleHandlers();
     }
 
     /**
@@ -667,14 +670,15 @@ export class StrategyCalculator {
 
         try {
             const container = document.getElementById('weather-display-page2');
-            if (!container) {
+            const contentDiv = document.getElementById('weather-content');
+            if (!container || !contentDiv) {
                 console.warn('⚠️ Weather container not found on Page 2');
                 return;
             }
 
-            // Initialize weather component if not already done
+            // Initialize weather component using the content div
             if (!this.weatherComponent) {
-                this.weatherComponent = new WeatherComponent('weather-display-page2');
+                this.weatherComponent = new WeatherComponent('weather-content');
             }
 
             // Fetch weather data for the event
@@ -708,14 +712,15 @@ export class StrategyCalculator {
 
         try {
             const container = document.getElementById('track-map-container-page2');
-            if (!container) {
+            const contentDiv = document.getElementById('track-map-content');
+            if (!container || !contentDiv) {
                 console.warn('⚠️ Track map container not found on Page 2');
                 return;
             }
 
-            // Initialize track map component if not already done
+            // Initialize track map component using the content div
             if (!this.trackMapComponent) {
-                this.trackMapComponent = new TrackMapComponent('track-map-container-page2');
+                this.trackMapComponent = new TrackMapComponent('track-map-content');
             }
 
             // Load track map from API
@@ -725,6 +730,32 @@ export class StrategyCalculator {
             console.log('✅ Track map component loaded (hidden until table displays)');
         } catch (error) {
             console.error('❌ Failed to load track map component:', error);
+        }
+    }
+
+    /**
+     * Set up collapsible toggle handlers for weather and track map
+     * @private
+     */
+    setupCollapsibleHandlers() {
+        // Weather toggle button
+        const weatherToggleBtn = document.getElementById('weather-toggle-btn');
+        const weatherContainer = document.getElementById('weather-display-page2');
+        if (weatherToggleBtn && weatherContainer) {
+            weatherToggleBtn.addEventListener('click', () => {
+                weatherContainer.classList.toggle('collapsed');
+                console.log('🔄 Weather container toggled');
+            });
+        }
+
+        // Track map toggle button
+        const trackMapToggleBtn = document.getElementById('track-map-toggle-btn');
+        const trackMapContainer = document.getElementById('track-map-container-page2');
+        if (trackMapToggleBtn && trackMapContainer) {
+            trackMapToggleBtn.addEventListener('click', () => {
+                trackMapContainer.classList.toggle('collapsed');
+                console.log('🔄 Track map container toggled');
+            });
         }
     }
 
