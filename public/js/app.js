@@ -1188,6 +1188,9 @@ class RadianPlannerApp {
             desktopModeBtn.addEventListener('click', () => this.toggleDesktopMode());
         }
 
+        // Setup Adjustment Sliders (Page 2)
+        this.setupAdjustmentSliders();
+
         // Setup additional UI event listeners (but not driver events which are already set up above)
         // this.uiManager.setupEventListeners(); // REMOVED - causing duplicate event listeners
     }
@@ -1256,6 +1259,129 @@ class RadianPlannerApp {
         } finally {
             this.setLoading(false);
         }
+    }
+
+    /**
+     * Setup adjustment sliders for Page 2 strategy adjustments
+     * Displays original and adjusted values, updates when sliders move
+     */
+    setupAdjustmentSliders() {
+        const fuelSlider = document.getElementById('fuel-slider');
+        const lapTimeSlider = document.getElementById('lap-time-slider');
+
+        // Function to update both original and adjusted displays
+        const updateAdjustmentDisplay = () => {
+            // Get base values from form (original Garage61 data)
+            const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value) || 0;
+            const lapTimeMinutes = parseInt(document.getElementById('avg-lap-time-minutes')?.value) || 0;
+            const lapTimeSeconds = parseInt(document.getElementById('avg-lap-time-seconds')?.value) || 0;
+            
+            // Get slider adjustments
+            const fuelAdjustment = parseFloat(fuelSlider?.value) || 0;
+            const lapTimeAdjustment = parseFloat(lapTimeSlider?.value) || 0;
+            
+            // Calculate effective values
+            const effectiveFuel = fuelPerLap + fuelAdjustment;
+            const effectiveLapTime = (lapTimeMinutes * 60) + lapTimeSeconds + lapTimeAdjustment;
+            
+            // Update original value displays
+            const fuelOriginal = document.getElementById('fuel-original-value');
+            const lapTimeOriginal = document.getElementById('lap-time-original-value');
+            
+            if (fuelOriginal) {
+                fuelOriginal.textContent = fuelPerLap.toFixed(2) + ' L';
+            }
+            if (lapTimeOriginal) {
+                const origMinutes = Math.floor((lapTimeMinutes * 60 + lapTimeSeconds) / 60);
+                const origSeconds = (lapTimeMinutes * 60 + lapTimeSeconds) % 60;
+                lapTimeOriginal.textContent = `${origMinutes}:${String(origSeconds).padStart(2, '0')}`;
+            }
+            
+            // Update adjusted value displays with color change (purple when adjusted)
+            const fuelAdjusted = document.getElementById('fuel-adjusted-value');
+            const lapTimeAdjusted = document.getElementById('lap-time-adjusted-value');
+            
+            if (fuelAdjusted) {
+                fuelAdjusted.textContent = effectiveFuel.toFixed(2) + ' L';
+                // Change to purple if adjustment is not 0
+                if (fuelAdjustment !== 0) {
+                    fuelAdjusted.classList.add('text-purple-400');
+                    fuelAdjusted.classList.remove('text-neutral-200');
+                } else {
+                    fuelAdjusted.classList.remove('text-purple-400');
+                    fuelAdjusted.classList.add('text-neutral-200');
+                }
+            }
+            if (lapTimeAdjusted) {
+                const minutes = Math.floor(effectiveLapTime / 60);
+                const seconds = (effectiveLapTime % 60).toFixed(0);
+                lapTimeAdjusted.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
+                // Change to purple if adjustment is not 0
+                if (lapTimeAdjustment !== 0) {
+                    lapTimeAdjusted.classList.add('text-purple-400');
+                    lapTimeAdjusted.classList.remove('text-neutral-200');
+                } else {
+                    lapTimeAdjusted.classList.remove('text-purple-400');
+                    lapTimeAdjusted.classList.add('text-neutral-200');
+                }
+            }
+        };
+
+        // Initial display update
+        updateAdjustmentDisplay();
+
+        // Fuel slider listeners
+        if (fuelSlider) {
+            fuelSlider.addEventListener('input', () => {
+                document.getElementById('fuel-slider-value').textContent = parseFloat(fuelSlider.value).toFixed(2);
+                updateAdjustmentDisplay();
+                // Trigger strategy recalculation
+                if (this.strategyCalculator) {
+                    this.strategyCalculator.recalculateWithAdjustments();
+                }
+            });
+        }
+
+        // Lap time slider listeners
+        if (lapTimeSlider) {
+            lapTimeSlider.addEventListener('input', () => {
+                document.getElementById('lap-time-slider-value').textContent = parseFloat(lapTimeSlider.value).toFixed(2);
+                updateAdjustmentDisplay();
+                // Trigger strategy recalculation
+                if (this.strategyCalculator) {
+                    this.strategyCalculator.recalculateWithAdjustments();
+                }
+            });
+        }
+
+        // Handle +/- buttons for adjustment sliders
+        const adjustmentButtons = document.querySelectorAll('button[data-adjust]');
+        adjustmentButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const adjustType = button.dataset.adjust;
+                const adjustValue = parseFloat(button.dataset.value);
+                
+                if (adjustType === 'fuel') {
+                    const slider = document.getElementById('fuel-slider');
+                    const newValue = Math.max(-2.0, Math.min(2.0, parseFloat(slider.value) + adjustValue));
+                    slider.value = newValue;
+                    document.getElementById('fuel-slider-value').textContent = newValue.toFixed(2);
+                    updateAdjustmentDisplay();
+                    if (this.strategyCalculator) {
+                        this.strategyCalculator.recalculateWithAdjustments();
+                    }
+                } else if (adjustType === 'lapTime') {
+                    const slider = document.getElementById('lap-time-slider');
+                    const newValue = Math.max(-3, Math.min(3, parseFloat(slider.value) + adjustValue));
+                    slider.value = newValue;
+                    document.getElementById('lap-time-slider-value').textContent = newValue.toFixed(2);
+                    updateAdjustmentDisplay();
+                    if (this.strategyCalculator) {
+                        this.strategyCalculator.recalculateWithAdjustments();
+                    }
+                }
+            });
+        });
     }
 
     collectFormData() {
@@ -2092,8 +2218,9 @@ class RadianPlannerApp {
             }
             
             // Update the adjustment display now that values are populated
-            if (window.updateAdjustmentDisplay) {
-                window.updateAdjustmentDisplay();
+            // Re-trigger the slider setup to update displays
+            if (window.radianPlanner && window.radianPlanner.setupAdjustmentSliders) {
+                window.radianPlanner.setupAdjustmentSliders();
             }
         } catch (e) {
             console.warn('Could not prefill race inputs from Garage61 adjusted values', e);
