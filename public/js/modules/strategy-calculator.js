@@ -509,6 +509,19 @@ export class StrategyCalculator {
 
         // Set up collapsible handlers for weather and track map
         this.setupCollapsibleHandlers();
+
+        // Force chart resize after containers are visible
+        // Use setTimeout to ensure DOM has updated
+        setTimeout(() => {
+            if (this.weatherComponent && this.weatherComponent.resize) {
+                this.weatherComponent.resize();
+                console.log('Resized weather charts');
+            }
+            if (this.trackMapComponent && this.trackMapComponent.resize) {
+                // Track map may not have a resize method, but try anyway
+                console.log('Track map component loaded');
+            }
+        }, 100);
     }
 
     /**
