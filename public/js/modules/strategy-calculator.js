@@ -244,7 +244,9 @@ export class StrategyCalculator {
         tbody.innerHTML = '';
 
         // Get race start time and timezone settings
-        const raceStartTime = this.getRaceStartTime();
+        // In LOCAL TIME mode: use event time (Europe/London) as base
+        // In RACE TIME mode: use race time as base
+        const raceStartTime = this.isLocalTimeMode ? this.getEventStartTime() : this.getRaceStartTime();
         const displayTimeZone = this.getDisplayTimeZoneForToggle();
         const daylightCalculationMode = this.getDaylightCalculationMode();
 
@@ -474,6 +476,28 @@ export class StrategyCalculator {
         
         console.warn('⚠️ No race start time found, using current time');
         return new Date(); // Fallback to current time
+    }
+
+    /**
+     * Get event start time for local time mode (always Europe/London)
+     * @returns {Date} Event start time in London time
+     */
+    getEventStartTime() {
+        // Get event time from Page 1 event-datetime data attributes
+        const eventDatetimeEl = document.getElementById('event-datetime');
+        if (eventDatetimeEl) {
+            const eventDate = eventDatetimeEl.dataset.eventDate;
+            const eventTime = eventDatetimeEl.dataset.eventTime;
+            
+            if (eventDate && eventTime) {
+                console.log(`🌍 Using event start time (London): ${eventDate}T${eventTime}`);
+                return new Date(`${eventDate}T${eventTime}`);
+            }
+        }
+        
+        // Fallback: Use race start time if event time not available
+        console.warn('⚠️ No event start time found, falling back to race start time');
+        return this.getRaceStartTime();
     }
 
     /**
@@ -751,7 +775,9 @@ export class StrategyCalculator {
         if (!tbody) return;
 
         const rows = tbody.querySelectorAll('tr[data-role="stint"]');
-        const raceStartTime = this.getRaceStartTime();
+        // In LOCAL TIME mode: use event time (Europe/London) as base
+        // In RACE TIME mode: use race time as base
+        const raceStartTime = this.isLocalTimeMode ? this.getEventStartTime() : this.getRaceStartTime();
         const displayTimeZone = this.getDisplayTimeZoneForToggle();
         
         let currentTime = new Date(raceStartTime);

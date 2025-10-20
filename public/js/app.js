@@ -339,6 +339,19 @@ class RadianPlannerApp {
                     minute: '2-digit',
                     timeZoneName: 'short'
                 });
+                
+                // Store date and time as data attributes for Page 2 Local Time calculations
+                // Event time is the base time in Europe/London that gets converted to driver timezones
+                const eventDate = eventDateTime.getFullYear() + '-' + 
+                    String(eventDateTime.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(eventDateTime.getDate()).padStart(2, '0');
+                const eventTime = String(eventDateTime.getHours()).padStart(2, '0') + ':' + 
+                    String(eventDateTime.getMinutes()).padStart(2, '0');
+                
+                eventDatetimeElement.dataset.eventDate = eventDate;
+                eventDatetimeElement.dataset.eventTime = eventTime;
+                eventDatetimeElement.dataset.eventTimezone = 'Europe/London'; // Event time is always in London time
+                console.log(`📅 Stored event start time data (London): ${eventDate} ${eventTime}`);
             }
             
             // Populate session length
