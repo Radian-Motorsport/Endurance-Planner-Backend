@@ -2016,7 +2016,7 @@ class RadianPlannerApp {
             const timeFormatter = new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false });
 
             if (sessionDateEl) sessionDateEl.textContent = dateFormatter.format(dt);
-            if (sessionTimeEl) sessionTimeEl.textContent = timeFormatter.format(dt) + ` (${tz})`;
+            if (sessionTimeEl) sessionTimeEl.textContent = timeFormatter.format(dt);
             if (timezoneEl) timezoneEl.textContent = tz;
         } catch (e) {
             // Fallback to UTC/local formatting
