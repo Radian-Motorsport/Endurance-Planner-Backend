@@ -1407,31 +1407,31 @@ class RadianPlannerApp {
             const iRating = driver.sports_car_irating || 'N/A';
             
             // Get color for group name and clean display name
-            let srColorClass = '';
+            let groupColorClass = '';
             const groupLetter = groupName.replace(/^Class\s*/i, '').trim().toUpperCase();
             const displayGroupName = groupLetter; // Remove "Class" from display
             
             // Determine color based on safety rating class
             switch(groupLetter) {
                 case 'A':
-                    srColorClass = 'bg-blue-400 text-blue-900';
+                    groupColorClass = 'bg-blue-400 text-blue-900';
                     break;
                 case 'B':
-                    srColorClass = 'bg-green-400 text-green-900';
+                    groupColorClass = 'bg-green-400 text-green-900';
                     break;
                 case 'C':
-                    srColorClass = 'bg-yellow-400 text-yellow-900';
+                    groupColorClass = 'bg-yellow-400 text-yellow-900';
                     break;
                 case 'D':
-                    srColorClass = 'bg-red-400 text-red-900';
+                    groupColorClass = 'bg-red-400 text-red-900';
                     break;
                 default:
-                    srColorClass = 'bg-neutral-400 text-neutral-900';
+                    groupColorClass = 'bg-neutral-400 text-neutral-900';
             }
             
             li.innerHTML = `
                 <div class="flex items-center">
-                    <div class="flex items-center justify-between w-32 px-3 py-2 rounded-full ${srColorClass}">
+                    <div class="flex items-center justify-between w-32 px-3 py-2 rounded-full ${groupColorClass}">
                         <span class="font-bold text-xs">${displayGroupName}</span>
                         <span class="mx-1">${safetyRating}</span>
                         <span class="font-bold">${iRating}</span>
