@@ -328,14 +328,14 @@ export class StrategyCalculator {
             <td class="w-2 px-1">
                 <div class="driver-color-strip" data-stint="${stintNumber - 1}" style="width:12px;height:40px;margin:0 auto;background:linear-gradient(to bottom, rgba(168,85,247,1), rgba(251,191,36,1));"></div>
             </td>
-            <td class="py-2 px-3 text-center">
-                <select class="driver-select-stint bg-neutral-700 text-neutral-200 p-2 rounded-md w-full border border-neutral-600" 
+            <td class="py-2 px-2 text-center">
+                <select class="driver-select-stint bg-neutral-700 text-neutral-200 p-1 rounded-md w-1/2 border border-neutral-600 text-xs font-mono" 
                         data-stint="${stintNumber - 1}">
                     ${this.generateDriverOptions(driverName)}
                 </select>
             </td>
-            <td class="py-2 px-3 text-center">
-                <select class="backup-select-stint bg-neutral-700 text-neutral-200 p-2 rounded-md w-full border border-neutral-600" 
+            <td class="py-2 px-2 text-center">
+                <select class="backup-select-stint bg-neutral-700 text-neutral-200 p-1 rounded-md w-1/2 border border-neutral-600 text-xs font-mono" 
                         data-stint="${stintNumber - 1}">
                     <option value="">Select...</option>
                 </select>
