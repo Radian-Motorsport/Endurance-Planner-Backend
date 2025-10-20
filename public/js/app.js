@@ -27,6 +27,7 @@ class RadianPlannerApp {
         this.selectedSeries = null;
         
         this.disposables = [];
+    this._isCalculating = false; // guard against re-entrant calculate calls
         
         // Note: init() will be called manually after DOM is loaded
     }
@@ -1126,10 +1127,47 @@ class RadianPlannerApp {
             strategyForm.addEventListener('submit', (e) => this.handleStrategySubmission(e));
         }
 
-        // Calculate button
-        const calculateBtn = document.getElementById('calculateBtn');
-        if (calculateBtn) {
-            calculateBtn.addEventListener('click', () => this.calculateStrategy());
+        // Calculate button - support page2 button id and legacy id
+        const calcButton = document.getElementById('calculate-page2-button') || document.getElementById('calculateBtn');
+        if (calcButton) {
+            // avoid attaching multiple handlers
+            if (!this._calculateHandler) {
+                this._calculateHandler = (e) => {
+                    // Quick validation to prevent calling calculation with missing inputs
+                    const raceDurHours = parseInt(document.getElementById('race-duration-hours')?.value) || 0;
+                    const raceDurMins = parseInt(document.getElementById('race-duration-minutes')?.value) || 0;
+                    const totalRaceMinutes = (raceDurHours * 60) + raceDurMins;
+
+                    const avgLapM = parseInt(document.getElementById('avg-lap-time-minutes')?.value);
+                    const avgLapS = parseInt(document.getElementById('avg-lap-time-seconds')?.value);
+                    const avgLapSecs = (isNaN(avgLapM) ? 0 : avgLapM * 60) + (isNaN(avgLapS) ? 0 : avgLapS);
+
+                    const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value);
+                    const tankCapacity = parseFloat(document.getElementById('tank-capacity-display-input')?.value);
+                    const driversCount = Array.isArray(this.selectedDrivers) ? this.selectedDrivers.length : 0;
+
+                    const missing = [];
+                    if (!totalRaceMinutes || totalRaceMinutes <= 0) missing.push('Race duration');
+                    if (!avgLapSecs || avgLapSecs <= 0) missing.push('Avg. lap time');
+                    if (isNaN(fuelPerLap) || fuelPerLap <= 0) missing.push('Fuel per lap');
+                    if (isNaN(tankCapacity) || tankCapacity <= 0) missing.push('Tank capacity');
+                    if (driversCount === 0) missing.push('At least one driver');
+
+                    if (missing.length > 0) {
+                        const message = 'Please fill in required race inputs: ' + missing.join(', ');
+                        alert(message);
+                        if (this.uiManager && typeof this.uiManager.showNotification === 'function') {
+                            this.uiManager.showNotification(message, 'error');
+                        }
+                        return;
+                    }
+
+                    // Prevent double execution
+                    if (this._isCalculating) return;
+                    this.calculateStrategy();
+                };
+                calcButton.addEventListener('click', this._calculateHandler);
+            }
         }
 
         // Desktop mode toggle
@@ -1143,52 +1181,57 @@ class RadianPlannerApp {
     }
 
     async calculateStrategy() {
+        if (this._isCalculating) {
+            console.log('Calculate already running, ignoring duplicate call');
+            return;
+        }
+
+        this._isCalculating = true;
         try {
             this.setLoading(true);
-            
-                this.setLoading(true);
 
-                // Validate key Page 2 inputs to avoid crashes when fields are empty.
-                // Required: race duration, avg lap time > 0, fuel per lap > 0, tank capacity > 0, at least one driver
-                const raceDurHours = parseInt(document.getElementById('race-duration-hours')?.value) || 0;
-                const raceDurMins = parseInt(document.getElementById('race-duration-minutes')?.value) || 0;
-                const totalRaceMinutes = (raceDurHours * 60) + raceDurMins;
+            // Validate key Page 2 inputs to avoid crashes when fields are empty.
+            const raceDurHours = parseInt(document.getElementById('race-duration-hours')?.value) || 0;
+            const raceDurMins = parseInt(document.getElementById('race-duration-minutes')?.value) || 0;
+            const totalRaceMinutes = (raceDurHours * 60) + raceDurMins;
 
-                const avgLapM = parseInt(document.getElementById('avg-lap-time-minutes')?.value);
-                const avgLapS = parseInt(document.getElementById('avg-lap-time-seconds')?.value);
-                const avgLapSecs = (isNaN(avgLapM) ? 0 : avgLapM * 60) + (isNaN(avgLapS) ? 0 : avgLapS);
+            const avgLapM = parseInt(document.getElementById('avg-lap-time-minutes')?.value);
+            const avgLapS = parseInt(document.getElementById('avg-lap-time-seconds')?.value);
+            const avgLapSecs = (isNaN(avgLapM) ? 0 : avgLapM * 60) + (isNaN(avgLapS) ? 0 : avgLapS);
 
-                const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value);
-                const tankCapacity = parseFloat(document.getElementById('tank-capacity-display-input')?.value);
-                const driversCount = Array.isArray(this.selectedDrivers) ? this.selectedDrivers.length : 0;
+            const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value);
+            const tankCapacity = parseFloat(document.getElementById('tank-capacity-display-input')?.value);
+            const driversCount = Array.isArray(this.selectedDrivers) ? this.selectedDrivers.length : 0;
 
-                const missing = [];
-                if (!totalRaceMinutes || totalRaceMinutes <= 0) missing.push('Race duration');
-                if (!avgLapSecs || avgLapSecs <= 0) missing.push('Avg. lap time');
-                if (isNaN(fuelPerLap) || fuelPerLap <= 0) missing.push('Fuel per lap');
-                if (isNaN(tankCapacity) || tankCapacity <= 0) missing.push('Tank capacity');
-                if (driversCount === 0) missing.push('At least one driver');
+            const missing = [];
+            if (!totalRaceMinutes || totalRaceMinutes <= 0) missing.push('Race duration');
+            if (!avgLapSecs || avgLapSecs <= 0) missing.push('Avg. lap time');
+            if (isNaN(fuelPerLap) || fuelPerLap <= 0) missing.push('Fuel per lap');
+            if (isNaN(tankCapacity) || tankCapacity <= 0) missing.push('Tank capacity');
+            if (driversCount === 0) missing.push('At least one driver');
 
-                if (missing.length > 0) {
-                    const message = 'Please fill in required race inputs: ' + missing.join(', ');
-                    // Popup for immediate UX
-                    alert(message);
-                    // In-app non-blocking notification as well
-                    if (this.uiManager && typeof this.uiManager.showNotification === 'function') {
-                        this.uiManager.showNotification(message, 'error');
-                    }
-                    this.setLoading(false);
-                    return;
+            if (missing.length > 0) {
+                const message = 'Please fill in required race inputs: ' + missing.join(', ');
+                alert(message);
+                if (this.uiManager && typeof this.uiManager.showNotification === 'function') {
+                    this.uiManager.showNotification(message, 'error');
                 }
+                return;
+            }
 
-                const formData = this.collectFormData();
+            const formData = this.collectFormData();
 
-                const strategy = await this.strategyCalculator.calculateStrategy(formData);
-            this.uiManager.showNotification('Strategy calculated successfully!', 'success');
+            const strategy = await this.strategyCalculator.calculateStrategy(formData);
+            // Render results
+            this.displayStrategy(strategy);
+            if (this.uiManager && typeof this.uiManager.showNotification === 'function') {
+                this.uiManager.showNotification('Strategy calculated successfully!', 'success');
+            }
         } catch (error) {
             console.error('❌ Strategy calculation failed:', error);
-            this.uiManager.showNotification('Strategy calculation failed', 'error');
+            try { this.uiManager.showNotification('Strategy calculation failed', 'error'); } catch (e) { /* ignore */ }
         } finally {
+            this._isCalculating = false;
             this.setLoading(false);
         }
     }
