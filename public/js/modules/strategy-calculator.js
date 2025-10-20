@@ -250,6 +250,10 @@ export class StrategyCalculator {
 
         tbody.innerHTML = '';
 
+        // Load weather and track map components (keep hidden initially)
+        await this.loadWeatherComponent();
+        await this.loadTrackMapComponent();
+
         // Get race start time and timezone settings
         // In LOCAL TIME mode: use event time (Europe/London) as base
         // In RACE TIME mode: use race time as base
@@ -455,7 +459,9 @@ export class StrategyCalculator {
             'overall-summary',
             'stint-breakdown-display',
             'sliders-container',
-            'share-link-container'
+            'share-link-container',
+            'weather-display-page2',
+            'track-map-container-page2'
         ];
 
         sectionsToShow.forEach(sectionId => {
@@ -647,6 +653,79 @@ export class StrategyCalculator {
         this.trackId = trackId;
         this.eventId = eventId;
         console.log(`📍 Session metadata set: trackId=${trackId}, eventId=${eventId}`);
+    }
+
+    /**
+     * Load weather component on Page 2
+     * @private
+     */
+    async loadWeatherComponent() {
+        if (!this.eventId) {
+            console.warn('⚠️ No event ID available for weather component');
+            return;
+        }
+
+        try {
+            const container = document.getElementById('weather-display-page2');
+            if (!container) {
+                console.warn('⚠️ Weather container not found on Page 2');
+                return;
+            }
+
+            // Initialize weather component if not already done
+            if (!this.weatherComponent) {
+                this.weatherComponent = new WeatherComponent('weather-display-page2');
+            }
+
+            // Fetch weather data for the event
+            const response = await fetch(`/api/events/${this.eventId}/weather`);
+            if (!response.ok) {
+                console.log('ℹ️ No weather data available for this event');
+                return;
+            }
+
+            const eventWeather = await response.json();
+            if (eventWeather && eventWeather.weather_url) {
+                await this.weatherComponent.loadWeatherData(eventWeather.weather_url);
+                // Keep hidden until table is shown
+                container.classList.add('hidden');
+                console.log('✅ Weather component loaded (hidden until table displays)');
+            }
+        } catch (error) {
+            console.error('❌ Failed to load weather component:', error);
+        }
+    }
+
+    /**
+     * Load track map component on Page 2
+     * @private
+     */
+    async loadTrackMapComponent() {
+        if (!this.trackId) {
+            console.warn('⚠️ No track ID available for track map component');
+            return;
+        }
+
+        try {
+            const container = document.getElementById('track-map-container-page2');
+            if (!container) {
+                console.warn('⚠️ Track map container not found on Page 2');
+                return;
+            }
+
+            // Initialize track map component if not already done
+            if (!this.trackMapComponent) {
+                this.trackMapComponent = new TrackMapComponent('track-map-container-page2');
+            }
+
+            // Load track map from API
+            await this.trackMapComponent.loadTrackFromAPI(this.trackId);
+            // Keep hidden until table is shown
+            container.classList.add('hidden');
+            console.log('✅ Track map component loaded (hidden until table displays)');
+        } catch (error) {
+            console.error('❌ Failed to load track map component:', error);
+        }
     }
 
     /**
