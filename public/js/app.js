@@ -1841,19 +1841,19 @@ class RadianPlannerApp {
                     
                     switch(groupLetter) {
                         case 'A':
-                            groupColorClass = 'bg-blue-500 text-blue-800';
+                            groupColorClass = 'bg-blue-400 text-blue-900';
                             break;
                         case 'B':
-                            groupColorClass = 'bg-green-500 text-green-800';
+                            groupColorClass = 'bg-green-400 text-green-900';
                             break;
                         case 'C':
-                            groupColorClass = 'bg-yellow-500 text-yellow-800';
+                            groupColorClass = 'bg-yellow-400 text-yellow-900';
                             break;
                         case 'D':
-                            groupColorClass = 'bg-red-500 text-red-800';
+                            groupColorClass = 'bg-red-400 text-red-900';
                             break;
                         default:
-                            groupColorClass = 'bg-neutral-400 text-neutral-800';
+                            groupColorClass = 'bg-neutral-400 text-neutral-900';
                     }
                     
                     return `
