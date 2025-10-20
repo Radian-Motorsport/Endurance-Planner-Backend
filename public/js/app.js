@@ -1764,7 +1764,7 @@ class RadianPlannerApp {
             }
 
             const raceDurationDisplay = document.getElementById('race-duration-minutes-display');
-            if (raceDurationDisplay) raceDurationDisplay.textContent = totalMinutes ? `${totalMinutes} minutes` : '-';
+            if (raceDurationDisplay) raceDurationDisplay.textContent = (totalMinutes || totalMinutes === 0) ? `${totalMinutes}` : '-';
 
             // Keep hidden inputs for compatibility and also normalize dataset values
             const raceDurationHoursEl = document.getElementById('race-duration-hours');

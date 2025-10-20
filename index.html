@@ -507,8 +507,8 @@
                     <h1 class="text-xl mb-4 road-rage-font">Race Inputs</h1>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="flex flex-col">
-                            <label class="text-sm font-medium text-neutral-500">Race Duration</label>
-                            <div class="flex items-center mt-1 space-x-2">
+                            <label class="text-sm font-medium text-neutral-500">Race Duration (Minutes)</label>
+                            <div class="flex items-center mt-1 justify-center space-x-2">
                                 <!-- Display total race duration in minutes (generated from Page 1). Hidden inputs kept for compatibility -->
                                 <div id="race-duration-minutes-display" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 w-full text-center">-</div>
                                 <input type="hidden" id="race-duration-hours" value="0">
@@ -517,7 +517,7 @@
                         </div>
                         <div class="flex flex-col">
                             <label class="text-sm font-medium text-neutral-500">Avg. Lap Time</label>
-                            <div class="flex items-center mt-1 space-x-2">
+                            <div class="flex items-center mt-1 justify-center space-x-2">
                                 <input type="number" id="avg-lap-time-minutes" placeholder="" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <span class="text-neutral-500">min</span>
                                 <input type="number" id="avg-lap-time-seconds" placeholder="" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
@@ -526,15 +526,21 @@
                         </div>
                         <div class="flex flex-col">
                             <label for="pit-stop-time" class="text-sm font-medium text-neutral-500">Avg. Pit Stop Time (sec)</label>
-                            <input type="number" id="pit-stop-time" value="90" class="mt-1 p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <div class="mt-1 flex justify-center">
+                                <input type="number" id="pit-stop-time" value="90" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 text-center w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            </div>
                         </div>
                         <div class="flex flex-col">
                             <label for="fuel-per-lap-display-input" class="text-sm font-medium text-neutral-500">Fuel Use per Lap (L)</label>
-                            <input type="number" id="fuel-per-lap-display-input" class="mt-1 p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <div class="mt-1 flex justify-center">
+                                <input type="number" id="fuel-per-lap-display-input" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 text-center w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            </div>
                         </div>
                         <div class="flex flex-col">
                             <label for="tank-capacity-display-input" class="text-sm font-medium text-neutral-500">Fuel Tank Size (L)</label>
-                            <input type="number" id="tank-capacity-display-input" class="mt-1 p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <div class="mt-1 flex justify-center">
+                                <input type="number" id="tank-capacity-display-input" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 text-center w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            </div>
                         </div>
                         <div class="mt-4 flex justify-end">
                             <button id="calculate-page2-button" onclick="console.log('Button clicked!'); if (window.radianPlanner) { console.log('RadianPlanner found'); try { window.radianPlanner.calculateStrategy(); } catch(e) { console.error('Calculate error:', e); } } else { console.error('RadianPlanner not found'); }" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105">
