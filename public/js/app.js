@@ -1132,6 +1132,14 @@ class RadianPlannerApp {
             calculateBtn.addEventListener('click', () => this.calculateStrategy());
         }
 
+        // Time toggle switch for Race Time / Local Time mode
+        const timeToggleSwitch = document.querySelector('.toggle-switch');
+        if (timeToggleSwitch && this.strategyCalculator) {
+            timeToggleSwitch.addEventListener('click', () => {
+                this.strategyCalculator.toggleTimeMode();
+            });
+        }
+
         // Desktop mode toggle
         const desktopModeBtn = document.getElementById('desktopModeBtn');
         if (desktopModeBtn) {

@@ -12,6 +12,8 @@ export class StrategyCalculator {
         this.lapsInLastStint = 0;
         this.pitStopTime = 0;
         this.selectedDrivers = [];
+        this.isLocalTimeMode = false;
+        this.selectedDriverForLocalTime = null;
     }
 
     /**
@@ -232,7 +234,7 @@ export class StrategyCalculator {
 
         // Get race start time and timezone settings
         const raceStartTime = this.getRaceStartTime();
-        const displayTimeZone = this.getDisplayTimeZone();
+        const displayTimeZone = this.getDisplayTimeZoneForToggle();
         const daylightCalculationMode = this.getDaylightCalculationMode();
 
         let currentTime = new Date(raceStartTime);
@@ -545,6 +547,101 @@ export class StrategyCalculator {
     }
 
     /**
+     * Toggle between race time and local time modes
+     */
+    toggleTimeMode() {
+        this.isLocalTimeMode = !this.isLocalTimeMode;
+        console.log(`🕐 Toggled time mode to: ${this.isLocalTimeMode ? 'LOCAL' : 'RACE'}`);
+        
+        // Update UI elements
+        const toggleSwitch = document.querySelector('.toggle-switch');
+        const slider = document.getElementById('time-toggle-slider');
+        const driverSelector = document.getElementById('driver-timezone-selector');
+        const raceLabel = document.getElementById('race-time-label');
+        const localLabel = document.getElementById('local-time-label');
+        
+        if (this.isLocalTimeMode) {
+            // Switch to Local Time mode
+            if (toggleSwitch) toggleSwitch.classList.add('active');
+            if (slider) slider.classList.add('translate-x-4');
+            if (driverSelector) driverSelector.classList.remove('hidden');
+            if (raceLabel) raceLabel.classList.remove('time-mode-active');
+            if (localLabel) localLabel.classList.add('time-mode-active');
+            
+            // Populate driver dropdown
+            this.populateDriverDropdown();
+            
+            // Set default to first driver if not already set
+            if (!this.selectedDriverForLocalTime && this.selectedDrivers.length > 0) {
+                this.selectedDriverForLocalTime = this.selectedDrivers[0];
+            }
+        } else {
+            // Switch to Race Time mode
+            if (toggleSwitch) toggleSwitch.classList.remove('active');
+            if (slider) slider.classList.remove('translate-x-4');
+            if (driverSelector) driverSelector.classList.add('hidden');
+            if (raceLabel) raceLabel.classList.add('time-mode-active');
+            if (localLabel) localLabel.classList.remove('time-mode-active');
+        }
+        
+        // Refresh the stint table with new timezone
+        const avgLapTimeSeconds = this.extractInputs().avgLapTimeInSeconds;
+        this.updateStintTableTimes(avgLapTimeSeconds);
+    }
+
+    /**
+     * Populate driver dropdown for local time selection
+     */
+    populateDriverDropdown() {
+        const dropdown = document.getElementById('driver-timezone-dropdown');
+        if (!dropdown) return;
+        
+        dropdown.innerHTML = '<option value="">Select Driver</option>';
+        
+        if (this.selectedDrivers && this.selectedDrivers.length > 0) {
+            this.selectedDrivers.forEach((driver, index) => {
+                const option = document.createElement('option');
+                option.value = driver.name;
+                option.textContent = `${driver.name} (${driver.timezone || 'Unknown'})`;
+                option.dataset.index = index;
+                if (this.selectedDriverForLocalTime && this.selectedDriverForLocalTime.name === driver.name) {
+                    option.selected = true;
+                }
+                dropdown.appendChild(option);
+            });
+            
+            // Add change listener
+            dropdown.removeEventListener('change', this.handleDriverDropdownChange);
+            dropdown.addEventListener('change', this.handleDriverDropdownChange.bind(this));
+        }
+    }
+
+    /**
+     * Handle driver selection change in local time mode
+     * @param {Event} e - Change event
+     */
+    handleDriverDropdownChange(e) {
+        const selectedName = e.target.value;
+        this.selectedDriverForLocalTime = this.selectedDrivers.find(d => d.name === selectedName) || null;
+        console.log(`🚗 Selected driver for local time: ${selectedName}`);
+        
+        // Refresh stint table with new driver's timezone
+        const avgLapTimeSeconds = this.extractInputs().avgLapTimeInSeconds;
+        this.updateStintTableTimes(avgLapTimeSeconds);
+    }
+
+    /**
+     * Get the timezone to use for displaying times
+     * @returns {string} Timezone string
+     */
+    getDisplayTimeZoneForToggle() {
+        if (this.isLocalTimeMode && this.selectedDriverForLocalTime) {
+            return this.selectedDriverForLocalTime.timezone || 'Europe/London';
+        }
+        return this.getDisplayTimeZone();
+    }
+
+    /**
      * Get current calculation state
      * @returns {Object} Current state
      */
@@ -630,7 +727,7 @@ export class StrategyCalculator {
 
         const rows = tbody.querySelectorAll('tr[data-role="stint"]');
         const raceStartTime = this.getRaceStartTime();
-        const displayTimeZone = this.getDisplayTimeZone();
+        const displayTimeZone = this.getDisplayTimeZoneForToggle();
         
         let currentTime = new Date(raceStartTime);
         let currentLap = 1;
