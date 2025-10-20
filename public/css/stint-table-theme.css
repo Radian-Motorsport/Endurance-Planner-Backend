@@ -1,0 +1,49 @@
+/* Stint table theme extracted from backup/index.html + project CSS */
+/* Table base */
+.stint-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+.stint-table th, .stint-table td { padding: 8px 12px; border-right: 1px solid rgba(255,255,255,0.04); text-align: center; }
+.stint-table thead th { background-color: #111827; /* dark header */ color: #ffc800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.stint-table tbody tr { background-color: #171717; }
+
+/* Pit rows */
+.pit-stop-row, .pit-row { background-color: rgb(42, 42, 42) !important; font-size: 0.9em; }
+
+/* Current/selected states */
+.current-stint { background-color: #585500; color: #fff; }
+.current-pit { background-color: #8B4000; color: #fff; }
+
+/* Driver color strips (vertical colour used to mark driver allocations) */
+.driver-color-7 { background-color: rgba(59, 130, 246, 0.2) !important; } /* Blue */
+.driver-color-6 { background-color: rgba(16, 185, 129, 0.2) !important; } /* Green */
+.driver-color-5 { background-color: rgba(245, 101, 101, 0.2) !important; } /* Red */
+.driver-color-4 { background-color: rgba(251, 191, 36, 0.2) !important; } /* Yellow */
+.driver-color-1 { background-color: rgba(168, 85, 247, 0.2) !important; } /* Purple */
+.driver-color-2 { background-color: rgba(236, 72, 153, 0.2) !important; } /* Pink */
+.driver-color-0 { background-color: rgba(6, 182, 212, 0.2) !important; } /* Cyan */
+.driver-color-3 { background-color: rgba(34, 197, 94, 0.2) !important; } /* Lime */
+.driver-color-default { background-color: rgba(115, 115, 115, 0.2) !important; } /* Default Gray */
+
+/* Daylight gradient / column classes */
+.daylight-night { background: #141450 !important; color: #9ca3af !important; opacity: 0.9; }
+.daylight-pre-dawn { background: #3f0d8a !important; color: #e5e7eb !important; opacity: 0.9; }
+.daylight-dawn { background: #7300a0 !important; color: #f9fafb !important; opacity: 0.95; }
+.daylight-post-dawn { background: #ffaa00 !important; color: #1f2937 !important; opacity: 0.95; }
+.daylight-day { background: #ffea29 !important; color: #1f2937 !important; opacity: 0.95; }
+.daylight-midday { background: #fffcc4 !important; color: #1f2937 !important; opacity: 0.95; }
+.daylight-pre-dusk { background: #ffaa00 !important; color: #1f2937 !important; opacity: 0.92; }
+.daylight-dusk { background: #7300a0 !important; color: #f9fafb !important; opacity: 0.92; }
+.daylight-post-dusk { background: #3f0d8a !important; color: #f3f4f6 !important; opacity: 0.9; }
+
+/* Small utility helpers (used by legacy JS) */
+.text-yellow-400 { color: #f59e0b; }
+.text-blue-400 { color: #60a5fa; }
+.text-orange-400 { color: #fb923c; }
+
+/* Compact table tweaks for the visual match */
+.stint-table td.px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+.stint-table .road-rage-font { font-family: 'RoadRage', sans-serif; }
+
+/* Accessibility: ensure select and inputs are visible on dark bg */
+.stint-table select, .stint-table input { background: rgba(255,255,255,0.03); color: #e5e7eb; border: 1px solid rgba(255,255,255,0.04); }
+
+/* End of theme */
