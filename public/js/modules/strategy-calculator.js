@@ -236,6 +236,31 @@ export class StrategyCalculator {
         const daylightCalculationMode = this.getDaylightCalculationMode();
 
         let currentTime = new Date(raceStartTime);
+        // Initialize lap counter
+        let currentLap = 1;
+
+        // Build selectedDrivers list (prefer internal state, fallback to textarea if empty)
+        let selectedDrivers = Array.isArray(this.selectedDrivers) && this.selectedDrivers.length ? this.selectedDrivers : [];
+        if (selectedDrivers.length === 0) {
+            const driversTextEl = document.getElementById('drivers-input');
+            if (driversTextEl) {
+                selectedDrivers = driversTextEl.value.trim().split('\n').map((n,i) => ({ name: n.trim(), id: i+1, timezone: 'Europe/London' })).filter(d => d.name);
+            }
+        }
+
+        // If totals weren't calculated earlier, derive them now from inputs
+        if (!this.totalStints || this.totalStints <= 0) {
+            try {
+                const inputs = this.extractInputs();
+                const calc = this.performCalculations(inputs);
+                // ensure instance state updated
+                this.totalStints = calc.totalStints || this.totalStints;
+                this.lapsPerStint = calc.lapsPerStint || this.lapsPerStint;
+                this.lapsInLastStint = calc.lapsInLastStint || this.lapsInLastStint;
+            } catch (e) {
+                console.warn('Could not auto-calc stints in populateStintTable:', e);
+            }
+        }
 
         for (let i = 0; i < this.totalStints; i++) {
             const stintLaps = (i === this.totalStints - 1) && (this.lapsInLastStint !== 0) 
@@ -277,7 +302,8 @@ export class StrategyCalculator {
      * @returns {HTMLElement} Table row element
      */
     createStintRow(stintNumber, driverName, stintLaps, startTime, endTime, startLap, endLap, timeZone, daylightStatus) {
-        const row = document.createElement('tr');
+                    const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, startLap, endLap, displayTimeZone, daylightStatus);
+                    row.setAttribute('data-role', 'stint');
         row.className = 'bg-neutral-750 hover:bg-neutral-700 transition-colors';
 
         row.innerHTML = `
