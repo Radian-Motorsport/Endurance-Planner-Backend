@@ -1738,14 +1738,13 @@ class RadianPlannerApp {
             const raceDurationHoursEl = document.getElementById('race-duration-hours');
             const raceDurationMinutesEl = document.getElementById('race-duration-minutes');
             
-            if (raceDurationHoursEl && sessionHours) {
-                raceDurationHoursEl.value = sessionHours;
-                console.log(`✅ Set race-duration-hours to: ${sessionHours}`);
-            }
-            if (raceDurationMinutesEl && sessionMinutes) {
-                raceDurationMinutesEl.value = sessionMinutes;
-                console.log(`✅ Set race-duration-minutes to: ${sessionMinutes}`);
-            }
+            // Convert to total minutes and set display
+            const totalMinutes = (parseInt(sessionHours || 0, 10) * 60) + (parseInt(sessionMinutes || 0, 10));
+            const raceDurationDisplay = document.getElementById('race-duration-minutes-display');
+            if (raceDurationDisplay) raceDurationDisplay.textContent = totalMinutes ? `${totalMinutes} minutes` : '-';
+            // Keep hidden inputs for compatibility
+            if (raceDurationHoursEl) raceDurationHoursEl.value = sessionHours || 0;
+            if (raceDurationMinutesEl) raceDurationMinutesEl.value = sessionMinutes || 0;
         }
 
         // 2. Extract and populate race start time from race datetime
@@ -1942,6 +1941,30 @@ class RadianPlannerApp {
                     </div>
                 `;
             }
+        }
+
+        // If Garage61 analysis already ran, copy adjusted lap/fuel values into race inputs
+        try {
+            const adjustedLapEl = document.getElementById('g61-adjusted-laptime');
+            const adjustedFuelEl = document.getElementById('g61-adjusted-fuel');
+            if (adjustedLapEl && adjustedLapEl.textContent && adjustedLapEl.textContent !== '-') {
+                const parts = adjustedLapEl.textContent.split(':');
+                if (parts.length === 2) {
+                    const mins = parseInt(parts[0], 10) || 0;
+                    const secs = Math.floor(parseFloat(parts[1]) || 0);
+                    const minsInput = document.getElementById('avg-lap-time-minutes');
+                    const secsInput = document.getElementById('avg-lap-time-seconds');
+                    if (minsInput) minsInput.value = mins;
+                    if (secsInput) secsInput.value = secs;
+                }
+            }
+            if (adjustedFuelEl && adjustedFuelEl.textContent && adjustedFuelEl.textContent !== '-') {
+                const fuelText = adjustedFuelEl.textContent.replace('L', '').trim();
+                const fuelInput = document.getElementById('fuel-per-lap-display-input');
+                if (fuelInput) fuelInput.value = parseFloat(fuelText) || '';
+            }
+        } catch (e) {
+            console.warn('Could not prefill race inputs from Garage61 adjusted values', e);
         }
 
         // Make Garage61 API call if we have the required IDs

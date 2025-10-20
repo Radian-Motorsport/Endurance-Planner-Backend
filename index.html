@@ -509,10 +509,10 @@
                         <div class="flex flex-col">
                             <label class="text-sm font-medium text-neutral-500">Race Duration</label>
                             <div class="flex items-center mt-1 space-x-2">
-                                <input type="number" id="race-duration-hours" placeholder="" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-neutral-500">hr</span>
-                                <input type="number" id="race-duration-minutes" placeholder="" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 w-1/2 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <span class="text-neutral-500">min</span>
+                                <!-- Display total race duration in minutes (generated from Page 1). Hidden inputs kept for compatibility -->
+                                <div id="race-duration-minutes-display" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 w-full text-center">-</div>
+                                <input type="hidden" id="race-duration-hours" value="0">
+                                <input type="hidden" id="race-duration-minutes" value="0">
                             </div>
                         </div>
                         <div class="flex flex-col">
@@ -526,7 +526,7 @@
                         </div>
                         <div class="flex flex-col">
                             <label for="pit-stop-time" class="text-sm font-medium text-neutral-500">Avg. Pit Stop Time (sec)</label>
-                            <input type="number" id="pit-stop-time" value="" class="mt-1 p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <input type="number" id="pit-stop-time" value="90" class="mt-1 p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                         </div>
                         <div class="flex flex-col">
                             <label for="fuel-per-lap-display-input" class="text-sm font-medium text-neutral-500">Fuel Use per Lap (L)</label>
