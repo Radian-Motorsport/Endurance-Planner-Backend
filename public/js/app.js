@@ -1739,40 +1739,43 @@ class RadianPlannerApp {
         // 1. Extract and populate race duration from session length
         const sessionLengthEl = document.getElementById('session-length');
         if (sessionLengthEl) {
-            const sessionHours = sessionLengthEl.dataset.sessionHours || '';
-            const sessionMinutes = sessionLengthEl.dataset.sessionMinutes || '';
-            
-            console.log(`📊 Session duration found: ${sessionHours}h ${sessionMinutes}m`);
-            
-            // Auto-populate the race duration form fields
-            const raceDurationHoursEl = document.getElementById('race-duration-hours');
-            const raceDurationMinutesEl = document.getElementById('race-duration-minutes');
-            
-            // Convert to total minutes and set display
-            // NOTE: some data sources populate data-session-hours with minutes (e.g. 1440)
-            // so be defensive: if hours field looks like minutes (>=24) and minutes is empty,
-            // treat that value as total minutes.
-            const rawHours = parseInt(sessionHours || 0, 10);
-            const rawMinutes = parseInt(sessionMinutes || 0, 10);
-            let totalMinutes = 0;
+            // Prefer numeric value from eventData.session.session_length (authoritative)
+            const eventSessionLen = eventData?.session?.session_length;
+            let totalMinutes = null;
 
-            if (rawMinutes === 0 && rawHours > 23) {
-                // hours field actually contains minutes
-                totalMinutes = rawHours;
+            if (eventSessionLen !== null && eventSessionLen !== undefined) {
+                totalMinutes = parseInt(eventSessionLen, 10) || 0;
+                console.log(`📊 Using eventData.session.session_length: ${totalMinutes} minutes`);
             } else {
-                totalMinutes = (rawHours * 60) + rawMinutes;
+                // Fallback to dataset values on the element (older code path)
+                const sessionHours = sessionLengthEl.dataset.sessionHours || '';
+                const sessionMinutes = sessionLengthEl.dataset.sessionMinutes || '';
+                console.log(`📊 Session duration dataset found: ${sessionHours}h ${sessionMinutes}m`);
+
+                const rawHours = parseInt(sessionHours || 0, 10);
+                const rawMinutes = parseInt(sessionMinutes || 0, 10);
+
+                if (rawMinutes === 0 && rawHours > 23) {
+                    // hours field actually contains minutes
+                    totalMinutes = rawHours;
+                } else {
+                    totalMinutes = (rawHours * 60) + rawMinutes;
+                }
             }
 
             const raceDurationDisplay = document.getElementById('race-duration-minutes-display');
             if (raceDurationDisplay) raceDurationDisplay.textContent = totalMinutes ? `${totalMinutes} minutes` : '-';
 
             // Keep hidden inputs for compatibility and also normalize dataset values
-            if (raceDurationHoursEl) raceDurationHoursEl.value = Math.floor(totalMinutes / 60) || 0;
-            if (raceDurationMinutesEl) raceDurationMinutesEl.value = totalMinutes % 60 || 0;
+            const raceDurationHoursEl = document.getElementById('race-duration-hours');
+            const raceDurationMinutesEl = document.getElementById('race-duration-minutes');
+            if (raceDurationHoursEl) raceDurationHoursEl.value = Math.floor((totalMinutes || 0) / 60) || 0;
+            if (raceDurationMinutesEl) raceDurationMinutesEl.value = (totalMinutes || 0) % 60 || 0;
             try {
-                if (sessionLengthEl) {
-                    sessionLengthEl.dataset.sessionMinutes = (totalMinutes % 60).toString();
-                    sessionLengthEl.dataset.sessionHours = Math.floor(totalMinutes / 60).toString();
+                if (sessionLengthEl && totalMinutes !== null) {
+                    sessionLengthEl.dataset.sessionMinutes = ((totalMinutes || 0) % 60).toString();
+                    sessionLengthEl.dataset.sessionHours = Math.floor((totalMinutes || 0) / 60).toString();
+                    sessionLengthEl.dataset.sessionLength = (totalMinutes || 0).toString();
                 }
             } catch (e) {
                 // ignore dataset write failures

@@ -34,6 +34,32 @@ export class UIManager {
         
         // Setup button event listeners
         this.setupButtonListeners();
+        
+        // Listen for session selection changes so page 2 updates automatically
+        try {
+            const sessionSelect = document.getElementById('session-select');
+            if (sessionSelect) {
+                sessionSelect.addEventListener('change', async (e) => {
+                    const sessionId = e.target.value;
+                    console.log('🔁 Session changed to', sessionId);
+                    if (this.app) {
+                        try {
+                            // Re-populate page 1 info for the new session
+                            await this.app.populateRaceInformation(sessionId);
+                            // If page2 is visible, update it too
+                            if (this.currentPage === 'page2') {
+                                const eventData = this.app.collectPage1Data();
+                                await this.app.populatePage2(eventData);
+                            }
+                        } catch (err) {
+                            console.error('❌ Error handling session change:', err);
+                        }
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn('Could not attach session-select listener', e);
+        }
     }
 
     /**
