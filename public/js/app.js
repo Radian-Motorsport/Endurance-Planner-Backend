@@ -1839,9 +1839,8 @@ class RadianPlannerApp {
             
             if (sessionTimeEl) {
                 const timeText = eventData.session.session_start_time || 'Not selected';
-                const timezone = eventData.session.timezone || '';
-                // If timezone is an IANA name, prefer to show only short name when available
-                sessionTimeEl.textContent = timezone ? `${timeText} (${timezone})` : timeText;
+                // Timezone is shown in the right-hand column (`#page2-timezone`), avoid repeating here
+                sessionTimeEl.textContent = timeText;
             }
 
             // Show default timezone label (Europe/London) if not otherwise set
