@@ -1402,13 +1402,17 @@ class RadianPlannerApp {
             console.log(`🏁 Flag result: ${countryFlag}`);
             
             // Get safety rating class from database field
-            const srClass = driver.sports_car_group_name || 'D';
+            const groupName = driver.sports_car_group_name || 'D';
             const safetyRating = driver.sports_car_safety_rating || 'D';
             const iRating = driver.sports_car_irating || 'N/A';
             
-            // Determine color based on safety rating class
+            // Get color for group name and clean display name
             let srColorClass = '';
-            switch(srClass.toUpperCase()) {
+            const groupLetter = groupName.replace(/^Class\s*/i, '').trim().toUpperCase();
+            const displayGroupName = groupLetter; // Remove "Class" from display
+            
+            // Determine color based on safety rating class
+            switch(groupLetter) {
                 case 'A':
                     srColorClass = 'bg-blue-400 text-blue-900';
                     break;
@@ -1428,9 +1432,9 @@ class RadianPlannerApp {
             li.innerHTML = `
                 <div class="flex items-center">
                     <div class="flex items-center justify-between w-32 px-3 py-2 rounded-full ${srColorClass}">
-                        <span class="font-bold text-xs">${srClass.toUpperCase()}</span>
-                        <span class="text-sm">${safetyRating}</span>
-                        <span class="text-sm">${iRating}</span>
+                        <span class="font-bold text-xs">${displayGroupName}</span>
+                        <span class="mx-1">${safetyRating}</span>
+                        <span class="font-bold">${iRating}</span>
                     </div>
                     <div class="ml-4 w-8 flex justify-center">
                         ${countryFlag}
