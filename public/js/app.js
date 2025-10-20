@@ -1925,14 +1925,14 @@ class RadianPlannerApp {
                         // update UI highlight: reset all name backgrounds to light grey
                         const allNames = driversListEl.querySelectorAll('.driver-name');
                         allNames.forEach(n => {
-                            n.style.backgroundColor = '#374151'; // tailwind neutral-700
+                            n.style.backgroundColor = '#4b5563'; // neutral-600 (less blue)
                             n.style.padding = '0.1rem 0.25rem';
                             n.style.borderRadius = '4px';
                         });
-                        // set selected name background to dark grey
+                        // set selected name background to neutral dark grey
                         const nameEl = card.querySelector('.driver-name');
                         if (nameEl) {
-                            nameEl.style.backgroundColor = '#111827'; // tailwind neutral-900
+                            nameEl.style.backgroundColor = '#1f2937'; // neutral-800
                             nameEl.style.padding = '0.1rem 0.25rem';
                             nameEl.style.borderRadius = '4px';
                         }
