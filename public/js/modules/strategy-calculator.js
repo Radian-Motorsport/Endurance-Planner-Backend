@@ -100,13 +100,72 @@ export class StrategyCalculator {
             // Update displays
             this.updateDisplays(calculations, adjustedInputs);
             
-            // Regenerate stint table with adjusted values
-            await this.populateStintTable(adjustedInputs.avgLapTimeInSeconds);
+            // Update stint table values WITHOUT rebuilding entire DOM
+            this.updateStintTableValues(adjustedInputs.avgLapTimeInSeconds);
             
             console.log('✅ Recalculation complete');
         } catch (error) {
             console.error('❌ Recalculation failed:', error);
         }
+    }
+
+    /**
+     * Update stint table values WITHOUT rebuilding DOM (smooth, no flicker)
+     * Only updates time durations and fuel calculations in existing rows
+     * @param {number} avgLapTimeInSeconds - Adjusted average lap time
+     */
+    updateStintTableValues(avgLapTimeInSeconds) {
+        const tbody = document.getElementById('stint-table-body');
+        if (!tbody) return;
+
+        const displayTimeZone = this.getDisplayTimeZoneForToggle();
+        const daylightCalculationMode = this.getDaylightCalculationMode();
+        const raceStartTime = this.isLocalTimeMode ? this.getEventStartTime() : this.getRaceStartTime();
+        const practiceQualifyingOffset = this.getPracticeQualifyingOffset();
+        let currentTime = new Date(raceStartTime.getTime() + practiceQualifyingOffset);
+        let currentLap = 1;
+
+        // Get all stint rows (skip pit rows)
+        const stintRows = Array.from(tbody.querySelectorAll('tr[data-role="stint"]'));
+        
+        stintRows.forEach((row, index) => {
+            const stintLaps = (index === this.totalStints - 1) && (this.lapsInLastStint !== 0) 
+                ? this.lapsInLastStint 
+                : this.lapsPerStint;
+
+            const stintDuration = stintLaps * avgLapTimeInSeconds * 1000; // milliseconds
+            const stintStartTime = new Date(currentTime);
+            const stintEndTime = new Date(currentTime.getTime() + stintDuration);
+
+            // Update duration cell (Duration column)
+            const durationCell = row.querySelector('td:nth-child(5)'); // Duration column
+            if (durationCell) {
+                const hours = Math.floor(stintDuration / 3600000);
+                const mins = Math.floor((stintDuration % 3600000) / 60000);
+                const secs = Math.floor((stintDuration % 60000) / 1000);
+                durationCell.textContent = `${hours}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+
+            // Update fuel cell (Fuel column) - calculate fuel needed for this stint
+            const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value) || 0;
+            const fuelCell = row.querySelector('td:nth-child(8)'); // Fuel column
+            if (fuelCell) {
+                const fuelNeeded = stintLaps * fuelPerLap;
+                fuelCell.textContent = fuelNeeded.toFixed(2) + ' L';
+            }
+
+            // Update lap range cell (Laps column)
+            const startLap = currentLap;
+            const endLap = startLap + stintLaps - 1;
+            const lapsCell = row.querySelector('td:nth-child(7)'); // Laps column
+            if (lapsCell) {
+                lapsCell.textContent = `${startLap}-${endLap}`;
+            }
+
+            // For next iteration (including pit row calculation)
+            currentLap += stintLaps;
+            currentTime = new Date(stintEndTime.getTime() + (this.pitStopTime * 1000));
+        });
     }
 
     /**
