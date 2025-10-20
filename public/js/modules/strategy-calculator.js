@@ -488,7 +488,6 @@ export class StrategyCalculator {
         const sectionsToShow = [
             'overall-summary',
             'stint-breakdown-display',
-            'sliders-container',
             'share-link-container',
             'weather-display-page2',
             'track-map-container-page2'

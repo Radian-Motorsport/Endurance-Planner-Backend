@@ -97,9 +97,38 @@ document.getElementById('live-pit-exit-button').addEventListener('click', () => 
 const fuelSlider = document.getElementById('fuel-slider');
 const lapTimeSlider = document.getElementById('lap-time-slider');
 
+function updateAdjustmentDisplay() {
+    // Get base values from form
+    const fuelPerLap = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value) || 0;
+    const lapTimeMinutes = parseInt(document.getElementById('avg-lap-time-minutes')?.value) || 0;
+    const lapTimeSeconds = parseInt(document.getElementById('avg-lap-time-seconds')?.value) || 0;
+    
+    // Get slider adjustments
+    const fuelAdjustment = parseFloat(fuelSlider?.value) || 0;
+    const lapTimeAdjustment = parseFloat(lapTimeSlider?.value) || 0;
+    
+    // Calculate effective values
+    const effectiveFuel = fuelPerLap + fuelAdjustment;
+    const effectiveLapTime = (lapTimeMinutes * 60) + lapTimeSeconds + lapTimeAdjustment;
+    
+    // Update displays
+    const fuelDisplay = document.getElementById('fuel-per-lap-adjustment');
+    const lapTimeDisplay = document.getElementById('lap-time-adjustment');
+    
+    if (fuelDisplay) {
+        fuelDisplay.textContent = effectiveFuel.toFixed(2) + ' L';
+    }
+    if (lapTimeDisplay) {
+        const minutes = Math.floor(effectiveLapTime / 60);
+        const seconds = (effectiveLapTime % 60).toFixed(0);
+        lapTimeDisplay.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+}
+
 if (fuelSlider) {
     fuelSlider.addEventListener('input', () => {
         document.getElementById('fuel-slider-value').textContent = parseFloat(fuelSlider.value).toFixed(2);
+        updateAdjustmentDisplay();
         // Trigger strategy recalculation if available
         if (window.radianPlanner && window.radianPlanner.strategyCalculator) {
             window.radianPlanner.strategyCalculator.recalculateWithAdjustments();
@@ -110,6 +139,7 @@ if (fuelSlider) {
 if (lapTimeSlider) {
     lapTimeSlider.addEventListener('input', () => {
         document.getElementById('lap-time-slider-value').textContent = parseFloat(lapTimeSlider.value).toFixed(2);
+        updateAdjustmentDisplay();
         // Trigger strategy recalculation if available
         if (window.radianPlanner && window.radianPlanner.strategyCalculator) {
             window.radianPlanner.strategyCalculator.recalculateWithAdjustments();
@@ -129,6 +159,7 @@ adjustmentButtons.forEach(button => {
             const newValue = Math.max(-2.0, Math.min(2.0, parseFloat(slider.value) + adjustValue));
             slider.value = newValue;
             document.getElementById('fuel-slider-value').textContent = newValue.toFixed(2);
+            updateAdjustmentDisplay();
             if (window.radianPlanner && window.radianPlanner.strategyCalculator) {
                 window.radianPlanner.strategyCalculator.recalculateWithAdjustments();
             }
@@ -137,6 +168,7 @@ adjustmentButtons.forEach(button => {
             const newValue = Math.max(-3, Math.min(3, parseFloat(slider.value) + adjustValue));
             slider.value = newValue;
             document.getElementById('lap-time-slider-value').textContent = newValue.toFixed(2);
+            updateAdjustmentDisplay();
             if (window.radianPlanner && window.radianPlanner.strategyCalculator) {
                 window.radianPlanner.strategyCalculator.recalculateWithAdjustments();
             }
