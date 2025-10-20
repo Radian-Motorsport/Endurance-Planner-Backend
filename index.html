@@ -638,8 +638,8 @@
                             <div class="flex items-center justify-between mb-2">
                                 <label for="fuel-slider" class="text-sm font-medium text-neutral-400">Fuel per Lap</label>
                                 <div class="flex items-center space-x-3">
-                                    <span id="fuel-original-value" class="text-sm font-mono text-neutral-500">-- L</span>
-                                    <span id="fuel-adjusted-value" class="text-sm font-mono text-neutral-200 transition-colors duration-300">-- L</span>
+                                    <span id="fuel-original-value" class="text-lg font-mono text-neutral-500">-- L</span>
+                                    <span id="fuel-adjusted-value" class="text-lg font-mono text-neutral-200 transition-colors duration-300">-- L</span>
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
@@ -655,14 +655,14 @@
                             <div class="flex items-center justify-between mb-2">
                                 <label for="lap-time-slider" class="text-sm font-medium text-neutral-400">Lap Time</label>
                                 <div class="flex items-center space-x-3">
-                                    <span id="lap-time-original-value" class="text-sm font-mono text-neutral-500">--:--</span>
-                                    <span id="lap-time-adjusted-value" class="text-sm font-mono text-neutral-200 transition-colors duration-300">--:--</span>
+                                    <span id="lap-time-original-value" class="text-lg font-mono text-neutral-500">--:--:---</span>
+                                    <span id="lap-time-adjusted-value" class="text-lg font-mono text-neutral-200 transition-colors duration-300">--:--:---</span>
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button class="p-1 rounded-full text-white bg-neutral-700 hover:bg-neutral-600 transition-colors duration-200" data-adjust="lapTime" data-value="-0.05">-</button>
-                                <input type="range" id="lap-time-slider" min="-3" max="3" value="0" step="0.05" class="w-full">
-                                <button class="p-1 rounded-full text-white bg-neutral-700 hover:bg-neutral-600 transition-colors duration-200" data-adjust="lapTime" data-value="0.05">+</button>
+                                <button class="p-1 rounded-full text-white bg-neutral-700 hover:bg-neutral-600 transition-colors duration-200" data-adjust="lapTime" data-value="-0.1">-</button>
+                                <input type="range" id="lap-time-slider" min="-3" max="3" value="0" step="0.1" class="w-full">
+                                <button class="p-1 rounded-full text-white bg-neutral-700 hover:bg-neutral-600 transition-colors duration-200" data-adjust="lapTime" data-value="0.1">+</button>
                                 <span id="lap-time-slider-value" class="text-neutral-200 font-mono text-sm w-8 text-right">0.00</span>
                             </div>
                         </div>

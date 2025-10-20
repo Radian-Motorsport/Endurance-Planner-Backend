@@ -1294,7 +1294,7 @@ class RadianPlannerApp {
             if (lapTimeOriginal) {
                 const origMinutes = Math.floor((lapTimeMinutes * 60 + lapTimeSeconds) / 60);
                 const origSeconds = (lapTimeMinutes * 60 + lapTimeSeconds) % 60;
-                lapTimeOriginal.textContent = `${origMinutes}:${String(origSeconds).padStart(2, '0')}`;
+                lapTimeOriginal.textContent = `${origMinutes}:${String(Math.floor(origSeconds)).padStart(2, '0')}.000`;
             }
             
             // Update adjusted value displays with color change (purple when adjusted)
@@ -1314,8 +1314,10 @@ class RadianPlannerApp {
             }
             if (lapTimeAdjusted) {
                 const minutes = Math.floor(effectiveLapTime / 60);
-                const seconds = (effectiveLapTime % 60).toFixed(0);
-                lapTimeAdjusted.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
+                const seconds = effectiveLapTime % 60;
+                const wholeSeconds = Math.floor(seconds);
+                const milliseconds = Math.round((seconds - wholeSeconds) * 1000);
+                lapTimeAdjusted.textContent = `${minutes}:${String(wholeSeconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
                 // Change to purple if adjustment is not 0
                 if (lapTimeAdjustment !== 0) {
                     lapTimeAdjusted.classList.add('text-purple-400');
