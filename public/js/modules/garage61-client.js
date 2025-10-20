@@ -207,6 +207,43 @@ export class Garage61Client {
             return;
         }
 
+        // Also compute averages for analysis
+        const numericLapTimes = bestLaps.map(l => typeof l.lapTime === 'number' ? l.lapTime : (parseFloat(l.lapTime) || 0)).filter(Boolean);
+        const numericFuel = bestLaps.map(l => parseFloat(l.fuelUsed) || 0).filter(Boolean);
+        const avgLapSeconds = numericLapTimes.length ? (numericLapTimes.reduce((a,b)=>a+b,0)/numericLapTimes.length) : null;
+        const avgFuel = numericFuel.length ? (numericFuel.reduce((a,b)=>a+b,0)/numericFuel.length) : null;
+
+        // Update analysis UI
+        const analysisEl = document.getElementById('garage61-analysis');
+        const avgLapEl = document.getElementById('g61-avg-laptime');
+        const avgFuelEl = document.getElementById('g61-avg-fuel');
+        const adjustedLapEl = document.getElementById('g61-adjusted-laptime');
+        const safetyInput = document.getElementById('g61-safety-margin');
+
+        if (analysisEl) analysisEl.classList.remove('hidden');
+        if (avgLapEl) avgLapEl.textContent = avgLapSeconds ? this.formatLapTime(avgLapSeconds) : '-';
+        if (avgFuelEl) avgFuelEl.textContent = avgFuel !== null ? `${avgFuel.toFixed(2)}L` : '-';
+
+        const applySafety = () => {
+            const margin = safetyInput ? parseFloat(safetyInput.value) || 0 : 0;
+            if (adjustedLapEl) {
+                if (avgLapSeconds) {
+                    const adjusted = avgLapSeconds * (1 + margin/100);
+                    adjustedLapEl.textContent = this.formatLapTime(adjusted);
+                } else {
+                    adjustedLapEl.textContent = '-';
+                }
+            }
+        };
+
+        if (safetyInput) {
+            safetyInput.removeEventListener('input', applySafety);
+            safetyInput.addEventListener('input', applySafety);
+        }
+
+        // Run initial safety application
+        applySafety();
+
         bestLaps.forEach((lap, index) => {
             const row = document.createElement('tr');
             row.className = 'hover:bg-neutral-600 transition-colors duration-200';

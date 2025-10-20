@@ -472,6 +472,29 @@
                                 </tbody>
                             </table>
                         </div>
+                        <!-- Garage61 Analysis Panel -->
+                        <div id="garage61-analysis" class="mt-4 hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div class="flex flex-col items-start">
+                                    <span class="text-xs text-neutral-400">Average Lap Time</span>
+                                    <span id="g61-avg-laptime" class="text-neutral-200 font-mono">-</span>
+                                </div>
+                                <div class="flex flex-col items-start">
+                                    <span class="text-xs text-neutral-400">Average Fuel Used</span>
+                                    <span id="g61-avg-fuel" class="text-neutral-200">-</span>
+                                </div>
+                                <div class="flex flex-col items-start">
+                                    <label class="text-xs text-neutral-400">Safety Margin (%)</label>
+                                    <div class="flex items-center space-x-2 mt-1">
+                                        <input id="g61-safety-margin" type="number" min="0" max="100" value="0" class="p-1 rounded bg-neutral-900 text-neutral-200 w-20" />
+                                        <div class="flex flex-col">
+                                            <span class="text-xs text-neutral-400">Adjusted Lap Time</span>
+                                            <span id="g61-adjusted-laptime" class="text-neutral-200 font-mono">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
