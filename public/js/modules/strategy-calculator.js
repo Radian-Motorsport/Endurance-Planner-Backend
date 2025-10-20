@@ -282,8 +282,8 @@ export class StrategyCalculator {
      * @returns {HTMLElement} Table row element
      */
     createStintRow(stintNumber, driverName, stintLaps, startTime, endTime, startLap, endLap, timeZone, daylightStatus) {
-                    const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, startLap, endLap, displayTimeZone, daylightStatus);
-                    row.setAttribute('data-role', 'stint');
+        const row = document.createElement('tr');
+        row.setAttribute('data-role', 'stint');
         row.className = 'bg-neutral-750 hover:bg-neutral-700 transition-colors';
 
         row.innerHTML = `
