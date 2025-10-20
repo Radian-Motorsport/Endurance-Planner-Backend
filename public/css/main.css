@@ -235,8 +235,8 @@ select {
 /* Collapsible Container Styles */
 .weather-collapsible,
 .track-map-collapsible {
-    max-height: 600px;
-    overflow: hidden;
+    max-height: 1200px;
+    overflow: visible;
     transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
     padding: 1rem;
 }
@@ -245,6 +245,7 @@ select {
 .track-map-collapsible.collapsed {
     max-height: 0;
     padding: 0 1rem;
+    overflow: hidden;
     transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
 }
 

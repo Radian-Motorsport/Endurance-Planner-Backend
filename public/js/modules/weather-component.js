@@ -154,8 +154,6 @@ export class WeatherComponent {
     createHTML() {
         return `
             <div>
-                <h3 class="text-lg font-medium text-neutral-300 mb-4">Weather Forecast</h3>
-                
                 <div class="bg-neutral-800 border border-neutral-700 rounded-lg p-4">
                     <div class="chakra-tabs">
                         <div class="chakra-tabs__tablist" role="tablist">
@@ -561,7 +559,6 @@ export class WeatherComponent {
                     <svg style="width: 20px; height: 20px; color: #666;" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
                     </svg>
-                    <h6 style="margin: 0 0 0 8px; font-size: 18px; font-weight: 600; color: #333;">Weather Forecast</h6>
                 </div>
                 <div class="weather-component-content">
                     <div style="text-align: center; color: #dc2626; padding: 20px;">

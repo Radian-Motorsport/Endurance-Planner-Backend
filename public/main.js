@@ -93,16 +93,53 @@ document.getElementById('live-pit-exit-button').addEventListener('click', () => 
     ws.send(JSON.stringify({ type: 'pitExit' }));
 });
 
-// Handle the adjustment sliders
+// Handle the adjustment sliders on Page 2 (Strategy Page)
 const fuelSlider = document.getElementById('fuel-slider');
-const lapTimeSlider = document.getElementById('live-lap-time-adjustment-slider');
+const lapTimeSlider = document.getElementById('lap-time-slider');
 
-fuelSlider.addEventListener('input', () => {
-    document.getElementById('live-fuel-slider-value').textContent = fuelSlider.value;
-    ws.send(JSON.stringify({ type: 'adjustFuel', value: parseFloat(fuelSlider.value) }));
-});
+if (fuelSlider) {
+    fuelSlider.addEventListener('input', () => {
+        document.getElementById('fuel-slider-value').textContent = parseFloat(fuelSlider.value).toFixed(2);
+        // Trigger strategy recalculation if available
+        if (window.radianPlanner && window.radianPlanner.strategyCalculator) {
+            window.radianPlanner.strategyCalculator.recalculateWithAdjustments();
+        }
+    });
+}
 
-lapTimeSlider.addEventListener('input', () => {
-    document.getElementById('live-lap-time-slider-value').textContent = lapTimeSlider.value;
-    ws.send(JSON.stringify({ type: 'adjustLapTime', value: parseFloat(lapTimeSlider.value) }));
+if (lapTimeSlider) {
+    lapTimeSlider.addEventListener('input', () => {
+        document.getElementById('lap-time-slider-value').textContent = parseFloat(lapTimeSlider.value).toFixed(2);
+        // Trigger strategy recalculation if available
+        if (window.radianPlanner && window.radianPlanner.strategyCalculator) {
+            window.radianPlanner.strategyCalculator.recalculateWithAdjustments();
+        }
+    });
+}
+
+// Handle +/- buttons for adjustment sliders on Page 2
+const adjustmentButtons = document.querySelectorAll('button[data-adjust]');
+adjustmentButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+        const adjustType = button.dataset.adjust;
+        const adjustValue = parseFloat(button.dataset.value);
+        
+        if (adjustType === 'fuel') {
+            const slider = document.getElementById('fuel-slider');
+            const newValue = Math.max(-2.0, Math.min(2.0, parseFloat(slider.value) + adjustValue));
+            slider.value = newValue;
+            document.getElementById('fuel-slider-value').textContent = newValue.toFixed(2);
+            if (window.radianPlanner && window.radianPlanner.strategyCalculator) {
+                window.radianPlanner.strategyCalculator.recalculateWithAdjustments();
+            }
+        } else if (adjustType === 'lapTime') {
+            const slider = document.getElementById('lap-time-slider');
+            const newValue = Math.max(-3, Math.min(3, parseFloat(slider.value) + adjustValue));
+            slider.value = newValue;
+            document.getElementById('lap-time-slider-value').textContent = newValue.toFixed(2);
+            if (window.radianPlanner && window.radianPlanner.strategyCalculator) {
+                window.radianPlanner.strategyCalculator.recalculateWithAdjustments();
+            }
+        }
+    });
 });

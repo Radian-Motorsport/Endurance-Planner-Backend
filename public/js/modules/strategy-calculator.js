@@ -80,6 +80,36 @@ export class StrategyCalculator {
     }
 
     /**
+     * Recalculate strategy when sliders are adjusted
+     * Uses the current form values with the new slider adjustments
+     * @async
+     */
+    async recalculateWithAdjustments() {
+        console.log('🔄 Recalculating with slider adjustments...');
+        
+        try {
+            // Extract base inputs from form
+            const inputs = this.extractInputs();
+            
+            // Apply slider adjustments
+            const adjustedInputs = this.applySliderAdjustments(inputs);
+            
+            // Perform calculations
+            const calculations = this.performCalculations(adjustedInputs);
+            
+            // Update displays
+            this.updateDisplays(calculations, adjustedInputs);
+            
+            // Regenerate stint table with adjusted values
+            await this.populateStintTable(adjustedInputs.avgLapTimeInSeconds);
+            
+            console.log('✅ Recalculation complete');
+        } catch (error) {
+            console.error('❌ Recalculation failed:', error);
+        }
+    }
+
+    /**
      * Extract inputs from form elements
      * @returns {Object} Input values
      */
@@ -738,24 +768,40 @@ export class StrategyCalculator {
      * @private
      */
     setupCollapsibleHandlers() {
+        console.log('Setting up collapsible handlers...');
+        
         // Weather toggle button
         const weatherToggleBtn = document.getElementById('weather-toggle-btn');
         const weatherContainer = document.getElementById('weather-display-page2');
         if (weatherToggleBtn && weatherContainer) {
-            weatherToggleBtn.addEventListener('click', () => {
+            // Remove any existing listeners to avoid duplicates
+            weatherToggleBtn.replaceWith(weatherToggleBtn.cloneNode(true));
+            const newWeatherBtn = document.getElementById('weather-toggle-btn');
+            newWeatherBtn.addEventListener('click', (e) => {
+                e.preventDefault();
                 weatherContainer.classList.toggle('collapsed');
-                console.log('🔄 Weather container toggled');
+                console.log('Weather container toggled, collapsed state:', weatherContainer.classList.contains('collapsed'));
             });
+            console.log('Weather toggle listener attached');
+        } else {
+            console.warn('Weather toggle button or container not found');
         }
 
         // Track map toggle button
         const trackMapToggleBtn = document.getElementById('track-map-toggle-btn');
         const trackMapContainer = document.getElementById('track-map-container-page2');
         if (trackMapToggleBtn && trackMapContainer) {
-            trackMapToggleBtn.addEventListener('click', () => {
+            // Remove any existing listeners to avoid duplicates
+            trackMapToggleBtn.replaceWith(trackMapToggleBtn.cloneNode(true));
+            const newTrackMapBtn = document.getElementById('track-map-toggle-btn');
+            newTrackMapBtn.addEventListener('click', (e) => {
+                e.preventDefault();
                 trackMapContainer.classList.toggle('collapsed');
-                console.log('🔄 Track map container toggled');
+                console.log('Track map container toggled, collapsed state:', trackMapContainer.classList.contains('collapsed'));
             });
+            console.log('Track map toggle listener attached');
+        } else {
+            console.warn('Track map toggle button or container not found');
         }
     }
 
