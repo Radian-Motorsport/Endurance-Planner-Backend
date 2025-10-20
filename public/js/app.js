@@ -1414,19 +1414,19 @@ class RadianPlannerApp {
             // Determine color based on safety rating class
             switch(groupLetter) {
                 case 'A':
-                    groupColorClass = 'bg-blue-400 text-blue-900';
+                    groupColorClass = 'bg-blue-500 text-blue-800';
                     break;
                 case 'B':
-                    groupColorClass = 'bg-green-400 text-green-900';
+                    groupColorClass = 'bg-green-500 text-green-800';
                     break;
                 case 'C':
-                    groupColorClass = 'bg-yellow-400 text-yellow-900';
+                    groupColorClass = 'bg-yellow-500 text-yellow-800';
                     break;
                 case 'D':
-                    groupColorClass = 'bg-red-400 text-red-900';
+                    groupColorClass = 'bg-red-500 text-red-800';
                     break;
                 default:
-                    groupColorClass = 'bg-neutral-400 text-neutral-900';
+                    groupColorClass = 'bg-neutral-400 text-neutral-800';
             }
             
             li.innerHTML = `
@@ -1841,19 +1841,19 @@ class RadianPlannerApp {
                     
                     switch(groupLetter) {
                         case 'A':
-                            groupColorClass = 'bg-blue-400 text-blue-900';
+                            groupColorClass = 'bg-blue-500 text-blue-800';
                             break;
                         case 'B':
-                            groupColorClass = 'bg-green-400 text-green-900';
+                            groupColorClass = 'bg-green-500 text-green-800';
                             break;
                         case 'C':
-                            groupColorClass = 'bg-yellow-400 text-yellow-900';
+                            groupColorClass = 'bg-yellow-500 text-yellow-800';
                             break;
                         case 'D':
-                            groupColorClass = 'bg-red-400 text-red-900';
+                            groupColorClass = 'bg-red-500 text-red-800';
                             break;
                         default:
-                            groupColorClass = 'bg-neutral-400 text-neutral-900';
+                            groupColorClass = 'bg-neutral-400 text-neutral-800';
                     }
                     
                     return `
