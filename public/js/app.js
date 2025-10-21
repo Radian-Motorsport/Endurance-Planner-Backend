@@ -2734,6 +2734,49 @@ class RadianPlannerApp {
 
         if (!strategyId) {
             return; // No shared strategy in URL
+        }
+
+        try {
+            const response = await fetch(`/api/strategies/${strategyId}`);
+            if (!response.ok) {
+                throw new Error('Strategy not found');
+            }
+
+            const strategyData = await response.json();
+            console.log('📥 Loaded shared strategy:', strategyData);
+
+            // Apply shared strategy data
+            if (strategyData.selectedSeries) {
+                const seriesSelect = document.getElementById('series-select');
+                if (seriesSelect) {
+                    seriesSelect.value = strategyData.selectedSeries.series_id;
+                    await this.handleSeriesSelection(strategyData.selectedSeries.series_id);
+                }
+            }
+
+            if (strategyData.selectedEvent) {
+                const eventSelect = document.getElementById('event-select');
+                if (eventSelect) {
+                    eventSelect.value = strategyData.selectedEvent.event_id;
+                    await this.handleEventSelection(strategyData.selectedEvent.event_id);
+                }
+            }
+
+            if (strategyData.selectedTrack) {
+                const trackSelect = document.getElementById('track-select');
+                if (trackSelect) {
+                    trackSelect.value = strategyData.selectedTrack.name;
+                    this.handleTrackSelection(strategyData.selectedTrack.name);
+
+                    // Load track map if available
+                    const trackMapContainer = document.getElementById('track-map-container');
+                    if (trackMapContainer && strategyData.selectedTrack.track_map_layers) {
+                        trackMapContainer.classList.remove('collapsed');
+                    }
+                }
+            }
+
+            if (strategyData.selectedCar) {
                 await this.populateCarsByClass(strategyData.selectedCar.class_id);
                 const carSelect = document.getElementById('car-select');
                 if (carSelect) {
