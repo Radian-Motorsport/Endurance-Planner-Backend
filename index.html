@@ -505,10 +505,10 @@
                 <!-- Race Inputs -->
                 <div id="race-inputs-container" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg">
                     <h1 class="text-xl mb-4 road-rage-font">Race Inputs</h1>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-6 mb-6">
                         <div class="flex flex-col">
                             <label class="text-sm font-medium text-neutral-500 text-center mb-2">Race Duration (Minutes)</label>
-                            <div class="flex justify-center">
+                            <div class="flex justify-center min-h-[2.5rem]">
                                 <!-- Display total race duration in minutes (generated from Page 1). Hidden inputs kept for compatibility -->
                                 <div id="race-duration-minutes-display" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 text-center min-w-[5rem]">-</div>
                                 <input type="hidden" id="race-duration-hours" value="0">
@@ -517,7 +517,7 @@
                         </div>
                         <div class="flex flex-col">
                             <label class="text-sm font-medium text-neutral-500 text-center mb-2">Avg. Lap Time</label>
-                            <div class="flex items-center justify-center space-x-2">
+                            <div class="flex items-center justify-center space-x-2 min-h-[2.5rem]">
                                 <input type="number" id="avg-lap-time-minutes" placeholder="" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <span class="text-neutral-500 text-sm">min</span>
                                 <input type="number" id="avg-lap-time-seconds" placeholder="" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
@@ -526,24 +526,23 @@
                         </div>
                         <div class="flex flex-col">
                             <label for="pit-stop-time" class="text-sm font-medium text-neutral-500 text-center mb-2">Avg. Pit Stop Time (sec)</label>
-                            <div class="flex justify-center">
+                            <div class="flex justify-center min-h-[2.5rem]">
                                 <input type="number" id="pit-stop-time" value="90" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                             </div>
                         </div>
                         <div class="flex flex-col">
                             <label for="fuel-per-lap-display-input" class="text-sm font-medium text-neutral-500 text-center mb-2">Fuel Use per Lap (L)</label>
-                            <div class="flex justify-center">
+                            <div class="flex justify-center min-h-[2.5rem]">
                                 <input type="number" id="fuel-per-lap-display-input" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                             </div>
                         </div>
                         <div class="flex flex-col">
                             <label for="tank-capacity-display-input" class="text-sm font-medium text-neutral-500 text-center mb-2">Fuel Tank Size (L)</label>
-                            <div class="flex justify-center">
+                            <div class="flex justify-center min-h-[2.5rem]">
                                 <input type="number" id="tank-capacity-display-input" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                             </div>
                         </div>
-                        <!-- Empty grid item for better spacing -->
-                        <div class="hidden lg:block"></div>
+
                     </div>
                     
                     <!-- Calculate Button - Outside the grid for better alignment -->
