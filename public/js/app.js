@@ -44,6 +44,9 @@ class RadianPlannerApp {
             // Setup event listeners
             this.setupEventListeners();
             
+            // Check for shared strategy in URL
+            await this.checkForSharedStrategy();
+            
             console.log('✅ RadianPlanner initialized successfully!');
         } catch (error) {
             console.error('❌ Failed to initialize RadianPlanner:', error);
@@ -1186,6 +1189,21 @@ class RadianPlannerApp {
         const desktopModeBtn = document.getElementById('desktopModeBtn');
         if (desktopModeBtn) {
             desktopModeBtn.addEventListener('click', () => this.toggleDesktopMode());
+        }
+
+        // Share link functionality
+        const generateShareBtn = document.getElementById('generate-share-btn');
+        const copyShareBtn = document.getElementById('copy-share-btn');
+        const saveUpdateBtn = document.getElementById('save-update-btn');
+
+        if (generateShareBtn) {
+            generateShareBtn.addEventListener('click', () => this.generateShareLink());
+        }
+        if (copyShareBtn) {
+            copyShareBtn.addEventListener('click', () => this.copyShareLink());
+        }
+        if (saveUpdateBtn) {
+            saveUpdateBtn.addEventListener('click', () => this.updateShareLink());
         }
 
         // Setup Adjustment Sliders (Page 2)
@@ -2401,6 +2419,302 @@ class RadianPlannerApp {
         const minutes = Math.floor(seconds / 60);
         const secs = (seconds % 60).toFixed(3);
         return `${minutes}:${secs.padStart(6, '0')}`;
+    }
+
+    // ===============================
+    // SHARE LINK FUNCTIONALITY
+    // ===============================
+
+    /**
+     * Generate a shareable link for the current strategy
+     */
+    async generateShareLink() {
+        try {
+            // Collect all current app state
+            const strategyData = {
+                // Page 1 selections
+                selectedSeries: this.selectedSeries,
+                selectedEvent: this.selectedSessionDetails,
+                selectedTrack: this.selectedTrack,
+                selectedCar: this.selectedCar,
+                selectedDrivers: this.selectedDrivers,
+
+                // Page 2 form data
+                formData: this.collectPage2FormData(),
+
+                // Strategy calculator state
+                strategyState: this.strategyCalculator ? {
+                    totalStints: this.strategyCalculator.totalStints,
+                    raceDurationSeconds: this.strategyCalculator.raceDurationSeconds,
+                    lapsPerStint: this.strategyCalculator.lapsPerStint,
+                    pitStopTime: this.strategyCalculator.pitStopTime,
+                    isLocalTimeMode: this.strategyCalculator.isLocalTimeMode,
+                    selectedDriverForLocalTime: this.strategyCalculator.selectedDriverForLocalTime
+                } : null,
+
+                // Timestamp for when strategy was created
+                createdAt: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            console.log('📤 Saving strategy data:', strategyData);
+
+            // Save to server
+            const response = await fetch('/api/strategies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(strategyData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save strategy');
+            }
+
+            const result = await response.json();
+            const shareUrl = `${window.location.origin}${window.location.pathname}?strategy=${result.id}`;
+
+            // Update UI
+            const shareLinkOutput = document.getElementById('share-link-output');
+            if (shareLinkOutput) {
+                shareLinkOutput.value = shareUrl;
+            }
+
+            // Show save update button
+            const saveUpdateBtn = document.getElementById('save-update-btn');
+            if (saveUpdateBtn) {
+                saveUpdateBtn.classList.remove('hidden');
+                saveUpdateBtn.dataset.strategyId = result.id;
+            }
+
+            this.uiManager.showNotification('Share link generated successfully!', 'success');
+            console.log('🔗 Generated share URL:', shareUrl);
+
+        } catch (error) {
+            console.error('❌ Failed to generate share link:', error);
+            this.uiManager.showNotification('Failed to generate share link', 'error');
+        }
+    }
+
+    /**
+     * Copy the share link to clipboard
+     */
+    async copyShareLink() {
+        const shareLinkOutput = document.getElementById('share-link-output');
+        if (!shareLinkOutput || !shareLinkOutput.value) {
+            this.uiManager.showNotification('No share link to copy', 'error');
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(shareLinkOutput.value);
+            this.uiManager.showNotification('Share link copied to clipboard!', 'success');
+        } catch (error) {
+            console.error('❌ Failed to copy to clipboard:', error);
+            // Fallback for older browsers
+            shareLinkOutput.select();
+            document.execCommand('copy');
+            this.uiManager.showNotification('Share link copied to clipboard!', 'success');
+        }
+    }
+
+    /**
+     * Update an existing shared strategy
+     */
+    async updateShareLink() {
+        const saveUpdateBtn = document.getElementById('save-update-btn');
+        const strategyId = saveUpdateBtn?.dataset.strategyId;
+
+        if (!strategyId) {
+            this.uiManager.showNotification('No strategy to update', 'error');
+            return;
+        }
+
+        try {
+            // Collect current state
+            const strategyData = {
+                selectedSeries: this.selectedSeries,
+                selectedEvent: this.selectedSessionDetails,
+                selectedTrack: this.selectedTrack,
+                selectedCar: this.selectedCar,
+                selectedDrivers: this.selectedDrivers,
+                formData: this.collectPage2FormData(),
+                strategyState: this.strategyCalculator ? {
+                    totalStints: this.strategyCalculator.totalStints,
+                    raceDurationSeconds: this.strategyCalculator.raceDurationSeconds,
+                    lapsPerStint: this.strategyCalculator.lapsPerStint,
+                    pitStopTime: this.strategyCalculator.pitStopTime,
+                    isLocalTimeMode: this.strategyCalculator.isLocalTimeMode,
+                    selectedDriverForLocalTime: this.strategyCalculator.selectedDriverForLocalTime
+                } : null,
+                updatedAt: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            // Update on server
+            const response = await fetch(`/api/strategies/${strategyId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(strategyData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update strategy');
+            }
+
+            this.uiManager.showNotification('Strategy updated successfully!', 'success');
+
+        } catch (error) {
+            console.error('❌ Failed to update strategy:', error);
+            this.uiManager.showNotification('Failed to update strategy', 'error');
+        }
+    }
+
+    /**
+     * Check for shared strategy in URL parameters and load it
+     */
+    async checkForSharedStrategy() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const strategyId = urlParams.get('strategy');
+
+        if (!strategyId) {
+            return; // No shared strategy in URL
+        }
+
+        try {
+            console.log('🔗 Loading shared strategy:', strategyId);
+
+            // Fetch strategy from server
+            const response = await fetch(`/api/strategies/${strategyId}`);
+            if (!response.ok) {
+                throw new Error('Strategy not found');
+            }
+
+            const strategyData = await response.json();
+            console.log('📥 Loaded strategy data:', strategyData);
+
+            // Apply the loaded strategy data to the app
+            await this.applySharedStrategy(strategyData);
+
+            // Update URL to remove the strategy parameter (cleaner)
+            const newUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+
+            this.uiManager.showNotification('Shared strategy loaded successfully!', 'success');
+
+        } catch (error) {
+            console.error('❌ Failed to load shared strategy:', error);
+            this.uiManager.showNotification('Failed to load shared strategy', 'error');
+        }
+    }
+
+    /**
+     * Apply loaded strategy data to the application
+     */
+    async applySharedStrategy(strategyData) {
+        try {
+            // Apply Page 1 selections
+            if (strategyData.selectedSeries) {
+                this.selectedSeries = strategyData.selectedSeries;
+                // Update UI for selected series
+                this.displaySeriesLogo();
+            }
+
+            if (strategyData.selectedEvent) {
+                this.selectedSessionDetails = strategyData.selectedEvent;
+                // Populate events dropdown and select the event
+                await this.populateEventsDropdown(this.selectedSeries?.series_id);
+                const eventSelect = document.getElementById('event-select');
+                if (eventSelect) {
+                    eventSelect.value = strategyData.selectedEvent.event_id;
+                }
+            }
+
+            if (strategyData.selectedTrack) {
+                this.selectedTrack = strategyData.selectedTrack;
+            }
+
+            if (strategyData.selectedCar) {
+                this.selectedCar = strategyData.selectedCar;
+                // Populate cars and select
+                await this.populateCarsByClass(strategyData.selectedCar.class_id);
+                const carSelect = document.getElementById('car-select');
+                if (carSelect) {
+                    carSelect.value = strategyData.selectedCar.car_id;
+                    await this.handleCarSelection(strategyData.selectedCar.car_id);
+                }
+            }
+
+            if (strategyData.selectedDrivers && Array.isArray(strategyData.selectedDrivers)) {
+                this.selectedDrivers = strategyData.selectedDrivers;
+                this.updateDriversList();
+            }
+
+            // Apply Page 2 form data
+            if (strategyData.formData) {
+                this.applyPage2FormData(strategyData.formData);
+            }
+
+            // Apply strategy calculator state
+            if (strategyData.strategyState && this.strategyCalculator) {
+                Object.assign(this.strategyCalculator, strategyData.strategyState);
+            }
+
+            // Navigate to Page 2 if we have form data
+            if (strategyData.formData) {
+                this.uiManager.showPage2();
+            }
+
+        } catch (error) {
+            console.error('❌ Failed to apply shared strategy:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Apply Page 2 form data from shared strategy
+     */
+    applyPage2FormData(formData) {
+        // Helper function to set value if element exists
+        const setValue = (id, value) => {
+            const element = document.getElementById(id);
+            if (element && value !== undefined && value !== null) {
+                element.value = value;
+            }
+        };
+
+        setValue('race-duration-hours', formData.raceDurationHours);
+        setValue('race-duration-minutes', formData.raceDurationMinutes);
+        setValue('avg-lap-time-minutes', formData.avgLapTimeMinutes);
+        setValue('avg-lap-time-seconds', formData.avgLapTimeSeconds);
+        setValue('fuel-per-lap-display-input', formData.fuelPerLap);
+        setValue('tank-capacity-display-input', formData.tankCapacity);
+        setValue('pit-stop-time-display-input', formData.pitStopTime);
+        setValue('fuel-slider', formData.fuelSlider || '0');
+        setValue('lap-time-slider', formData.lapTimeSlider || '0');
+
+        // Trigger adjustment display updates
+        this.updateAdjustmentDisplayOnly();
+    }
+
+    /**
+     * Collect Page 2 form data for sharing
+     */
+    collectPage2FormData() {
+        return {
+            raceDurationHours: document.getElementById('race-duration-hours')?.value || '',
+            raceDurationMinutes: document.getElementById('race-duration-minutes')?.value || '',
+            avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes')?.value || '',
+            avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds')?.value || '',
+            fuelPerLap: document.getElementById('fuel-per-lap-display-input')?.value || '',
+            tankCapacity: document.getElementById('tank-capacity-display-input')?.value || '',
+            pitStopTime: document.getElementById('pit-stop-time-display-input')?.value || '',
+            fuelSlider: document.getElementById('fuel-slider')?.value || '0',
+            lapTimeSlider: document.getElementById('lap-time-slider')?.value || '0'
+        };
     }
 }
 
