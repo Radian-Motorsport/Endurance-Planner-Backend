@@ -24,6 +24,17 @@ export class StrategyCalculator {
     }
 
     /**
+     * Set session metadata for weather and track component loading
+     * @param {string|number} trackId - The track ID
+     * @param {string|number} eventId - The event ID
+     */
+    setSessionMetadata(trackId, eventId) {
+        this.trackId = trackId;
+        this.eventId = eventId;
+        console.log('📊 Session metadata set:', { trackId, eventId });
+    }
+
+    /**
      * Calculate race strategy and populate results
      * @param {Object} raceData - Race configuration data
      * @returns {Object} Calculation results

@@ -1495,6 +1495,20 @@ class RadianPlannerApp {
         return drivers;
     }
 
+    collectPage2FormData() {
+        return {
+            raceDurationHours: document.getElementById('race-duration-hours')?.value || '',
+            raceDurationMinutes: document.getElementById('race-duration-minutes')?.value || '',
+            avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes')?.value || '',
+            avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds')?.value || '',
+            fuelPerLap: document.getElementById('fuel-per-lap-display-input')?.value || '',
+            tankCapacity: document.getElementById('tank-capacity-display-input')?.value || '',
+            pitStopTime: document.getElementById('pit-stop-time-display-input')?.value || '',
+            fuelSlider: document.getElementById('fuel-slider')?.value || '0',
+            lapTimeSlider: document.getElementById('lap-time-slider')?.value || '0'
+        };
+    }
+
     validateFormData(formData) {
         return formData.trackName && 
                formData.raceLength > 0 && 
@@ -2655,6 +2669,18 @@ class RadianPlannerApp {
             if (strategyData.selectedDrivers && Array.isArray(strategyData.selectedDrivers)) {
                 this.selectedDrivers = strategyData.selectedDrivers;
                 this.updateDriversList();
+            }
+
+            // Set session metadata for strategy calculator (needed for weather/track loading)
+            if (this.strategyCalculator && strategyData.selectedEvent && strategyData.selectedTrack) {
+                this.strategyCalculator.setSessionMetadata(
+                    strategyData.selectedTrack.garage61_id || strategyData.selectedTrack.track_id,
+                    strategyData.selectedEvent.event_id
+                );
+
+                // Load weather and track components now that metadata is set
+                await this.strategyCalculator.loadWeatherComponent();
+                await this.strategyCalculator.loadTrackMapComponent();
             }
 
             // Apply Page 2 form data
