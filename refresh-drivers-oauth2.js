@@ -5,6 +5,8 @@
 
 const iRacingOAuth2Client = require('./iracing-oauth2-client.js');
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 
 class DriverRefreshService {
     constructor() {
@@ -186,6 +188,26 @@ class DriverRefreshService {
 
             console.log(`📋 Found ${drivers.length} drivers to refresh with full details`);
 
+            // Get existing columns in drivers table to avoid updating non-existent columns
+            let existingColumns = new Set();
+            try {
+                const columnsResult = await pool.query(`
+                    SELECT column_name 
+                    FROM information_schema.columns 
+                    WHERE table_name = 'drivers' AND table_schema = 'public'
+                `);
+                existingColumns = new Set(columnsResult.rows.map(row => row.column_name));
+                console.log(`📊 Found ${existingColumns.size} columns in drivers table:`, Array.from(existingColumns));
+            } catch (columnError) {
+                console.warn(`⚠️  Could not query table columns, falling back to basic fields: ${columnError.message}`);
+                // Fallback to known safe columns
+                existingColumns = new Set([
+                    'cust_id', 'sports_car_irating', 'sports_car_safety_rating', 'data_fetched_at',
+                    'display_name', 'country', 'member_since', 'last_login', 'sports_car_license_level',
+                    'oval_irating', 'dirt_oval_irating', 'dirt_road_irating', 'ai_driver'
+                ]);
+            }
+
             // Prepare cust_ids array for iRacing API
             const custIds = drivers.map(driver => driver.cust_id);
 
@@ -216,6 +238,24 @@ class DriverRefreshService {
 
             // Update database with comprehensive driver data
             let updatedCount = 0;
+
+            // Define sample updateData to get field count for return statement
+            const sampleUpdateData = {
+                cust_id: 0,
+                display_name: '',
+                country: '',
+                member_since: null,
+                last_login: null,
+                sports_car_license_level: 0,
+                sports_car_group_name: '',
+                sports_car_safety_rating: '',
+                oval_irating: 0,
+                dirt_oval_irating: 0,
+                dirt_road_irating: 0,
+                ai_driver: false,
+                data_fetched_at: new Date()
+            };
+
             for (const member of data.members) {
                 try {
                     // Extract license data for different categories
@@ -257,10 +297,28 @@ class DriverRefreshService {
                         data_fetched_at: new Date()
                     };
 
-                    // Build dynamic update query - EXCLUDE garage61_slug, name, timezone to preserve them
-                    const updateFields = Object.keys(updateData).filter(key => updateData[key] !== undefined);
+                    // Filter updateData to only include columns that exist in the database
+                    // EXCLUDE garage61_slug, name, timezone to preserve them
+                    const filteredUpdateData = {};
+                    const preserveColumns = new Set(['garage61_slug', 'name', 'timezone']);
+                    
+                    for (const [key, value] of Object.entries(updateData)) {
+                        if (existingColumns.has(key) && !preserveColumns.has(key) && value !== undefined) {
+                            filteredUpdateData[key] = value;
+                        }
+                    }
+
+                    console.log(`🔄 Updating driver ${member.cust_id} with ${Object.keys(filteredUpdateData).length} fields:`, Object.keys(filteredUpdateData));
+
+                    // Build dynamic update query - only update existing columns
+                    const updateFields = Object.keys(filteredUpdateData);
+                    if (updateFields.length === 0) {
+                        console.log(`⚠️  No valid columns to update for driver ${member.cust_id}, skipping`);
+                        continue;
+                    }
+
                     const setClause = updateFields.map((field, index) => `${field} = $${index + 1}`).join(', ');
-                    const values = updateFields.map(field => updateData[field]);
+                    const values = updateFields.map(field => filteredUpdateData[field]);
                     values.push(member.cust_id); // Add cust_id for WHERE clause
 
                     const updateQuery = `
@@ -272,7 +330,7 @@ class DriverRefreshService {
                     await pool.query(updateQuery, values);
                     updatedCount++;
 
-                    console.log(`✅ Updated ${member.display_name} (${member.cust_id}) with full details (preserved garage61_slug, name, timezone)`);                } catch (updateError) {
+                    console.log(`✅ Updated ${member.display_name} (${member.cust_id}) with ${updateFields.length} fields (preserved garage61_slug, name, timezone)`);                } catch (updateError) {
                     console.error(`❌ Failed to update driver ${member.cust_id} (${member.display_name || 'Unknown'}):`, updateError.message);
                 }
             }
@@ -284,7 +342,7 @@ class DriverRefreshService {
                 totalDrivers: drivers.length,
                 updatedCount: updatedCount,
                 timestamp: new Date().toISOString(),
-                dataFields: Object.keys(updateData).length
+                dataFields: Object.keys(sampleUpdateData).length
             };
 
         } catch (error) {
