@@ -1369,4 +1369,48 @@ export class StrategyCalculator {
             this.recalculateWithAdjustments();
         }
     }
+
+    /**
+     * Setup collapsible handlers for weather and track map containers
+     */
+    setupCollapsibleHandlers() {
+        console.log('🔧 Setting up collapsible handlers for weather and track map...');
+
+        // Weather toggle button
+        const weatherToggleBtn = document.getElementById('weather-toggle-btn');
+        if (weatherToggleBtn) {
+            weatherToggleBtn.addEventListener('click', () => {
+                this.toggleContainer('weather-display-page2');
+            });
+        }
+
+        // Track map toggle button
+        const trackMapToggleBtn = document.getElementById('track-map-toggle-btn');
+        if (trackMapToggleBtn) {
+            trackMapToggleBtn.addEventListener('click', () => {
+                this.toggleContainer('track-map-container-page2');
+            });
+        }
+    }
+
+    /**
+     * Toggle a collapsible container
+     * @param {string} containerId - ID of the container to toggle
+     */
+    toggleContainer(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const isCollapsed = container.classList.contains('collapsed');
+
+        if (isCollapsed) {
+            // Expand
+            container.classList.remove('collapsed');
+            console.log(`📂 Expanded ${containerId}`);
+        } else {
+            // Collapse
+            container.classList.add('collapsed');
+            console.log(`📁 Collapsed ${containerId}`);
+        }
+    }
 }
