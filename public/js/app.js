@@ -1263,10 +1263,13 @@ class RadianPlannerApp {
                 // Pass session metadata (track and event IDs) for weather and track map
                 if (this.strategyCalculator && this.selectedSessionDetails) {
                     this.strategyCalculator.setSessionMetadata(
-                        this.selectedSessionDetails.track_id,
+                        this.selectedSessionDetails.track_garage61_id || this.selectedSessionDetails.track_id,
                         this.selectedSessionDetails.event_id
                     );
-                    console.log('📍 Passed session metadata to strategy calculator');
+                    console.log('📍 Passed session metadata to strategy calculator:', {
+                        trackId: this.selectedSessionDetails.track_garage61_id || this.selectedSessionDetails.track_id,
+                        eventId: this.selectedSessionDetails.event_id
+                    });
                 }
 
                 const formData = this.collectFormData();

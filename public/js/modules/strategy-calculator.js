@@ -29,9 +29,10 @@ export class StrategyCalculator {
      * @param {string|number} eventId - The event ID
      */
     setSessionMetadata(trackId, eventId) {
+        console.log('📊 Setting session metadata:', { trackId, eventId });
         this.trackId = trackId;
         this.eventId = eventId;
-        console.log('📊 Session metadata set:', { trackId, eventId });
+        console.log('📊 Session metadata set:', { trackId: this.trackId, eventId: this.eventId });
     }
 
     /**
@@ -96,7 +97,7 @@ export class StrategyCalculator {
      * @async
      */
     async recalculateWithAdjustments() {
-        console.log('🔄 Recalculating with slider adjustments...');
+        console.log('🔄 Recalculating with slider adjustments, current metadata:', { eventId: this.eventId, trackId: this.trackId });
 
         try {
             // Store current stint count to detect if table structure changed
@@ -796,8 +797,9 @@ export class StrategyCalculator {
      * @private
      */
     async loadWeatherComponent() {
+        console.log('🌤️ Loading weather component, current metadata:', { eventId: this.eventId, trackId: this.trackId });
         if (!this.eventId) {
-            console.warn('⚠️ No event ID available for weather component');
+            console.warn('⚠️ No event ID available for weather component - this is normal for manual track entries');
             return;
         }
 
@@ -843,8 +845,9 @@ export class StrategyCalculator {
      * @private
      */
     async loadTrackMapComponent() {
+        console.log('🗺️ Loading track map component, current metadata:', { eventId: this.eventId, trackId: this.trackId });
         if (!this.trackId) {
-            console.warn('⚠️ No track ID available for track map component');
+            console.warn('⚠️ No track ID available for track map component - this is normal for manual track entries');
             return;
         }
 
