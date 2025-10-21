@@ -300,3 +300,16 @@ select {
     flex: 1 !important;
     min-width: 180px !important;
 }
+
+/* Race Inputs - Match safety margin box sizing */
+#race-inputs-container input[type="number"] {
+    padding: 0.25rem 0.5rem !important; /* p-1 equivalent */
+    font-size: 0.875rem !important; /* text-sm */
+    width: 5rem !important; /* w-20 equivalent */
+    max-width: none !important; /* Remove max-w-xs constraint */
+}
+
+#race-inputs-container input[type="number"]#avg-lap-time-minutes,
+#race-inputs-container input[type="number"]#avg-lap-time-seconds {
+    width: 3rem !important; /* Smaller width for time inputs */
+}
