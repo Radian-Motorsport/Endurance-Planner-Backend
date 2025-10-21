@@ -86,23 +86,34 @@ export class StrategyCalculator {
      */
     async recalculateWithAdjustments() {
         console.log('🔄 Recalculating with slider adjustments...');
-        
+
         try {
+            // Store current stint count to detect if table structure changed
+            const previousTotalStints = this.totalStints;
+
             // Extract base inputs from form
             const inputs = this.extractInputs();
-            
+
             // Apply slider adjustments
             const adjustedInputs = this.applySliderAdjustments(inputs);
-            
+
             // Perform calculations
             const calculations = this.performCalculations(adjustedInputs);
-            
+
             // Update displays
             this.updateDisplays(calculations, adjustedInputs);
-            
-            // Update stint table values WITHOUT rebuilding entire DOM
-            this.updateStintTableValues(adjustedInputs.avgLapTimeInSeconds);
-            
+
+            // Check if table structure changed (number of stints changed)
+            if (this.totalStints !== previousTotalStints) {
+                console.log(`🔄 Table structure changed: ${previousTotalStints} → ${this.totalStints} stints, rebuilding table...`);
+                // Rebuild entire table if stint count changed
+                await this.populateStintTable(adjustedInputs.avgLapTimeInSeconds);
+            } else {
+                console.log('🔄 Table structure unchanged, updating values only...');
+                // Update stint table values WITHOUT rebuilding entire DOM
+                this.updateStintTableValues(adjustedInputs.avgLapTimeInSeconds);
+            }
+
             console.log('✅ Recalculation complete');
         } catch (error) {
             console.error('❌ Recalculation failed:', error);
@@ -568,6 +579,9 @@ export class StrategyCalculator {
 
         // Set up collapsible handlers for weather and track map
         this.setupCollapsibleHandlers();
+
+        // Set up slider event listeners
+        this.setupSliderEventListeners();
 
         // Force chart resize after containers are visible
         // Use setTimeout to ensure DOM has updated
@@ -1126,5 +1140,167 @@ export class StrategyCalculator {
                 }
             }
         });
+    }
+
+    /**
+     * Set up collapsible handlers for weather and track map sections
+     */
+    setupCollapsibleHandlers() {
+        // Weather toggle
+        const weatherToggle = document.getElementById('weather-toggle-btn');
+        const weatherContent = document.getElementById('weather-content');
+        if (weatherToggle && weatherContent) {
+            weatherToggle.addEventListener('click', () => {
+                const isCollapsed = weatherContent.classList.contains('weather-collapsible');
+                if (isCollapsed) {
+                    weatherContent.classList.remove('weather-collapsible');
+                    weatherToggle.querySelector('i').className = 'fas fa-chevron-up weather-toggle-icon';
+                } else {
+                    weatherContent.classList.add('weather-collapsible');
+                    weatherToggle.querySelector('i').className = 'fas fa-chevron-down weather-toggle-icon';
+                }
+            });
+        }
+
+        // Track map toggle
+        const trackMapToggle = document.getElementById('track-map-toggle-btn');
+        const trackMapContent = document.getElementById('track-map-content');
+        if (trackMapToggle && trackMapContent) {
+            trackMapToggle.addEventListener('click', () => {
+                const isCollapsed = trackMapContent.classList.contains('track-map-collapsible');
+                if (isCollapsed) {
+                    trackMapContent.classList.remove('track-map-collapsible');
+                    trackMapToggle.querySelector('i').className = 'fas fa-chevron-up track-map-toggle-icon';
+                } else {
+                    trackMapContent.classList.add('track-map-collapsible');
+                    trackMapToggle.querySelector('i').className = 'fas fa-chevron-down track-map-toggle-icon';
+                }
+            });
+        }
+    }
+
+    /**
+     * Set up event listeners for fuel and lap time sliders
+     */
+    setupSliderEventListeners() {
+        console.log('🔧 Setting up slider event listeners...');
+
+        // Fuel slider
+        const fuelSlider = document.getElementById('fuel-slider');
+        if (fuelSlider) {
+            fuelSlider.addEventListener('input', () => {
+                this.updateSliderDisplays();
+                this.recalculateWithAdjustments();
+            });
+        }
+
+        // Lap time slider
+        const lapTimeSlider = document.getElementById('lap-time-slider');
+        if (lapTimeSlider) {
+            lapTimeSlider.addEventListener('input', () => {
+                this.updateSliderDisplays();
+                this.recalculateWithAdjustments();
+            });
+        }
+
+        // +/- buttons for fuel adjustment
+        document.querySelectorAll('[data-adjust="fuel"]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const adjustment = parseFloat(button.dataset.value) || 0;
+                this.adjustFuelSlider(adjustment);
+            });
+        });
+
+        // +/- buttons for lap time adjustment
+        document.querySelectorAll('[data-adjust="lapTime"]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const adjustment = parseFloat(button.dataset.value) || 0;
+                this.adjustLapTimeSlider(adjustment);
+            });
+        });
+
+        // Update displays initially
+        this.updateSliderDisplays();
+    }
+
+    /**
+     * Update slider value displays
+     */
+    updateSliderDisplays() {
+        // Update fuel slider display
+        const fuelSlider = document.getElementById('fuel-slider');
+        const fuelValueDisplay = document.getElementById('fuel-slider-value');
+        const fuelOriginalDisplay = document.getElementById('fuel-original-value');
+        const fuelAdjustedDisplay = document.getElementById('fuel-adjusted-value');
+
+        if (fuelSlider && fuelValueDisplay) {
+            const currentValue = parseFloat(fuelSlider.value) || 0;
+            fuelValueDisplay.textContent = currentValue.toFixed(2);
+
+            // Calculate and display adjusted fuel per lap
+            const baseFuel = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value) || 0;
+            const adjustedFuel = baseFuel + currentValue;
+
+            if (fuelOriginalDisplay) fuelOriginalDisplay.textContent = baseFuel.toFixed(1) + ' L';
+            if (fuelAdjustedDisplay) fuelAdjustedDisplay.textContent = adjustedFuel.toFixed(1) + ' L';
+        }
+
+        // Update lap time slider display
+        const lapTimeSlider = document.getElementById('lap-time-slider');
+        const lapTimeValueDisplay = document.getElementById('lap-time-slider-value');
+        const lapTimeOriginalDisplay = document.getElementById('lap-time-original-value');
+        const lapTimeAdjustedDisplay = document.getElementById('lap-time-adjusted-value');
+
+        if (lapTimeSlider && lapTimeValueDisplay) {
+            const currentValue = parseInt(lapTimeSlider.value) || 0;
+            lapTimeValueDisplay.textContent = currentValue.toString();
+
+            // Calculate and display adjusted lap time
+            const baseMinutes = parseInt(document.getElementById('avg-lap-time-minutes')?.value) || 0;
+            const baseSeconds = parseInt(document.getElementById('avg-lap-time-seconds')?.value) || 0;
+            const baseTotalSeconds = (baseMinutes * 60) + baseSeconds;
+            const adjustedSeconds = baseTotalSeconds + currentValue;
+
+            const adjustedMinutes = Math.floor(adjustedSeconds / 60);
+            const adjustedSecs = adjustedSeconds % 60;
+
+            const baseTimeStr = `${baseMinutes}:${baseSeconds.toString().padStart(2, '0')}`;
+            const adjustedTimeStr = `${adjustedMinutes}:${adjustedSecs.toString().padStart(2, '0')}`;
+
+            if (lapTimeOriginalDisplay) lapTimeOriginalDisplay.textContent = baseTimeStr;
+            if (lapTimeAdjustedDisplay) lapTimeAdjustedDisplay.textContent = adjustedTimeStr;
+        }
+    }
+
+    /**
+     * Adjust fuel slider by increment/decrement
+     * @param {number} adjustment - Amount to adjust
+     */
+    adjustFuelSlider(adjustment) {
+        const fuelSlider = document.getElementById('fuel-slider');
+        if (fuelSlider) {
+            const currentValue = parseFloat(fuelSlider.value) || 0;
+            const newValue = Math.max(-2.0, Math.min(2.0, currentValue + adjustment));
+            fuelSlider.value = newValue.toFixed(2);
+            this.updateSliderDisplays();
+            this.recalculateWithAdjustments();
+        }
+    }
+
+    /**
+     * Adjust lap time slider by increment/decrement
+     * @param {number} adjustment - Amount to adjust
+     */
+    adjustLapTimeSlider(adjustment) {
+        const lapTimeSlider = document.getElementById('lap-time-slider');
+        if (lapTimeSlider) {
+            const currentValue = parseInt(lapTimeSlider.value) || 0;
+            const newValue = Math.max(-3, Math.min(3, currentValue + adjustment));
+            lapTimeSlider.value = newValue;
+            this.updateSliderDisplays();
+            this.recalculateWithAdjustments();
+        }
     }
 }

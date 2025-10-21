@@ -26,6 +26,8 @@ class RadianPlannerApp {
         this.selectedCar = null;
         this.selectedSeries = null;
         
+        this.isLoadingFromSharedLink = false; // Flag to track shared strategy loading
+        
         this.disposables = [];
         
         // Note: init() will be called manually after DOM is loaded
@@ -2616,6 +2618,8 @@ class RadianPlannerApp {
      */
     async applySharedStrategy(strategyData) {
         try {
+            // Set flag to indicate we're loading from a shared link
+            this.isLoadingFromSharedLink = true;
             // Apply Page 1 selections
             if (strategyData.selectedSeries) {
                 this.selectedSeries = strategyData.selectedSeries;
@@ -2666,6 +2670,14 @@ class RadianPlannerApp {
             // Navigate to Page 2 if we have form data
             if (strategyData.formData) {
                 this.uiManager.showPage2();
+                
+                // Automatically calculate the strategy to show results
+                console.log('🔄 Auto-calculating strategy from shared link...');
+                setTimeout(async () => {
+                    await this.calculateStrategy();
+                    // Reset the flag after calculation
+                    this.isLoadingFromSharedLink = false;
+                }, 500); // Small delay to ensure Page 2 is fully loaded
             }
 
         } catch (error) {
@@ -2701,20 +2713,42 @@ class RadianPlannerApp {
     }
 
     /**
-     * Collect Page 2 form data for sharing
+     * Update slider displays without triggering recalculation
      */
-    collectPage2FormData() {
-        return {
-            raceDurationHours: document.getElementById('race-duration-hours')?.value || '',
-            raceDurationMinutes: document.getElementById('race-duration-minutes')?.value || '',
-            avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes')?.value || '',
-            avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds')?.value || '',
-            fuelPerLap: document.getElementById('fuel-per-lap-display-input')?.value || '',
-            tankCapacity: document.getElementById('tank-capacity-display-input')?.value || '',
-            pitStopTime: document.getElementById('pit-stop-time-display-input')?.value || '',
-            fuelSlider: document.getElementById('fuel-slider')?.value || '0',
-            lapTimeSlider: document.getElementById('lap-time-slider')?.value || '0'
-        };
+    updateAdjustmentDisplayOnly() {
+        // Reset sliders to 0 when loading shared data
+        const fuelSlider = document.getElementById('fuel-slider');
+        const lapTimeSlider = document.getElementById('lap-time-slider');
+
+        if (fuelSlider) fuelSlider.value = '0';
+        if (lapTimeSlider) lapTimeSlider.value = '0';
+
+        // Update displays if strategy calculator has the method
+        if (this.strategyCalculator && this.strategyCalculator.updateSliderDisplays) {
+            this.strategyCalculator.updateSliderDisplays();
+        }
+    }
+
+    /**
+     * Calculate race strategy using the strategy calculator
+     */
+    async calculateStrategy() {
+        try {
+            console.log('🚀 Starting strategy calculation...');
+            
+            // Call the strategy calculator (it extracts inputs from the form)
+            const result = await this.strategyCalculator.calculateStrategy();
+            
+            if (result.success) {
+                console.log('✅ Strategy calculation completed successfully');
+            } else {
+                console.warn('⚠️ Strategy calculation completed with warnings:', result.error);
+            }
+            
+        } catch (error) {
+            console.error('❌ Strategy calculation failed:', error);
+            this.uiManager.showNotification('Failed to calculate strategy', 'error');
+        }
     }
 }
 
