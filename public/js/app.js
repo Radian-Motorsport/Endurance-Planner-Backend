@@ -2485,6 +2485,12 @@ class RadianPlannerApp {
                     selectedDriverForLocalTime: this.strategyCalculator.selectedDriverForLocalTime
                 } : null,
 
+                // UI state (container collapsed/expanded states)
+                uiState: {
+                    weatherCollapsed: document.getElementById('weather-display-page2')?.classList.contains('collapsed') || false,
+                    trackMapCollapsed: document.getElementById('track-map-container-page2')?.classList.contains('collapsed') || false
+                },
+
                 // Timestamp for when strategy was created
                 createdAt: new Date().toISOString(),
                 version: '1.0'
@@ -2708,6 +2714,29 @@ class RadianPlannerApp {
             // Apply strategy calculator state
             if (strategyData.strategyState && this.strategyCalculator) {
                 Object.assign(this.strategyCalculator, strategyData.strategyState);
+            }
+
+            // Apply UI state (container collapsed/expanded states)
+            if (strategyData.uiState) {
+                // Weather container state
+                const weatherContainer = document.getElementById('weather-display-page2');
+                if (weatherContainer) {
+                    if (strategyData.uiState.weatherCollapsed) {
+                        weatherContainer.classList.add('collapsed');
+                    } else {
+                        weatherContainer.classList.remove('collapsed');
+                    }
+                }
+
+                // Track map container state
+                const trackMapContainer = document.getElementById('track-map-container-page2');
+                if (trackMapContainer) {
+                    if (strategyData.uiState.trackMapCollapsed) {
+                        trackMapContainer.classList.add('collapsed');
+                    } else {
+                        trackMapContainer.classList.remove('collapsed');
+                    }
+                }
             }
 
             // Navigate to Page 2 if we have form data
