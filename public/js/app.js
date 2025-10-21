@@ -28,6 +28,9 @@ class RadianPlannerApp {
         
         this.isLoadingFromSharedLink = false; // Flag to track shared strategy loading
         
+        // Expose app instance globally for strategy calculator access
+        window.radianPlanner = this;
+        
         this.disposables = [];
         
         // Note: init() will be called manually after DOM is loaded
@@ -1262,6 +1265,12 @@ class RadianPlannerApp {
 
                 // Pass session metadata (track and event IDs) for weather and track map
                 if (this.strategyCalculator && this.selectedSessionDetails) {
+                    console.log('🔍 selectedSessionDetails exists:', !!this.selectedSessionDetails);
+                    console.log('🔍 selectedSessionDetails keys:', Object.keys(this.selectedSessionDetails));
+                    console.log('🔍 selectedSessionDetails.event_id:', this.selectedSessionDetails.event_id);
+                    console.log('🔍 selectedSessionDetails.track_garage61_id:', this.selectedSessionDetails.track_garage61_id);
+                    console.log('🔍 selectedSessionDetails.track_id:', this.selectedSessionDetails.track_id);
+                    
                     this.strategyCalculator.setSessionMetadata(
                         this.selectedSessionDetails.track_garage61_id || this.selectedSessionDetails.track_id,
                         this.selectedSessionDetails.event_id
@@ -1269,6 +1278,11 @@ class RadianPlannerApp {
                     console.log('📍 Passed session metadata to strategy calculator:', {
                         trackId: this.selectedSessionDetails.track_garage61_id || this.selectedSessionDetails.track_id,
                         eventId: this.selectedSessionDetails.event_id
+                    });
+                } else {
+                    console.log('❌ selectedSessionDetails is null or strategyCalculator is null:', {
+                        selectedSessionDetails: this.selectedSessionDetails,
+                        strategyCalculator: !!this.strategyCalculator
                     });
                 }
 

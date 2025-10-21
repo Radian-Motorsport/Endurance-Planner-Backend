@@ -98,6 +98,20 @@ export class StrategyCalculator {
      */
     async recalculateWithAdjustments() {
         console.log('🔄 Recalculating with slider adjustments, current metadata:', { eventId: this.eventId, trackId: this.trackId });
+        
+        // Ensure session metadata is still set (defensive programming)
+        if (!this.eventId || !this.trackId) {
+            console.log('⚠️ Session metadata missing during recalculation, attempting to restore...');
+            // Try to get metadata from app if available
+            if (window.radianPlanner && window.radianPlanner.selectedSessionDetails) {
+                const sessionDetails = window.radianPlanner.selectedSessionDetails;
+                this.setSessionMetadata(
+                    sessionDetails.track_garage61_id || sessionDetails.track_id,
+                    sessionDetails.event_id
+                );
+                console.log('✅ Restored session metadata during recalculation');
+            }
+        }
 
         try {
             // Store current stint count to detect if table structure changed
@@ -798,8 +812,19 @@ export class StrategyCalculator {
      */
     async loadWeatherComponent() {
         console.log('🌤️ Loading weather component, current metadata:', { eventId: this.eventId, trackId: this.trackId });
+        
+        // If metadata is missing, try to get it from the app
+        if ((!this.eventId || !this.trackId) && window.radianPlanner && window.radianPlanner.selectedSessionDetails) {
+            console.log('🔄 Metadata missing, attempting to restore from app...');
+            const sessionDetails = window.radianPlanner.selectedSessionDetails;
+            this.setSessionMetadata(
+                sessionDetails.track_garage61_id || sessionDetails.track_id,
+                sessionDetails.event_id
+            );
+        }
+        
         if (!this.eventId) {
-            console.warn('⚠️ No event ID available for weather component - this is normal for manual track entries');
+            console.warn('⚠️ No event ID available for weather component - this may be normal for manual entries or if session selection failed');
             return;
         }
 
@@ -846,8 +871,19 @@ export class StrategyCalculator {
      */
     async loadTrackMapComponent() {
         console.log('🗺️ Loading track map component, current metadata:', { eventId: this.eventId, trackId: this.trackId });
+        
+        // If metadata is missing, try to get it from the app
+        if ((!this.eventId || !this.trackId) && window.radianPlanner && window.radianPlanner.selectedSessionDetails) {
+            console.log('🔄 Metadata missing, attempting to restore from app...');
+            const sessionDetails = window.radianPlanner.selectedSessionDetails;
+            this.setSessionMetadata(
+                sessionDetails.track_garage61_id || sessionDetails.track_id,
+                sessionDetails.event_id
+            );
+        }
+        
         if (!this.trackId) {
-            console.warn('⚠️ No track ID available for track map component - this is normal for manual track entries');
+            console.warn('⚠️ No track ID available for track map component - this may be normal for manual entries or if session selection failed');
             return;
         }
 
