@@ -799,6 +799,7 @@ export class StrategyCalculator {
             }
 
             // Initialize weather component using the content div
+            const isFirstLoad = !this.weatherComponent;
             if (!this.weatherComponent) {
                 this.weatherComponent = new WeatherComponent('weather-content');
             }
@@ -813,9 +814,13 @@ export class StrategyCalculator {
             const eventWeather = await response.json();
             if (eventWeather && eventWeather.weather_url) {
                 await this.weatherComponent.loadWeatherData(eventWeather.weather_url);
-                // Keep hidden until table is shown
-                container.classList.add('hidden');
-                console.log('✅ Weather component loaded (hidden until table displays)');
+                // Only hide on first load, preserve visibility on reloads
+                if (isFirstLoad) {
+                    container.classList.add('hidden');
+                    console.log('✅ Weather component loaded (hidden until table displays)');
+                } else {
+                    console.log('✅ Weather component reloaded (keeping current visibility)');
+                }
             }
         } catch (error) {
             console.error('❌ Failed to load weather component:', error);
@@ -841,15 +846,20 @@ export class StrategyCalculator {
             }
 
             // Initialize track map component using the content div
+            const isFirstLoad = !this.trackMapComponent;
             if (!this.trackMapComponent) {
                 this.trackMapComponent = new TrackMapComponent('track-map-content');
             }
 
             // Load track map from API
             await this.trackMapComponent.loadTrackFromAPI(this.trackId);
-            // Keep hidden until table is shown
-            container.classList.add('hidden');
-            console.log('✅ Track map component loaded (hidden until table displays)');
+            // Only hide on first load, preserve visibility on reloads
+            if (isFirstLoad) {
+                container.classList.add('hidden');
+                console.log('✅ Track map component loaded (hidden until table displays)');
+            } else {
+                console.log('✅ Track map component reloaded (keeping current visibility)');
+            }
         } catch (error) {
             console.error('❌ Failed to load track map component:', error);
         }
