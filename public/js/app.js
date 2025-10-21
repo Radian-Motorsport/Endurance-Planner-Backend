@@ -1152,6 +1152,11 @@ class RadianPlannerApp {
             refreshDriversBtn.addEventListener('click', () => this.refreshAllDrivers());
         }
 
+        const refreshDriversFullBtn = document.getElementById('refresh-drivers-full-btn');
+        if (refreshDriversFullBtn) {
+            refreshDriversFullBtn.addEventListener('click', () => this.refreshAllDriversFullDetails());
+        }
+
         // Track selection
         const trackSelect = document.getElementById('track-select');
         if (trackSelect) {
@@ -1833,6 +1838,54 @@ class RadianPlannerApp {
             console.error('❌ Driver refresh failed:', error);
             this.uiManager.showNotification(
                 `Driver refresh failed: ${error.message}`, 
+                'error'
+            );
+        } finally {
+            // Restore button
+            refreshBtn.innerHTML = originalHtml;
+            refreshBtn.disabled = false;
+        }
+    }
+
+    async refreshAllDriversFullDetails() {
+        const refreshBtn = document.getElementById('refresh-drivers-full-btn');
+        const originalHtml = refreshBtn.innerHTML;
+
+        try {
+            // Update button to show loading state
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            refreshBtn.disabled = true;
+
+            this.uiManager.showNotification('Refreshing all driver details from iRacing...', 'info');
+
+            const response = await fetch('/api/drivers/refresh-all-full', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Full details refresh failed');
+            }
+
+            // Reload driver data
+            this.allData = await this.apiClient.fetchAllData();
+            this.populateDriversDropdown();
+
+            this.uiManager.showNotification(
+                `Successfully refreshed full details for ${result.updatedCount}/${result.totalDrivers} drivers`,
+                'success'
+            );
+
+            console.log(`✅ Full driver details refresh completed: ${result.updatedCount}/${result.totalDrivers} updated`);
+
+        } catch (error) {
+            console.error('❌ Full driver details refresh failed:', error);
+            this.uiManager.showNotification(
+                `Full driver details refresh failed: ${error.message}`,
                 'error'
             );
         } finally {

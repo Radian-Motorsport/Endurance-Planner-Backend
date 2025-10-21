@@ -1034,6 +1034,86 @@ app.post('/api/drivers/refresh-all', async (req, res) => {
     }
 });
 
+// Full details driver refresh endpoint
+app.post('/api/drivers/refresh-all-full', async (req, res) => {
+    try {
+        if (!pool) {
+            return res.status(500).json({ error: 'Database not available' });
+        }
+
+        console.log('🔄 Starting FULL DETAILS refresh of all drivers...');
+        const result = await driverRefreshService.refreshAllDriversFullDetails(pool);
+
+        res.json({
+            message: 'Full details driver refresh completed',
+            ...result
+        });
+    } catch (error) {
+        console.error('Full details driver refresh failed:', error.message);
+        res.status(500).json({
+            error: 'Full details driver refresh failed',
+            message: error.message
+        });
+    }
+});
+
+// Individual driver details endpoint
+app.get('/api/drivers/:custId/details', async (req, res) => {
+    try {
+        const custId = parseInt(req.params.custId);
+
+        if (!custId || isNaN(custId)) {
+            return res.status(400).json({ error: 'Invalid customer ID' });
+        }
+
+        console.log(`🔍 Fetching details for driver cust_id: ${custId}`);
+        const driverDetails = await driverRefreshService.getDriverDetails(custId);
+
+        res.json({
+            success: true,
+            driver: driverDetails
+        });
+    } catch (error) {
+        console.error(`Driver details fetch failed for cust_id ${req.params.custId}:`, error.message);
+        res.status(500).json({
+            error: 'Driver details fetch failed',
+            message: error.message
+        });
+    }
+});
+
+// Get driver details from database (without API call)
+app.get('/api/drivers/:custId', async (req, res) => {
+    try {
+        const custId = parseInt(req.params.custId);
+
+        if (!custId || isNaN(custId)) {
+            return res.status(400).json({ error: 'Invalid customer ID' });
+        }
+
+        const query = `
+            SELECT * FROM drivers
+            WHERE cust_id = $1
+        `;
+        const result = await pool.query(query, [custId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Driver not found' });
+        }
+
+        res.json({
+            success: true,
+            driver: result.rows[0]
+        });
+    } catch (error) {
+        console.error(`Database driver fetch failed for cust_id ${req.params.custId}:`, error.message);
+        res.status(500).json({
+            error: 'Database driver fetch failed',
+            message: error.message
+        });
+    }
+});
+
 
 
 // Start the server
