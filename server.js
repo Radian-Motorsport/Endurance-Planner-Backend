@@ -23,12 +23,22 @@ if (process.env.DATABASE_URL) {
             connectionString: process.env.DATABASE_URL,
             ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
         });
-        console.log('Database connection configured with URL:', process.env.DATABASE_URL.substring(0, 30) + '...');
+        console.log('✅ Database connection pool created with URL:', process.env.DATABASE_URL.substring(0, 30) + '...');
+        
+        // Test the connection
+        pool.query('SELECT NOW()', (err, result) => {
+            if (err) {
+                console.error('❌ Database connection test FAILED:', err.message);
+            } else {
+                console.log('✅ Database connection test SUCCESSFUL:', result.rows[0].now);
+            }
+        });
     } catch (error) {
-        console.error('Failed to create database pool:', error);
+        console.error('❌ Failed to create database pool:', error.message);
+        pool = null;
     }
 } else {
-    console.log('No database URL provided. Running without database features.');
+    console.log('⚠️  No database URL provided. Running without database features.');
 }
 
 // Increase JSON body size to handle full data imports
@@ -220,16 +230,27 @@ app.get('/api/data', async (req, res) => {
 // Individual API endpoints for frontend dropdown population
 app.get('/api/drivers', async (req, res) => {
     try {
+        if (!pool) {
+            console.error('❌ Pool is null when /api/drivers called');
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
         const result = await pool.query('SELECT * FROM drivers');
+        console.log(`✅ /api/drivers returned ${result.rows.length} drivers`);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error fetching drivers:', err);
-        res.status(500).send('Internal Server Error');
+        console.error('❌ Error fetching drivers:', err.message);
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
 });
 
 app.get('/api/cars', async (req, res) => {
     try {
+        if (!pool) {
+            console.error('❌ Pool is null when /api/cars called');
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+
         // Get cars with their class information
         const result = await pool.query(`
             SELECT 
@@ -241,10 +262,11 @@ app.get('/api/cars', async (req, res) => {
             LEFT JOIN car_classes cc ON c.iracing_class_id = cc.car_class_id
             ORDER BY c.car_name
         `);
+        console.log(`✅ /api/cars returned ${result.rows.length} cars`);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error fetching cars:', err);
-        res.status(500).send('Internal Server Error');
+        console.error('❌ Error fetching cars:', err.message);
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
 });
 
@@ -310,11 +332,17 @@ app.get('/api/cars/endurance', async (req, res) => {
 
 app.get('/api/tracks', async (req, res) => {
     try {
+        if (!pool) {
+            console.error('❌ Pool is null when /api/tracks called');
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+
         const result = await pool.query('SELECT * FROM tracks');
+        console.log(`✅ /api/tracks returned ${result.rows.length} tracks`);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error fetching tracks:', err);
-        res.status(500).send('Internal Server Error');
+        console.error('❌ Error fetching tracks:', err.message);
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
 });
 
