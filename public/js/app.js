@@ -1157,6 +1157,11 @@ class RadianPlannerApp {
             refreshDriversFullBtn.addEventListener('click', () => this.refreshAllDriversFullDetails());
         }
 
+        const addDriverByIdBtn = document.getElementById('add-driver-by-id-btn');
+        if (addDriverByIdBtn) {
+            addDriverByIdBtn.addEventListener('click', () => this.addDriverByCustomerId());
+        }
+
         // Track selection
         const trackSelect = document.getElementById('track-select');
         if (trackSelect) {
@@ -1897,6 +1902,66 @@ class RadianPlannerApp {
 
 
 
+    async addDriverByCustomerId() {
+        const custIdInput = document.getElementById('new-driver-cust-id');
+        const addBtn = document.getElementById('add-driver-by-id-btn');
+        const custId = custIdInput.value.trim();
+
+        if (!custId || isNaN(parseInt(custId))) {
+            this.uiManager.showNotification('Please enter a valid iRacing Customer ID', 'error');
+            return;
+        }
+
+        const originalHtml = addBtn.innerHTML;
+
+        try {
+            // Update button to show loading state
+            addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            addBtn.disabled = true;
+
+            this.uiManager.showNotification('Adding driver to database...', 'info');
+
+            const response = await fetch('/api/drivers/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ custId: parseInt(custId) })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to add driver');
+            }
+
+            // Clear input field
+            custIdInput.value = '';
+
+            // Reload driver data to include the new driver
+            this.allData = await this.apiClient.fetchAllData();
+            this.populateDriversDropdown();
+
+            this.uiManager.showNotification(
+                `Successfully added driver: ${result.driver.display_name}`,
+                'success'
+            );
+
+            console.log(`✅ Driver added: ${result.driver.display_name} (${result.driver.cust_id})`);
+
+        } catch (error) {
+            console.error('❌ Failed to add driver:', error);
+            this.uiManager.showNotification(
+                `Failed to add driver: ${error.message}`,
+                'error'
+            );
+        } finally {
+            // Restore button
+            addBtn.innerHTML = originalHtml;
+            addBtn.disabled = false;
+        }
+    }
+
     handleTrackSelection(trackName) {
         if (!trackName) {
             this.selectedTrack = null;
@@ -2270,11 +2335,6 @@ class RadianPlannerApp {
                     const iRating = driver.irating || '';
                     const country = driver.country || '';
                     const groupName = driver.sports_car_group_name || '';
-                    
-                    // Get country flag
-                    console.log(`🏁 Page2: Getting flag for driver ${name} from ${country}`);
-                    const countryFlag = getCountryFlagOrCode(country);
-                    console.log(`🏁 Page2: Flag result: ${countryFlag}`);
                     
                     // Get color for group name and clean display name
                     let groupColorClass = '';
@@ -2674,66 +2734,6 @@ class RadianPlannerApp {
 
         if (!strategyId) {
             return; // No shared strategy in URL
-        }
-
-        try {
-            console.log('🔗 Loading shared strategy:', strategyId);
-
-            // Fetch strategy from server
-            const response = await fetch(`/api/strategies/${strategyId}`);
-            if (!response.ok) {
-                throw new Error('Strategy not found');
-            }
-
-            const strategyData = await response.json();
-            console.log('📥 Loaded strategy data:', strategyData);
-
-            // Apply the loaded strategy data to the app
-            await this.applySharedStrategy(strategyData);
-
-            // Update URL to remove the strategy parameter (cleaner)
-            const newUrl = window.location.pathname + window.location.hash;
-            window.history.replaceState({}, document.title, newUrl);
-
-            this.uiManager.showNotification('Shared strategy loaded successfully!', 'success');
-
-        } catch (error) {
-            console.error('❌ Failed to load shared strategy:', error);
-            this.uiManager.showNotification('Failed to load shared strategy', 'error');
-        }
-    }
-
-    /**
-     * Apply loaded strategy data to the application
-     */
-    async applySharedStrategy(strategyData) {
-        try {
-            // Set flag to indicate we're loading from a shared link
-            this.isLoadingFromSharedLink = true;
-            // Apply Page 1 selections
-            if (strategyData.selectedSeries) {
-                this.selectedSeries = strategyData.selectedSeries;
-                // Update UI for selected series
-                this.displaySeriesLogo();
-            }
-
-            if (strategyData.selectedEvent) {
-                this.selectedSessionDetails = strategyData.selectedEvent;
-                // Populate events dropdown and select the event
-                await this.populateEventsDropdown(this.selectedSeries?.series_id);
-                const eventSelect = document.getElementById('event-select');
-                if (eventSelect) {
-                    eventSelect.value = strategyData.selectedEvent.event_id;
-                }
-            }
-
-            if (strategyData.selectedTrack) {
-                this.selectedTrack = strategyData.selectedTrack;
-            }
-
-            if (strategyData.selectedCar) {
-                this.selectedCar = strategyData.selectedCar;
-                // Populate cars and select
                 await this.populateCarsByClass(strategyData.selectedCar.class_id);
                 const carSelect = document.getElementById('car-select');
                 if (carSelect) {

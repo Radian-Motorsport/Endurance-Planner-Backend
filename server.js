@@ -1114,7 +1114,92 @@ app.get('/api/drivers/:custId', async (req, res) => {
     }
 });
 
+// Add single driver by customer ID endpoint
+app.post('/api/drivers/add', async (req, res) => {
+    try {
+        const { custId } = req.body;
 
+        if (!custId || isNaN(parseInt(custId))) {
+            return res.status(400).json({ error: 'Valid customer ID required' });
+        }
+
+        const customerId = parseInt(custId);
+
+        if (!pool) {
+            return res.status(500).json({ error: 'Database not available' });
+        }
+
+        console.log(`➕ Adding driver with cust_id: ${customerId}`);
+
+        // Check if driver already exists
+        const existingCheck = await pool.query('SELECT cust_id FROM drivers WHERE cust_id = $1', [customerId]);
+        if (existingCheck.rows.length > 0) {
+            return res.status(409).json({ error: 'Driver already exists in database' });
+        }
+
+        // Get driver details from iRacing API
+        const driverDetails = await driverRefreshService.getDriverDetails(customerId);
+
+        // Insert into database with basic info (preserve existing columns)
+        const insertQuery = `
+            INSERT INTO drivers (
+                cust_id, name, garage61_slug, timezone,
+                display_name, country, member_since, last_login,
+                sports_car_irating, sports_car_safety_rating, data_fetched_at
+            ) VALUES (
+                $1, $2, '', 'UTC',
+                $3, $4, $5, $6,
+                $7, $8, CURRENT_TIMESTAMP
+            )
+        `;
+
+        const sportsCarLicense = driverDetails.licenses?.sports_car;
+        await pool.query(insertQuery, [
+            driverDetails.cust_id,
+            driverDetails.display_name, // Use as name initially
+            driverDetails.display_name,
+            driverDetails.location?.country || null,
+            driverDetails.member_since,
+            driverDetails.last_login,
+            sportsCarLicense?.irating || null,
+            sportsCarLicense?.safety_rating || null
+        ]);
+
+        // Update config file to include the new driver
+        const fs = require('fs');
+        const path = require('path');
+        const configPath = path.join(__dirname, 'update-data', 'config.json');
+
+        try {
+            const configData = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            if (!configData.teamMembers.includes(customerId)) {
+                configData.teamMembers.push(customerId);
+                fs.writeFileSync(configPath, JSON.stringify(configData, null, 2));
+                console.log(`✅ Added cust_id ${customerId} to config file`);
+            }
+        } catch (configError) {
+            console.warn(`⚠️  Could not update config file: ${configError.message}`);
+        }
+
+        console.log(`✅ Successfully added driver: ${driverDetails.display_name} (${customerId})`);
+
+        res.json({
+            message: 'Driver added successfully',
+            driver: {
+                cust_id: driverDetails.cust_id,
+                display_name: driverDetails.display_name,
+                country: driverDetails.location?.country
+            }
+        });
+
+    } catch (error) {
+        console.error('Failed to add driver:', error.message);
+        res.status(500).json({
+            error: 'Failed to add driver',
+            message: error.message
+        });
+    }
+});
 
 // Start the server
 app.listen(PORT, () => {
