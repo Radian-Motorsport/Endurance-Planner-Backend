@@ -313,6 +313,7 @@ export class StrategyCalculator {
         this.updateElement('stint-duration-display', this.formatDuration(calculations.stintDuration));
         this.updateElement('laps-per-stint-display', calculations.lapsPerStint);
         this.updateElement('pit-stops-display', calculations.totalPitStops);
+        this.updateElement('stint-pit-stops-display', calculations.totalPitStops);
         this.updateElement('total-fuel-display', calculations.totalFuel.toFixed(1) + ' L');
         this.updateElement('fuel-per-lap-display', inputs.fuelPerLap.toFixed(1) + ' L');
         this.updateElement('lap-time-display', this.formatLapTime(inputs.avgLapTimeInSeconds));
