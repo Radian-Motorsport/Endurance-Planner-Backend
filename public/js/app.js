@@ -2335,6 +2335,7 @@ class RadianPlannerApp {
                     const iRating = driver.irating || '';
                     const country = driver.country || '';
                     const groupName = driver.sports_car_group_name || '';
+                    const countryFlag = getCountryFlagOrCode(country);
                     
                     // Get color for group name and clean display name
                     let groupColorClass = '';
