@@ -1098,7 +1098,7 @@ app.post('/api/weather/refresh-all', async (req, res) => {
         
         // Get all upcoming events with their season_id and race_week_num
         const result = await pool.query(
-            'SELECT DISTINCT event_id, event_name, season_id, race_week_num FROM events WHERE start_date >= CURRENT_DATE AND season_id IS NOT NULL ORDER BY start_date ASC'
+            'SELECT event_id, event_name, season_id, race_week_num FROM events WHERE start_date >= CURRENT_DATE AND season_id IS NOT NULL ORDER BY start_date ASC'
         );
         
         const events = result.rows;
