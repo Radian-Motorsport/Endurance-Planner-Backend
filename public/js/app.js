@@ -2908,6 +2908,10 @@ class RadianPlannerApp {
                 }
             }
 
+            // Check for Garage61 data now that car and track are selected
+            console.log('🔍 Checking for Garage61 data after loading shared strategy...');
+            this.checkGarage61Data();
+
             if (strategyData.selectedDrivers && Array.isArray(strategyData.selectedDrivers)) {
                 this.selectedDrivers = strategyData.selectedDrivers;
                 this.updateDriversList();
