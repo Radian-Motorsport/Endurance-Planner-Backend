@@ -3021,7 +3021,7 @@ class RadianPlannerApp {
         setValue('avg-lap-time-seconds', formData.avgLapTimeSeconds);
         setValue('fuel-per-lap-display-input', formData.fuelPerLap);
         setValue('tank-capacity-display-input', formData.tankCapacity);
-        setValue('pit-stop-time-display-input', formData.pitStopTime);
+        setValue('pit-stop-time', formData.pitStopTime);
         setValue('fuel-slider', formData.fuelSlider || '0');
         setValue('lap-time-slider', formData.lapTimeSlider || '0');
 
