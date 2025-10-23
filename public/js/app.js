@@ -2796,7 +2796,7 @@ class RadianPlannerApp {
     }
 
     /**
-     * Update an existing shared strategy
+     * Update an existing shared strategy - uses identical data collection as generateShareLink
      */
     async updateShareLink() {
         const saveUpdateBtn = document.getElementById('save-update-btn');
@@ -2808,27 +2808,78 @@ class RadianPlannerApp {
         }
 
         try {
-            // Collect current state
+            // IDENTICAL DATA COLLECTION AS generateShareLink()
+            // Collect stint driver and backup driver assignments from the table
+            const stintDrivers = {};
+            const stintBackupDrivers = {};
+            const tbody = document.getElementById('stint-table-body');
+            
+            if (tbody) {
+                const rows = tbody.querySelectorAll('tr[data-role="stint"]');
+                rows.forEach((row, index) => {
+                    // Get primary driver selection
+                    const driverSelect = row.querySelector('.driver-select-stint');
+                    if (driverSelect && driverSelect.value) {
+                        stintDrivers[index] = driverSelect.value;
+                    }
+                    
+                    // Get backup driver selection
+                    const backupSelect = row.querySelector('.backup-select-stint');
+                    if (backupSelect && backupSelect.value) {
+                        stintBackupDrivers[index] = backupSelect.value;
+                    }
+                });
+            }
+
+            // Also collect from window storage as fallback
+            if (window.stintDriverAssignments) {
+                Object.assign(stintDrivers, window.stintDriverAssignments);
+            }
+            if (window.stintBackupDriverAssignments) {
+                Object.assign(stintBackupDrivers, window.stintBackupDriverAssignments);
+            }
+
+            // Collect all current app state - IDENTICAL TO generateShareLink()
             const strategyData = {
+                // Page 1 selections
                 selectedSeries: this.selectedSeries,
                 selectedEvent: this.selectedSessionDetails,
                 selectedTrack: this.selectedTrack,
                 selectedCar: this.selectedCar,
                 selectedDrivers: this.selectedDrivers,
+
+                // Page 2 form data
                 formData: this.collectPage2FormData(),
+
+                // Strategy calculator state
                 strategyState: this.strategyCalculator ? {
                     totalStints: this.strategyCalculator.totalStints,
                     raceDurationSeconds: this.strategyCalculator.raceDurationSeconds,
                     lapsPerStint: this.strategyCalculator.lapsPerStint,
                     pitStopTime: this.strategyCalculator.pitStopTime,
                     isLocalTimeMode: this.strategyCalculator.isLocalTimeMode,
-                    selectedDriverForLocalTime: this.strategyCalculator.selectedDriverForLocalTime
+                    selectedDriverForLocalTime: this.strategyCalculator.selectedDriverForLocalTime,
+                    driverColorMap: this.strategyCalculator.driverColorMap
                 } : null,
+
+                // Driver assignments for each stint (CRITICAL FOR PERSISTENCE)
+                stintDriverAssignments: stintDrivers,
+                stintBackupDriverAssignments: stintBackupDrivers,
+
+                // UI state (container collapsed/expanded states)
+                uiState: {
+                    weatherCollapsed: document.getElementById('weather-display-page2')?.classList.contains('collapsed') || false,
+                    trackMapCollapsed: document.getElementById('track-map-container-page2')?.classList.contains('collapsed') || false
+                },
+
+                // Timestamp for when strategy was updated
                 updatedAt: new Date().toISOString(),
                 version: '1.0'
             };
 
-            // Update on server
+            console.log('📤 Updating strategy data to server:', strategyData);
+
+            // Update on server using PUT instead of POST
             const response = await fetch(`/api/strategies/${strategyId}`, {
                 method: 'PUT',
                 headers: {
@@ -2842,6 +2893,7 @@ class RadianPlannerApp {
             }
 
             this.uiManager.showNotification('Strategy updated successfully!', 'success');
+            console.log('✅ Strategy updated successfully!');
 
         } catch (error) {
             console.error('❌ Failed to update strategy:', error);
