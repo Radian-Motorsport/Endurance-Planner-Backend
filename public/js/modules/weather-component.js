@@ -526,6 +526,19 @@ export class WeatherComponent {
         
         const stintData = stints.map((stint, i) => {
             const driverName = stint.driverName || 'Unassigned';
+            
+            // Skip unassigned stints entirely - don't add them to the chart
+            if (driverName === 'Unassigned') {
+                return {
+                    value: 0,
+                    itemStyle: { color: defaultColor },
+                    driverName: driverName,
+                    startTime: stint.startTime,
+                    endTime: stint.endTime,
+                    originalLaps: stint.laps
+                };
+            }
+            
             const colorIndex = driverColorMap[driverName];
             const color = colorIndex !== undefined ? driverColors[colorIndex] : defaultColor;
             const laps = Math.floor(stint.laps || 0); // Round down laps for chart display only
@@ -534,7 +547,7 @@ export class WeatherComponent {
             if (!driverSeriesMap.has(driverName)) {
                 driverSeriesMap.set(driverName, {
                     color: color,
-                    data: new Array(stints.length).fill(0)
+                    data: new Array(stints.length).fill(null)
                 });
             }
             
@@ -573,13 +586,14 @@ export class WeatherComponent {
             name: driverName,
             type: 'bar',
             data: seriesData.data.map((value, index) => {
-                if (value === 0) return null; // No laps for this driver in this stint
+                if (value === null || value === 0) return null; // No laps for this driver in this stint
                 return {
                     value: value,
                     itemStyle: { color: seriesData.color }
                 };
             }),
             barWidth: '60%',
+            barGap: '10%', // Gap between bars in the same category
             label: { show: false }
         }));
         

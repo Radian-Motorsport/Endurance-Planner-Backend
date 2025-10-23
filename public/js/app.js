@@ -1595,13 +1595,15 @@ class RadianPlannerApp {
 
     /**
      * Restore stint driver assignments from saved data
-     * @param {Object} assignments - Map of stint assignments (e.g., {stint_0_driver: 'John Sowerby', stint_0_backup: 'Jane Doe'})
+     * @param {Object} assignments - Map of stint assignments (e.g., {0: 'Driver', 1: 'Driver2'} or {stint_0_driver: 'Driver'})
      */
     restoreStintDriverAssignments(assignments) {
         if (!assignments || Object.keys(assignments).length === 0) {
             console.log('ℹ️ No stint assignments to restore');
             return;
         }
+        
+        console.log('🔄 Restoring stint driver assignments:', assignments);
         
         const tbody = document.getElementById('stint-table-body');
         if (!tbody) {
@@ -1612,33 +1614,55 @@ class RadianPlannerApp {
         const rows = tbody.querySelectorAll('tr[data-role="stint"]');
         
         Object.entries(assignments).forEach(([key, value]) => {
-            const match = key.match(/stint_(\d+)_(driver|backup)/);
-            if (!match) return;
+            // Handle both numeric keys (0, 1, 2) and string keys (stint_0_driver)
+            const stringKeyMatch = key.match(/stint_(\d+)_(driver|backup)/);
             
-            const [, stintIndex, driverType] = match;
-            const index = parseInt(stintIndex);
-            const row = rows[index];
-            
-            if (!row) {
-                console.warn(`⚠️ Stint row ${index} not found`);
-                return;
-            }
-            
-            if (driverType === 'driver') {
+            if (stringKeyMatch) {
+                // Format: stint_0_driver or stint_0_backup
+                const [, stintIndex, driverType] = stringKeyMatch;
+                const index = parseInt(stintIndex);
+                const row = rows[index];
+                
+                if (!row) {
+                    console.warn(`⚠️ Stint row ${index} not found`);
+                    return;
+                }
+                
+                if (driverType === 'driver') {
+                    const driverSelect = row.querySelector('.driver-select-stint');
+                    if (driverSelect) {
+                        driverSelect.value = value;
+                        // Apply color to row
+                        if (this.strategyCalculator) {
+                            this.strategyCalculator.applyDriverColorToRow(row, value);
+                        }
+                        console.log(`✅ Restored driver "${value}" to stint ${index + 1}`);
+                    }
+                } else if (driverType === 'backup') {
+                    const backupSelect = row.querySelector('.backup-select-stint');
+                    if (backupSelect) {
+                        backupSelect.value = value;
+                        console.log(`✅ Restored backup driver "${value}" to stint ${index + 1}`);
+                    }
+                }
+            } else if (!isNaN(key)) {
+                // Format: numeric key (0, 1, 2...) - assume it's for primary driver
+                const index = parseInt(key);
+                const row = rows[index];
+                
+                if (!row) {
+                    console.warn(`⚠️ Stint row ${index} not found`);
+                    return;
+                }
+                
                 const driverSelect = row.querySelector('.driver-select-stint');
-                if (driverSelect) {
+                if (driverSelect && value) {
                     driverSelect.value = value;
                     // Apply color to row
                     if (this.strategyCalculator) {
                         this.strategyCalculator.applyDriverColorToRow(row, value);
                     }
                     console.log(`✅ Restored driver "${value}" to stint ${index + 1}`);
-                }
-            } else if (driverType === 'backup') {
-                const backupSelect = row.querySelector('.backup-select-stint');
-                if (backupSelect) {
-                    backupSelect.value = value;
-                    console.log(`✅ Restored backup driver "${value}" to stint ${index + 1}`);
                 }
             }
         });
