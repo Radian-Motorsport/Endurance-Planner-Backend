@@ -472,23 +472,31 @@ export class WeatherComponent {
     }
     
     renderDriversChart() {
-        console.log('🏁 WeatherComponent: Rendering drivers chart...', this.stintData);
+        console.log('🏁 WeatherComponent: Rendering drivers chart...');
+        console.log('   Container ID:', this.containerId);
+        console.log('   Stint data:', this.stintData);
+        console.log('   Weather data:', this.weatherData ? 'present' : 'missing');
         
         if (this.driversChart) {
             this.driversChart.dispose();
         }
         
         const container = document.getElementById(`${this.containerId}-drivers-chart`);
+        console.log('   Container element:', container);
+        
         if (!container) {
-            console.warn('⚠️ Drivers chart container not found');
+            console.error('❌ Drivers chart container not found! Looking for:', `${this.containerId}-drivers-chart`);
             return;
         }
         
         if (!this.stintData || !this.stintData.stints || this.stintData.stints.length === 0) {
             console.warn('⚠️ No stint data available for drivers chart');
+            console.log('   stintData:', this.stintData);
             container.innerHTML = '<div style="text-align: center; padding: 40px; color: #a3a3a3;">No stint data available. Please calculate strategy first.</div>';
             return;
         }
+        
+        console.log('   Found', this.stintData.stints.length, 'stints to display');
         
         this.driversChart = echarts.init(container);
         
@@ -518,6 +526,15 @@ export class WeatherComponent {
             const color = colorIndex !== undefined ? driverColors[colorIndex] : defaultColor;
             const duration = (stint.endTime - stint.startTime) / 1000 / 60; // Duration in minutes
             
+            console.log(`   Stint ${i + 1}:`, {
+                driver: driverName,
+                colorIndex: colorIndex,
+                color: color,
+                duration: duration.toFixed(2) + ' min',
+                startTime: stint.startTime,
+                endTime: stint.endTime
+            });
+            
             return {
                 value: duration,
                 itemStyle: { color: color },
@@ -525,6 +542,11 @@ export class WeatherComponent {
                 startTime: stint.startTime,
                 endTime: stint.endTime
             };
+        });
+        
+        console.log('   Chart data prepared:', {
+            labels: stintLabels,
+            dataPoints: stintData.length
         });
         
         // Create day/night markings based on weather data
@@ -591,7 +613,9 @@ export class WeatherComponent {
             }
         };
         
+        console.log('   Setting ECharts option:', option);
         this.driversChart.setOption(option);
+        console.log('✅ Drivers chart rendered successfully');
     }
     
     createDayNightMarkingsForDrivers(forecast, stints) {
