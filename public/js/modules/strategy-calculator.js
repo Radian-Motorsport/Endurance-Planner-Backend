@@ -21,6 +21,63 @@ export class StrategyCalculator {
         this.eventId = null;
         this.weatherComponent = null;
         this.trackMapComponent = null;
+        this.driverColorMap = {}; // Maps driver name to color index (0-7)
+    }
+
+    /**
+     * Assign colors to drivers automatically
+     * Each driver gets a color index from 0-7
+     */
+    assignDriverColors() {
+        if (!this.selectedDrivers || this.selectedDrivers.length === 0) {
+            return;
+        }
+
+        // Assign color indices to each driver (0-7, cycling if more than 8 drivers)
+        this.selectedDrivers.forEach((driver, index) => {
+            if (!this.driverColorMap[driver.name]) {
+                this.driverColorMap[driver.name] = index % 8;
+                console.log(`🎨 Assigned color ${index % 8} to driver: ${driver.name}`);
+            }
+        });
+    }
+
+    /**
+     * Get color class for a driver
+     * @param {string} driverName - Driver name
+     * @returns {string} CSS class name for the driver's color
+     */
+    getDriverColorClass(driverName) {
+        if (!driverName || driverName === '' || driverName === 'Select Driver') {
+            return 'driver-color-default';
+        }
+        
+        const colorIndex = this.driverColorMap[driverName];
+        if (colorIndex !== undefined) {
+            return `driver-color-${colorIndex}`;
+        }
+        
+        return 'driver-color-default';
+    }
+
+    /**
+     * Apply driver color to a stint row
+     * @param {HTMLElement} row - The stint row element
+     * @param {string} driverName - Selected driver name
+     */
+    applyDriverColorToRow(row, driverName) {
+        if (!row) return;
+        
+        // Remove all existing driver color classes
+        for (let i = 0; i <= 7; i++) {
+            row.classList.remove(`driver-color-${i}`);
+        }
+        row.classList.remove('driver-color-default');
+        
+        // Apply new color class
+        const colorClass = this.getDriverColorClass(driverName);
+        row.classList.add(colorClass);
+        console.log(`🎨 Applied ${colorClass} to stint row for driver: ${driverName}`);
     }
 
     /**
@@ -826,6 +883,12 @@ export class StrategyCalculator {
         window.stintDriverAssignments[stintIndex] = selectedDriverName;
         console.log('💾 Saved to window.stintDriverAssignments:', window.stintDriverAssignments);
         
+        // Apply driver color to the row
+        const row = selectElement.closest('tr');
+        if (row) {
+            this.applyDriverColorToRow(row, selectedDriverName);
+        }
+        
         // Update internal state or trigger recalculation if needed
         // This could trigger daylight recalculation for driver-specific timezones if needed
     }
@@ -868,9 +931,13 @@ export class StrategyCalculator {
         
         this.selectedDrivers = drivers;
         
+        // Assign color indices to drivers
+        this.assignDriverColors();
+        
         console.log('✅ setSelectedDrivers COMPLETE - this.selectedDrivers is now:', {
             count: this.selectedDrivers ? this.selectedDrivers.length : 0,
-            drivers: this.selectedDrivers ? this.selectedDrivers.map(d => ({name: d.name, timezone: d.timezone})) : 'NULL'
+            drivers: this.selectedDrivers ? this.selectedDrivers.map(d => ({name: d.name, timezone: d.timezone})) : 'NULL',
+            driverColorMap: this.driverColorMap
         });
     }
 

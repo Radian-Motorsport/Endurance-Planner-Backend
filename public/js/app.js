@@ -2714,7 +2714,8 @@ class RadianPlannerApp {
                     lapsPerStint: this.strategyCalculator.lapsPerStint,
                     pitStopTime: this.strategyCalculator.pitStopTime,
                     isLocalTimeMode: this.strategyCalculator.isLocalTimeMode,
-                    selectedDriverForLocalTime: this.strategyCalculator.selectedDriverForLocalTime
+                    selectedDriverForLocalTime: this.strategyCalculator.selectedDriverForLocalTime,
+                    driverColorMap: this.strategyCalculator.driverColorMap
                 } : null,
 
                 // Driver assignments for each stint (CRITICAL FOR PERSISTENCE)
@@ -3080,6 +3081,11 @@ class RadianPlannerApp {
                         if (driverSelect) {
                             driverSelect.value = driverName;
                             console.log(`✅ Restored primary driver "${driverName}" for stint ${index + 1}`);
+                            
+                            // Apply driver color to the row
+                            if (this.strategyCalculator) {
+                                this.strategyCalculator.applyDriverColorToRow(row, driverName);
+                            }
                         }
                     }
                 });
