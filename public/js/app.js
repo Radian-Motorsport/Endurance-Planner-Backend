@@ -1594,7 +1594,7 @@ class RadianPlannerApp {
             avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds')?.value || '',
             fuelPerLap: document.getElementById('fuel-per-lap-display-input')?.value || '',
             tankCapacity: document.getElementById('tank-capacity-display-input')?.value || '',
-            pitStopTime: document.getElementById('pit-stop-time-display-input')?.value || '',
+            pitStopTime: document.getElementById('pit-stop-time')?.value || '',
             fuelSlider: document.getElementById('fuel-slider')?.value || '0',
             lapTimeSlider: document.getElementById('lap-time-slider')?.value || '0'
         };
