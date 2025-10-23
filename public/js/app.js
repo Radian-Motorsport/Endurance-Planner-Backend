@@ -1239,6 +1239,28 @@ class RadianPlannerApp {
             
                 this.setLoading(true);
 
+                // SAVE CURRENT DRIVER ASSIGNMENTS BEFORE TABLE REBUILD
+                const savedStintDrivers = {};
+                const savedBackupDrivers = {};
+                const tbody = document.getElementById('stint-table-body');
+                if (tbody) {
+                    const rows = tbody.querySelectorAll('tr[data-role="stint"]');
+                    rows.forEach((row, index) => {
+                        const driverSelect = row.querySelector('.driver-select-stint');
+                        if (driverSelect && driverSelect.value) {
+                            savedStintDrivers[index] = driverSelect.value;
+                        }
+                        const backupSelect = row.querySelector('.backup-select-stint');
+                        if (backupSelect && backupSelect.value) {
+                            savedBackupDrivers[index] = backupSelect.value;
+                        }
+                    });
+                }
+                console.log('💾 Saved driver assignments before recalculation:', {
+                    stintDrivers: savedStintDrivers,
+                    backupDrivers: savedBackupDrivers
+                });
+
                 // Validate key Page 2 inputs to avoid crashes when fields are empty.
                 // Required: race duration, avg lap time > 0, fuel per lap > 0, tank capacity > 0, at least one driver
                 const raceDurHours = parseInt(document.getElementById('race-duration-hours')?.value) || 0;
@@ -1311,12 +1333,67 @@ class RadianPlannerApp {
                 const formData = this.collectFormData();
 
                 const strategy = await this.strategyCalculator.calculateStrategy(formData);
+                
+                // RESTORE DRIVER ASSIGNMENTS AFTER TABLE IS REBUILT
+                this.restoreDriverAssignmentsAfterRecalculation(savedStintDrivers, savedBackupDrivers);
+                
             this.uiManager.showNotification('Strategy calculated successfully!', 'success');
         } catch (error) {
             console.error('❌ Strategy calculation failed:', error);
             this.uiManager.showNotification('Strategy calculation failed', 'error');
         } finally {
             this.setLoading(false);
+        }
+    }
+
+    /**
+     * Restore driver assignments after strategy recalculation
+     * This preserves driver selections when the table is rebuilt
+     */
+    restoreDriverAssignmentsAfterRecalculation(stintDrivers, backupDrivers) {
+        try {
+            const tbody = document.getElementById('stint-table-body');
+            if (!tbody) {
+                console.warn('⚠️ Stint table body not found');
+                return;
+            }
+
+            const rows = tbody.querySelectorAll('tr[data-role="stint"]');
+            
+            // Restore primary driver assignments
+            Object.entries(stintDrivers).forEach(([stintIndex, driverName]) => {
+                const index = parseInt(stintIndex);
+                const row = rows[index];
+                if (row) {
+                    const driverSelect = row.querySelector('.driver-select-stint');
+                    if (driverSelect) {
+                        driverSelect.value = driverName;
+                        // Apply color to row
+                        if (this.strategyCalculator) {
+                            this.strategyCalculator.applyDriverColorToRow(row, driverName);
+                        }
+                        console.log(`✅ Restored primary driver "${driverName}" to stint ${index + 1}`);
+                    }
+                }
+            });
+
+            // Restore backup driver assignments
+            Object.entries(backupDrivers).forEach(([stintIndex, backupDriverName]) => {
+                const index = parseInt(stintIndex);
+                const row = rows[index];
+                if (row) {
+                    const backupSelect = row.querySelector('.backup-select-stint');
+                    if (backupSelect) {
+                        backupSelect.value = backupDriverName;
+                        console.log(`✅ Restored backup driver "${backupDriverName}" to stint ${index + 1}`);
+                    }
+                }
+            });
+
+            console.log('✅ All driver assignments restored after recalculation');
+
+        } catch (error) {
+            console.error('❌ Failed to restore driver assignments:', error);
         }
     }
 
