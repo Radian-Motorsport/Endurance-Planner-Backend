@@ -569,13 +569,14 @@ export class StrategyCalculator {
 
             // Calculate lap numbers for this stint
             const startLap = Math.floor(currentLap);
-            const endLap = Math.floor(startLap + stintLaps - 1);
+            // After the stint, currentLap will be currentLap + stintLaps, so the end lap is that value minus 1
+            const endLap = Math.floor(currentLap + stintLaps - 1);
             const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, startLap, endLap, displayTimeZone, daylightStatus);
             tbody.appendChild(row);
 
             console.log(`   Stint ${i + 1}: ${stintStartTime.toISOString()} → ${stintEndTime.toISOString()} (${stintLaps} laps)`);
 
-            // Increment lap counter for next stint
+            // Increment lap counter for next stint - use FULL stintLaps value to preserve decimals
             currentLap += stintLaps;
 
             // Add pit stop row for next stint (except last stint)
@@ -620,7 +621,7 @@ export class StrategyCalculator {
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 80px;">${this.formatTimeForDisplay(endTime, timeZone)}</td>
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${Math.floor(startLap)}</td>
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${Math.floor(endLap)}</td>
-            <td class="py-2 px-2 text-center text-blue-400 font-mono text-sm" style="width: 60px;">${stintLaps}</td>
+            <td class="py-2 px-2 text-center text-blue-400 font-mono text-sm" style="width: 70px; white-space: nowrap;">${stintLaps.toFixed(1)}</td>
             <!-- DAYLIGHT COLOR COLUMN - COMMENTED OUT FOR NOW -->
             <!-- <td class="w-2 px-1" style="width: 15px;">
                 <div class="driver-color-strip" data-stint="${stintNumber - 1}" style="width:12px;height:40px;margin:0 auto;background:linear-gradient(to bottom, rgba(168,85,247,1), rgba(251,191,36,1));"></div>
@@ -1425,7 +1426,7 @@ export class StrategyCalculator {
                 cells[1].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
                 // Update lap numbers
                 const startLap = Math.floor(currentLap);
-                const endLap = Math.floor(startLap + stintLaps - 1);
+                const endLap = Math.floor(currentLap + stintLaps - 1);
                 cells[2].textContent = startLap;
                 cells[3].textContent = endLap;
                 cells[4].textContent = stintLaps;
