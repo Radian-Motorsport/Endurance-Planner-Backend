@@ -317,12 +317,12 @@ export class StrategyCalculator {
                 cells[0].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
                 // End Time (nth-child(2))
                 cells[1].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
-                // Start Lap (nth-child(3))
-                cells[2].textContent = currentLap;
-                // End Lap (nth-child(4))
-                cells[3].textContent = currentLap + stintLaps - 1;
-                // Laps (nth-child(5)) - should remain as the number of laps in stint
-                cells[4].textContent = stintLaps;
+                // Start Lap (nth-child(3)) - MUST be integer
+                cells[2].textContent = Math.floor(currentLap);
+                // End Lap (nth-child(4)) - MUST be integer
+                cells[3].textContent = Math.floor(currentLap + stintLaps - 1);
+                // Laps (nth-child(5)) - formatted with 1 decimal
+                cells[4].textContent = stintLaps.toFixed(1);
             }
 
             // Increment lap counter for next stint
@@ -331,7 +331,7 @@ export class StrategyCalculator {
             // Update pit stop row if it exists
             if (index < this.totalStints - 1) {
                 const nextRow = row.nextElementSibling;
-                if (nextRow && nextRow.getAttribute('data-role') === 'pit') {
+                if (nextRow && nextRow.getAttribute('data-role') === 'pit-stop') {
                     const pitStartTime = new Date(stintEndTime.getTime());
                     const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                     const pitCells = nextRow.querySelectorAll('td');
@@ -1488,12 +1488,12 @@ export class StrategyCalculator {
             if (cells.length >= 7) {  // Changed from 8 to 7 - we have 7 columns total
                 cells[0].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
                 cells[1].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
-                // Update lap numbers
+                // Update lap numbers - MUST be integers
                 const startLap = Math.floor(currentLap);
                 const endLap = Math.floor(currentLap + stintLaps - 1);
                 cells[2].textContent = startLap;
                 cells[3].textContent = endLap;
-                cells[4].textContent = stintLaps;
+                cells[4].textContent = stintLaps.toFixed(1);
             }
 
             currentLap += stintLaps;
@@ -1501,7 +1501,7 @@ export class StrategyCalculator {
             // Update pit stop row if it exists
             if (index < this.totalStints - 1) {
                 const nextRow = row.nextElementSibling;
-                if (nextRow && nextRow.getAttribute('data-role') === 'pit') {
+                if (nextRow && nextRow.getAttribute('data-role') === 'pit-stop') {
                     const pitStartTime = new Date(stintEndTime.getTime());
                     const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                     const pitCells = nextRow.querySelectorAll('td');
