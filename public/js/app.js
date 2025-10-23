@@ -2883,6 +2883,11 @@ class RadianPlannerApp {
                     eventSelect.value = strategyData.selectedEvent.event_id;
                     await this.handleEventSelection(strategyData.selectedEvent.event_id);
                 }
+                
+                // CRITICAL: Restore selectedSessionDetails from saved data
+                // This is normally set by populateRaceInformation() but we skip that when loading shared strategies
+                this.selectedSessionDetails = strategyData.selectedEvent;
+                console.log('✅ Restored selectedSessionDetails:', this.selectedSessionDetails);
             }
 
             if (strategyData.selectedTrack) {
