@@ -337,11 +337,11 @@ export class StrategyCalculator {
                     const pitStartTime = new Date(stintEndTime.getTime());
                     const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                     const pitCells = nextRow.querySelectorAll('td');
-                    if (pitCells.length >= 4) {
-                        pitCells[0].textContent = this.formatTimeForDisplay(pitStartTime, displayTimeZone);
-                        pitCells[1].textContent = this.formatTimeForDisplay(pitEndTime, displayTimeZone);
-                        // cell[2] is "PIT" with colspan=2, don't touch it
-                        pitCells[3].textContent = this.formatPitStopTime(this.pitStopTime);
+                    if (pitCells.length >= 6) {
+                        pitCells[1].textContent = this.formatTimeForDisplay(pitStartTime, displayTimeZone);
+                        pitCells[2].textContent = this.formatTimeForDisplay(pitEndTime, displayTimeZone);
+                        // cells[3-4] are "PIT" text, don't touch
+                        pitCells[5].textContent = this.formatPitStopTime(this.pitStopTime);
                     }
                     // Advance currentTime to AFTER the pit stop
                     currentTime = pitEndTime;
@@ -711,11 +711,13 @@ export class StrategyCalculator {
         row.className = 'bg-neutral-900 transition-colors';
 
         row.innerHTML = `
-            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs">${this.formatTimeForDisplay(startTime, timeZone)}</td>
-            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs">${this.formatTimeForDisplay(endTime, timeZone)}</td>
-            <td class="py-1 px-2 text-center text-neutral-500 road-rage-font text-xs" colspan="2">PIT</td>
-            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs">${this.formatPitStopTime(this.pitStopTime)}</td>
-            <td class="w-2 px-1"></td>
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 50px;"></td>
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 80px;">${this.formatTimeForDisplay(startTime, timeZone)}</td>
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 80px;">${this.formatTimeForDisplay(endTime, timeZone)}</td>
+            <td class="py-1 px-2 text-center text-neutral-500 road-rage-font text-xs" style="width: 70px;">PIT</td>
+            <td class="py-1 px-2 text-center text-neutral-500 road-rage-font text-xs" style="width: 70px;">PIT</td>
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 70px;">${this.formatPitStopTime(this.pitStopTime)}</td>
+            <td class="w-2 px-1" style="width: 15px;"></td>
             <td class="py-1 px-2 text-center text-neutral-600 text-xs">-</td>
             <td class="py-1 px-2 text-center text-neutral-600 text-xs">-</td>
         `;
@@ -749,13 +751,15 @@ export class StrategyCalculator {
     updatePitStopRow(row, startTime, endTime, timeZone) {
         const cells = row.querySelectorAll('td');
         
-        // Update time cells and duration
-        // cell[0] = Start Time, cell[1] = End Time
-        // cell[2] = "PIT" text (colspan=2, don't touch)
-        // cell[3] = Duration (LAPS column)
-        cells[0].innerHTML = this.formatTimeForDisplay(startTime, timeZone);
-        cells[1].innerHTML = this.formatTimeForDisplay(endTime, timeZone);
-        cells[3].innerHTML = this.formatPitStopTime(this.pitStopTime);
+        // cells[0] = Empty (stint # column for alignment)
+        // cells[1] = Start Time
+        // cells[2] = End Time
+        // cells[3] = PIT text
+        // cells[4] = PIT text
+        // cells[5] = Duration
+        cells[1].innerHTML = this.formatTimeForDisplay(startTime, timeZone);
+        cells[2].innerHTML = this.formatTimeForDisplay(endTime, timeZone);
+        cells[5].innerHTML = this.formatPitStopTime(this.pitStopTime);
     }
 
     /**
@@ -1519,11 +1523,11 @@ export class StrategyCalculator {
                     const pitStartTime = new Date(stintEndTime.getTime());
                     const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                     const pitCells = nextRow.querySelectorAll('td');
-                    if (pitCells.length >= 4) {
-                        pitCells[0].textContent = this.formatTimeForDisplay(pitStartTime, displayTimeZone);
-                        pitCells[1].textContent = this.formatTimeForDisplay(pitEndTime, displayTimeZone);
-                        // cell[2] is "PIT" with colspan=2, don't touch it
-                        pitCells[3].textContent = this.formatPitStopTime(this.pitStopTime);
+                    if (pitCells.length >= 6) {
+                        pitCells[1].textContent = this.formatTimeForDisplay(pitStartTime, displayTimeZone);
+                        pitCells[2].textContent = this.formatTimeForDisplay(pitEndTime, displayTimeZone);
+                        // cells[3-4] are "PIT" text, don't touch
+                        pitCells[5].textContent = this.formatPitStopTime(this.pitStopTime);
                     }
                     // IMPORTANT: Advance currentTime to AFTER the pit stop so next stint starts after pit completes
                     currentTime = pitEndTime;
