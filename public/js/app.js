@@ -2079,6 +2079,38 @@ class RadianPlannerApp {
         }
     }
 
+    async handleSeriesSelection(seriesId) {
+        if (!seriesId) {
+            this.selectedSeries = null;
+            this.hideSeriesLogo();
+            console.log('❌ Series selection cleared');
+            return;
+        }
+
+        // Find and store the selected series object
+        this.selectedSeries = this.allData.series.find(s => s.series_id === parseInt(seriesId));
+        if (!this.selectedSeries) {
+            console.error(`❌ Series "${seriesId}" not found in series data`);
+            return;
+        }
+
+        console.log('✅ Selected series:', this.selectedSeries);
+        this.displaySeriesLogo();
+        
+        // Populate events dropdown with this series's events
+        await this.populateEventsDropdown(seriesId);
+    }
+
+    async handleEventSelection(eventId) {
+        if (!eventId) {
+            console.log('❌ Event selection cleared');
+            return;
+        }
+
+        // Populate sessions dropdown when event is selected
+        await this.populateSessionsDropdown(eventId);
+    }
+
     /**
      * Collect all page 1 data for transition to page 2
      * @returns {Object} Complete event data from page 1 selections
