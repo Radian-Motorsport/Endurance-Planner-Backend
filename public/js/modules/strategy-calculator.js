@@ -618,8 +618,8 @@ export class StrategyCalculator {
         row.innerHTML = `
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 80px;">${this.formatTimeForDisplay(startTime, timeZone)}</td>
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 80px;">${this.formatTimeForDisplay(endTime, timeZone)}</td>
-            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${startLap}</td>
-            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${endLap}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${Math.floor(startLap)}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${Math.floor(endLap)}</td>
             <td class="py-2 px-2 text-center text-blue-400 font-mono text-sm" style="width: 60px;">${stintLaps}</td>
             <!-- DAYLIGHT COLOR COLUMN - COMMENTED OUT FOR NOW -->
             <!-- <td class="w-2 px-1" style="width: 15px;">
