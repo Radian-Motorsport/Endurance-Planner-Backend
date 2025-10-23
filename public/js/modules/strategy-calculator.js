@@ -568,8 +568,8 @@ export class StrategyCalculator {
             const daylightStatus = this.getDaylightStatus(stintStartTime, displayTimeZone, daylightCalculationMode, selectedDriverName);
 
             // Calculate lap numbers for this stint
-            const startLap = currentLap;
-            const endLap = startLap + stintLaps - 1;
+            const startLap = Math.floor(currentLap);
+            const endLap = Math.floor(startLap + stintLaps - 1);
             const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, startLap, endLap, displayTimeZone, daylightStatus);
             tbody.appendChild(row);
 
@@ -1424,8 +1424,8 @@ export class StrategyCalculator {
                 cells[0].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
                 cells[1].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
                 // Update lap numbers
-                const startLap = currentLap;
-                const endLap = startLap + stintLaps - 1;
+                const startLap = Math.floor(currentLap);
+                const endLap = Math.floor(startLap + stintLaps - 1);
                 cells[2].textContent = startLap;
                 cells[3].textContent = endLap;
                 cells[4].textContent = stintLaps;
