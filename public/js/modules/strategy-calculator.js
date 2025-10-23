@@ -526,7 +526,15 @@ export class StrategyCalculator {
         const tbody = document.getElementById('stint-table-body');
         if (!tbody) return;
 
-        tbody.innerHTML = '';
+        // Get existing stint rows (not pit stop rows)
+        const existingStintRows = Array.from(tbody.querySelectorAll('tr[data-role="stint"]'));
+        const existingPitRows = Array.from(tbody.querySelectorAll('tr[data-role="pit-stop"]'));
+        
+        // Only clear if we're doing initial load (no existing rows)
+        const isInitialLoad = existingStintRows.length === 0;
+        if (isInitialLoad) {
+            tbody.innerHTML = '';
+        }
 
         // Load weather and track map components (keep hidden initially)
         await this.loadWeatherComponent();
@@ -550,6 +558,7 @@ export class StrategyCalculator {
         console.log(`   Pit stop duration: ${this.pitStopTime}s`);
         
         let currentLap = 1; // Initialize lap counter
+        let rowIndex = 0; // Track position in tbody for inserting/updating
 
         for (let i = 0; i < this.totalStints; i++) {
             const stintLaps = (i === this.totalStints - 1) && (this.lapsInLastStint !== 0) 
@@ -571,8 +580,17 @@ export class StrategyCalculator {
             const startLap = Math.floor(currentLap);
             // After the stint, currentLap will be currentLap + stintLaps, so the end lap is that value minus 1
             const endLap = Math.floor(currentLap + stintLaps - 1);
-            const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, startLap, endLap, displayTimeZone, daylightStatus);
-            tbody.appendChild(row);
+            
+            // Update existing row or create new one
+            const existingRow = existingStintRows[i];
+            if (existingRow && !isInitialLoad) {
+                // Update existing row in place
+                this.updateStintRow(existingRow, i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, startLap, endLap, displayTimeZone, daylightStatus);
+            } else {
+                // Create new row
+                const row = this.createStintRow(i + 1, selectedDriverName, stintLaps, stintStartTime, stintEndTime, startLap, endLap, displayTimeZone, daylightStatus);
+                tbody.appendChild(row);
+            }
 
             console.log(`   Stint ${i + 1}: ${stintStartTime.toISOString()} → ${stintEndTime.toISOString()} (${stintLaps} laps)`);
 
@@ -583,12 +601,28 @@ export class StrategyCalculator {
             if (i < this.totalStints - 1) {
                 const pitStartTime = new Date(stintEndTime.getTime());
                 const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
-                const pitRow = this.createPitStopRow(pitStartTime, pitEndTime, displayTimeZone);
-                tbody.appendChild(pitRow);
+                
+                // Update existing pit row or create new one
+                const existingPitRow = existingPitRows[i];
+                if (existingPitRow && !isInitialLoad) {
+                    this.updatePitStopRow(existingPitRow, pitStartTime, pitEndTime, displayTimeZone);
+                } else {
+                    const pitRow = this.createPitStopRow(pitStartTime, pitEndTime, displayTimeZone);
+                    tbody.appendChild(pitRow);
+                }
+                
                 // IMPORTANT: Advance currentTime to AFTER the pit stop so next stint starts after pit completes
                 currentTime = pitEndTime;
                 
                 console.log(`      Pit stop: ${pitStartTime.toISOString()} → ${pitEndTime.toISOString()} (${this.pitStopTime}s)`);
+            }
+        }
+        
+        // Remove extra rows if stint count decreased
+        if (!isInitialLoad && existingStintRows.length > this.totalStints) {
+            for (let i = this.totalStints; i < existingStintRows.length; i++) {
+                existingStintRows[i]?.remove();
+                existingPitRows[i]?.remove();
             }
         }
     }
@@ -619,8 +653,8 @@ export class StrategyCalculator {
         row.innerHTML = `
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 80px;">${this.formatTimeForDisplay(startTime, timeZone)}</td>
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 80px;">${this.formatTimeForDisplay(endTime, timeZone)}</td>
-            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${Math.floor(startLap)}</td>
-            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${Math.floor(endLap)}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${startLap}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${endLap}</td>
             <td class="py-2 px-2 text-center text-blue-400 font-mono text-sm" style="width: 70px; white-space: nowrap;">${stintLaps.toFixed(1)}</td>
             <!-- DAYLIGHT COLOR COLUMN - COMMENTED OUT FOR NOW -->
             <!-- <td class="w-2 px-1" style="width: 15px;">
@@ -668,7 +702,7 @@ export class StrategyCalculator {
      */
     createPitStopRow(startTime, endTime, timeZone) {
         const row = document.createElement('tr');
-        row.setAttribute('data-role', 'pit');
+        row.setAttribute('data-role', 'pit-stop');
         row.className = 'bg-neutral-900 transition-colors';
 
         row.innerHTML = `
@@ -682,6 +716,36 @@ export class StrategyCalculator {
         `;
 
         return row;
+    }
+
+    /**
+     * Update existing stint row in place (preserves driver selections)
+     */
+    updateStintRow(row, stintNumber, driverName, stintLaps, startTime, endTime, startLap, endLap, timeZone, daylightStatus) {
+        const cells = row.querySelectorAll('td');
+        
+        // Update time cells
+        cells[0].innerHTML = this.formatTimeForDisplay(startTime, timeZone);
+        cells[1].innerHTML = this.formatTimeForDisplay(endTime, timeZone);
+        
+        // Update lap number cells - keep as integers
+        cells[2].textContent = startLap;
+        cells[3].textContent = endLap;
+        cells[4].textContent = stintLaps.toFixed(1);
+        
+        // Driver dropdowns are preserved - don't touch them!
+    }
+
+    /**
+     * Update existing pit stop row in place
+     */
+    updatePitStopRow(row, startTime, endTime, timeZone) {
+        const cells = row.querySelectorAll('td');
+        
+        // Update time cells
+        cells[0].innerHTML = this.formatTimeForDisplay(startTime, timeZone);
+        cells[1].innerHTML = this.formatTimeForDisplay(endTime, timeZone);
+        cells[4].innerHTML = this.formatPitStopTime(this.pitStopTime);
     }
 
     /**
