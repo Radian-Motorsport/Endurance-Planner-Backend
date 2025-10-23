@@ -520,23 +520,37 @@ export class WeatherComponent {
         
         // Build series data for stacked bar chart
         const stintLabels = stints.map((stint, i) => `Stint ${i + 1}`);
+        
+        // Build legend entries for each driver
+        const driverLegends = [];
+        const driverLegendMap = new Map(); // Track which drivers we've added to legend
+        
         const stintData = stints.map((stint, i) => {
             const driverName = stint.driverName || 'Unassigned';
             const colorIndex = driverColorMap[driverName];
             const color = colorIndex !== undefined ? driverColors[colorIndex] : defaultColor;
-            const duration = (stint.endTime - stint.startTime) / 1000 / 60; // Duration in minutes
+            const laps = stint.laps || 0; // Use laps instead of duration
+            
+            // Add driver to legend (only once per unique driver)
+            if (!driverLegendMap.has(driverName)) {
+                driverLegendMap.set(driverName, color);
+                driverLegends.push({
+                    name: driverName,
+                    color: color
+                });
+            }
             
             console.log(`   Stint ${i + 1}:`, {
                 driver: driverName,
                 colorIndex: colorIndex,
                 color: color,
-                duration: duration.toFixed(2) + ' min',
+                laps: laps.toFixed(1),
                 startTime: stint.startTime,
                 endTime: stint.endTime
             });
             
             return {
-                value: duration,
+                value: laps,
                 itemStyle: { color: color },
                 driverName: driverName,
                 startTime: stint.startTime,
@@ -546,7 +560,8 @@ export class WeatherComponent {
         
         console.log('   Chart data prepared:', {
             labels: stintLabels,
-            dataPoints: stintData.length
+            dataPoints: stintData.length,
+            uniqueDrivers: driverLegends.length
         });
         
         // Create day/night markings based on weather data
@@ -555,9 +570,10 @@ export class WeatherComponent {
         const option = {
             grid: { left: '60px', right: '60px', top: '60px', bottom: '80px' },
             legend: {
-                data: ['Stint Duration'],
+                data: driverLegends.map(d => d.name),
                 top: '10px',
-                textStyle: { color: '#d4d4d8' }
+                textStyle: { color: '#d4d4d8' },
+                itemGap: 20
             },
             xAxis: {
                 type: 'category',
@@ -567,7 +583,7 @@ export class WeatherComponent {
             },
             yAxis: {
                 type: 'value',
-                name: 'Duration (minutes)',
+                name: 'Laps in Stint',
                 nameLocation: 'middle',
                 nameGap: 40,
                 nameTextStyle: { color: '#d4d4d8', fontSize: 12 },
@@ -577,7 +593,7 @@ export class WeatherComponent {
             },
             series: [
                 {
-                    name: 'Stint Duration',
+                    name: 'Stints',
                     type: 'bar',
                     data: stintData,
                     barWidth: '60%',
@@ -590,7 +606,7 @@ export class WeatherComponent {
             tooltip: {
                 trigger: 'axis',
                 formatter: (params) => {
-                    const stintParam = params.find(p => p.seriesName === 'Stint Duration');
+                    const stintParam = params.find(p => p.seriesName === 'Stints');
                     if (!stintParam) return '';
                     
                     const stintInfo = stintParam.data;
@@ -607,7 +623,7 @@ export class WeatherComponent {
                         <strong>Driver:</strong> ${stintInfo.driverName}<br>
                         <strong>Start:</strong> ${startTime}<br>
                         <strong>End:</strong> ${endTime}<br>
-                        <strong>Duration:</strong> ${stintInfo.value.toFixed(1)} minutes
+                        <strong>Laps:</strong> ${stintInfo.value.toFixed(1)}
                     </div>`;
                 }
             }
