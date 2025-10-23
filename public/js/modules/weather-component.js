@@ -507,14 +507,17 @@ export class WeatherComponent {
         // Define color palette matching stint-table.css driver colors EXACTLY
         // CSS mapping: driver-color-0=Cyan, 1=Purple, 2=Pink, 3=Lime, 4=Yellow, 5=Red, 6=Green, 7=Blue
         const driverColors = [
-            'rgba(6, 182, 212, 0.8)',    // driver-color-0: Cyan (increased opacity for chart visibility)
-            'rgba(168, 85, 247, 0.8)',   // driver-color-1: Purple
-            'rgba(236, 72, 153, 0.8)',   // driver-color-2: Pink
-            'rgba(34, 197, 94, 0.8)',    // driver-color-3: Lime
-            'rgba(251, 191, 36, 0.8)',   // driver-color-4: Yellow
-            'rgba(245, 101, 101, 0.8)',  // driver-color-5: Red
-            'rgba(16, 185, 129, 0.8)',   // driver-color-6: Green
-            'rgba(59, 130, 246, 0.8)',   // driver-color-7: Blue
+            'rgba(6, 182, 212, 0.2)',    // driver-color-0: 
+            'rgba(168, 85, 247, 0.2)',   // driver-color-1: 
+            'rgba(236, 72, 153, 0.2)',   // driver-color-2: 
+            'rgba(34, 197, 94, 0.2)',    // driver-color-3: 
+            'rgba(251, 191, 36, 0.2)',   // driver-color-4: 
+            'rgba(245, 101, 101, 0.2)',    // driver-color-5: 
+            'rgba(16, 185, 129, 0.2)',   // driver-color-6: 
+            
+            // 
+        
+      
         ];
         
         const defaultColor = 'rgba(115, 115, 115, 0.3)'; // driver-color-default
