@@ -529,7 +529,7 @@ export class WeatherComponent {
             const driverName = stint.driverName || 'Unassigned';
             const colorIndex = driverColorMap[driverName];
             const color = colorIndex !== undefined ? driverColors[colorIndex] : defaultColor;
-            const laps = stint.laps || 0; // Use laps instead of duration
+            const laps = Math.floor(stint.laps || 0); // Round down laps for chart display only
             
             // Add driver to legend (only once per unique driver)
             if (!driverLegendMap.has(driverName)) {
@@ -544,7 +544,7 @@ export class WeatherComponent {
                 driver: driverName,
                 colorIndex: colorIndex,
                 color: color,
-                laps: laps.toFixed(1),
+                laps: laps + ' (rounded from ' + (stint.laps || 0).toFixed(1) + ')',
                 startTime: stint.startTime,
                 endTime: stint.endTime
             });
@@ -554,7 +554,8 @@ export class WeatherComponent {
                 itemStyle: { color: color },
                 driverName: driverName,
                 startTime: stint.startTime,
-                endTime: stint.endTime
+                endTime: stint.endTime,
+                originalLaps: stint.laps // Keep original for tooltip if needed
             };
         });
         
@@ -623,7 +624,7 @@ export class WeatherComponent {
                         <strong>Driver:</strong> ${stintInfo.driverName}<br>
                         <strong>Start:</strong> ${startTime}<br>
                         <strong>End:</strong> ${endTime}<br>
-                        <strong>Laps:</strong> ${stintInfo.value.toFixed(1)}
+                        <strong>Laps:</strong> ${stintInfo.value}
                     </div>`;
                 }
             }
