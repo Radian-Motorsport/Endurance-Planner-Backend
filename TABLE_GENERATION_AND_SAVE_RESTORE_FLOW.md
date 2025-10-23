@@ -643,6 +643,7 @@ Object.entries(strategyData.stintBackupDriverAssignments).forEach(([stintIndex, 
 ### Issue: Dropdowns are Empty
 - **Cause:** `setSelectedDrivers()` not called before `populateStintTable()`
 - **Fix:** Ensure drivers are passed to calculator in the setTimeout before `calculateStrategy()`
+- **Commit:** 4d297ad
 
 ### Issue: Stint Assignments Not Restored
 - **Cause:** `restoreStintDriverAssignments()` called before table is generated
@@ -651,14 +652,65 @@ Object.entries(strategyData.stintBackupDriverAssignments).forEach(([stintIndex, 
 ### Issue: Form Data Not Applied
 - **Cause:** Form input ID mismatch between save/restore
 - **Fix:** Verify `collectPage2FormData()` and `applyPage2FormData()` use identical IDs
+- **Example:** pit-stop-time vs pit-stop-time-display-input (fixed in 2d9977f)
 
 ### Issue: Garage61 Data Not Loading
 - **Cause:** `checkGarage61Data()` not called after car/track restoration
 - **Fix:** Explicitly call after both car and track are set
+- **Commit:** 55718c5
 
 ### Issue: Weather/Track Not Loading
 - **Cause:** `setSessionMetadata()` not called before component load
 - **Fix:** Call `setSessionMetadata()` before `loadWeatherComponent()` and `loadTrackMapComponent()`
+
+### **CRITICAL Issue: selectedSessionDetails Not Restored**
+- **Symptom:** Table generates but missing session data, weather doesn't load, metadata missing
+- **Root Cause:** `handleEventSelection(eventId)` only populates the sessions dropdown, it does NOT set `this.selectedSessionDetails`
+- **Why It Breaks:** 
+  - In normal flow, user selects a session → triggers `populateRaceInformation()` → sets `this.selectedSessionDetails`
+  - In shared strategy flow, we call `handleEventSelection()` which skips `populateRaceInformation()`
+  - Result: `this.selectedSessionDetails` remains null
+- **Data Impact:** Missing track_id, event_id, session_length, simulated_start_time, session_date
+- **Fix (Commit 4c4429b):** After calling `handleEventSelection()`, directly restore:
+  ```javascript
+  this.selectedSessionDetails = strategyData.selectedEvent;
+  ```
+- **Lesson:** Event selection and session selection are TWO different steps - shared strategy must restore both
+
+### **CRITICAL Issue: Wrong Method Used for Car Restoration**
+- **Symptom:** Car not selected, car details not displayed, selectedCar has wrong structure
+- **Root Cause:** Code called `handleCarSelection(car_id)` but that method:
+  - Expects parameter to be `carName` (not car_id)
+  - Searches using `cars.find(c => c.name === carName)` - looks up by NAME not ID
+  - Stores car differently than normal flow
+- **Normal Flow:** Uses `populateCarDetails(car_id, car_name)` which:
+  - Accepts car_id as parameter
+  - Looks up car by: `car.car_id.toString() === carId.toString()`
+  - Stores as: `{ id: carId, name: carName, details: carObject }`
+- **Why It Matters:** 
+  - `handleCarSelection()` is for a different purpose (appears to be legacy)
+  - Using wrong method causes car lookup to fail
+  - Even if it worked, data structure would be incompatible
+- **Fix (Commit 765b286):** Changed restoration to use correct method:
+  ```javascript
+  await this.populateCarDetails(
+      strategyData.selectedCar.car_id || strategyData.selectedCar.id,
+      strategyData.selectedCar.car_name || strategyData.selectedCar.name
+  );
+  ```
+- **Lesson:** Always use the SAME methods for restoration that are used in normal UI flow
+
+### **Issue: Duplicate calculateStrategy() Method**
+- **Symptom:** Table not generating, drivers array empty in calculator
+- **Root Cause:** Two `calculateStrategy()` methods defined - second one (stub at line 3075) overrode the first
+- **Fix (Commit 22ac0f6):** Removed the duplicate stub method
+- **Lesson:** Search for duplicate method definitions when data mysteriously doesn't pass through
+
+### **Issue: Missing handleSeriesSelection & handleEventSelection Methods**
+- **Symptom:** "TypeError: this.handleSeriesSelection is not a function"
+- **Root Cause:** These methods didn't exist - series/event selection was done inline in event listeners
+- **Fix (Commit 7fe606e):** Created both methods to match pattern of handleTrackSelection/handleCarSelection
+- **Lesson:** Shared strategy restoration requires extracting inline event handler logic into reusable methods
 
 ---
 
