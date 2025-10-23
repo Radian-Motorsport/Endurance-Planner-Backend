@@ -656,12 +656,12 @@ export class StrategyCalculator {
         row.className = 'bg-neutral-800 hover:bg-neutral-700 transition-colors';
 
         row.innerHTML = `
-            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm font-bold" style="width: 50px;">${stintNumber}</td>
-            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 80px;">${this.formatTimeForDisplay(startTime, timeZone)}</td>
-            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 80px;">${this.formatTimeForDisplay(endTime, timeZone)}</td>
-            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 70px;">${startLap}</td>
-            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 70px;">${endLap}</td>
-            <td class="py-2 px-2 text-center text-blue-400 font-mono text-sm" style="width: 70px; white-space: nowrap;">${stintLaps.toFixed(1)}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm font-bold" style="width: 80px;">${stintNumber}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 110px;">${this.formatTimeForDisplay(startTime, timeZone)}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 110px;">${this.formatTimeForDisplay(endTime, timeZone)}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 100px;">${startLap}</td>
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 100px;">${endLap}</td>
+            <td class="py-2 px-2 text-center text-blue-400 font-mono text-sm" style="width: 100px; white-space: nowrap;">${stintLaps.toFixed(1)}</td>
             <td class="px-1" style="width: 15px; text-align:center;">
                 <div class="driver-color-strip" data-stint="${stintNumber - 1}" style="width:12px;height:40px;margin:0 auto;"></div>
             </td>
@@ -711,12 +711,12 @@ export class StrategyCalculator {
         row.className = 'bg-neutral-900 transition-colors';
 
         row.innerHTML = `
-            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 50px;"></td>
-            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 80px;">${this.formatTimeForDisplay(startTime, timeZone)}</td>
-            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 80px;">${this.formatTimeForDisplay(endTime, timeZone)}</td>
-            <td class="py-1 px-2 text-center text-neutral-500 road-rage-font text-xs" style="width: 70px;">PIT</td>
-            <td class="py-1 px-2 text-center text-neutral-500 road-rage-font text-xs" style="width: 70px;">PIT</td>
-            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 70px;">${this.formatPitStopTime(this.pitStopTime)}</td>
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 80px;"></td>
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 110px;">${this.formatTimeForDisplay(startTime, timeZone)}</td>
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 110px;">${this.formatTimeForDisplay(endTime, timeZone)}</td>
+            <td class="py-1 px-2 text-center text-neutral-500 road-rage-font text-xs" style="width: 100px;">PIT</td>
+            <td class="py-1 px-2 text-center text-neutral-500 road-rage-font text-xs" style="width: 100px;">PIT</td>
+            <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 100px;">${this.formatPitStopTime(this.pitStopTime)}</td>
             <td class="px-1" style="width: 15px;"></td>
             <td class="py-1 px-2 text-center text-neutral-600 text-xs">-</td>
             <td class="py-1 px-2 text-center text-neutral-600 text-xs">-</td>

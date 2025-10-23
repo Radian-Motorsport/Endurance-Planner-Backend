@@ -281,12 +281,12 @@ select {
     white-space: nowrap !important;
 }
 
-/* 9-Column Layout: Stint#(50px) | StartTime(80px) | EndTime(80px) | StartLap(70px) | EndLap(70px) | Laps(70px) | Color(15px) | Driver(flex) | Backup(flex) */
+/* 9-Column Layout: Stint#(80px) | StartTime(110px) | EndTime(110px) | StartLap(100px) | EndLap(100px) | Laps(100px) | Color(15px) | Driver(flex) | Backup(flex) */
 
 /* Column 1: Stint # */
 .stint-table td:nth-child(1),
 .stint-table th:nth-child(1) {
-    width: 50px !important;
+    width: 80px !important;
     flex-shrink: 0;
 }
 
@@ -295,7 +295,7 @@ select {
 .stint-table td:nth-child(3),
 .stint-table th:nth-child(2),
 .stint-table th:nth-child(3) {
-    width: 80px !important;
+    width: 110px !important;
     flex-shrink: 0;
 }
 
@@ -306,7 +306,7 @@ select {
 .stint-table th:nth-child(4),
 .stint-table th:nth-child(5),
 .stint-table th:nth-child(6) {
-    width: 70px !important;
+    width: 100px !important;
     flex-shrink: 0;
 }
 
