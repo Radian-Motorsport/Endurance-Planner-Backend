@@ -1085,6 +1085,72 @@ app.post('/api/drivers/refresh-all-full', async (req, res) => {
     }
 });
 
+// ========================= WEATHER REFRESH ENDPOINT =========================
+
+// Refresh all weather data
+app.post('/api/weather/refresh-all', async (req, res) => {
+    try {
+        if (!pool) {
+            return res.status(500).json({ error: 'Database not available' });
+        }
+
+        console.log('🌤️  Starting refresh of all weather data...');
+        
+        // Get all events with weather URLs
+        const result = await pool.query(
+            'SELECT event_id, event_name, weather_url FROM events WHERE weather_url IS NOT NULL ORDER BY start_date DESC'
+        );
+        
+        const events = result.rows;
+        console.log(`📊 Found ${events.length} events with weather URLs`);
+        
+        let updatedCount = 0;
+        const failures = [];
+        
+        // Fetch weather for each event
+        for (const event of events) {
+            try {
+                console.log(`🔄 Refreshing weather for event ${event.event_id}: ${event.event_name}`);
+                
+                // Use the weather API's fetchWeatherData to get latest weather
+                const weatherData = await fetch(event.weather_url);
+                
+                if (!weatherData.ok) {
+                    throw new Error(`HTTP ${weatherData.status}`);
+                }
+                
+                const weatherJson = await weatherData.json();
+                console.log(`✅ Updated weather for ${event.event_name}`);
+                updatedCount++;
+                
+            } catch (error) {
+                console.warn(`⚠️  Failed to refresh weather for event ${event.event_id}:`, error.message);
+                failures.push({
+                    event_id: event.event_id,
+                    event_name: event.event_name,
+                    error: error.message
+                });
+            }
+        }
+        
+        res.json({
+            message: 'Weather refresh completed',
+            updatedCount,
+            totalEvents: events.length,
+            failures: failures.length > 0 ? failures : undefined
+        });
+        
+    } catch (error) {
+        console.error('Weather refresh failed:', error.message);
+        res.status(500).json({ 
+            error: 'Weather refresh failed',
+            message: error.message 
+        });
+    }
+});
+
+// ========================= END WEATHER REFRESH ENDPOINT =========================
+
 // Individual driver details endpoint
 app.get('/api/drivers/:custId/details', async (req, res) => {
     try {

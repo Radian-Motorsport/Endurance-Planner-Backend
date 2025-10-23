@@ -1157,6 +1157,11 @@ class RadianPlannerApp {
             refreshDriversFullBtn.addEventListener('click', () => this.refreshAllDriversFullDetails());
         }
 
+        const refreshWeatherBtn = document.getElementById('refresh-weather-btn');
+        if (refreshWeatherBtn) {
+            refreshWeatherBtn.addEventListener('click', () => this.refreshWeatherData());
+        }
+
         const addDriverByIdBtn = document.getElementById('add-driver-by-id-btn');
         if (addDriverByIdBtn) {
             addDriverByIdBtn.addEventListener('click', () => this.addDriverByCustomerId());
@@ -1891,6 +1896,50 @@ class RadianPlannerApp {
             console.error('❌ Full driver details refresh failed:', error);
             this.uiManager.showNotification(
                 `Full driver details refresh failed: ${error.message}`,
+                'error'
+            );
+        } finally {
+            // Restore button
+            refreshBtn.innerHTML = originalHtml;
+            refreshBtn.disabled = false;
+        }
+    }
+
+    async refreshWeatherData() {
+        const refreshBtn = document.getElementById('refresh-weather-btn');
+        const originalHtml = refreshBtn.innerHTML;
+
+        try {
+            // Update button to show loading state
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            refreshBtn.disabled = true;
+
+            this.uiManager.showNotification('Refreshing weather data from iRacing...', 'info');
+
+            const response = await fetch('/api/weather/refresh-all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Weather refresh failed');
+            }
+
+            this.uiManager.showNotification(
+                `Successfully refreshed weather data for ${result.updatedCount}/${result.totalEvents} events`,
+                'success'
+            );
+
+            console.log(`✅ Weather refresh completed: ${result.updatedCount}/${result.totalEvents} updated`);
+
+        } catch (error) {
+            console.error('❌ Weather refresh failed:', error);
+            this.uiManager.showNotification(
+                `Weather refresh failed: ${error.message}`,
                 'error'
             );
         } finally {
