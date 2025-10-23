@@ -1254,7 +1254,7 @@ export class StrategyCalculator {
 
             // Update time cells
             const cells = row.querySelectorAll('td');
-            if (cells.length >= 8) {
+            if (cells.length >= 7) {  // Changed from 8 to 7 - we have 7 columns total
                 cells[0].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
                 cells[1].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
                 // Update lap numbers
