@@ -521,9 +521,8 @@ export class WeatherComponent {
         // Build series data for stacked bar chart
         const stintLabels = stints.map((stint, i) => `Stint ${i + 1}`);
         
-        // Build legend entries for each driver
-        const driverLegends = [];
-        const driverLegendMap = new Map(); // Track which drivers we've added to legend
+        // Build legend entries for each driver and organize data by driver
+        const driverSeriesMap = new Map(); // Map of driver name -> array of {value, stintIndex}
         
         const stintData = stints.map((stint, i) => {
             const driverName = stint.driverName || 'Unassigned';
@@ -531,14 +530,17 @@ export class WeatherComponent {
             const color = colorIndex !== undefined ? driverColors[colorIndex] : defaultColor;
             const laps = Math.floor(stint.laps || 0); // Round down laps for chart display only
             
-            // Add driver to legend (only once per unique driver)
-            if (!driverLegendMap.has(driverName)) {
-                driverLegendMap.set(driverName, color);
-                driverLegends.push({
-                    name: driverName,
-                    color: color
+            // Build data structure for this stint
+            if (!driverSeriesMap.has(driverName)) {
+                driverSeriesMap.set(driverName, {
+                    color: color,
+                    data: new Array(stints.length).fill(0)
                 });
             }
+            
+            // Add laps to this driver's series at this stint index
+            const driverSeries = driverSeriesMap.get(driverName);
+            driverSeries.data[i] = laps;
             
             console.log(`   Stint ${i + 1}:`, {
                 driver: driverName,
@@ -562,8 +564,24 @@ export class WeatherComponent {
         console.log('   Chart data prepared:', {
             labels: stintLabels,
             dataPoints: stintData.length,
-            uniqueDrivers: driverLegends.length
+            uniqueDrivers: driverSeriesMap.size,
+            drivers: Array.from(driverSeriesMap.keys())
         });
+        
+        // Build series array with one series per driver for proper legend display
+        const driverSeries = Array.from(driverSeriesMap.entries()).map(([driverName, seriesData]) => ({
+            name: driverName,
+            type: 'bar',
+            data: seriesData.data.map((value, index) => {
+                if (value === 0) return null; // No laps for this driver in this stint
+                return {
+                    value: value,
+                    itemStyle: { color: seriesData.color }
+                };
+            }),
+            barWidth: '60%',
+            label: { show: false }
+        }));
         
         // Create day/night markings based on weather data
         const dayNightSeries = this.createDayNightMarkingsForDrivers(forecast, stints);
@@ -571,7 +589,7 @@ export class WeatherComponent {
         const option = {
             grid: { left: '60px', right: '60px', top: '60px', bottom: '80px' },
             legend: {
-                data: driverLegends.map(d => d.name),
+                data: Array.from(driverSeriesMap.keys()),
                 top: '10px',
                 textStyle: { color: '#d4d4d8' },
                 itemGap: 20
@@ -593,24 +611,22 @@ export class WeatherComponent {
                 splitLine: { lineStyle: { color: '#6E7079', opacity: 0.2 } }
             },
             series: [
-                {
-                    name: 'Stints',
-                    type: 'bar',
-                    data: stintData,
-                    barWidth: '60%',
-                    label: {
-                        show: false
-                    }
-                },
+                ...driverSeries,
                 ...dayNightSeries
             ],
             tooltip: {
                 trigger: 'axis',
                 formatter: (params) => {
-                    const stintParam = params.find(p => p.seriesName === 'Stints');
-                    if (!stintParam) return '';
+                    if (!params || params.length === 0) return '';
                     
-                    const stintInfo = stintParam.data;
+                    // Find the driver series (not day/night markings)
+                    const driverParam = params.find(p => driverSeriesMap.has(p.seriesName));
+                    if (!driverParam || driverParam.value === null) return '';
+                    
+                    // Find the stint info from original data
+                    const stintIndex = driverParam.dataIndex;
+                    const stintInfo = stintData[stintIndex];
+                    
                     const startTime = new Date(stintInfo.startTime).toLocaleString('en-US', {
                         month: 'short', day: 'numeric',
                         hour: 'numeric', minute: '2-digit', hour12: true
@@ -621,10 +637,10 @@ export class WeatherComponent {
                     });
                     
                     return `<div style="color: black;">
-                        <strong>Driver:</strong> ${stintInfo.driverName}<br>
+                        <strong>Driver:</strong> ${driverParam.seriesName}<br>
                         <strong>Start:</strong> ${startTime}<br>
                         <strong>End:</strong> ${endTime}<br>
-                        <strong>Laps:</strong> ${stintInfo.value}
+                        <strong>Laps:</strong> ${driverParam.value}
                     </div>`;
                 }
             }
