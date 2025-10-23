@@ -1493,6 +1493,7 @@ export class StrategyCalculator {
             button.addEventListener('click', (e) => {
                 e.preventDefault();
                 const adjustment = parseFloat(button.dataset.value) || 0;
+                console.log('🔘 Fuel button clicked:', { buttonValue: button.dataset.value, parsedAdjustment: adjustment });
                 this.adjustFuelSlider(adjustment);
             });
         });
@@ -1502,6 +1503,7 @@ export class StrategyCalculator {
             button.addEventListener('click', (e) => {
                 e.preventDefault();
                 const adjustment = parseFloat(button.dataset.value) || 0;
+                console.log('🔘 Lap time button clicked:', { buttonValue: button.dataset.value, parsedAdjustment: adjustment });
                 this.adjustLapTimeSlider(adjustment);
             });
         });
@@ -1539,8 +1541,8 @@ export class StrategyCalculator {
         const lapTimeAdjustedDisplay = document.getElementById('lap-time-adjusted-value');
 
         if (lapTimeSlider && lapTimeValueDisplay) {
-            const currentValue = parseInt(lapTimeSlider.value) || 0;
-            lapTimeValueDisplay.textContent = currentValue.toString();
+            const currentValue = parseFloat(lapTimeSlider.value) || 0;
+            lapTimeValueDisplay.textContent = currentValue.toFixed(1) + 's';
 
             // Calculate and display adjusted lap time
             const baseMinutes = parseInt(document.getElementById('avg-lap-time-minutes')?.value) || 0;
@@ -1552,7 +1554,7 @@ export class StrategyCalculator {
             const adjustedSecs = adjustedSeconds % 60;
 
             const baseTimeStr = `${baseMinutes}:${baseSeconds.toString().padStart(2, '0')}`;
-            const adjustedTimeStr = `${adjustedMinutes}:${adjustedSecs.toString().padStart(2, '0')}`;
+            const adjustedTimeStr = `${adjustedMinutes}:${adjustedSecs.toString().padStart(2, '0')}.${String(Math.round((adjustedSeconds - Math.floor(adjustedSeconds)) * 10)).padStart(1, '0')}`;
 
             if (lapTimeOriginalDisplay) lapTimeOriginalDisplay.textContent = baseTimeStr;
             if (lapTimeAdjustedDisplay) lapTimeAdjustedDisplay.textContent = adjustedTimeStr;
@@ -1568,6 +1570,7 @@ export class StrategyCalculator {
         if (fuelSlider) {
             const currentValue = parseFloat(fuelSlider.value) || 0;
             const newValue = Math.max(-2.0, Math.min(2.0, currentValue + adjustment));
+            console.log('⛽ Fuel slider adjustment:', { currentValue, adjustment, newValue });
             fuelSlider.value = newValue.toFixed(2);
             this.updateSliderDisplays();
             this.recalculateWithAdjustments();
@@ -1583,6 +1586,7 @@ export class StrategyCalculator {
         if (lapTimeSlider) {
             const currentValue = parseFloat(lapTimeSlider.value) || 0;
             const newValue = Math.max(-3, Math.min(3, currentValue + adjustment));
+            console.log('⏱️ Lap time slider adjustment:', { currentValue, adjustment, newValue });
             lapTimeSlider.value = newValue.toFixed(1);
             this.updateSliderDisplays();
             this.recalculateWithAdjustments();
