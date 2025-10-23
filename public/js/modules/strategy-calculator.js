@@ -395,7 +395,7 @@ export class StrategyCalculator {
      */
     applySliderAdjustments(inputs) {
         const fuelSliderAdjustment = parseFloat(document.getElementById('fuel-slider')?.value) || 0;
-        const lapTimeSliderAdjustment = parseInt(document.getElementById('lap-time-slider')?.value) || 0;
+        const lapTimeSliderAdjustment = parseFloat(document.getElementById('lap-time-slider')?.value) || 0;
 
         return {
             ...inputs,
@@ -441,7 +441,7 @@ export class StrategyCalculator {
     updateDisplays(calculations, inputs) {
         this.updateElement('est-laps-display', calculations.totalLaps);
         this.updateElement('stint-duration-display', this.formatDuration(calculations.stintDuration));
-        this.updateElement('laps-per-stint-display', calculations.lapsPerStint);
+        this.updateElement('laps-per-stint-display', calculations.lapsPerTank.toFixed(1));
         this.updateElement('pit-stops-display', calculations.totalPitStops);
         this.updateElement('stint-pit-stops-display', calculations.totalPitStops);
         this.updateElement('total-fuel-display', calculations.totalFuel.toFixed(1) + ' L');
@@ -1531,7 +1531,17 @@ export class StrategyCalculator {
             const adjustedFuel = baseFuel + currentValue;
 
             if (fuelOriginalDisplay) fuelOriginalDisplay.textContent = baseFuel.toFixed(1) + ' L';
-            if (fuelAdjustedDisplay) fuelAdjustedDisplay.textContent = adjustedFuel.toFixed(1) + ' L';
+            if (fuelAdjustedDisplay) {
+                fuelAdjustedDisplay.textContent = adjustedFuel.toFixed(1) + ' L';
+                // Add purple if adjusted
+                if (currentValue !== 0) {
+                    fuelAdjustedDisplay.classList.add('text-purple-400');
+                    fuelAdjustedDisplay.classList.remove('text-neutral-200');
+                } else {
+                    fuelAdjustedDisplay.classList.remove('text-purple-400');
+                    fuelAdjustedDisplay.classList.add('text-neutral-200');
+                }
+            }
         }
 
         // Update lap time slider display
@@ -1544,7 +1554,7 @@ export class StrategyCalculator {
             const currentValue = parseFloat(lapTimeSlider.value) || 0;
             lapTimeValueDisplay.textContent = currentValue.toFixed(1) + 's';
 
-            // Calculate and display adjusted lap time
+            // Calculate and display adjusted lap time with 3 decimals
             const baseMinutes = parseInt(document.getElementById('avg-lap-time-minutes')?.value) || 0;
             const baseSeconds = parseInt(document.getElementById('avg-lap-time-seconds')?.value) || 0;
             const baseTotalSeconds = (baseMinutes * 60) + baseSeconds;
@@ -1552,12 +1562,24 @@ export class StrategyCalculator {
 
             const adjustedMinutes = Math.floor(adjustedSeconds / 60);
             const adjustedSecs = adjustedSeconds % 60;
+            const wholeSeconds = Math.floor(adjustedSecs);
+            const milliseconds = Math.round((adjustedSecs - wholeSeconds) * 1000);
 
             const baseTimeStr = `${baseMinutes}:${baseSeconds.toString().padStart(2, '0')}`;
-            const adjustedTimeStr = `${adjustedMinutes}:${adjustedSecs.toString().padStart(2, '0')}.${String(Math.round((adjustedSeconds - Math.floor(adjustedSeconds)) * 10)).padStart(1, '0')}`;
+            const adjustedTimeStr = `${adjustedMinutes}:${wholeSeconds.toString().padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
 
             if (lapTimeOriginalDisplay) lapTimeOriginalDisplay.textContent = baseTimeStr;
-            if (lapTimeAdjustedDisplay) lapTimeAdjustedDisplay.textContent = adjustedTimeStr;
+            if (lapTimeAdjustedDisplay) {
+                lapTimeAdjustedDisplay.textContent = adjustedTimeStr;
+                // Add purple if adjusted
+                if (currentValue !== 0) {
+                    lapTimeAdjustedDisplay.classList.add('text-purple-400');
+                    lapTimeAdjustedDisplay.classList.remove('text-neutral-200');
+                } else {
+                    lapTimeAdjustedDisplay.classList.remove('text-purple-400');
+                    lapTimeAdjustedDisplay.classList.add('text-neutral-200');
+                }
+            }
         }
     }
 
