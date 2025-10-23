@@ -1287,11 +1287,11 @@ class RadianPlannerApp {
                     console.log('🔍 selectedSessionDetails.track_id:', this.selectedSessionDetails.track_id);
                     
                     this.strategyCalculator.setSessionMetadata(
-                        this.selectedSessionDetails.track_garage61_id || this.selectedSessionDetails.track_id,
+                        this.selectedSessionDetails.track_id,
                         this.selectedSessionDetails.event_id
                     );
                     console.log('📍 Passed session metadata to strategy calculator:', {
-                        trackId: this.selectedSessionDetails.track_garage61_id || this.selectedSessionDetails.track_id,
+                        trackId: this.selectedSessionDetails.track_id,
                         eventId: this.selectedSessionDetails.event_id
                     });
                 } else {
@@ -2843,7 +2843,7 @@ class RadianPlannerApp {
             // Set session metadata for strategy calculator (needed for weather/track loading)
             if (this.strategyCalculator && strategyData.selectedEvent && strategyData.selectedTrack) {
                 this.strategyCalculator.setSessionMetadata(
-                    strategyData.selectedTrack.garage61_id || strategyData.selectedTrack.track_id,
+                    strategyData.selectedTrack.track_id,
                     strategyData.selectedEvent.event_id
                 );
 

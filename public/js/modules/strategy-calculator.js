@@ -106,7 +106,7 @@ export class StrategyCalculator {
             if (window.radianPlanner && window.radianPlanner.selectedSessionDetails) {
                 const sessionDetails = window.radianPlanner.selectedSessionDetails;
                 this.setSessionMetadata(
-                    sessionDetails.track_garage61_id || sessionDetails.track_id,
+                    sessionDetails.track_id,
                     sessionDetails.event_id
                 );
                 console.log('✅ Restored session metadata during recalculation');
@@ -878,7 +878,7 @@ export class StrategyCalculator {
             console.log('🔄 Metadata missing, attempting to restore from app...');
             const sessionDetails = window.radianPlanner.selectedSessionDetails;
             this.setSessionMetadata(
-                sessionDetails.track_garage61_id || sessionDetails.track_id,
+                sessionDetails.track_id,
                 sessionDetails.event_id
             );
         }
