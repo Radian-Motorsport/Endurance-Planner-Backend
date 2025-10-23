@@ -258,12 +258,24 @@ class DriverRefreshService {
 
             for (const member of data.members) {
                 try {
+                    // Log raw license data for debugging
+                    console.log(`\n📋 DEBUG: License data for ${member.display_name} (${member.cust_id}):`);
+                    if (member.licenses && Array.isArray(member.licenses)) {
+                        member.licenses.forEach((license, index) => {
+                            console.log(`  License ${index}: category="${license.category}", category_id=${license.category_id}, irating=${license.irating}, safety_rating=${license.safety_rating}, license_level=${license.license_level}, group_name="${license.group_name}"`);
+                        });
+                    } else {
+                        console.log(`  No licenses array found`);
+                    }
+
                     // Extract license data for different categories
                     const sportsCarLicense = member.licenses?.find(l => l.category === 'sports_car');
                     const ovalLicense = member.licenses?.find(l => l.category === 'oval');
                     const dirtRoadLicense = member.licenses?.find(l => l.category === 'dirt_road');
                     const dirtOvalLicense = member.licenses?.find(l => l.category === 'dirt_oval');
                     const roadLicense = member.licenses?.find(l => l.category_id === 2); // Road license
+                    
+                    console.log(`  Matched licenses: sports_car=${sportsCarLicense?.irating || 'NOT FOUND'}, oval=${ovalLicense?.irating || 'NOT FOUND'}, dirt_road=${dirtRoadLicense?.irating || 'NOT FOUND'}, dirt_oval=${dirtOvalLicense?.irating || 'NOT FOUND'}`);
 
                     // Prepare comprehensive update - PRESERVE existing garage61_slug, name, and timezone
                     const updateData = {
@@ -282,9 +294,13 @@ class DriverRefreshService {
                         sports_car_license_level: sportsCarLicense?.license_level,
                         sports_car_group_name: sportsCarLicense?.group_name,
                         sports_car_safety_rating: sportsCarLicense?.safety_rating,
+                        sports_car_irating: sportsCarLicense?.irating,
 
                         // License data - Oval
                         oval_irating: ovalLicense?.irating,
+
+                        // License data - Formula/other categories
+                        formula_car_irating: member.licenses?.find(l => l.category === 'formula_car')?.irating,
 
                         // License data - Dirt categories
                         dirt_oval_irating: dirtOvalLicense?.irating,
@@ -296,6 +312,8 @@ class DriverRefreshService {
                         // Metadata
                         data_fetched_at: new Date()
                     };
+
+                    console.log(`  📊 Update data prepared:`, JSON.stringify(updateData, null, 2));
 
                     // Filter updateData to only include columns that exist in the database
                     // EXCLUDE garage61_slug, name, timezone to preserve them
