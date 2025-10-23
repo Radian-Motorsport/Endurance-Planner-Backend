@@ -1087,44 +1087,108 @@ app.post('/api/drivers/refresh-all-full', async (req, res) => {
 
 // ========================= WEATHER REFRESH ENDPOINT =========================
 
-// Refresh all weather data
+// Refresh all weather URLs from iRacing API
 app.post('/api/weather/refresh-all', async (req, res) => {
     try {
         if (!pool) {
             return res.status(500).json({ error: 'Database not available' });
         }
 
-        console.log('🌤️  Starting refresh of all weather data...');
+        console.log('🌤️  Starting refresh of all weather URLs from iRacing API...');
         
-        // Get all events with weather URLs
+        // Get all upcoming events
         const result = await pool.query(
-            'SELECT event_id, event_name, weather_url FROM events WHERE weather_url IS NOT NULL ORDER BY start_date DESC'
+            'SELECT event_id, event_name, start_date FROM events WHERE start_date >= CURRENT_DATE ORDER BY start_date ASC LIMIT 100'
         );
         
         const events = result.rows;
-        console.log(`📊 Found ${events.length} events with weather URLs`);
+        console.log(`📊 Found ${events.length} upcoming events to update with weather URLs`);
+        
+        if (events.length === 0) {
+            console.log('⚠️  No upcoming events found in database');
+            return res.json({
+                message: 'No upcoming events to refresh',
+                updatedCount: 0,
+                totalEvents: 0,
+                warning: 'No events with future start dates found'
+            });
+        }
+
+        // Load the DriverRefreshService to use OAuth2 client
+        const DriverRefreshService = require('./refresh-drivers-oauth2.js');
+        const driverRefreshService = new DriverRefreshService();
+        
+        // Authenticate with iRacing
+        console.log('🔐 Authenticating with iRacing API...');
+        await driverRefreshService.authenticate();
+        console.log('✅ Authentication successful');
         
         let updatedCount = 0;
         const failures = [];
         
-        // Fetch weather for each event
+        // For each event, try to fetch weather URL from iRacing
         for (const event of events) {
             try {
-                console.log(`🔄 Refreshing weather for event ${event.event_id}: ${event.event_name}`);
+                console.log(`🔄 Fetching weather URL for event ${event.event_id}: ${event.event_name}`);
                 
-                // Use the weather API's fetchWeatherData to get latest weather
-                const weatherData = await fetch(event.weather_url);
+                // Try to get weather URL from iRacing API
+                // The weather endpoint typically requires season_id and race_week_num
+                // For now, we'll attempt to fetch and store if available
                 
-                if (!weatherData.ok) {
-                    throw new Error(`HTTP ${weatherData.status}`);
+                // Query to get more event details (season_id, race_week_num)
+                const eventDetailsResult = await pool.query(
+                    'SELECT season_id, race_week_num FROM events WHERE event_id = $1',
+                    [event.event_id]
+                );
+                
+                if (eventDetailsResult.rows.length === 0) {
+                    console.warn(`⚠️  Could not find event details for event ${event.event_id}`);
+                    failures.push({
+                        event_id: event.event_id,
+                        event_name: event.event_name,
+                        error: 'Event details not found'
+                    });
+                    continue;
                 }
                 
-                const weatherJson = await weatherData.json();
-                console.log(`✅ Updated weather for ${event.event_name}`);
-                updatedCount++;
+                const eventDetails = eventDetailsResult.rows[0];
+                
+                // Attempt to fetch weather data from iRacing
+                // Note: The exact endpoint may vary - this is a starting point
+                const weatherEndpoint = `/data/season/${eventDetails.season_id}/race_week/${eventDetails.race_week_num || 1}/weather`;
+                console.log(`  📡 Attempting endpoint: ${weatherEndpoint}`);
+                
+                try {
+                    const weatherResponse = await driverRefreshService.client.makeDataAPIRequest(weatherEndpoint);
+                    
+                    if (weatherResponse && weatherResponse.link) {
+                        // Update the event with the new weather URL
+                        await pool.query(
+                            'UPDATE events SET weather_url = $1, updated_at = CURRENT_TIMESTAMP WHERE event_id = $2',
+                            [weatherResponse.link, event.event_id]
+                        );
+                        
+                        console.log(`✅ Updated weather URL for event ${event.event_id}`);
+                        updatedCount++;
+                    } else {
+                        console.warn(`⚠️  No weather data link in response for event ${event.event_id}`);
+                        failures.push({
+                            event_id: event.event_id,
+                            event_name: event.event_name,
+                            error: 'No weather link in API response'
+                        });
+                    }
+                } catch (apiError) {
+                    console.warn(`⚠️  iRacing API error for event ${event.event_id}:`, apiError.message);
+                    failures.push({
+                        event_id: event.event_id,
+                        event_name: event.event_name,
+                        error: apiError.message
+                    });
+                }
                 
             } catch (error) {
-                console.warn(`⚠️  Failed to refresh weather for event ${event.event_id}:`, error.message);
+                console.error(`❌ Error processing event ${event.event_id}:`, error.message);
                 failures.push({
                     event_id: event.event_id,
                     event_name: event.event_name,
@@ -1134,9 +1198,10 @@ app.post('/api/weather/refresh-all', async (req, res) => {
         }
         
         res.json({
-            message: 'Weather refresh completed',
+            message: 'Weather URL refresh completed',
             updatedCount,
             totalEvents: events.length,
+            successRate: `${((updatedCount / events.length) * 100).toFixed(1)}%`,
             failures: failures.length > 0 ? failures : undefined
         });
         
