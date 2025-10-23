@@ -338,7 +338,7 @@ export class StrategyCalculator {
                     const pitStartTime = new Date(stintEndTime.getTime());
                     const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                     const pitCells = nextRow.querySelectorAll('td');
-                    if (pitCells.length >= 9) {
+                    if (pitCells.length >= 8) {
                         pitCells[1].textContent = this.formatTimeForDisplay(pitStartTime, displayTimeZone);
                         pitCells[2].textContent = this.formatTimeForDisplay(pitEndTime, displayTimeZone);
                         // cells[3-4] are "PIT" text, don't touch
@@ -662,9 +662,6 @@ export class StrategyCalculator {
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 100px;">${startLap}</td>
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 100px;">${endLap}</td>
             <td class="py-2 px-2 text-center text-blue-400 font-mono text-sm" style="width: 100px; white-space: nowrap;">${stintLaps.toFixed(1)}</td>
-            <td class="px-1" style="width: 15px; text-align:center;">
-                <div class="driver-color-strip" data-stint="${stintNumber - 1}" style="width:12px;height:40px;margin:0 auto;"></div>
-            </td>
             <td class="py-2 px-2">
                 <select class="driver-select-stint bg-neutral-700 text-neutral-200 p-1 rounded-md w-full border border-neutral-600 text-xs font-mono" 
                         data-stint="${stintNumber - 1}">
@@ -717,7 +714,6 @@ export class StrategyCalculator {
             <td class="py-1 px-2 text-center text-neutral-500 road-rage-font text-xs" style="width: 100px;">PIT</td>
             <td class="py-1 px-2 text-center text-neutral-500 road-rage-font text-xs" style="width: 100px;">PIT</td>
             <td class="py-1 px-2 text-center text-neutral-400 font-mono text-xs" style="width: 100px;">${this.formatPitStopTime(this.pitStopTime)}</td>
-            <td class="px-1" style="width: 15px;"></td>
             <td class="py-1 px-2 text-center text-neutral-600 text-xs">-</td>
             <td class="py-1 px-2 text-center text-neutral-600 text-xs">-</td>
         `;
@@ -741,13 +737,6 @@ export class StrategyCalculator {
         cells[3].textContent = startLap;
         cells[4].textContent = endLap;
         cells[5].textContent = stintLaps.toFixed(1);
-
-        // cells[6] = color strip - update to match driver
-        const colorStripCell = cells[6];
-        if (colorStripCell) {
-            const colorClass = this.getDriverColorClass(driverName);
-            colorStripCell.innerHTML = `<div class="driver-color-strip ${colorClass}" data-stint="${stintNumber - 1}" style="width:12px;height:40px;margin:0 auto;"></div>`;
-        }
 
         // Driver dropdowns are preserved - don't touch them!
     }
@@ -1531,7 +1520,7 @@ export class StrategyCalculator {
                     const pitStartTime = new Date(stintEndTime.getTime());
                     const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                     const pitCells = nextRow.querySelectorAll('td');
-                    if (pitCells.length >= 9) {
+                    if (pitCells.length >= 8) {
                         pitCells[1].textContent = this.formatTimeForDisplay(pitStartTime, displayTimeZone);
                         pitCells[2].textContent = this.formatTimeForDisplay(pitEndTime, displayTimeZone);
                         // cells[3-4] are "PIT" text, don't touch

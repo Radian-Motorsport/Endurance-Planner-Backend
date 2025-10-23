@@ -281,7 +281,7 @@ select {
     white-space: nowrap !important;
 }
 
-/* 9-Column Layout: Stint#(80px) | StartTime(110px) | EndTime(110px) | StartLap(100px) | EndLap(100px) | Laps(100px) | Color(15px) | Driver(flex) | Backup(flex) */
+/* 8-Column Layout: Stint#(80px) | StartTime(110px) | EndTime(110px) | StartLap(100px) | EndLap(100px) | Laps(100px) | Driver(flex) | Backup(flex) */
 
 /* Column 1: Stint # */
 .stint-table td:nth-child(1),
@@ -310,18 +310,11 @@ select {
     flex-shrink: 0;
 }
 
-/* Column 7: Color Strip */
+/* Columns 7-8: Driver and Backup - flexible */
 .stint-table td:nth-child(7),
-.stint-table th:nth-child(7) {
-    width: 15px !important;
-    flex-shrink: 0;
-}
-
-/* Columns 8-9: Driver and Backup - flexible */
 .stint-table td:nth-child(8),
-.stint-table td:nth-child(9),
-.stint-table th:nth-child(8),
-.stint-table th:nth-child(9) {
+.stint-table th:nth-child(7),
+.stint-table th:nth-child(8) {
     flex: 1 !important;
     min-width: 180px !important;
 }
