@@ -378,6 +378,13 @@ export class StrategyCalculator {
      * @param {number} avgLapTimeInSeconds - Average lap time
      */
     async populateStintTable(avgLapTimeInSeconds) {
+        console.log('🏁 populateStintTable START - checking this.selectedDrivers:', {
+            exists: !!this.selectedDrivers,
+            count: this.selectedDrivers ? this.selectedDrivers.length : 'UNDEFINED',
+            drivers: this.selectedDrivers ? this.selectedDrivers.map(d => d.name) : 'NOT AN ARRAY',
+            reference: this.selectedDrivers
+        });
+
         const tbody = document.getElementById('stint-table-body');
         if (!tbody) return;
 
