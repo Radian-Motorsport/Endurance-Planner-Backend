@@ -1437,9 +1437,13 @@ export class StrategyCalculator {
         const selectedName = e.target.value;
         this.selectedDriverForLocalTime = this.selectedDrivers.find(d => d.name === selectedName) || null;
         console.log(`🚗 Selected driver for local time: ${selectedName}`);
+        console.log(`   Driver timezone: ${this.selectedDriverForLocalTime?.timezone || 'Unknown'}`);
+        console.log(`   isLocalTimeMode: ${this.isLocalTimeMode}`);
         
         // Refresh stint table with new driver's timezone
         const avgLapTimeSeconds = this.extractInputs().avgLapTimeInSeconds;
+        const displayTZ = this.getDisplayTimeZoneForToggle();
+        console.log(`   Display timezone being used: ${displayTZ}`);
         this.updateStintTableTimes(avgLapTimeSeconds);
     }
 
@@ -1544,6 +1548,13 @@ export class StrategyCalculator {
         const raceStartTime = this.isLocalTimeMode ? this.getEventStartTime() : this.getRaceStartTime();
         const displayTimeZone = this.getDisplayTimeZoneForToggle();
         
+        console.log(`⏰ updateStintTableTimes called:`, {
+            isLocalTimeMode: this.isLocalTimeMode,
+            displayTimeZone: displayTimeZone,
+            raceStartTime: raceStartTime.toISOString(),
+            selectedDriver: this.selectedDriverForLocalTime?.name || 'None'
+        });
+        
         // Add practice + qualifying offset to get actual first stint start time
         const practiceQualifyingOffset = this.getPracticeQualifyingOffset();
         let currentTime = new Date(raceStartTime.getTime() + practiceQualifyingOffset);
@@ -1560,13 +1571,27 @@ export class StrategyCalculator {
 
             // Update time cells
             const cells = row.querySelectorAll('td');
-            if (cells.length >= 9) {  // 9 columns total
+            if (cells.length >= 8) {  // 8 columns total (stint#, start, end, startLap, endLap, laps, driver, backup)
                 // Stint # (cell[0])
                 cells[0].textContent = index + 1;
                 // Start Time (cell[1])
-                cells[1].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
+                const formattedStartTime = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
+                cells[1].textContent = formattedStartTime;
                 // End Time (cell[2])
-                cells[2].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
+                const formattedEndTime = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
+                cells[2].textContent = formattedEndTime;
+                
+                // Log first stint for debugging
+                if (index === 0) {
+                    console.log(`   Stint 1 times:`, {
+                        stintStartTime: stintStartTime.toISOString(),
+                        stintEndTime: stintEndTime.toISOString(),
+                        displayTimeZone: displayTimeZone,
+                        formattedStartTime: formattedStartTime,
+                        formattedEndTime: formattedEndTime
+                    });
+                }
+                
                 // Update lap numbers - MUST be integers (cells[3-5])
                 const startLap = Math.floor(currentLap);
                 const endLap = Math.floor(currentLap + stintLaps - 1);
