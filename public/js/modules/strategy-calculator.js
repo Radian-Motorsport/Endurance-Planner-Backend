@@ -335,9 +335,11 @@ export class StrategyCalculator {
                     const pitStartTime = new Date(stintEndTime.getTime());
                     const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                     const pitCells = nextRow.querySelectorAll('td');
-                    if (pitCells.length >= 2) {
+                    if (pitCells.length >= 4) {
                         pitCells[0].textContent = this.formatTimeForDisplay(pitStartTime, displayTimeZone);
                         pitCells[1].textContent = this.formatTimeForDisplay(pitEndTime, displayTimeZone);
+                        // cell[2] is "PIT" with colspan=2, don't touch it
+                        pitCells[3].textContent = this.formatPitStopTime(this.pitStopTime);
                     }
                     // Advance currentTime to AFTER the pit stop
                     currentTime = pitEndTime;
@@ -742,10 +744,13 @@ export class StrategyCalculator {
     updatePitStopRow(row, startTime, endTime, timeZone) {
         const cells = row.querySelectorAll('td');
         
-        // Update time cells
+        // Update time cells and duration
+        // cell[0] = Start Time, cell[1] = End Time
+        // cell[2] = "PIT" text (colspan=2, don't touch)
+        // cell[3] = Duration (LAPS column)
         cells[0].innerHTML = this.formatTimeForDisplay(startTime, timeZone);
         cells[1].innerHTML = this.formatTimeForDisplay(endTime, timeZone);
-        cells[4].innerHTML = this.formatPitStopTime(this.pitStopTime);
+        cells[3].innerHTML = this.formatPitStopTime(this.pitStopTime);
     }
 
     /**
@@ -1505,9 +1510,11 @@ export class StrategyCalculator {
                     const pitStartTime = new Date(stintEndTime.getTime());
                     const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                     const pitCells = nextRow.querySelectorAll('td');
-                    if (pitCells.length >= 2) {
+                    if (pitCells.length >= 4) {
                         pitCells[0].textContent = this.formatTimeForDisplay(pitStartTime, displayTimeZone);
                         pitCells[1].textContent = this.formatTimeForDisplay(pitEndTime, displayTimeZone);
+                        // cell[2] is "PIT" with colspan=2, don't touch it
+                        pitCells[3].textContent = this.formatPitStopTime(this.pitStopTime);
                     }
                     // IMPORTANT: Advance currentTime to AFTER the pit stop so next stint starts after pit completes
                     currentTime = pitEndTime;
