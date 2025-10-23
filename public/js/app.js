@@ -1551,33 +1551,8 @@ class RadianPlannerApp {
         }
 
         // Handle +/- buttons for adjustment sliders
-        const adjustmentButtons = document.querySelectorAll('button[data-adjust]');
-        adjustmentButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const adjustType = button.dataset.adjust;
-                const adjustValue = parseFloat(button.dataset.value);
-                
-                if (adjustType === 'fuel') {
-                    const slider = document.getElementById('fuel-slider');
-                    const newValue = Math.max(-2.0, Math.min(2.0, parseFloat(slider.value) + adjustValue));
-                    slider.value = newValue;
-                    document.getElementById('fuel-slider-value').textContent = newValue.toFixed(2);
-                    updateAdjustmentDisplay();
-                    if (this.strategyCalculator) {
-                        this.strategyCalculator.recalculateWithAdjustments();
-                    }
-                } else if (adjustType === 'lapTime') {
-                    const slider = document.getElementById('lap-time-slider');
-                    const newValue = Math.max(-3, Math.min(3, parseFloat(slider.value) + adjustValue));
-                    slider.value = newValue;
-                    document.getElementById('lap-time-slider-value').textContent = newValue.toFixed(2);
-                    updateAdjustmentDisplay();
-                    if (this.strategyCalculator) {
-                        this.strategyCalculator.recalculateWithAdjustments();
-                    }
-                }
-            });
-        });
+        // Adjustment buttons are now handled in strategy-calculator.js setupSliderAdjustmentButtons()
+        // Removing duplicate listener code here to prevent double-firing
     }
 
     collectFormData() {
