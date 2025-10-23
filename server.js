@@ -1096,21 +1096,21 @@ app.post('/api/weather/refresh-all', async (req, res) => {
 
         console.log('🌤️  Starting refresh of all weather URLs from iRacing API...');
         
-        // Get all upcoming events
+        // Get all upcoming events with their season_id and race_week_num
         const result = await pool.query(
-            'SELECT event_id, event_name, start_date FROM events WHERE start_date >= CURRENT_DATE ORDER BY start_date ASC LIMIT 100'
+            'SELECT DISTINCT event_id, event_name, season_id, race_week_num FROM events WHERE start_date >= CURRENT_DATE AND season_id IS NOT NULL ORDER BY start_date ASC'
         );
         
         const events = result.rows;
         console.log(`📊 Found ${events.length} upcoming events to update with weather URLs`);
         
         if (events.length === 0) {
-            console.log('⚠️  No upcoming events found in database');
+            console.log('⚠️  No upcoming events with season data found in database');
             return res.json({
                 message: 'No upcoming events to refresh',
                 updatedCount: 0,
                 totalEvents: 0,
-                warning: 'No events with future start dates found'
+                warning: 'No events with season_id found'
             });
         }
 
@@ -1125,74 +1125,117 @@ app.post('/api/weather/refresh-all', async (req, res) => {
         
         let updatedCount = 0;
         const failures = [];
-        
-        // For each event, try to fetch weather URL from iRacing
-        for (const event of events) {
+        const axios = require('axios');
+
+        // Group events by season_id to fetch schedule once per season
+        const eventsBySeasonId = {};
+        events.forEach(event => {
+            if (!eventsBySeasonId[event.season_id]) {
+                eventsBySeasonId[event.season_id] = [];
+            }
+            eventsBySeasonId[event.season_id].push(event);
+        });
+
+        console.log(`📋 Found ${Object.keys(eventsBySeasonId).length} unique seasons`);
+
+        // For each season, fetch the schedule once
+        for (const [seasonId, seasonEvents] of Object.entries(eventsBySeasonId)) {
             try {
-                console.log(`🔄 Fetching weather URL for event ${event.event_id}: ${event.event_name}`);
+                console.log(`\n🔄 Fetching schedule for season ${seasonId}...`);
                 
-                // Try to get weather URL from iRacing API
-                // The weather endpoint typically requires season_id and race_week_num
-                // For now, we'll attempt to fetch and store if available
+                // Call the schedule endpoint
+                const scheduleEndpoint = `/data/series/season_schedule?season_id=${seasonId}`;
+                console.log(`  📡 Requesting: ${scheduleEndpoint}`);
                 
-                // Query to get more event details (season_id, race_week_num)
-                const eventDetailsResult = await pool.query(
-                    'SELECT season_id, race_week_num FROM events WHERE event_id = $1',
-                    [event.event_id]
-                );
+                const scheduleResponse = await driverRefreshService.client.makeDataAPIRequest(scheduleEndpoint);
                 
-                if (eventDetailsResult.rows.length === 0) {
-                    console.warn(`⚠️  Could not find event details for event ${event.event_id}`);
-                    failures.push({
-                        event_id: event.event_id,
-                        event_name: event.event_name,
-                        error: 'Event details not found'
-                    });
-                    continue;
-                }
-                
-                const eventDetails = eventDetailsResult.rows[0];
-                
-                // Attempt to fetch weather data from iRacing
-                // Note: The exact endpoint may vary - this is a starting point
-                const weatherEndpoint = `/data/season/${eventDetails.season_id}/race_week/${eventDetails.race_week_num || 1}/weather`;
-                console.log(`  📡 Attempting endpoint: ${weatherEndpoint}`);
-                
-                try {
-                    const weatherResponse = await driverRefreshService.client.makeDataAPIRequest(weatherEndpoint);
-                    
-                    if (weatherResponse && weatherResponse.link) {
-                        // Update the event with the new weather URL
-                        await pool.query(
-                            'UPDATE events SET weather_url = $1, updated_at = CURRENT_TIMESTAMP WHERE event_id = $2',
-                            [weatherResponse.link, event.event_id]
-                        );
-                        
-                        console.log(`✅ Updated weather URL for event ${event.event_id}`);
-                        updatedCount++;
-                    } else {
-                        console.warn(`⚠️  No weather data link in response for event ${event.event_id}`);
+                if (!scheduleResponse || !scheduleResponse.link) {
+                    console.warn(`⚠️  No schedule link in response for season ${seasonId}`);
+                    seasonEvents.forEach(event => {
                         failures.push({
                             event_id: event.event_id,
                             event_name: event.event_name,
-                            error: 'No weather link in API response'
+                            error: 'No schedule link in API response'
+                        });
+                    });
+                    continue;
+                }
+
+                // Fetch the actual schedule data from the S3 link
+                console.log(`  🔗 Fetching schedule data from S3 link...`);
+                const scheduleData = await axios.get(scheduleResponse.link, { timeout: 30000 });
+                const schedule = scheduleData.data;
+
+                if (!schedule || !Array.isArray(schedule.schedules)) {
+                    console.warn(`⚠️  Invalid schedule structure for season ${seasonId}`);
+                    seasonEvents.forEach(event => {
+                        failures.push({
+                            event_id: event.event_id,
+                            event_name: event.event_name,
+                            error: 'Invalid schedule structure'
+                        });
+                    });
+                    continue;
+                }
+
+                console.log(`  📊 Retrieved ${schedule.schedules.length} race weeks for season ${seasonId}`);
+
+                // For each event in this season, find its race week and extract weather URL
+                for (const event of seasonEvents) {
+                    try {
+                        // Find the matching race week
+                        const raceWeek = schedule.schedules.find(week => week.race_week_num === event.race_week_num);
+                        
+                        if (!raceWeek) {
+                            console.warn(`⚠️  Race week ${event.race_week_num} not found for event ${event.event_id}`);
+                            failures.push({
+                                event_id: event.event_id,
+                                event_name: event.event_name,
+                                error: `Race week ${event.race_week_num} not found in schedule`
+                            });
+                            continue;
+                        }
+
+                        // Extract weather URL from race week
+                        const weatherUrl = raceWeek.weather?.weather_url;
+                        
+                        if (!weatherUrl) {
+                            console.warn(`⚠️  No weather URL in race week ${event.race_week_num} for event ${event.event_id}`);
+                            failures.push({
+                                event_id: event.event_id,
+                                event_name: event.event_name,
+                                error: 'No weather URL in race week data'
+                            });
+                            continue;
+                        }
+
+                        // Update the event with the weather URL
+                        await pool.query(
+                            'UPDATE events SET weather_url = $1, updated_at = CURRENT_TIMESTAMP WHERE event_id = $2',
+                            [weatherUrl, event.event_id]
+                        );
+                        
+                        console.log(`✅ Updated weather URL for event ${event.event_id}: ${event.event_name}`);
+                        updatedCount++;
+
+                    } catch (eventError) {
+                        console.error(`❌ Error processing event ${event.event_id}:`, eventError.message);
+                        failures.push({
+                            event_id: event.event_id,
+                            event_name: event.event_name,
+                            error: eventError.message
                         });
                     }
-                } catch (apiError) {
-                    console.warn(`⚠️  iRacing API error for event ${event.event_id}:`, apiError.message);
+                }
+
+            } catch (seasonError) {
+                console.error(`❌ Error fetching schedule for season ${seasonId}:`, seasonError.message);
+                seasonEvents.forEach(event => {
                     failures.push({
                         event_id: event.event_id,
                         event_name: event.event_name,
-                        error: apiError.message
+                        error: `Season fetch error: ${seasonError.message}`
                     });
-                }
-                
-            } catch (error) {
-                console.error(`❌ Error processing event ${event.event_id}:`, error.message);
-                failures.push({
-                    event_id: event.event_id,
-                    event_name: event.event_name,
-                    error: error.message
                 });
             }
         }
@@ -1201,6 +1244,7 @@ app.post('/api/weather/refresh-all', async (req, res) => {
             message: 'Weather URL refresh completed',
             updatedCount,
             totalEvents: events.length,
+            seasonsProcessed: Object.keys(eventsBySeasonId).length,
             successRate: `${((updatedCount / events.length) * 100).toFixed(1)}%`,
             failures: failures.length > 0 ? failures : undefined
         });
