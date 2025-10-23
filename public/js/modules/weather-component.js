@@ -603,7 +603,10 @@ export class WeatherComponent {
         const option = {
             grid: { left: '60px', right: '60px', top: '60px', bottom: '80px' },
             legend: {
-                data: Array.from(driverSeriesMap.keys()),
+                data: Array.from(driverSeriesMap.entries()).map(([driverName, seriesData]) => ({
+                    name: driverName,
+                    itemStyle: { color: seriesData.color }
+                })),
                 top: '10px',
                 textStyle: { color: '#d4d4d8' },
                 itemGap: 20
