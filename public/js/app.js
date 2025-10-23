@@ -2984,6 +2984,21 @@ class RadianPlannerApp {
                     window.stintBackupDriverAssignments = strategyData.stintBackupDriverAssignments;
                 }
                 
+                // Show save update button and store strategy ID for updates
+                const saveUpdateBtn = document.getElementById('save-update-btn');
+                if (saveUpdateBtn) {
+                    saveUpdateBtn.classList.remove('hidden');
+                    saveUpdateBtn.dataset.strategyId = strategyId;
+                    console.log('✅ Showing save update button for strategy:', strategyId);
+                }
+                
+                // Show the share link output
+                const shareLinkOutput = document.getElementById('share-link-output');
+                if (shareLinkOutput) {
+                    const shareUrl = `${window.location.origin}${window.location.pathname}?strategy=${strategyId}`;
+                    shareLinkOutput.value = shareUrl;
+                }
+                
                 // Automatically calculate the strategy to show results
                 console.log('🔄 Auto-calculating strategy from shared link...');
                 setTimeout(async () => {
