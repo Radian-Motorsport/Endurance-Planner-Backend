@@ -451,8 +451,9 @@ export class StrategyCalculator {
         this.updateElement('laps-per-stint-display', calculations.lapsPerTank.toFixed(1));
         this.updateElement('pit-stops-display', calculations.totalPitStops);
         this.updateElement('stint-pit-stops-display', calculations.totalPitStops);
+        this.updateElement('stint-laps-per-stint-display', calculations.lapsPerTank.toFixed(1));
         this.updateElement('total-fuel-display', calculations.totalFuel.toFixed(1) + ' L');
-        this.updateElement('fuel-per-lap-display', inputs.fuelPerLap.toFixed(1) + ' L');
+        this.updateElement('fuel-per-lap-display', inputs.fuelPerLap.toFixed(2) + ' L');
         this.updateElement('lap-time-display', this.formatLapTime(inputs.avgLapTimeInSeconds));
         this.updateElement('pit-stop-duration-display', `${inputs.pitStopTime} sec`);
     }
