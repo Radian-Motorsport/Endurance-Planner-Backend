@@ -504,16 +504,17 @@ export class WeatherComponent {
         const driverColorMap = this.stintData.driverColorMap || {};
         const forecast = this.weatherData.weather_forecast;
         
-        // Define color palette matching stint-table.css driver colors
+        // Define color palette matching stint-table.css driver colors EXACTLY
+        // CSS mapping: driver-color-0=Cyan, 1=Purple, 2=Pink, 3=Lime, 4=Yellow, 5=Red, 6=Green, 7=Blue
         const driverColors = [
-            'rgba(59, 130, 246, 0.4)',   // driver-color-0: Blue
-            'rgba(16, 185, 129, 0.4)',   // driver-color-1: Green
-            'rgba(245, 101, 101, 0.4)',  // driver-color-2: Red
-            'rgba(251, 191, 36, 0.4)',   // driver-color-3: Yellow
-            'rgba(168, 85, 247, 0.4)',   // driver-color-4: Purple
-            'rgba(236, 72, 153, 0.4)',   // driver-color-5: Pink
-            'rgba(6, 182, 212, 0.4)',    // driver-color-6: Cyan
-            'rgba(34, 197, 94, 0.4)',    // driver-color-7: Lime
+            'rgba(6, 182, 212, 0.8)',    // driver-color-0: Cyan (increased opacity for chart visibility)
+            'rgba(168, 85, 247, 0.8)',   // driver-color-1: Purple
+            'rgba(236, 72, 153, 0.8)',   // driver-color-2: Pink
+            'rgba(34, 197, 94, 0.8)',    // driver-color-3: Lime
+            'rgba(251, 191, 36, 0.8)',   // driver-color-4: Yellow
+            'rgba(245, 101, 101, 0.8)',  // driver-color-5: Red
+            'rgba(16, 185, 129, 0.8)',   // driver-color-6: Green
+            'rgba(59, 130, 246, 0.8)',   // driver-color-7: Blue
         ];
         
         const defaultColor = 'rgba(115, 115, 115, 0.3)'; // driver-color-default
@@ -527,16 +528,9 @@ export class WeatherComponent {
         const stintData = stints.map((stint, i) => {
             const driverName = stint.driverName || 'Unassigned';
             
-            // Skip unassigned stints entirely - don't add them to the chart
+            // Skip unassigned stints entirely - don't add them to the chart or data structure
             if (driverName === 'Unassigned') {
-                return {
-                    value: 0,
-                    itemStyle: { color: defaultColor },
-                    driverName: driverName,
-                    startTime: stint.startTime,
-                    endTime: stint.endTime,
-                    originalLaps: stint.laps
-                };
+                return null; // Return null instead of an object with value:0
             }
             
             const colorIndex = driverColorMap[driverName];
@@ -581,20 +575,23 @@ export class WeatherComponent {
             drivers: Array.from(driverSeriesMap.keys())
         });
         
-        // Build series array with one series per driver for proper legend display
+        // Build series array with one series per driver for proper legend display and stacking
         const driverSeries = Array.from(driverSeriesMap.entries()).map(([driverName, seriesData]) => ({
             name: driverName,
             type: 'bar',
+            stack: 'stints', // CRITICAL: Stack all drivers in the same column using 'stints' stack ID
             data: seriesData.data.map((value, index) => {
-                if (value === null || value === 0) return null; // No laps for this driver in this stint
+                if (value === null || value === 0) return 0; // Use 0 for stacking, not null
                 return {
                     value: value,
                     itemStyle: { color: seriesData.color }
                 };
             }),
             barWidth: '60%',
-            barGap: '10%', // Gap between bars in the same category
-            label: { show: false }
+            label: { show: false },
+            emphasis: {
+                focus: 'series'
+            }
         }));
         
         // Create day/night markings based on weather data
@@ -634,12 +631,14 @@ export class WeatherComponent {
                     if (!params || params.length === 0) return '';
                     
                     // Find the driver series (not day/night markings)
-                    const driverParam = params.find(p => driverSeriesMap.has(p.seriesName));
-                    if (!driverParam || driverParam.value === null) return '';
+                    const driverParams = params.filter(p => driverSeriesMap.has(p.seriesName) && p.value > 0);
+                    if (driverParams.length === 0) return '';
                     
-                    // Find the stint info from original data
-                    const stintIndex = driverParam.dataIndex;
-                    const stintInfo = stintData[stintIndex];
+                    // Get the stint index from the first valid param
+                    const stintIndex = driverParams[0].dataIndex;
+                    const stintInfo = stints[stintIndex]; // Use original stints array, not stintData
+                    
+                    if (!stintInfo) return '';
                     
                     const startTime = new Date(stintInfo.startTime).toLocaleString('en-US', {
                         month: 'short', day: 'numeric',
@@ -650,11 +649,16 @@ export class WeatherComponent {
                         hour: 'numeric', minute: '2-digit', hour12: true
                     });
                     
+                    // Show info for the driver assigned to this stint
+                    const driverName = stintInfo.driverName || 'Unassigned';
+                    const driverLaps = stintInfo.laps ? Math.floor(stintInfo.laps) : 0;
+                    
                     return `<div style="color: black;">
-                        <strong>Driver:</strong> ${driverParam.seriesName}<br>
+                        <strong>Stint ${stintIndex + 1}</strong><br>
+                        <strong>Driver:</strong> ${driverName}<br>
                         <strong>Start:</strong> ${startTime}<br>
                         <strong>End:</strong> ${endTime}<br>
-                        <strong>Laps:</strong> ${driverParam.value}
+                        <strong>Laps:</strong> ${driverLaps}
                     </div>`;
                 }
             }

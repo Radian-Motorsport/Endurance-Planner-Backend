@@ -3401,6 +3401,12 @@ class RadianPlannerApp {
                 }
             }
 
+            // ✅ CRITICAL FIX: Update weather component drivers chart after restoring assignments
+            if (this.strategyCalculator && this.strategyCalculator.weatherComponent) {
+                console.log('🔄 Updating weather component drivers chart after restore...');
+                this.strategyCalculator.updateWeatherComponentDriversChart();
+            }
+
             console.log('✅ All stint driver assignments restored');
         } catch (error) {
             console.error('❌ Failed to restore stint driver assignments:', error);
