@@ -1646,6 +1646,12 @@ class RadianPlannerApp {
     setLoading(loading) {
         this.isLoading = loading;
         
+        // Show/hide page2 loading overlay
+        const loadingOverlay = document.getElementById('page2-loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.classList.toggle('hidden', !loading);
+        }
+        
         // Update UI loading state
         const loadingElements = document.querySelectorAll('.loading-spinner');
         loadingElements.forEach(el => {
