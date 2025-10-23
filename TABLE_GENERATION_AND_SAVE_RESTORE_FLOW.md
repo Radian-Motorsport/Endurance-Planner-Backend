@@ -712,6 +712,22 @@ Object.entries(strategyData.stintBackupDriverAssignments).forEach(([stintIndex, 
 - **Fix (Commit 7fe606e):** Created both methods to match pattern of handleTrackSelection/handleCarSelection
 - **Lesson:** Shared strategy restoration requires extracting inline event handler logic into reusable methods
 
+### **Issue: Local Time Toggle Not Updating Stint Times**
+- **Symptom:** When toggling between Race Time and Local Time modes, pit stop times update but stint start/end times remain unchanged
+- **Root Cause:** `updateStintTableTimes()` method checks `if (cells.length >= 8)` before updating stint times
+- **Why It Fails:** Stint rows only have 7 columns:
+  1. Start Time
+  2. End Time
+  3. Start Lap
+  4. End Lap
+  5. Laps
+  6. Driver Dropdown
+  7. Backup Driver Dropdown
+- **Result:** The `if` condition fails (7 < 8), so lines updating `cells[0]` and `cells[1]` never execute
+- **Pit Times Still Update:** Pit row update code is outside the `if` condition, so it runs regardless
+- **Fix (Commit d6d8396):** Changed condition from `>= 8` to `>= 7`
+- **Lesson:** Always verify cell count matches table structure when updating DOM elements by index
+
 ---
 
 ## 10. TESTING CHECKLIST
