@@ -2993,6 +2993,13 @@ class RadianPlannerApp {
                 // This is normally set by populateRaceInformation() but we skip that when loading shared strategies
                 this.selectedSessionDetails = strategyData.selectedEvent;
                 console.log('✅ Restored selectedSessionDetails:', this.selectedSessionDetails);
+                
+                // CRITICAL: Call populateRaceInformation to set race-datetime and event-datetime data attributes
+                // These are needed for the time toggle to work correctly
+                if (strategyData.selectedEvent && strategyData.selectedEvent.session_id) {
+                    console.log('📅 Populating race information to set data attributes for time toggle');
+                    await this.populateRaceInformation(strategyData.selectedEvent.session_id);
+                }
             }
 
             if (strategyData.selectedTrack) {
@@ -3118,6 +3125,17 @@ class RadianPlannerApp {
                     
                     await this.calculateStrategy();
                     
+                    // ✅ NEW: If there are slider adjustments, recalculate to apply them
+                    if (strategyData.formData && (parseFloat(strategyData.formData.fuelSlider) !== 0 || parseFloat(strategyData.formData.lapTimeSlider) !== 0)) {
+                        console.log('🔄 Applying saved slider adjustments:', {
+                            fuelSlider: strategyData.formData.fuelSlider,
+                            lapTimeSlider: strategyData.formData.lapTimeSlider
+                        });
+                        if (this.strategyCalculator) {
+                            await this.strategyCalculator.recalculateWithAdjustments();
+                        }
+                    }
+                    
                     // Restore stint driver assignments after table is generated
                     this.restoreStintDriverAssignments(strategyData);
                     
@@ -3162,12 +3180,20 @@ class RadianPlannerApp {
      * Update slider displays without triggering recalculation
      */
     updateAdjustmentDisplayOnly() {
-        // Reset sliders to 0 when loading shared data
+        // Do NOT reset sliders - preserve any saved adjustments from shared strategy
         const fuelSlider = document.getElementById('fuel-slider');
         const lapTimeSlider = document.getElementById('lap-time-slider');
 
-        if (fuelSlider) fuelSlider.value = '0';
-        if (lapTimeSlider) lapTimeSlider.value = '0';
+        // Just update the display text showing the current slider values
+        if (fuelSlider) {
+            const fuelValue = parseFloat(fuelSlider.value) || 0;
+            document.getElementById('fuel-slider-value').textContent = fuelValue.toFixed(2);
+        }
+        
+        if (lapTimeSlider) {
+            const lapTimeValue = parseFloat(lapTimeSlider.value) || 0;
+            document.getElementById('lap-time-slider-value').textContent = lapTimeValue.toFixed(2);
+        }
 
         // Update displays if strategy calculator has the method
         if (this.strategyCalculator && this.strategyCalculator.updateSliderDisplays) {

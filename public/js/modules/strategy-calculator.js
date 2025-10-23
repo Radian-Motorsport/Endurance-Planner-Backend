@@ -22,6 +22,8 @@ export class StrategyCalculator {
         this.weatherComponent = null;
         this.trackMapComponent = null;
         this.driverColorMap = {}; // Maps driver name to color index (0-7)
+        this.cachedRaceStartTime = null; // Cache race start time to prevent it changing on every slider adjustment
+        this.cachedEventStartTime = null; // Cache event start time (local time mode) to prevent it changing on every slider adjustment
     }
 
     /**
@@ -99,6 +101,11 @@ export class StrategyCalculator {
      */
     async calculateStrategy(raceData) {
         console.log('🔥🔥🔥 CALCULATE BUTTON PRESSED 🔥🔥🔥');
+        
+        // Clear cached times when starting a new calculation
+        this.cachedRaceStartTime = null;
+        this.cachedEventStartTime = null;
+        console.log('🔄 Cleared cached times for new calculation');
         
         try {
             // Extract and validate inputs
@@ -796,12 +803,20 @@ export class StrategyCalculator {
      * @returns {Date} Race start time
      */
     getRaceStartTime() {
+        // Return cached race start time if available (prevents time changing on every slider adjustment)
+        if (this.cachedRaceStartTime) {
+            console.log(`⏱️ Using cached race start time: ${this.cachedRaceStartTime.toISOString()}`);
+            return this.cachedRaceStartTime;
+        }
+
         // First try to get from race-start-date/time inputs (Page 2 populated fields)
         const dateInput = document.getElementById('race-start-date-page2');
         const timeInput = document.getElementById('race-start-time-page2');
         
         if (dateInput && timeInput && dateInput.value && timeInput.value) {
-            return new Date(`${dateInput.value}T${timeInput.value}`);
+            this.cachedRaceStartTime = new Date(`${dateInput.value}T${timeInput.value}`);
+            console.log(`📅 Cached race start time from Page 2 inputs: ${this.cachedRaceStartTime.toISOString()}`);
+            return this.cachedRaceStartTime;
         }
         
         // Fallback: Try to get from race-datetime data attributes (from Page 1 race information)
@@ -811,13 +826,15 @@ export class StrategyCalculator {
             const raceTime = raceDatetimeEl.dataset.raceTime;
             
             if (raceDate && raceTime) {
-                console.log(`📅 Using race start time from data attributes: ${raceDate}T${raceTime}`);
-                return new Date(`${raceDate}T${raceTime}`);
+                this.cachedRaceStartTime = new Date(`${raceDate}T${raceTime}`);
+                console.log(`📅 Cached race start time from data attributes: ${this.cachedRaceStartTime.toISOString()}`);
+                return this.cachedRaceStartTime;
             }
         }
         
-        console.warn('⚠️ No race start time found, using current time');
-        return new Date(); // Fallback to current time
+        console.warn('⚠️ No race start time found, caching current time');
+        this.cachedRaceStartTime = new Date(); // Fallback to current time - but cache it!
+        return this.cachedRaceStartTime;
     }
 
     /**
@@ -825,6 +842,12 @@ export class StrategyCalculator {
      * @returns {Date} Event start time in London time
      */
     getEventStartTime() {
+        // Return cached event start time if available (prevents time changing on every slider adjustment)
+        if (this.cachedEventStartTime) {
+            console.log(`⏱️ Using cached event start time: ${this.cachedEventStartTime.toISOString()}`);
+            return this.cachedEventStartTime;
+        }
+
         // Get event time from Page 1 event-datetime data attributes
         const eventDatetimeEl = document.getElementById('event-datetime');
         if (eventDatetimeEl) {
@@ -832,14 +855,16 @@ export class StrategyCalculator {
             const eventTime = eventDatetimeEl.dataset.eventTime;
             
             if (eventDate && eventTime) {
-                console.log(`🌍 Using event start time (London): ${eventDate}T${eventTime}`);
-                return new Date(`${eventDate}T${eventTime}`);
+                this.cachedEventStartTime = new Date(`${eventDate}T${eventTime}`);
+                console.log(`🌍 Cached event start time (London): ${this.cachedEventStartTime.toISOString()}`);
+                return this.cachedEventStartTime;
             }
         }
         
         // Fallback: Use race start time if event time not available
         console.warn('⚠️ No event start time found, falling back to race start time');
-        return this.getRaceStartTime();
+        this.cachedEventStartTime = this.getRaceStartTime();
+        return this.cachedEventStartTime;
     }
 
     /**
