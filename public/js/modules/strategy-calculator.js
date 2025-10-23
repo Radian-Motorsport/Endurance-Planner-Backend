@@ -564,6 +564,9 @@ export class StrategyCalculator {
         
         let currentLap = 1; // Initialize lap counter
         let rowIndex = 0; // Track position in tbody for inserting/updating
+        
+        // Store stint data for weather component
+        const stintsData = [];
 
         for (let i = 0; i < this.totalStints; i++) {
             const stintLaps = (i === this.totalStints - 1) && (this.lapsInLastStint !== 0) 
@@ -577,6 +580,15 @@ export class StrategyCalculator {
             // Get assigned driver for this stint
             const assignedDriver = this.getAssignedDriver(i);
             const selectedDriverName = assignedDriver ? assignedDriver.name : 'Unassigned';
+            
+            // Store stint data for weather component
+            stintsData.push({
+                stintNumber: i + 1,
+                driverName: selectedDriverName,
+                startTime: stintStartTime,
+                endTime: stintEndTime,
+                laps: stintLaps
+            });
 
             // Calculate daylight status
             const daylightStatus = this.getDaylightStatus(stintStartTime, displayTimeZone, daylightCalculationMode, selectedDriverName);
@@ -629,6 +641,16 @@ export class StrategyCalculator {
                 existingStintRows[i]?.remove();
                 existingPitRows[i]?.remove();
             }
+        }
+        
+        // Update weather component with stint data for drivers chart
+        if (this.weatherComponent) {
+            const stintData = {
+                stints: stintsData,
+                driverColorMap: this.driverColorMap
+            };
+            console.log('📊 Passing stint data to weather component:', stintData);
+            this.weatherComponent.setStintData(stintData);
         }
     }
 
@@ -1063,10 +1085,53 @@ export class StrategyCalculator {
             this.applyDriverColorToRow(row, selectedDriverName);
         }
         
+        // Update weather component drivers chart with new driver assignment
+        this.updateWeatherComponentDriversChart();
+        
         // Update internal state or trigger recalculation if needed
         // This could trigger daylight recalculation for driver-specific timezones if needed
     }
 
+    /**
+     * Update weather component drivers chart when driver assignments change
+     * @private
+     */
+    updateWeatherComponentDriversChart() {
+        if (!this.weatherComponent) return;
+        
+        // Collect current driver assignments from the table
+        const tbody = document.getElementById('stint-table-body');
+        if (!tbody) return;
+        
+        const stintRows = tbody.querySelectorAll('tr[data-role="stint"]');
+        const stints = [];
+        
+        stintRows.forEach((row, index) => {
+            const cells = row.querySelectorAll('td');
+            const driverSelect = row.querySelector('.driver-select-stint');
+            const driverName = driverSelect ? driverSelect.value : 'Unassigned';
+            
+            // We need the start/end times - these should be stored somewhere or parsed
+            // For now, we'll trigger a full update via setStintData if available
+            // This is called after driver selection changes, so stint data structure exists
+            const existingStintData = this.weatherComponent.stintData;
+            if (existingStintData && existingStintData.stints[index]) {
+                stints.push({
+                    ...existingStintData.stints[index],
+                    driverName: driverName  // Update with new driver assignment
+                });
+            }
+        });
+        
+        if (stints.length > 0) {
+            const stintData = {
+                stints: stints,
+                driverColorMap: this.driverColorMap
+            };
+            this.weatherComponent.setStintData(stintData);
+        }
+    }
+    
     /**
      * Handle backup driver selection change in stint table
      * Stores the backup assignment and updates the display

@@ -16,8 +16,10 @@ export class WeatherComponent {
         
         this.temperatureChart = null;
         this.cloudsChart = null;
+        this.driversChart = null;
         this.container = null;
         this.weatherData = null;
+        this.stintData = null;
         
         this.init();
     }
@@ -163,6 +165,9 @@ export class WeatherComponent {
                             <button class="chakra-tabs__tab" role="tab" aria-selected="true" data-tab="clouds">
                                 Clouds & Precipitation
                             </button>
+                            <button class="chakra-tabs__tab" role="tab" aria-selected="false" data-tab="drivers">
+                                Drivers
+                            </button>
                         </div>
 
                         <!-- Temperature Tab Panel -->
@@ -173,6 +178,11 @@ export class WeatherComponent {
                         <!-- Clouds & Precipitation Tab Panel -->
                         <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="false" id="clouds-panel">
                             <div id="${this.containerId}-clouds-chart" style="width: 100%; height: 300px; margin-top: 16px;"></div>
+                        </div>
+
+                        <!-- Drivers Tab Panel -->
+                        <div class="chakra-tabs__tab-panel" role="tabpanel" aria-hidden="true" id="drivers-panel">
+                            <div id="${this.containerId}-drivers-chart" style="width: 100%; height: 300px; margin-top: 16px;"></div>
                         </div>
                     </div>
                 </div>
@@ -206,6 +216,8 @@ export class WeatherComponent {
                 this.temperatureChart.resize();
             } else if (tabName === 'clouds' && this.cloudsChart) {
                 this.cloudsChart.resize();
+            } else if (tabName === 'drivers' && this.driversChart) {
+                this.driversChart.resize();
             }
         }, 100);
     }
@@ -227,6 +239,11 @@ export class WeatherComponent {
         
         this.renderTemperatureChart();
         this.renderCloudsChart();
+        
+        // Render drivers chart only if stint data is available
+        if (this.stintData) {
+            this.renderDriversChart();
+        }
     }
     
     renderTemperatureChart() {
@@ -454,6 +471,215 @@ export class WeatherComponent {
         this.cloudsChart.setOption(option);
     }
     
+    renderDriversChart() {
+        console.log('🏁 WeatherComponent: Rendering drivers chart...', this.stintData);
+        
+        if (this.driversChart) {
+            this.driversChart.dispose();
+        }
+        
+        const container = document.getElementById(`${this.containerId}-drivers-chart`);
+        if (!container) {
+            console.warn('⚠️ Drivers chart container not found');
+            return;
+        }
+        
+        if (!this.stintData || !this.stintData.stints || this.stintData.stints.length === 0) {
+            console.warn('⚠️ No stint data available for drivers chart');
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #a3a3a3;">No stint data available. Please calculate strategy first.</div>';
+            return;
+        }
+        
+        this.driversChart = echarts.init(container);
+        
+        const stints = this.stintData.stints;
+        const driverColorMap = this.stintData.driverColorMap || {};
+        const forecast = this.weatherData.weather_forecast;
+        
+        // Define color palette matching stint-table.css driver colors
+        const driverColors = [
+            'rgba(59, 130, 246, 0.4)',   // driver-color-0: Blue
+            'rgba(16, 185, 129, 0.4)',   // driver-color-1: Green
+            'rgba(245, 101, 101, 0.4)',  // driver-color-2: Red
+            'rgba(251, 191, 36, 0.4)',   // driver-color-3: Yellow
+            'rgba(168, 85, 247, 0.4)',   // driver-color-4: Purple
+            'rgba(236, 72, 153, 0.4)',   // driver-color-5: Pink
+            'rgba(6, 182, 212, 0.4)',    // driver-color-6: Cyan
+            'rgba(34, 197, 94, 0.4)',    // driver-color-7: Lime
+        ];
+        
+        const defaultColor = 'rgba(115, 115, 115, 0.3)'; // driver-color-default
+        
+        // Build series data for stacked bar chart
+        const stintLabels = stints.map((stint, i) => `Stint ${i + 1}`);
+        const stintData = stints.map((stint, i) => {
+            const driverName = stint.driverName || 'Unassigned';
+            const colorIndex = driverColorMap[driverName];
+            const color = colorIndex !== undefined ? driverColors[colorIndex] : defaultColor;
+            const duration = (stint.endTime - stint.startTime) / 1000 / 60; // Duration in minutes
+            
+            return {
+                value: duration,
+                itemStyle: { color: color },
+                driverName: driverName,
+                startTime: stint.startTime,
+                endTime: stint.endTime
+            };
+        });
+        
+        // Create day/night markings based on weather data
+        const dayNightSeries = this.createDayNightMarkingsForDrivers(forecast, stints);
+        
+        const option = {
+            grid: { left: '60px', right: '60px', top: '60px', bottom: '80px' },
+            legend: {
+                data: ['Stint Duration'],
+                top: '10px',
+                textStyle: { color: '#d4d4d8' }
+            },
+            xAxis: {
+                type: 'category',
+                data: stintLabels,
+                axisLine: { lineStyle: { color: '#adadadff' } },
+                axisLabel: { color: '#adadadff', fontSize: 10, rotate: 45 }
+            },
+            yAxis: {
+                type: 'value',
+                name: 'Duration (minutes)',
+                nameLocation: 'middle',
+                nameGap: 40,
+                nameTextStyle: { color: '#d4d4d8', fontSize: 12 },
+                axisLine: { lineStyle: { color: '#d6d6d6ff' } },
+                axisLabel: { color: '#d6d6d6ff', fontSize: 12 },
+                splitLine: { lineStyle: { color: '#6E7079', opacity: 0.2 } }
+            },
+            series: [
+                {
+                    name: 'Stint Duration',
+                    type: 'bar',
+                    data: stintData,
+                    barWidth: '60%',
+                    label: {
+                        show: false
+                    }
+                },
+                ...dayNightSeries
+            ],
+            tooltip: {
+                trigger: 'axis',
+                formatter: (params) => {
+                    const stintParam = params.find(p => p.seriesName === 'Stint Duration');
+                    if (!stintParam) return '';
+                    
+                    const stintInfo = stintParam.data;
+                    const startTime = new Date(stintInfo.startTime).toLocaleString('en-US', {
+                        month: 'short', day: 'numeric',
+                        hour: 'numeric', minute: '2-digit', hour12: true
+                    });
+                    const endTime = new Date(stintInfo.endTime).toLocaleString('en-US', {
+                        month: 'short', day: 'numeric',
+                        hour: 'numeric', minute: '2-digit', hour12: true
+                    });
+                    
+                    return `<div style="color: black;">
+                        <strong>Driver:</strong> ${stintInfo.driverName}<br>
+                        <strong>Start:</strong> ${startTime}<br>
+                        <strong>End:</strong> ${endTime}<br>
+                        <strong>Duration:</strong> ${stintInfo.value.toFixed(1)} minutes
+                    </div>`;
+                }
+            }
+        };
+        
+        this.driversChart.setOption(option);
+    }
+    
+    createDayNightMarkingsForDrivers(forecast, stints) {
+        // Simplified day/night overlay for drivers chart
+        // This creates a subtle background showing day/night periods
+        if (!forecast || forecast.length === 0 || !stints || stints.length === 0) {
+            return [];
+        }
+        
+        // Calculate which stints are during day vs night based on stint start times
+        const dayStints = [];
+        const nightStints = [];
+        
+        stints.forEach((stint, index) => {
+            // Find the weather forecast entry closest to stint start time
+            const stintStartTime = stint.startTime.getTime();
+            const closestForecast = forecast.reduce((prev, curr) => {
+                const prevDiff = Math.abs(new Date(prev.timestamp).getTime() - stintStartTime);
+                const currDiff = Math.abs(new Date(curr.timestamp).getTime() - stintStartTime);
+                return currDiff < prevDiff ? curr : prev;
+            });
+            
+            if (closestForecast.is_sun_up) {
+                dayStints.push(index);
+            } else {
+                nightStints.push(index);
+            }
+        });
+        
+        // Create continuous ranges for day/night markings
+        const dayRanges = this.createContinuousRanges(dayStints);
+        const nightRanges = this.createContinuousRanges(nightStints);
+        
+        return [
+            {
+                name: 'Day',
+                type: 'bar',
+                data: [],
+                markArea: {
+                    silent: true,
+                    itemStyle: {
+                        color: 'rgba(255, 225, 0, 0.08)'
+                    },
+                    data: dayRanges.map(range => [
+                        { xAxis: range.start },
+                        { xAxis: range.end }
+                    ])
+                }
+            },
+            {
+                name: 'Night',
+                type: 'bar',
+                data: [],
+                markArea: {
+                    silent: true,
+                    itemStyle: {
+                        color: 'rgba(29, 29, 29, 0.3)'
+                    },
+                    data: nightRanges.map(range => [
+                        { xAxis: range.start },
+                        { xAxis: range.end }
+                    ])
+                }
+            }
+        ];
+    }
+    
+    createContinuousRanges(indices) {
+        if (indices.length === 0) return [];
+        
+        const ranges = [];
+        let rangeStart = indices[0];
+        let rangeEnd = indices[0];
+        
+        for (let i = 1; i < indices.length; i++) {
+            if (indices[i] === rangeEnd + 1) {
+                rangeEnd = indices[i];
+            } else {
+                ranges.push({ start: rangeStart, end: rangeEnd });
+                rangeStart = indices[i];
+                rangeEnd = indices[i];
+            }
+        }
+        
+        ranges.push({ start: rangeStart, end: rangeEnd });
+        return ranges;
+    }
+    
     createDayNightMarkings(forecast, timeLabels) {
         const dayAreas = [];
         const nightAreas = [];
@@ -587,7 +813,12 @@ export class WeatherComponent {
             this.cloudsChart.dispose();
             this.cloudsChart = null;
         }
+        if (this.driversChart) {
+            this.driversChart.dispose();
+            this.driversChart = null;
+        }
         this.weatherData = null;
+        this.stintData = null;
     }
     
     // Public API methods
@@ -601,9 +832,20 @@ export class WeatherComponent {
         this.render();
     }
     
+    setStintData(stintData) {
+        console.log('📊 WeatherComponent: Setting stint data:', stintData);
+        this.stintData = stintData;
+        
+        // Re-render drivers chart if already initialized
+        if (this.driversChart && this.weatherData && typeof echarts !== 'undefined') {
+            this.renderDriversChart();
+        }
+    }
+    
     resize() {
         if (this.temperatureChart) this.temperatureChart.resize();
         if (this.cloudsChart) this.cloudsChart.resize();
+        if (this.driversChart) this.driversChart.resize();
     }
     
     destroy() {
@@ -621,6 +863,10 @@ export class WeatherComponent {
         if (this.cloudsChart) {
             this.cloudsChart.dispose();
             this.cloudsChart = null;
+        }
+        if (this.driversChart) {
+            this.driversChart.dispose();
+            this.driversChart = null;
         }
         
         // Clear container
