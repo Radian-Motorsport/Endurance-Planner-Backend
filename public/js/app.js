@@ -62,7 +62,7 @@ class RadianPlannerApp {
         console.log('📥 Loading initial data...');
         
         try {
-            this.setLoading(true);
+            this.setLoading(true, true); // Show overlay for initial load
             
             // Load all data from server
             this.allData = await this.apiClient.fetchAllData();
@@ -78,7 +78,7 @@ class RadianPlannerApp {
             console.error('❌ Failed to load initial data:', error);
             this.uiManager.showNotification('Failed to load initial data', 'error');
         } finally {
-            this.setLoading(false);
+            this.setLoading(false, true); // Hide overlay after initial load
         }
     }
 
@@ -1235,7 +1235,7 @@ class RadianPlannerApp {
 
     async calculateStrategy() {
         try {
-            this.setLoading(true);
+            this.setLoading(true, false); // Don't show overlay for quick calculations
 
                 // SAVE CURRENT DRIVER ASSIGNMENTS BEFORE TABLE REBUILD
                 const savedStintDrivers = {};
@@ -1339,7 +1339,7 @@ class RadianPlannerApp {
             console.error('❌ Strategy calculation failed:', error);
             this.uiManager.showNotification('Strategy calculation failed', 'error');
         } finally {
-            this.setLoading(false);
+            this.setLoading(false, false); // Don't show overlay when finishing
         }
     }
 
@@ -1640,33 +1640,40 @@ class RadianPlannerApp {
         }
     }
 
-    setLoading(loading) {
+    setLoading(loading, showOverlay = false) {
         this.isLoading = loading;
         
-        // Show/hide page2 loading overlay
-        const loadingOverlay = document.getElementById('page2-loading-overlay');
-        if (loadingOverlay) {
-            if (loading) {
-                loadingOverlay.classList.remove('hidden');
-            } else {
-                // Add 3-second delay before hiding overlay
-                setTimeout(() => {
-                    loadingOverlay.classList.add('hidden');
-                }, 3000);
+        // Only show/hide the page2 loading overlay if explicitly requested (for saved data loading)
+        if (showOverlay) {
+            const loadingOverlay = document.getElementById('page2-loading-overlay');
+            if (loadingOverlay) {
+                if (loading) {
+                    loadingOverlay.classList.remove('hidden');
+                } else {
+                    // Add 3-second delay before hiding overlay
+                    setTimeout(() => {
+                        loadingOverlay.classList.add('hidden');
+                    }, 3000);
+                }
             }
         }
         
-        // Update UI loading state
-        const loadingElements = document.querySelectorAll('.loading-spinner');
-        loadingElements.forEach(el => {
-            el.style.display = loading ? 'block' : 'none';
-        });
-        
-        // Disable form elements during loading
-        const formElements = document.querySelectorAll('input, select, button');
-        formElements.forEach(el => {
-            el.disabled = loading;
-        });
+        // Skip showing loading spinners and disabling forms for quick calculations
+        // These cause flickering during strategy calculations
+        // Only enable them for initial data load or explicit requests
+        if (showOverlay) {
+            // Update UI loading state
+            const loadingElements = document.querySelectorAll('.loading-spinner');
+            loadingElements.forEach(el => {
+                el.style.display = loading ? 'block' : 'none';
+            });
+            
+            // Disable form elements during loading
+            const formElements = document.querySelectorAll('input, select, button');
+            formElements.forEach(el => {
+                el.disabled = loading;
+            });
+        }
     }
 
     addSelectedDriver() {

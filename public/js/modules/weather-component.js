@@ -860,9 +860,15 @@ export class WeatherComponent {
         console.log('📊 WeatherComponent: Setting stint data:', stintData);
         this.stintData = stintData;
         
-        // Re-render drivers chart if already initialized
-        if (this.driversChart && this.weatherData && typeof echarts !== 'undefined') {
+        // Render drivers chart immediately if weather data and echarts are available
+        if (this.weatherData && typeof echarts !== 'undefined') {
+            console.log('🎨 Triggering renderDriversChart from setStintData');
             this.renderDriversChart();
+        } else {
+            console.warn('⚠️ Cannot render drivers chart yet:', {
+                hasWeatherData: !!this.weatherData,
+                hasEcharts: typeof echarts !== 'undefined'
+            });
         }
     }
     
