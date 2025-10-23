@@ -156,6 +156,28 @@ export class StrategyCalculator {
     async recalculateWithAdjustments() {
         console.log('🔄 Recalculating with slider adjustments, current metadata:', { eventId: this.eventId, trackId: this.trackId });
         
+        // SAVE CURRENT DRIVER ASSIGNMENTS BEFORE REBUILDING TABLE
+        const savedStintDrivers = {};
+        const savedBackupDrivers = {};
+        const tbody = document.getElementById('stint-table-body');
+        if (tbody) {
+            const rows = tbody.querySelectorAll('tr[data-role="stint"]');
+            rows.forEach((row, index) => {
+                const driverSelect = row.querySelector('.driver-select-stint');
+                if (driverSelect && driverSelect.value) {
+                    savedStintDrivers[index] = driverSelect.value;
+                }
+                const backupSelect = row.querySelector('.backup-select-stint');
+                if (backupSelect && backupSelect.value) {
+                    savedBackupDrivers[index] = backupSelect.value;
+                }
+            });
+        }
+        console.log('💾 Saved driver assignments before slider recalculation:', {
+            stintDrivers: savedStintDrivers,
+            backupDrivers: savedBackupDrivers
+        });
+        
         // Ensure session metadata is still set (defensive programming)
         if (!this.eventId || !this.trackId) {
             console.log('⚠️ Session metadata missing during recalculation, attempting to restore...');
@@ -191,6 +213,8 @@ export class StrategyCalculator {
                 console.log(`🔄 Table structure changed: ${previousTotalStints} → ${this.totalStints} stints, rebuilding table...`);
                 // Rebuild entire table if stint count changed
                 await this.populateStintTable(adjustedInputs.avgLapTimeInSeconds);
+                // RESTORE DRIVER ASSIGNMENTS AFTER TABLE REBUILD
+                this.restoreDriverAssignmentsAfterSliderAdjustment(savedStintDrivers, savedBackupDrivers);
             } else {
                 console.log('🔄 Table structure unchanged, updating values only...');
                 // Update stint table values WITHOUT rebuilding entire DOM
@@ -200,6 +224,55 @@ export class StrategyCalculator {
             console.log('✅ Recalculation complete');
         } catch (error) {
             console.error('❌ Recalculation failed:', error);
+        }
+    }
+
+    /**
+     * Restore driver assignments after slider adjustment causes table rebuild
+     * Preserves driver selections when adjusting fuel/lap time sliders
+     */
+    restoreDriverAssignmentsAfterSliderAdjustment(stintDrivers, backupDrivers) {
+        try {
+            const tbody = document.getElementById('stint-table-body');
+            if (!tbody) {
+                console.warn('⚠️ Stint table body not found');
+                return;
+            }
+
+            const rows = tbody.querySelectorAll('tr[data-role="stint"]');
+            
+            // Restore primary driver assignments
+            Object.entries(stintDrivers).forEach(([stintIndex, driverName]) => {
+                const index = parseInt(stintIndex);
+                const row = rows[index];
+                if (row) {
+                    const driverSelect = row.querySelector('.driver-select-stint');
+                    if (driverSelect) {
+                        driverSelect.value = driverName;
+                        // Apply color to row
+                        this.applyDriverColorToRow(row, driverName);
+                        console.log(`✅ Restored primary driver "${driverName}" to stint ${index + 1} after slider adjustment`);
+                    }
+                }
+            });
+
+            // Restore backup driver assignments
+            Object.entries(backupDrivers).forEach(([stintIndex, backupDriverName]) => {
+                const index = parseInt(stintIndex);
+                const row = rows[index];
+                if (row) {
+                    const backupSelect = row.querySelector('.backup-select-stint');
+                    if (backupSelect) {
+                        backupSelect.value = backupDriverName;
+                        console.log(`✅ Restored backup driver "${backupDriverName}" to stint ${index + 1} after slider adjustment`);
+                    }
+                }
+            });
+
+            console.log('✅ All driver assignments restored after slider adjustment');
+
+        } catch (error) {
+            console.error('❌ Failed to restore driver assignments:', error);
         }
     }
 
@@ -1508,9 +1581,9 @@ export class StrategyCalculator {
     adjustLapTimeSlider(adjustment) {
         const lapTimeSlider = document.getElementById('lap-time-slider');
         if (lapTimeSlider) {
-            const currentValue = parseInt(lapTimeSlider.value) || 0;
+            const currentValue = parseFloat(lapTimeSlider.value) || 0;
             const newValue = Math.max(-3, Math.min(3, currentValue + adjustment));
-            lapTimeSlider.value = newValue;
+            lapTimeSlider.value = newValue.toFixed(1);
             this.updateSliderDisplays();
             this.recalculateWithAdjustments();
         }
