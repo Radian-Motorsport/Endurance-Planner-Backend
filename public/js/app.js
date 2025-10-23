@@ -3068,28 +3068,6 @@ class RadianPlannerApp {
             console.error('❌ Failed to restore stint driver assignments:', error);
         }
     }
-
-    /**
-     * Calculate race strategy using the strategy calculator
-     */
-    async calculateStrategy() {
-        try {
-            console.log('🚀 Starting strategy calculation...');
-            
-            // Call the strategy calculator (it extracts inputs from the form)
-            const result = await this.strategyCalculator.calculateStrategy();
-            
-            if (result.success) {
-                console.log('✅ Strategy calculation completed successfully');
-            } else {
-                console.warn('⚠️ Strategy calculation completed with warnings:', result.error);
-            }
-            
-        } catch (error) {
-            console.error('❌ Strategy calculation failed:', error);
-            this.uiManager.showNotification('Failed to calculate strategy', 'error');
-        }
-    }
 }
 
 // Initialize the application when DOM is loaded
