@@ -1288,8 +1288,7 @@ class RadianPlannerApp {
                     if (this.uiManager && typeof this.uiManager.showNotification === 'function') {
                         this.uiManager.showNotification(message, 'error');
                     }
-                    this.setLoading(false);
-                    return;
+                    throw new Error(message);
                 }
 
                 // Pass selected drivers to strategy calculator
@@ -1647,7 +1646,14 @@ class RadianPlannerApp {
         // Show/hide page2 loading overlay
         const loadingOverlay = document.getElementById('page2-loading-overlay');
         if (loadingOverlay) {
-            loadingOverlay.classList.toggle('hidden', !loading);
+            if (loading) {
+                loadingOverlay.classList.remove('hidden');
+            } else {
+                // Add 3-second delay before hiding overlay
+                setTimeout(() => {
+                    loadingOverlay.classList.add('hidden');
+                }, 3000);
+            }
         }
         
         // Update UI loading state
