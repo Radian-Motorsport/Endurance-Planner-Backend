@@ -2977,6 +2977,16 @@ class RadianPlannerApp {
                 // Automatically calculate the strategy to show results
                 console.log('🔄 Auto-calculating strategy from shared link...');
                 setTimeout(async () => {
+                    // CRITICAL: Pass drivers to strategyCalculator BEFORE calculating
+                    // This ensures the driver dropdowns are populated in the stint table
+                    if (this.strategyCalculator && this.selectedDrivers) {
+                        console.log('✅ Setting drivers on strategyCalculator before calculateStrategy:', {
+                            driverCount: this.selectedDrivers.length,
+                            drivers: this.selectedDrivers.map(d => d.name)
+                        });
+                        this.strategyCalculator.setSelectedDrivers(this.selectedDrivers);
+                    }
+                    
                     await this.calculateStrategy();
                     
                     // Restore stint driver assignments after table is generated
