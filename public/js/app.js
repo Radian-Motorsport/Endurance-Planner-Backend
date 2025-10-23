@@ -1562,8 +1562,93 @@ class RadianPlannerApp {
             pitStopTime: this.parseTimeToSeconds(document.getElementById('pitStopTime')?.value || '0:00'),
             drivers: this.collectDriverData(),
             startTime: document.getElementById('startTime')?.value || '',
-            startDate: document.getElementById('startDate')?.value || ''
+            startDate: document.getElementById('startDate')?.value || '',
+            stintDriverAssignments: this.collectStintDriverAssignments()
         };
+    }
+    
+    collectStintDriverAssignments() {
+        const assignments = {};
+        const tbody = document.getElementById('stint-table-body');
+        
+        if (!tbody) {
+            console.warn('⚠️ Stint table not found, cannot collect assignments');
+            return assignments;
+        }
+        
+        const rows = tbody.querySelectorAll('tr[data-role="stint"]');
+        rows.forEach((row, index) => {
+            const driverSelect = row.querySelector('.driver-select-stint');
+            const backupSelect = row.querySelector('.backup-select-stint');
+            
+            if (driverSelect?.value) {
+                assignments[`stint_${index}_driver`] = driverSelect.value;
+            }
+            if (backupSelect?.value) {
+                assignments[`stint_${index}_backup`] = backupSelect.value;
+            }
+        });
+        
+        console.log('💾 Collected stint driver assignments:', assignments);
+        return assignments;
+    }
+
+    /**
+     * Restore stint driver assignments from saved data
+     * @param {Object} assignments - Map of stint assignments (e.g., {stint_0_driver: 'John Sowerby', stint_0_backup: 'Jane Doe'})
+     */
+    restoreStintDriverAssignments(assignments) {
+        if (!assignments || Object.keys(assignments).length === 0) {
+            console.log('ℹ️ No stint assignments to restore');
+            return;
+        }
+        
+        const tbody = document.getElementById('stint-table-body');
+        if (!tbody) {
+            console.warn('⚠️ Stint table not found, cannot restore assignments');
+            return;
+        }
+        
+        const rows = tbody.querySelectorAll('tr[data-role="stint"]');
+        
+        Object.entries(assignments).forEach(([key, value]) => {
+            const match = key.match(/stint_(\d+)_(driver|backup)/);
+            if (!match) return;
+            
+            const [, stintIndex, driverType] = match;
+            const index = parseInt(stintIndex);
+            const row = rows[index];
+            
+            if (!row) {
+                console.warn(`⚠️ Stint row ${index} not found`);
+                return;
+            }
+            
+            if (driverType === 'driver') {
+                const driverSelect = row.querySelector('.driver-select-stint');
+                if (driverSelect) {
+                    driverSelect.value = value;
+                    // Apply color to row
+                    if (this.strategyCalculator) {
+                        this.strategyCalculator.applyDriverColorToRow(row, value);
+                    }
+                    console.log(`✅ Restored driver "${value}" to stint ${index + 1}`);
+                }
+            } else if (driverType === 'backup') {
+                const backupSelect = row.querySelector('.backup-select-stint');
+                if (backupSelect) {
+                    backupSelect.value = value;
+                    console.log(`✅ Restored backup driver "${value}" to stint ${index + 1}`);
+                }
+            }
+        });
+        
+        console.log('✅ Stint driver assignments restored');
+        
+        // Update weather component with restored data
+        if (this.strategyCalculator && this.strategyCalculator.weatherComponent) {
+            this.strategyCalculator.updateWeatherComponentDriversChart();
+        }
     }
 
     collectDriverData() {
@@ -1610,6 +1695,12 @@ class RadianPlannerApp {
         // Update UI with calculated strategy
         this.strategyCalculator.displayStrategy(strategy);
         this.currentStrategies = [strategy];
+        
+        // Restore stint driver assignments if they were saved
+        if (window.stintDriverAssignments) {
+            this.restoreStintDriverAssignments(window.stintDriverAssignments);
+            delete window.stintDriverAssignments;
+        }
     }
 
     async handleStrategySubmission(e) {
