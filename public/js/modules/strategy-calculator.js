@@ -459,6 +459,11 @@ export class StrategyCalculator {
      * @returns {HTMLElement} Table row element
      */
     createStintRow(stintNumber, driverName, stintLaps, startTime, endTime, startLap, endLap, timeZone, daylightStatus) {
+        console.log(`📋 Creating stint row ${stintNumber}:`, {
+            selectedDriversCount: this.selectedDrivers ? this.selectedDrivers.length : 0,
+            selectedDrivers: this.selectedDrivers ? this.selectedDrivers.map(d => d.name) : []
+        });
+
         const row = document.createElement('tr');
         row.setAttribute('data-role', 'stint');
         row.className = 'bg-neutral-800 hover:bg-neutral-700 transition-colors';
@@ -539,11 +544,20 @@ export class StrategyCalculator {
     generateDriverOptions(selectedDriverName) {
         let options = '<option value="">Select Driver</option>';
         
+        console.log('🔍 generateDriverOptions called:', {
+            selectedDrivers: this.selectedDrivers,
+            driverCount: this.selectedDrivers ? this.selectedDrivers.length : 0,
+            selectedDriverName: selectedDriverName
+        });
+        
         if (this.selectedDrivers && this.selectedDrivers.length > 0) {
             this.selectedDrivers.forEach(driver => {
                 const isSelected = driver.name === selectedDriverName ? 'selected' : '';
                 options += `<option value="${driver.name}" ${isSelected}>${driver.name}</option>`;
             });
+            console.log(`✅ Generated ${this.selectedDrivers.length} driver options`);
+        } else {
+            console.warn('❌ No selectedDrivers available when generating options');
         }
         
         return options;
@@ -791,13 +805,17 @@ export class StrategyCalculator {
         const stintIndex = parseInt(selectElement.dataset.stint);
         const selectedDriverName = selectElement.value;
         
-        console.log(`📍 Primary driver assignment changed for stint ${stintIndex + 1}: ${selectedDriverName}`);
+        console.log(`📍 Primary driver selection CHANGED for stint ${stintIndex + 1}:`, {
+            selectedDriver: selectedDriverName,
+            selectElement: selectElement.className
+        });
         
         // Store driver assignment for persistence when sharing/saving
         if (!window.stintDriverAssignments) {
             window.stintDriverAssignments = {};
         }
         window.stintDriverAssignments[stintIndex] = selectedDriverName;
+        console.log('💾 Saved to window.stintDriverAssignments:', window.stintDriverAssignments);
         
         // Update internal state or trigger recalculation if needed
         // This could trigger daylight recalculation for driver-specific timezones if needed
@@ -812,13 +830,17 @@ export class StrategyCalculator {
         const stintIndex = parseInt(selectElement.dataset.stint);
         const selectedBackupDriverName = selectElement.value;
         
-        console.log(`🔄 Backup driver assignment changed for stint ${stintIndex + 1}: ${selectedBackupDriverName}`);
+        console.log(`🔄 Backup driver selection CHANGED for stint ${stintIndex + 1}:`, {
+            selectedBackupDriver: selectedBackupDriverName,
+            selectElement: selectElement.className
+        });
         
         // Store backup driver assignment for persistence when sharing/saving
         if (!window.stintBackupDriverAssignments) {
             window.stintBackupDriverAssignments = {};
         }
         window.stintBackupDriverAssignments[stintIndex] = selectedBackupDriverName;
+        console.log('💾 Saved to window.stintBackupDriverAssignments:', window.stintBackupDriverAssignments);
     }
 
     /**
@@ -826,7 +848,12 @@ export class StrategyCalculator {
      * @param {Array} drivers - Array of selected driver objects
      */
     setSelectedDrivers(drivers) {
+        console.log('👥 setSelectedDrivers called with:', {
+            count: drivers ? drivers.length : 0,
+            drivers: drivers ? drivers.map(d => ({name: d.name, timezone: d.timezone})) : []
+        });
         this.selectedDrivers = drivers;
+        console.log('✅ selectedDrivers updated in strategy calculator:', this.selectedDrivers);
     }
 
     /**
