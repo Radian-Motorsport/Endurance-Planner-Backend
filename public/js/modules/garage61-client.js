@@ -231,15 +231,6 @@ export class Garage61Client {
                 if (avgLapSeconds) {
                     const adjusted = avgLapSeconds * (1 + margin/100);
                     adjustedLapEl.textContent = this.formatLapTime(adjusted);
-                    // Also populate strategy avg lap inputs (minutes / seconds) so planner uses these generated values
-                    try {
-                        const minutesInput = document.getElementById('avg-lap-time-minutes');
-                        const secondsInput = document.getElementById('avg-lap-time-seconds');
-                        if (minutesInput) minutesInput.value = Math.floor(adjusted / 60);
-                        if (secondsInput) secondsInput.value = Math.round(adjusted % 60);
-                    } catch (e) {
-                        console.warn('Could not set avg lap time inputs from Garage61 adjusted value', e);
-                    }
                 } else {
                     adjustedLapEl.textContent = '-';
                 }
