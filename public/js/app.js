@@ -2909,8 +2909,12 @@ class RadianPlannerApp {
                 const carSelect = document.getElementById('car-select');
                 if (carSelect) {
                     carSelect.value = strategyData.selectedCar.car_id;
-                    await this.handleCarSelection(strategyData.selectedCar.car_id);
                 }
+                // Populate car details using the same method as normal selection
+                await this.populateCarDetails(
+                    strategyData.selectedCar.car_id || strategyData.selectedCar.id, 
+                    strategyData.selectedCar.car_name || strategyData.selectedCar.name
+                );
             }
 
             // Check for Garage61 data now that car and track are selected
