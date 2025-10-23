@@ -661,10 +661,10 @@ export class StrategyCalculator {
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${startLap}</td>
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${endLap}</td>
             <td class="py-2 px-2 text-center text-blue-400 font-mono text-sm" style="width: 70px; white-space: nowrap;">${stintLaps.toFixed(1)}</td>
-            <!-- DAYLIGHT COLOR COLUMN - COMMENTED OUT FOR NOW -->
-            <!-- <td class="w-2 px-1" style="width: 15px;">
-                <div class="driver-color-strip" data-stint="${stintNumber - 1}" style="width:12px;height:40px;margin:0 auto;background:linear-gradient(to bottom, rgba(168,85,247,1), rgba(251,191,36,1));"></div>
-            </td> -->
+            <!-- DAYLIGHT / DRIVER COLOR STRIP COLUMN -->
+            <td class="w-2 px-1" style="width: 15px; text-align:center;">
+                <div class="driver-color-strip" data-stint="${stintNumber - 1}" style="width:12px;height:40px;margin:0 auto;"></div>
+            </td>
             <td class="py-2 px-3" style="flex: 1; min-width: 0;">
                 <select class="driver-select-stint bg-neutral-700 text-neutral-200 p-1 rounded-md w-full border border-neutral-600 text-xs font-mono" 
                         data-stint="${stintNumber - 1}">
@@ -741,7 +741,14 @@ export class StrategyCalculator {
         cells[3].textContent = startLap;
         cells[4].textContent = endLap;
         cells[5].textContent = stintLaps.toFixed(1);
-        
+
+        // cells[6] = color strip - update to match driver
+        const colorStripCell = cells[6];
+        if (colorStripCell) {
+            const colorClass = this.getDriverColorClass(driverName);
+            colorStripCell.innerHTML = `<div class="driver-color-strip ${colorClass}" data-stint="${stintNumber - 1}" style="width:12px;height:40px;margin:0 auto;"></div>`;
+        }
+
         // Driver dropdowns are preserved - don't touch them!
     }
 
