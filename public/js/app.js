@@ -1236,8 +1236,6 @@ class RadianPlannerApp {
     async calculateStrategy() {
         try {
             this.setLoading(true);
-            
-                this.setLoading(true);
 
                 // SAVE CURRENT DRIVER ASSIGNMENTS BEFORE TABLE REBUILD
                 const savedStintDrivers = {};
