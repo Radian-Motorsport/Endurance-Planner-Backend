@@ -417,13 +417,13 @@ export class StrategyCalculator {
      * @returns {Object} Calculation results
      */
     performCalculations(inputs) {
-        const lapsPerTank = Math.floor(inputs.tankCapacity / inputs.fuelPerLap);
+        const lapsPerTank = inputs.tankCapacity / inputs.fuelPerLap;
         const totalLaps = Math.floor(inputs.raceDurationSeconds / inputs.avgLapTimeInSeconds);
         const stintDuration = lapsPerTank * inputs.avgLapTimeInSeconds;
         
-        this.totalStints = Math.floor(totalLaps / lapsPerTank) + (totalLaps % lapsPerTank > 0 ? 1 : 0);
+        this.totalStints = Math.floor(totalLaps / lapsPerTank) + (totalLaps % Math.floor(lapsPerTank) > 0 ? 1 : 0);
         this.lapsPerStint = lapsPerTank;
-        this.lapsInLastStint = totalLaps % this.lapsPerStint;
+        this.lapsInLastStint = totalLaps % Math.floor(this.lapsPerStint);
 
         const totalFuel = totalLaps * inputs.fuelPerLap;
         const totalPitStops = this.totalStints - 1;
@@ -1556,9 +1556,9 @@ export class StrategyCalculator {
             const baseFuel = parseFloat(document.getElementById('fuel-per-lap-display-input')?.value) || 0;
             const adjustedFuel = baseFuel + currentValue;
 
-            if (fuelOriginalDisplay) fuelOriginalDisplay.textContent = baseFuel.toFixed(1) + ' L';
+            if (fuelOriginalDisplay) fuelOriginalDisplay.textContent = baseFuel.toFixed(2) + ' L';
             if (fuelAdjustedDisplay) {
-                fuelAdjustedDisplay.textContent = adjustedFuel.toFixed(1) + ' L';
+                fuelAdjustedDisplay.textContent = adjustedFuel.toFixed(2) + ' L';
                 // Add purple if adjusted
                 if (currentValue !== 0) {
                     fuelAdjustedDisplay.classList.add('text-purple-400');
