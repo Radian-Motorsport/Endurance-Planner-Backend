@@ -1273,9 +1273,16 @@ class RadianPlannerApp {
                 }
 
                 // Pass selected drivers to strategy calculator
+                console.log('🔍 BEFORE setSelectedDrivers - app.selectedDrivers:', {
+                    count: this.selectedDrivers.length,
+                    drivers: this.selectedDrivers.map(d => ({name: d.name, timezone: d.timezone}))
+                });
+                
                 if (this.strategyCalculator && this.selectedDrivers) {
                     this.strategyCalculator.setSelectedDrivers(this.selectedDrivers);
                     console.log('🚗 Passed drivers to strategy calculator:', this.selectedDrivers);
+                } else {
+                    console.error('❌ Cannot pass drivers - strategyCalculator:', !!this.strategyCalculator, 'selectedDrivers:', !!this.selectedDrivers);
                 }
 
                 // Pass session metadata (track and event IDs) for weather and track map

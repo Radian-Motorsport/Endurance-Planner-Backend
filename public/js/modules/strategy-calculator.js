@@ -460,8 +460,10 @@ export class StrategyCalculator {
      */
     createStintRow(stintNumber, driverName, stintLaps, startTime, endTime, startLap, endLap, timeZone, daylightStatus) {
         console.log(`📋 Creating stint row ${stintNumber}:`, {
-            selectedDriversCount: this.selectedDrivers ? this.selectedDrivers.length : 0,
-            selectedDrivers: this.selectedDrivers ? this.selectedDrivers.map(d => d.name) : []
+            this_selectedDrivers_reference: this.selectedDrivers,
+            selectedDriversCount: this.selectedDrivers ? this.selectedDrivers.length : 'UNDEFINED/NULL',
+            selectedDriversArray: this.selectedDrivers ? this.selectedDrivers.map(d => d.name) : 'NOT AN ARRAY',
+            selectedDriversType: this.selectedDrivers ? typeof this.selectedDrivers : 'undefined'
         });
 
         const row = document.createElement('tr');
@@ -848,12 +850,21 @@ export class StrategyCalculator {
      * @param {Array} drivers - Array of selected driver objects
      */
     setSelectedDrivers(drivers) {
-        console.log('👥 setSelectedDrivers called with:', {
-            count: drivers ? drivers.length : 0,
-            drivers: drivers ? drivers.map(d => ({name: d.name, timezone: d.timezone})) : []
+        console.log('👥 setSelectedDrivers CALLED with:', {
+            received_count: drivers ? drivers.length : 0,
+            received_drivers: drivers ? drivers.map(d => ({name: d.name, timezone: d.timezone})) : 'NULL',
+            before_update: {
+                this_selectedDrivers_count: this.selectedDrivers ? this.selectedDrivers.length : 'UNDEFINED',
+                this_selectedDrivers: this.selectedDrivers ? this.selectedDrivers.map(d => ({name: d.name})) : 'UNDEFINED'
+            }
         });
+        
         this.selectedDrivers = drivers;
-        console.log('✅ selectedDrivers updated in strategy calculator:', this.selectedDrivers);
+        
+        console.log('✅ setSelectedDrivers COMPLETE - this.selectedDrivers is now:', {
+            count: this.selectedDrivers ? this.selectedDrivers.length : 0,
+            drivers: this.selectedDrivers ? this.selectedDrivers.map(d => ({name: d.name, timezone: d.timezone})) : 'NULL'
+        });
     }
 
     /**
