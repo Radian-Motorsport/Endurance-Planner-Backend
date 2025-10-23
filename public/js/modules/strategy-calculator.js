@@ -482,16 +482,24 @@ export class StrategyCalculator {
             <td class="py-2 px-3" style="flex: 1; min-width: 0;">
                 <select class="backup-select-stint bg-neutral-700 text-neutral-200 p-1 rounded-md w-full border border-neutral-600 text-xs font-mono" 
                         data-stint="${stintNumber - 1}">
-                    <option value="">Select...</option>
+                    ${this.generateDriverOptions('')}
                 </select>
             </td>
         `;
 
-        // Add event listener for driver selection change
+        // Add event listener for primary driver selection change
         const driverSelect = row.querySelector('.driver-select-stint');
         if (driverSelect) {
             driverSelect.addEventListener('change', (e) => {
                 this.handleDriverSelectionChange(e.target);
+            });
+        }
+
+        // Add event listener for backup driver selection change
+        const backupSelect = row.querySelector('.backup-select-stint');
+        if (backupSelect) {
+            backupSelect.addEventListener('change', (e) => {
+                this.handleBackupDriverSelectionChange(e.target);
             });
         }
 
@@ -775,17 +783,42 @@ export class StrategyCalculator {
     }
 
     /**
-     * Handle driver selection change in stint table
+     * Handle primary driver selection change in stint table
+     * Stores the assignment and updates the display
      * @param {HTMLElement} selectElement - Select element that changed
      */
     handleDriverSelectionChange(selectElement) {
         const stintIndex = parseInt(selectElement.dataset.stint);
         const selectedDriverName = selectElement.value;
         
-        console.log(`Driver assignment changed for stint ${stintIndex + 1}: ${selectedDriverName}`);
+        console.log(`📍 Primary driver assignment changed for stint ${stintIndex + 1}: ${selectedDriverName}`);
+        
+        // Store driver assignment for persistence when sharing/saving
+        if (!window.stintDriverAssignments) {
+            window.stintDriverAssignments = {};
+        }
+        window.stintDriverAssignments[stintIndex] = selectedDriverName;
         
         // Update internal state or trigger recalculation if needed
-        // This could trigger daylight recalculation for driver-specific timezones
+        // This could trigger daylight recalculation for driver-specific timezones if needed
+    }
+
+    /**
+     * Handle backup driver selection change in stint table
+     * Stores the backup assignment and updates the display
+     * @param {HTMLElement} selectElement - Select element that changed
+     */
+    handleBackupDriverSelectionChange(selectElement) {
+        const stintIndex = parseInt(selectElement.dataset.stint);
+        const selectedBackupDriverName = selectElement.value;
+        
+        console.log(`🔄 Backup driver assignment changed for stint ${stintIndex + 1}: ${selectedBackupDriverName}`);
+        
+        // Store backup driver assignment for persistence when sharing/saving
+        if (!window.stintBackupDriverAssignments) {
+            window.stintBackupDriverAssignments = {};
+        }
+        window.stintBackupDriverAssignments[stintIndex] = selectedBackupDriverName;
     }
 
     /**

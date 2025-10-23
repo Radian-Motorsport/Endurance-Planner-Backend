@@ -2626,6 +2626,36 @@ class RadianPlannerApp {
      */
     async generateShareLink() {
         try {
+            // Collect stint driver and backup driver assignments from the table
+            const stintDrivers = {};
+            const stintBackupDrivers = {};
+            const tbody = document.getElementById('stint-table-body');
+            
+            if (tbody) {
+                const rows = tbody.querySelectorAll('tr[data-role="stint"]');
+                rows.forEach((row, index) => {
+                    // Get primary driver selection
+                    const driverSelect = row.querySelector('.driver-select-stint');
+                    if (driverSelect && driverSelect.value) {
+                        stintDrivers[index] = driverSelect.value;
+                    }
+                    
+                    // Get backup driver selection
+                    const backupSelect = row.querySelector('.backup-select-stint');
+                    if (backupSelect && backupSelect.value) {
+                        stintBackupDrivers[index] = backupSelect.value;
+                    }
+                });
+            }
+
+            // Also collect from window storage as fallback
+            if (window.stintDriverAssignments) {
+                Object.assign(stintDrivers, window.stintDriverAssignments);
+            }
+            if (window.stintBackupDriverAssignments) {
+                Object.assign(stintBackupDrivers, window.stintBackupDriverAssignments);
+            }
+
             // Collect all current app state
             const strategyData = {
                 // Page 1 selections
@@ -2648,6 +2678,10 @@ class RadianPlannerApp {
                     selectedDriverForLocalTime: this.strategyCalculator.selectedDriverForLocalTime
                 } : null,
 
+                // Driver assignments for each stint (CRITICAL FOR PERSISTENCE)
+                stintDriverAssignments: stintDrivers,
+                stintBackupDriverAssignments: stintBackupDrivers,
+
                 // UI state (container collapsed/expanded states)
                 uiState: {
                     weatherCollapsed: document.getElementById('weather-display-page2')?.classList.contains('collapsed') || false,
@@ -2659,7 +2693,7 @@ class RadianPlannerApp {
                 version: '1.0'
             };
 
-            console.log('📤 Saving strategy data:', strategyData);
+            console.log('📤 Saving strategy data with driver assignments:', strategyData);
 
             // Save to server
             const response = await fetch('/api/strategies', {
@@ -2889,10 +2923,22 @@ class RadianPlannerApp {
             if (strategyData.formData) {
                 this.uiManager.showPage2();
                 
+                // Store stint assignments for restoration after calculation
+                if (strategyData.stintDriverAssignments) {
+                    window.stintDriverAssignments = strategyData.stintDriverAssignments;
+                }
+                if (strategyData.stintBackupDriverAssignments) {
+                    window.stintBackupDriverAssignments = strategyData.stintBackupDriverAssignments;
+                }
+                
                 // Automatically calculate the strategy to show results
                 console.log('🔄 Auto-calculating strategy from shared link...');
                 setTimeout(async () => {
                     await this.calculateStrategy();
+                    
+                    // Restore stint driver assignments after table is generated
+                    this.restoreStintDriverAssignments(strategyData);
+                    
                     // Reset the flag after calculation
                     this.isLoadingFromSharedLink = false;
                 }, 500); // Small delay to ensure Page 2 is fully loaded
@@ -2944,6 +2990,75 @@ class RadianPlannerApp {
         // Update displays if strategy calculator has the method
         if (this.strategyCalculator && this.strategyCalculator.updateSliderDisplays) {
             this.strategyCalculator.updateSliderDisplays();
+        }
+    }
+
+    /**
+     * Restore stint driver assignments from shared strategy data
+     * Called after the stint table is generated to populate the driver dropdowns
+     * @param {Object} strategyData - Strategy data from shared link
+     */
+    restoreStintDriverAssignments(strategyData) {
+        try {
+            const tbody = document.getElementById('stint-table-body');
+            if (!tbody) {
+                console.warn('⚠️ Stint table body not found, cannot restore assignments');
+                return;
+            }
+
+            const rows = tbody.querySelectorAll('tr[data-role="stint"]');
+            
+            if (strategyData.stintDriverAssignments) {
+                // Restore primary driver assignments
+                Object.entries(strategyData.stintDriverAssignments).forEach(([stintIndex, driverName]) => {
+                    const index = parseInt(stintIndex);
+                    const row = rows[index];
+                    if (row) {
+                        const driverSelect = row.querySelector('.driver-select-stint');
+                        if (driverSelect) {
+                            driverSelect.value = driverName;
+                            console.log(`✅ Restored primary driver "${driverName}" for stint ${index + 1}`);
+                        }
+                    }
+                });
+            }
+
+            if (strategyData.stintBackupDriverAssignments) {
+                // Restore backup driver assignments
+                Object.entries(strategyData.stintBackupDriverAssignments).forEach(([stintIndex, backupDriverName]) => {
+                    const index = parseInt(stintIndex);
+                    const row = rows[index];
+                    if (row) {
+                        const backupSelect = row.querySelector('.backup-select-stint');
+                        if (backupSelect) {
+                            backupSelect.value = backupDriverName;
+                            console.log(`✅ Restored backup driver "${backupDriverName}" for stint ${index + 1}`);
+                        }
+                    }
+                });
+            }
+
+            // Restore time mode toggle state
+            if (strategyData.strategyState && strategyData.strategyState.isLocalTimeMode) {
+                const toggleSwitch = document.querySelector('.toggle-switch');
+                if (toggleSwitch && !toggleSwitch.classList.contains('active')) {
+                    toggleSwitch.click(); // Toggle to local time mode
+                    console.log('✅ Restored local time mode');
+                }
+
+                // Restore selected driver for local time if present
+                if (strategyData.strategyState.selectedDriverForLocalTime) {
+                    const dropdown = document.getElementById('driver-timezone-dropdown');
+                    if (dropdown) {
+                        dropdown.value = strategyData.strategyState.selectedDriverForLocalTime.name;
+                        console.log(`✅ Restored driver timezone selection: ${strategyData.strategyState.selectedDriverForLocalTime.name}`);
+                    }
+                }
+            }
+
+            console.log('✅ All stint driver assignments restored');
+        } catch (error) {
+            console.error('❌ Failed to restore stint driver assignments:', error);
         }
     }
 
