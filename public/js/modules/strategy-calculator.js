@@ -312,17 +312,19 @@ export class StrategyCalculator {
 
             // Update time cells
             const cells = row.querySelectorAll('td');
-            if (cells.length >= 5) {
-                // Start Time (nth-child(1))
-                cells[0].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
-                // End Time (nth-child(2))
-                cells[1].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
-                // Start Lap (nth-child(3)) - MUST be integer
-                cells[2].textContent = Math.floor(currentLap);
-                // End Lap (nth-child(4)) - MUST be integer
-                cells[3].textContent = Math.floor(currentLap + stintLaps - 1);
-                // Laps (nth-child(5)) - formatted with 1 decimal
-                cells[4].textContent = stintLaps.toFixed(1);
+            if (cells.length >= 6) {
+                // Stint # (cell[0]) - already set, but keep it consistent
+                cells[0].textContent = index + 1;
+                // Start Time (cell[1])
+                cells[1].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
+                // End Time (cell[2])
+                cells[2].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
+                // Start Lap (cell[3]) - MUST be integer
+                cells[3].textContent = Math.floor(currentLap);
+                // End Lap (cell[4]) - MUST be integer
+                cells[4].textContent = Math.floor(currentLap + stintLaps - 1);
+                // Laps (cell[5]) - formatted with 1 decimal
+                cells[5].textContent = stintLaps.toFixed(1);
             }
 
             // Increment lap counter for next stint
@@ -653,6 +655,7 @@ export class StrategyCalculator {
         row.className = 'bg-neutral-800 hover:bg-neutral-700 transition-colors';
 
         row.innerHTML = `
+            <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm font-bold" style="width: 50px;">${stintNumber}</td>
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 80px;">${this.formatTimeForDisplay(startTime, timeZone)}</td>
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 80px;">${this.formatTimeForDisplay(endTime, timeZone)}</td>
             <td class="py-2 px-2 text-center text-neutral-200 font-mono text-sm" style="width: 60px;">${startLap}</td>
@@ -726,14 +729,16 @@ export class StrategyCalculator {
     updateStintRow(row, stintNumber, driverName, stintLaps, startTime, endTime, startLap, endLap, timeZone, daylightStatus) {
         const cells = row.querySelectorAll('td');
         
-        // Update time cells
-        cells[0].innerHTML = this.formatTimeForDisplay(startTime, timeZone);
-        cells[1].innerHTML = this.formatTimeForDisplay(endTime, timeZone);
+        // cells[0] = Stint # (update for clarity)
+        cells[0].textContent = stintNumber;
+        // cells[1-2] = Start/End times
+        cells[1].innerHTML = this.formatTimeForDisplay(startTime, timeZone);
+        cells[2].innerHTML = this.formatTimeForDisplay(endTime, timeZone);
         
-        // Update lap number cells - keep as integers
-        cells[2].textContent = startLap;
-        cells[3].textContent = endLap;
-        cells[4].textContent = stintLaps.toFixed(1);
+        // cells[3-5] = Lap numbers and count
+        cells[3].textContent = startLap;
+        cells[4].textContent = endLap;
+        cells[5].textContent = stintLaps.toFixed(1);
         
         // Driver dropdowns are preserved - don't touch them!
     }
@@ -1490,15 +1495,19 @@ export class StrategyCalculator {
 
             // Update time cells
             const cells = row.querySelectorAll('td');
-            if (cells.length >= 7) {  // Changed from 8 to 7 - we have 7 columns total
-                cells[0].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
-                cells[1].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
-                // Update lap numbers - MUST be integers
+            if (cells.length >= 8) {  // Now 8 columns total (Stint# + 7 original)
+                // Stint # (cell[0])
+                cells[0].textContent = index + 1;
+                // Start Time (cell[1])
+                cells[1].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
+                // End Time (cell[2])
+                cells[2].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
+                // Update lap numbers - MUST be integers (cells[3-5])
                 const startLap = Math.floor(currentLap);
                 const endLap = Math.floor(currentLap + stintLaps - 1);
-                cells[2].textContent = startLap;
-                cells[3].textContent = endLap;
-                cells[4].textContent = stintLaps.toFixed(1);
+                cells[3].textContent = startLap;
+                cells[4].textContent = endLap;
+                cells[5].textContent = stintLaps.toFixed(1);
             }
 
             currentLap += stintLaps;
