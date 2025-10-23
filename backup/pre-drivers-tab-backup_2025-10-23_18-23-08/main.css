@@ -1,0 +1,333 @@
+/* RadianPlanner - Main Styles */
+
+body {
+    font-family: 'Inter', sans-serif;
+    transition: background-color 0.5s, color 0.5s;
+    background-color: #808080;
+}
+
+/* Flag Image Support */
+.flag-image {
+    width: 24px;
+    height: 18px;
+    object-fit: cover;
+    border-radius: 2px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.flag-fallback {
+    background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Inter', monospace !important;
+    min-width: 24px;
+    text-align: center;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+h1 {
+    font-family: 'RoadRage', sans-serif;
+    color: #ffffff;
+    text-shadow: 3px 3px 0px #000000;
+}
+
+h2 {
+    font-size: 4em;
+    font-weight: semi-bold;
+    background-image: linear-gradient(to right, #00ffff, #d400ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #4a90e2; /* Fallback */
+}
+
+h3 {
+    color: #ffffff;
+    text-shadow: 3px 3px 0px #000000;
+}
+
+h4 {
+    color: #ffffff;
+    text-shadow: 3px 3px 0px #000000;
+}
+
+/* Custom Font */
+@font-face {
+    font-family: 'RoadRage';
+    src: url('../../assets/RoadRage.woff2') format('woff2'),
+         url('../../assets/RoadRage.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.road-rage-font {
+    font-family: 'RoadRage', sans-serif;
+}
+
+/* Form Input Styles */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+/* Date and Time Picker Styles */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(0.7);
+    cursor: pointer;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    filter: invert(1) brightness(1);
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Select Styles */
+select {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Icon Effects */
+.icon-shadow {
+    filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.5));
+}
+
+.text-shadow {
+    filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.5));
+}
+
+/* Desktop Layout Styles */
+.desktop-mode {
+    display: grid !important;
+    grid-template-columns: 1280px 1280px !important;
+    gap: 2rem !important;
+    max-width: 2560px !important;
+    width: 2560px !important;
+    margin: 0 auto !important;
+    background: transparent !important;
+    padding: 1rem !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.desktop-left {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    background: rgb(23 23 23) !important;
+    padding: 1.5rem !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.desktop-right {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    background: rgb(23 23 23) !important;
+    padding: 1.5rem !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Show all containers in desktop mode */
+.desktop-mode .hidden {
+    display: block !important;
+}
+
+/* Driver Color Classes for Stint Rows */
+.driver-color-7 { background-color: rgba(59, 130, 246, 0.2) !important; } /* Blue */
+.driver-color-6 { background-color: rgba(16, 185, 129, 0.2) !important; } /* Green */
+.driver-color-5 { background-color: rgba(245, 101, 101, 0.2) !important; } /* Red */
+.driver-color-4 { background-color: rgba(251, 191, 36, 0.2) !important; } /* Yellow */
+.driver-color-1 { background-color: rgba(168, 85, 247, 0.2) !important; } /* Purple */
+.driver-color-2 { background-color: rgba(236, 72, 153, 0.2) !important; } /* Pink */
+.driver-color-0 { background-color: rgba(6, 182, 212, 0.2) !important; } /* Cyan */
+.driver-color-3 { background-color: rgba(34, 197, 94, 0.2) !important; } /* Lime */
+.driver-color-default { background-color: rgba(115, 115, 115, 0.2) !important; } /* Default Gray */
+.pit-stop-row { background-color: rgb(42, 42, 42) !important; } /* Red for pit stops */
+
+/* Daylight Gradient Classes for Daylight Column */
+.daylight-night { 
+    background: #141450 !important; 
+    color: #9ca3af !important;
+    opacity: 0.9;
+}
+.daylight-pre-dawn { 
+    background: #3f0d8a !important; 
+    color: #e5e7eb !important;
+    opacity: 0.9;
+}
+.daylight-dawn { 
+    background: #7300a0 !important; 
+    color: #f9fafb !important;
+    opacity: 0.95;
+}
+.daylight-post-dawn { 
+    background: #ffaa00 !important; 
+    color: #1f2937 !important;
+    opacity: 0.95;
+}
+.daylight-day { 
+    background: #ffea29 !important; 
+    color: #1f2937 !important;
+    opacity: 0.95;
+}
+.daylight-midday { 
+    background: #fffcc4 !important; 
+    color: #1f2937 !important;
+    opacity: 0.95;
+}
+.daylight-pre-dusk { 
+    background: #ffaa00 !important; 
+    color: #1f2937 !important;
+    opacity: 0.92;
+}
+.daylight-dusk { 
+    background: #7300a0 !important; 
+    color: #f9fafb !important;
+    opacity: 0.92;
+}
+.daylight-post-dusk { 
+    background: #3f0d8a !important; 
+    color: #f3f4f6 !important;
+    opacity: 0.9;
+}
+
+/* Toggle Switch Styles */
+.toggle-active {
+    background-color: #3b82f6 !important;
+}
+.toggle-active .toggle-slider {
+    transform: translateX(1.25rem) !important;
+}
+.time-mode-active {
+    color: #3b82f6 !important;
+    font-weight: 600 !important;
+}
+
+/* Time Mode Toggle Styles */
+.toggle-switch {
+    background-color: #4b5563;
+}
+.toggle-switch.active {
+    background-color: #3b82f6;
+}
+.toggle-switch.active #time-toggle-slider {
+    transform: translateX(16px);
+}
+
+/* Collapsible Container Styles */
+.weather-collapsible,
+.track-map-collapsible {
+    max-height: 1200px;
+    overflow: visible;
+    transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+    padding: 1rem;
+}
+
+#weather-display-page2.collapsed .weather-collapsible,
+#track-map-container-page2.collapsed .track-map-collapsible {
+    max-height: 0;
+    padding: 0 1rem;
+    overflow: hidden;
+}
+
+/* Toggle Icon Rotation */
+.weather-toggle-icon,
+.track-map-toggle-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+#weather-display-page2.collapsed .weather-toggle-icon,
+#track-map-container-page2.collapsed .track-map-toggle-icon {
+    transform: rotate(-90deg);
+}
+
+/* Stint Table Layout - Fixed columns with flexible driver/backup */
+.stint-table {
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+
+.stint-table thead tr {
+    display: flex !important;
+}
+
+.stint-table tbody tr {
+    display: flex !important;
+    width: 100% !important;
+}
+
+.stint-table td,
+.stint-table th {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* 8-Column Layout: Stint#(80px) | StartTime(110px) | EndTime(110px) | StartLap(100px) | EndLap(100px) | Laps(100px) | Driver(flex) | Backup(flex) */
+
+/* Column 1: Stint # */
+.stint-table td:nth-child(1),
+.stint-table th:nth-child(1) {
+    width: 80px !important;
+    flex-shrink: 0;
+}
+
+/* Columns 2-3: Start/End Time */
+.stint-table td:nth-child(2),
+.stint-table td:nth-child(3),
+.stint-table th:nth-child(2),
+.stint-table th:nth-child(3) {
+    width: 110px !important;
+    flex-shrink: 0;
+}
+
+/* Columns 4-6: Start Lap, End Lap, Laps */
+.stint-table td:nth-child(4),
+.stint-table td:nth-child(5),
+.stint-table td:nth-child(6),
+.stint-table th:nth-child(4),
+.stint-table th:nth-child(5),
+.stint-table th:nth-child(6) {
+    width: 100px !important;
+    flex-shrink: 0;
+}
+
+/* Columns 7-8: Driver and Backup - flexible */
+.stint-table td:nth-child(7),
+.stint-table td:nth-child(8),
+.stint-table th:nth-child(7),
+.stint-table th:nth-child(8) {
+    flex: 1 !important;
+    min-width: 180px !important;
+}
+
+/* Race Inputs - Match safety margin box sizing */
+#race-inputs-container input[type="number"] {
+    padding: 0.25rem 0.5rem !important; /* p-1 equivalent */
+    font-size: 0.875rem !important; /* text-sm */
+    width: 5rem !important; /* w-20 equivalent */
+    max-width: none !important; /* Remove max-w-xs constraint */
+}
+
+#race-inputs-container input[type="number"]#avg-lap-time-minutes,
+#race-inputs-container input[type="number"]#avg-lap-time-seconds {
+    width: 3rem !important; /* Smaller width for time inputs */
+}
