@@ -512,22 +512,24 @@ class LiveStrategyTracker {
         
         stintRows.forEach(row => {
             const statusCell = row.querySelector('.status-cell');
-            const stintIndex = parseInt(row.getAttribute('data-stint-index'));
+            const stintNumber = parseInt(row.getAttribute('data-stint'));  // 1-based stint number from table
             
             // Remove all status classes
             row.classList.remove('stint-completed', 'stint-active', 'stint-upcoming');
             statusCell.classList.remove('text-green-500', 'text-blue-400', 'text-neutral-500');
             
             // Check if this stint is in history (completed)
-            const isCompleted = this.stintHistory.some(s => s.stintNumber === stintIndex);
+            // stintHistory stores 0-based stintNumber, table shows 1-based
+            const isCompleted = this.stintHistory.some(s => s.stintNumber === stintNumber - 1);
             
             if (isCompleted) {
                 row.classList.add('stint-completed');
                 row.classList.add('opacity-50');
                 statusCell.textContent = '✓ Completed';
                 statusCell.classList.add('text-green-500');
-            } else if (stintIndex === this.currentStintNumber) {
+            } else if (stintNumber === this.currentStintNumber + 1) {
                 // Current stint is active
+                // currentStintNumber is 0-based, so +1 to match table's 1-based numbering
                 row.classList.add('stint-active');
                 statusCell.textContent = '→ Active';
                 statusCell.classList.add('text-blue-400');
