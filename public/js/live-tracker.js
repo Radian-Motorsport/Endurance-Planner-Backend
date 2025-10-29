@@ -12,7 +12,11 @@ class LiveStrategyTracker {
         this.isConnected = false;
         this.sessionInfo = null;
         this.fuelPerLap = 0;
-        this.lastFuelLevel = 0;
+        
+        // Fuel per lap calculation - track lap boundaries
+        this.lastProcessedLap = -1;
+        this.fuelAtLapStart = null;
+        this.fuelUsageHistory = [];
         
         this.elements = {};
         this.initializeElements();
@@ -177,11 +181,31 @@ class LiveStrategyTracker {
         this.fuelLevel = values.FuelLevel || 0;
         this.lastLapTime = values.LapLastLapTime || 0;
         
-        // Calculate fuel used per lap (simple delta from last known fuel level)
-        if (this.lastFuelLevel > 0 && this.fuelLevel > 0 && this.fuelLevel < this.lastFuelLevel) {
-            this.fuelPerLap = Math.abs(this.lastFuelLevel - this.fuelLevel);
+        // Calculate fuel per lap when lap boundaries are crossed
+        if (this.currentLap > this.lastProcessedLap) {
+            // Lap has incremented - lap just completed
+            if (this.fuelAtLapStart !== null && this.fuelAtLapStart > 0) {
+                // Calculate fuel used in the lap that just completed
+                const fuelUsedInLap = this.fuelAtLapStart - this.fuelLevel;
+                
+                // Only record if fuel was actually consumed (not pit stop or refuel)
+                if (fuelUsedInLap > 0 && fuelUsedInLap < 10) {
+                    this.fuelUsageHistory.push(fuelUsedInLap);
+                    // Keep rolling buffer of last 10 laps
+                    if (this.fuelUsageHistory.length > 10) {
+                        this.fuelUsageHistory.shift();
+                    }
+                    // Use latest lap fuel consumption
+                    this.fuelPerLap = fuelUsedInLap;
+                    
+                    console.log(`📊 Lap ${this.lastProcessedLap + 1} completed: ${fuelUsedInLap.toFixed(2)}L consumed`);
+                }
+            }
+            
+            // Record fuel at start of new lap
+            this.fuelAtLapStart = this.fuelLevel;
+            this.lastProcessedLap = this.currentLap;
         }
-        this.lastFuelLevel = this.fuelLevel;
         
         // Update UI
         this.updateLiveStats();
@@ -392,6 +416,19 @@ class LiveStrategyTracker {
         const hours = date.getHours();
         const minutes = date.getMinutes();
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    }
+    
+    /**
+     * Get average fuel per lap from history
+     * @param {number} lapCount - Number of laps to average (default 5)
+     * @returns {number} Average fuel used per lap
+     */
+    getAverageFuelPerLap(lapCount = 5) {
+        if (this.fuelUsageHistory.length === 0) return 0;
+        
+        const relevantLaps = this.fuelUsageHistory.slice(-lapCount);
+        const sum = relevantLaps.reduce((a, b) => a + b, 0);
+        return sum / relevantLaps.length;
     }
 }
 
