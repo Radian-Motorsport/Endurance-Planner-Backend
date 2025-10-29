@@ -84,6 +84,22 @@ class LiveStrategyTracker {
     }
     
     setupEventListeners() {
+        // Navigation buttons
+        document.getElementById('nav-back-planner')?.addEventListener('click', () => {
+            const strategyId = this.currentStrategyId;
+            if (strategyId) {
+                // Go back to planner with strategy link
+                window.location.href = `/?strategy=${strategyId}`;
+            } else {
+                // Go to main planner
+                window.location.href = '/';
+            }
+        });
+        
+        document.getElementById('nav-load-strategy')?.addEventListener('click', () => {
+            this.elements.loadModal.classList.remove('hidden');
+        });
+        
         // Load strategy button
         document.getElementById('load-strategy-btn').addEventListener('click', () => {
             this.elements.loadModal.classList.remove('hidden');
@@ -479,8 +495,9 @@ class LiveStrategyTracker {
                 console.log('✅ Strategy loaded from server');
                 this.loadStrategy(strategy);
                 
-                // Store strategy ID for real-time updates
+                // Store strategy ID and update header
                 this.currentStrategyId = strategyId;
+                this.updateStrategyHeader();
                 
                 // Close modal
                 this.elements.loadModal.classList.add('hidden');
@@ -495,12 +512,21 @@ class LiveStrategyTracker {
         }
     }
     
+    updateStrategyHeader() {
+        const infoEl = document.getElementById('current-strategy-info');
+        if (infoEl && this.currentStrategyId) {
+            infoEl.textContent = `Loaded: ${this.currentStrategyId.substring(0, 8)}...`;
+        }
+    }
+    
     checkURLForStrategy() {
         const params = new URLSearchParams(window.location.search);
-        const strategyId = params.get('id');
+        const strategyId = params.get('strategy');
         
         if (strategyId) {
             console.log('📥 Strategy ID found in URL:', strategyId);
+            this.currentStrategyId = strategyId;
+            this.updateStrategyHeader();
             this.elements.strategyInput.value = strategyId;
             this.loadStrategyFromInput();
         }
