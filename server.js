@@ -11,9 +11,30 @@ const {
 } = require('./weather-api');
 const { exec } = require('child_process');
 const DriverRefreshService = require('./refresh-drivers-oauth2');
+const socketIo = require('socket.io');
+const http = require('http');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Create HTTP server for Socket.io
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+        credentials: false
+    },
+    transports: ['websocket', 'polling']
+});
+
+// Socket.io connection handler
+io.on('connection', (socket) => {
+    console.log('🔌 Client connected to strategy updates:', socket.id);
+    socket.on('disconnect', () => {
+        console.log('❌ Client disconnected:', socket.id);
+    });
+});
 
 // Use the DATABASE_URL environment variable from Render (optional)
 let pool = null;
@@ -841,6 +862,13 @@ app.put('/api/strategies/:id', async (req, res) => {
         const result = await pool.query('UPDATE strategies SET strategy_data = $1 WHERE id = $2 RETURNING id', [strategyData, id]);
         
         if (result.rows.length > 0) {
+            // Broadcast strategy update to all connected clients
+            io.emit('strategyUpdated', {
+                strategyId: id,
+                strategy: strategyData
+            });
+            console.log(`📡 Broadcasted strategy update for ID: ${id}`);
+            
             res.json({ id: result.rows[0].id, message: 'Strategy updated successfully' });
         } else {
             res.status(404).send('Strategy not found');
@@ -1405,7 +1433,7 @@ app.post('/api/drivers/add', async (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   // console.log(`iRacing service will initialize automatically...`);
   console.log(`iRacing integration disabled (files in .gitignore)`);
