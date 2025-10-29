@@ -245,22 +245,19 @@ class LiveStrategyTracker {
         
         // When exiting pit road (driver just exited pits - NEW STINT STARTED)
         if (this.wasOnPitRoad === true && isOnPitRoad === false) {
-            // Only trigger on actual pit exit transition (not on first data when already on track)
-            if (this.currentLap > 0 || this.currentStintNumber > 0) {
-                // Calculate actual pit stop duration
-                if (this.pitStopStartTime) {
-                    this.actualPitStopTime = Math.round((Date.now() - this.pitStopStartTime) / 1000);
-                    this.pitStopDuration = this.actualPitStopTime;
-                    console.log(`🛠️  Pit stop ended - Duration: ${this.actualPitStopTime}s`);
-                    
-                    // Update the pit row with actual time
-                    this.updatePitRowWithActualTime();
-                }
+            // Calculate actual pit stop duration
+            if (this.pitStopStartTime) {
+                this.actualPitStopTime = Math.round((Date.now() - this.pitStopStartTime) / 1000);
+                this.pitStopDuration = this.actualPitStopTime;
+                console.log(`🛠️  Pit stop ended - Duration: ${this.actualPitStopTime}s`);
                 
-                this.finishCurrentStint();  // Save current stint data
-                this.startNewStint();       // Initialize new stint
-                console.log(`🏁 NEW STINT #${this.currentStintNumber} started!`);
+                // Update the pit row with actual time
+                this.updatePitRowWithActualTime();
             }
+            
+            this.finishCurrentStint();  // Save current stint data
+            this.startNewStint();       // Initialize new stint
+            console.log(`🏁 NEW STINT #${this.currentStintNumber} started!`);
         }
         
         this.wasOnPitRoad = isOnPitRoad;
@@ -524,16 +521,18 @@ class LiveStrategyTracker {
             statusCell.classList.remove('text-green-500', 'text-blue-400', 'text-neutral-500');
             
             // Check if this stint is in history (completed)
-            // stintHistory stores 0-based stintNumber, table shows 1-based
-            const isCompleted = this.stintHistory.some(s => s.stintNumber === stintNumber - 1);
+            // stintHistory stores 0-based stintNumber, so convert table's 1-based to 0-based
+            const stintHistoryIndex = stintNumber - 1;
+            const isCompleted = this.stintHistory.some(s => s.stintNumber === stintHistoryIndex);
             
             if (isCompleted) {
                 row.classList.add('stint-completed');
                 row.classList.add('opacity-50');
                 statusCell.textContent = '✓ Completed';
                 statusCell.classList.add('text-green-500');
-            } else if (stintNumber === this.currentStintNumber) {
-                // Current stint is active - use exact same logic as display: stintNumber === currentStintNumber
+            } else if (stintNumber === this.currentStintNumber + 1) {
+                // Current stint is active
+                // currentStintNumber is 0-based, table is 1-based, so add 1
                 row.classList.add('stint-active');
                 statusCell.textContent = '→ Active';
                 statusCell.classList.add('text-blue-400');
