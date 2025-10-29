@@ -11,6 +11,8 @@ class LiveStrategyTracker {
         this.lastLapTime = 0;
         this.isConnected = false;
         this.sessionInfo = null;
+        this.fuelPerLap = 0;
+        this.lastFuelLevel = 0;
         
         this.elements = {};
         this.initializeElements();
@@ -38,6 +40,7 @@ class LiveStrategyTracker {
         this.elements.currentLap = document.getElementById('current-lap');
         this.elements.fuelRemaining = document.getElementById('fuel-remaining');
         this.elements.lastLapTime = document.getElementById('last-lap-time');
+        this.elements.fuelPerLap = document.getElementById('fuel-per-lap');
         
         // Strategy comparison
         this.elements.currentStintNumber = document.getElementById('current-stint-number');
@@ -174,6 +177,12 @@ class LiveStrategyTracker {
         this.fuelLevel = values.FuelLevel || 0;
         this.lastLapTime = values.LapLastLapTime || 0;
         
+        // Calculate fuel used per lap (simple delta from last known fuel level)
+        if (this.lastFuelLevel > 0 && this.fuelLevel > 0 && this.fuelLevel < this.lastFuelLevel) {
+            this.fuelPerLap = Math.abs(this.lastFuelLevel - this.fuelLevel);
+        }
+        this.lastFuelLevel = this.fuelLevel;
+        
         // Update UI
         this.updateLiveStats();
         
@@ -197,6 +206,9 @@ class LiveStrategyTracker {
         
         // Last lap time
         this.elements.lastLapTime.textContent = this.lastLapTime ? this.formatLapTime(this.lastLapTime) : '--:--';
+        
+        // Fuel per lap
+        this.elements.fuelPerLap.textContent = this.fuelPerLap > 0 ? `${this.fuelPerLap.toFixed(2)} L` : '-- L';
     }
     
     updateStrategyComparison() {
