@@ -308,11 +308,7 @@ class LiveStrategyTracker {
     }
     
     startNewStint() {
-        // Only increment if we actually completed laps in the previous stint
-        if (this.currentStintLap > 0) {
-            this.currentStintNumber++;
-            console.log(`⬆️ Stint number incremented to ${this.currentStintNumber}`);
-        }
+        this.currentStintNumber++;
         this.currentStintLap = 0;  // Reset to 0 laps completed
         this.stintStartLap = this.currentLap;
         this.currentStintLapTimes = [];
@@ -320,7 +316,7 @@ class LiveStrategyTracker {
         this.fuelAtLapStart = this.fuelLevel;
         this.actualPitStopTime = 0;  // Reset pit stop time for new stint
         this.pitStopStartTime = null;  // Reset pit timer
-        // Update table status now that stint number may have changed
+        // Update table status now that stint number has changed
         this.updateStintTableStatus();
     }
     
