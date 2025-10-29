@@ -36,6 +36,16 @@ class RadianPlannerApp {
         // Note: init() will be called manually after DOM is loaded
     }
 
+    setLoading(isLoading, showOverlay = false) {
+        this.isLoading = isLoading;
+        if (showOverlay) {
+            const overlay = document.getElementById('page2-loading-overlay');
+            if (overlay) {
+                overlay.classList.toggle('hidden', !isLoading);
+            }
+        }
+    }
+
     async init() {
         console.log('🏁 Initializing RadianPlanner...');
         
