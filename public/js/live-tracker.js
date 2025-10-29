@@ -517,12 +517,26 @@ class LiveStrategyTracker {
     }
     
     populateStintTable() {
-        if (!this.strategy || !this.strategy.stints) return;
+        console.log('📋 populateStintTable called');
+        console.log('   this.strategy:', this.strategy);
+        
+        if (!this.strategy) {
+            console.warn('❌ No strategy loaded');
+            return;
+        }
+        
+        let stints = this.strategy.stints;
+        console.log('   this.strategy.stints:', stints);
+        
+        if (!stints) {
+            console.warn('❌ No stints in strategy');
+            return;
+        }
         
         const tbody = this.elements.stintTableBody;
         tbody.innerHTML = '';
         
-        this.strategy.stints.forEach(stint => {
+        stints.forEach(stint => {
             const row = document.createElement('tr');
             row.setAttribute('data-stint', stint.stintNumber);
             row.className = 'stint-upcoming';
@@ -543,6 +557,7 @@ class LiveStrategyTracker {
             
             tbody.appendChild(row);
         });
+        console.log('✅ Stint table populated with', stints.length, 'stints');
     }
     
     formatTime(seconds) {
