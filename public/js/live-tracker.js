@@ -454,13 +454,13 @@ class LiveStrategyTracker {
         const input = this.elements.strategyInput.value.trim();
         
         if (!input) {
-            alert('Please enter a strategy ID or paste strategy JSON');
+            alert('Please enter a strategy share link or ID');
             return;
         }
         
         console.log('📥 Loading strategy input...');
         
-        // Try as strategy ID first (UUID format or share link)
+        // Extract strategy ID from input
         let strategyId = input;
         
         // Extract ID from full share link if provided
@@ -470,8 +470,7 @@ class LiveStrategyTracker {
         }
         
         try {
-            // First try to load as ID from server
-            console.log('🔍 Attempting to fetch strategy ID:', strategyId);
+            console.log('🔍 Fetching strategy ID:', strategyId);
             const response = await fetch(`/api/strategies/${strategyId}`);
             
             if (response.ok) {
@@ -479,32 +478,19 @@ class LiveStrategyTracker {
                 console.log('✅ Strategy loaded from server');
                 this.loadStrategy(strategy);
                 
-                // Store strategy ID for updates
+                // Store strategy ID for real-time updates
                 this.currentStrategyId = strategyId;
                 
                 // Close modal
                 this.elements.loadModal.classList.add('hidden');
                 this.elements.strategyInput.value = '';
                 return;
+            } else {
+                alert('Strategy not found. Check the share link or ID.');
             }
-        } catch (fetchError) {
-            console.warn('⚠️ Failed to load as strategy ID, trying as JSON:', fetchError.message);
-        }
-        
-        // If ID load failed, try parsing as JSON
-        try {
-            const strategy = JSON.parse(input);
-            console.log('✅ Strategy parsed as JSON');
-            this.loadStrategy(strategy);
-            this.currentStrategyId = null; // No ID for directly pasted JSON
-            
-            // Close modal
-            this.elements.loadModal.classList.add('hidden');
-            this.elements.strategyInput.value = '';
-            
-        } catch (parseError) {
-            console.error('❌ Failed to load strategy:', parseError);
-            alert('Failed to load strategy.\n\nOptions:\n1. Paste full share URL from RadianPlanner\n2. Paste just the strategy ID\n3. Paste strategy JSON');
+        } catch (error) {
+            console.error('❌ Failed to load strategy:', error);
+            alert('Failed to load strategy. Paste a valid share link or strategy ID.');
         }
     }
     
