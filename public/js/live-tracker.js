@@ -324,8 +324,9 @@ class LiveStrategyTracker {
             const totalStintTime = totalLapTime + this.actualPitStopTime;
             
             // Only save if we completed at least one lap in the stint
+            // Save with currentStintNumber - 1 because currentStintNumber gets incremented AFTER we finish
             const stintData = {
-                stintNumber: this.currentStintNumber,
+                stintNumber: this.currentStintNumber - 1,
                 lapCount: this.currentStintLap,
                 lapTimes: [...this.currentStintLapTimes],
                 fuelUse: [...this.currentStintFuelUse],
@@ -336,7 +337,7 @@ class LiveStrategyTracker {
                 totalStintTime: totalStintTime || 0
             };
             this.stintHistory.push(stintData);
-            console.log(`✅ Stint #${this.currentStintNumber} completed:`, stintData);
+            console.log(`✅ Stint #${this.currentStintNumber - 1} completed:`, stintData);
             console.log(`   Lap times: ${JSON.stringify(this.currentStintLapTimes)}`);
             console.log(`   Total lap time: ${totalLapTime}s, Pit time: ${this.actualPitStopTime}s`);
             // Update display immediately
