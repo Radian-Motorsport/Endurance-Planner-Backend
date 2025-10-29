@@ -286,6 +286,12 @@ class LiveStrategyTracker {
                     // Increment stint lap count (completed laps)
                     this.currentStintLap++;
                     
+                    // Increment stint number when first lap of new stint completes
+                    if (this.currentStintLap === 1 && this.currentStintNumber === 0) {
+                        this.incrementStintNumber();
+                        this.updateStintTableStatus();
+                    }
+                    
                     console.log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${fuelUsedInLap.toFixed(2)}L, ${this.formatLapTime(this.lastLapTime)}`);
                 }
             }
@@ -313,6 +319,8 @@ class LiveStrategyTracker {
         this.fuelAtLapStart = this.fuelLevel;
         this.actualPitStopTime = 0;  // Reset pit stop time for new stint
         this.pitStopStartTime = null;  // Reset pit timer
+        // Update table status now that stint number has changed
+        this.updateStintTableStatus();
     }
     
     finishCurrentStint() {
@@ -737,9 +745,6 @@ class LiveStrategyTracker {
                 tbody.appendChild(pitRow);
             }
         });
-        
-        // Mark first stint as active
-        this.updateStintTableStatus();
     }
     
     formatTime(seconds) {
