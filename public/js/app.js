@@ -2990,6 +2990,50 @@ class RadianPlannerApp {
     }
 
     /**
+     * Export strategy data for live tracker
+     * Returns clean JSON structure with stint breakdown
+     */
+    exportStrategyForLiveTracker() {
+        const tbody = document.getElementById('stint-table-body');
+        if (!tbody) {
+            console.warn('⚠️ No stint table found');
+            return null;
+        }
+
+        const stints = [];
+        const rows = tbody.querySelectorAll('tr[data-role="stint"]');
+        
+        rows.forEach((row, index) => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 8) return;
+
+            const driverSelect = row.querySelector('.driver-select-stint');
+            const backupSelect = row.querySelector('.backup-select-stint');
+
+            stints.push({
+                stintNumber: index + 1,
+                startTime: cells[1].textContent.trim(),
+                endTime: cells[2].textContent.trim(),
+                startLap: parseInt(cells[3].textContent.trim()),
+                endLap: parseInt(cells[4].textContent.trim()),
+                laps: parseFloat(cells[5].textContent.trim()),
+                driver: driverSelect?.value || 'Unassigned',
+                backup: backupSelect?.value || null
+            });
+        });
+
+        return {
+            metadata: {
+                series: this.selectedSeries?.series_name || 'Unknown',
+                track: this.selectedTrack?.track_name || 'Unknown',
+                car: this.selectedCar?.car_name || 'Unknown',
+                exportedAt: new Date().toISOString()
+            },
+            stints: stints
+        };
+    }
+
+    /**
      * Update an existing shared strategy - uses identical data collection as generateShareLink
      */
     async updateShareLink() {
