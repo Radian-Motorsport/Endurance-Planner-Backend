@@ -27,7 +27,7 @@ class LiveStrategyTracker {
         this.fuelUsageHistory = [];
         
         // Stint tracking - pit road transition detection
-        this.wasOnPitRoad = false;
+        this.wasOnPitRoad = true;  // Start as if in pits, so first pit exit triggers increment
         this.stintStartLap = 0;
         
         // Per-stint data storage
