@@ -327,14 +327,16 @@ class LiveStrategyTracker {
                 lapCount: this.currentStintLap,
                 lapTimes: [...this.currentStintLapTimes],
                 fuelUse: [...this.currentStintFuelUse],
-                pitStopTime: this.actualPitStopTime,
+                pitStopTime: this.actualPitStopTime || 0,
                 avgLapTime: this.getAverageLapTime(this.currentStintLapTimes),
                 avgFuelPerLap: this.getAverageFuelPerLap(this.currentStintFuelUse),
-                totalLapTime: totalLapTime,
-                totalStintTime: totalStintTime
+                totalLapTime: totalLapTime || 0,
+                totalStintTime: totalStintTime || 0
             };
             this.stintHistory.push(stintData);
             console.log(`✅ Stint #${this.currentStintNumber} completed:`, stintData);
+            console.log(`   Lap times: ${JSON.stringify(this.currentStintLapTimes)}`);
+            console.log(`   Total lap time: ${totalLapTime}s, Pit time: ${this.actualPitStopTime}s`);
             // Update display immediately
             this.updateStintDataDisplay();
         }
@@ -429,12 +431,15 @@ class LiveStrategyTracker {
                         <div class="text-sm font-mono border-b border-neutral-700 pb-2 mb-2">
                             <div class="flex justify-between items-center">
                                 <span class="font-bold text-blue-400">Stint #${stint.stintNumber}</span>
-                                <span class="text-neutral-400">${stint.driver}</span>
+                                <span class="text-emerald-400">${stint.totalStintTime ? stint.totalStintTime.toFixed(1) + 's' : '--'}</span>
                             </div>
                             <div class="text-xs text-neutral-400 mt-1">
                                 Laps: <span class="text-white">${stint.lapCount}</span> | 
-                                Avg Time: <span class="text-white">${this.formatLapTime(stint.avgLapTime)}</span> | 
-                                Avg Fuel: <span class="text-white">${stint.avgFuelPerLap.toFixed(2)}L</span>
+                                Avg: <span class="text-white">${this.formatLapTime(stint.avgLapTime)}</span> | 
+                                Fuel: <span class="text-white">${stint.avgFuelPerLap.toFixed(2)}L</span>
+                            </div>
+                            <div class="text-xs text-neutral-500 mt-1">
+                                Pit: ${stint.pitStopTime}s | Lap Time: ${stint.totalLapTime ? stint.totalLapTime.toFixed(1) : '--'}s
                             </div>
                         </div>
                     `)
