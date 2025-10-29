@@ -507,9 +507,6 @@ class LiveStrategyTracker {
     
     loadStrategy(strategy) {
         console.log('✅ Strategy loaded:', strategy);
-        console.log('🔍 Strategy structure keys:', Object.keys(strategy));
-        console.log('🔍 Has stints?:', !!strategy.stints);
-        console.log('🔍 Stints value:', strategy.stints);
         this.strategy = strategy;
         
         // Populate stint table
@@ -517,19 +514,14 @@ class LiveStrategyTracker {
     }
     
     populateStintTable() {
-        console.log('📋 populateStintTable called');
-        console.log('   this.strategy:', this.strategy);
+        if (!this.strategy) return;
         
-        if (!this.strategy) {
-            console.warn('❌ No strategy loaded');
-            return;
-        }
+        // The strategy object from the planner contains stints array at top level
+        const stints = this.strategy.stints;
         
-        let stints = this.strategy.stints;
-        console.log('   this.strategy.stints:', stints);
-        
-        if (!stints) {
-            console.warn('❌ No stints in strategy');
+        if (!stints || !Array.isArray(stints) || stints.length === 0) {
+            const tbody = this.elements.stintTableBody;
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-neutral-500 py-4">No stints loaded</td></tr>';
             return;
         }
         
@@ -557,7 +549,6 @@ class LiveStrategyTracker {
             
             tbody.appendChild(row);
         });
-        console.log('✅ Stint table populated with', stints.length, 'stints');
     }
     
     formatTime(seconds) {
