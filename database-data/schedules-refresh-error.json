@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-10-17T22:17:04.737Z",
+  "error": "Authentication failed - no authcode received",
+  "rateLimitStatus": {
+    "requestsUsed": 0,
+    "requestsRemaining": 12,
+    "minutesInCurrentWindow": 0,
+    "tokenExpiry": null
+  }
+}
