@@ -495,8 +495,9 @@ class LiveStrategyTracker {
                 console.log('✅ Strategy loaded from server');
                 this.loadStrategy(strategy);
                 
-                // Store strategy ID and update header
+                // Store strategy ID in sessionStorage for persistence
                 this.currentStrategyId = strategyId;
+                sessionStorage.setItem('currentStrategyId', strategyId);
                 this.updateStrategyHeader();
                 
                 // Close modal
@@ -521,11 +522,17 @@ class LiveStrategyTracker {
     
     checkURLForStrategy() {
         const params = new URLSearchParams(window.location.search);
-        const strategyId = params.get('strategy');
+        let strategyId = params.get('strategy');
+        
+        // Fallback to sessionStorage if not in URL
+        if (!strategyId) {
+            strategyId = sessionStorage.getItem('currentStrategyId');
+        }
         
         if (strategyId) {
-            console.log('📥 Strategy ID found in URL:', strategyId);
+            console.log('📥 Strategy ID found:', strategyId);
             this.currentStrategyId = strategyId;
+            sessionStorage.setItem('currentStrategyId', strategyId);
             this.updateStrategyHeader();
             this.elements.strategyInput.value = strategyId;
             this.loadStrategyFromInput();

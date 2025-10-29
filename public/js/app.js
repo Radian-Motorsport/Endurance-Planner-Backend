@@ -1235,6 +1235,19 @@ class RadianPlannerApp {
         if (saveUpdateBtn) {
             saveUpdateBtn.addEventListener('click', () => this.updateShareLink());
         }
+        
+        // Live tracker button
+        const liveTrackerBtn = document.getElementById('live-tracker-btn');
+        if (liveTrackerBtn) {
+            liveTrackerBtn.addEventListener('click', () => {
+                const strategyId = sessionStorage.getItem('currentStrategyId');
+                if (strategyId) {
+                    window.location.href = `live-tracker.html?strategy=${strategyId}`;
+                } else {
+                    window.location.href = 'live-tracker.html';
+                }
+            });
+        }
 
         // Setup Adjustment Sliders (Page 2)
         this.setupAdjustmentSliders();
@@ -3168,6 +3181,9 @@ class RadianPlannerApp {
         if (!strategyId) {
             return; // No shared strategy in URL
         }
+        
+        // Store strategy ID in sessionStorage for cross-page persistence
+        sessionStorage.setItem('currentStrategyId', strategyId);
 
         try {
             const response = await fetch(`/api/strategies/${strategyId}`);
