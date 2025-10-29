@@ -324,9 +324,8 @@ class LiveStrategyTracker {
             const totalStintTime = totalLapTime + this.actualPitStopTime;
             
             // Only save if we completed at least one lap in the stint
-            // Save with currentStintNumber - 1 because currentStintNumber gets incremented AFTER we finish
             const stintData = {
-                stintNumber: this.currentStintNumber - 1,
+                stintNumber: this.currentStintNumber,
                 lapCount: this.currentStintLap,
                 lapTimes: [...this.currentStintLapTimes],
                 fuelUse: [...this.currentStintFuelUse],
@@ -337,7 +336,7 @@ class LiveStrategyTracker {
                 totalStintTime: totalStintTime || 0
             };
             this.stintHistory.push(stintData);
-            console.log(`✅ Stint #${this.currentStintNumber - 1} completed:`, stintData);
+            console.log(`✅ Stint #${this.currentStintNumber} completed:`, stintData);
             console.log(`   Lap times: ${JSON.stringify(this.currentStintLapTimes)}`);
             console.log(`   Total lap time: ${totalLapTime}s, Pit time: ${this.actualPitStopTime}s`);
             // Update display immediately
@@ -521,20 +520,19 @@ class LiveStrategyTracker {
             row.classList.remove('stint-completed', 'stint-active', 'stint-upcoming');
             statusCell.classList.remove('text-green-500', 'text-blue-400', 'text-neutral-500');
             
-            // Check if completed - stintHistory stores 0-based numbers
-            const isCompleted = this.stintHistory.some(s => s.stintNumber === stintNumber - 1);
-            
-            if (isCompleted) {
+            if (stintNumber < this.currentStintNumber) {
+                // Completed - before current
                 row.classList.add('stint-completed');
                 row.classList.add('opacity-50');
                 statusCell.textContent = '✓ Completed';
                 statusCell.classList.add('text-green-500');
-            } else if (this.currentStintNumber > 0 && stintNumber - 1 === this.currentStintNumber) {
-                // Active: convert table's 1-based to 0-based and compare with currentStintNumber
+            } else if (this.currentStintNumber > 0 && stintNumber === this.currentStintNumber) {
+                // Active - matches current stint number
                 row.classList.add('stint-active');
                 statusCell.textContent = '→ Active';
                 statusCell.classList.add('text-blue-400');
             } else {
+                // Upcoming - after current
                 row.classList.add('stint-upcoming');
                 statusCell.textContent = '○ Upcoming';
                 statusCell.classList.add('text-neutral-500');
