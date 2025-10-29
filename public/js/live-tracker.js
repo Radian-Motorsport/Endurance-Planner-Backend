@@ -507,6 +507,9 @@ class LiveStrategyTracker {
     
     loadStrategy(strategy) {
         console.log('✅ Strategy loaded:', strategy);
+        console.log('🔍 Strategy structure keys:', Object.keys(strategy));
+        console.log('🔍 Has stints?:', !!strategy.stints);
+        console.log('🔍 Stints value:', strategy.stints);
         this.strategy = strategy;
         
         // Populate stint table
