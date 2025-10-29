@@ -10,6 +10,7 @@ class LiveStrategyTracker {
         this.fuelLevel = 0;
         this.lastLapTime = 0;
         this.isConnected = false;
+        this.sessionInfo = null;
         
         this.elements = {};
         this.initializeElements();
@@ -25,6 +26,12 @@ class LiveStrategyTracker {
         this.elements.telemetryStatus = document.getElementById('telemetry-status');
         this.elements.telemetryStatusText = document.getElementById('telemetry-status-text');
         this.elements.currentDriver = document.getElementById('current-driver');
+        
+        // Session info
+        this.elements.sessionTrack = document.getElementById('session-track');
+        this.elements.sessionCar = document.getElementById('session-car');
+        this.elements.sessionType = document.getElementById('session-type');
+        this.elements.sessionSeries = document.getElementById('session-series');
         
         // Live stats
         this.elements.sessionTime = document.getElementById('session-time');
@@ -100,6 +107,12 @@ class LiveStrategyTracker {
         this.socket.on('currentBroadcaster', (info) => {
             this.elements.currentDriver.textContent = info.driver || '--';
         });
+        
+        // Listen for session info
+        this.socket.on('sessionInfo', (data) => {
+            console.log('📊 Received sessionInfo:', data);
+            this.handleSessionInfo(data);
+        });
     }
     
     updateConnectionStatus(connected) {
@@ -112,6 +125,42 @@ class LiveStrategyTracker {
             this.elements.telemetryStatus.classList.add('status-offline');
             this.elements.telemetryStatusText.textContent = 'Disconnected';
         }
+    }
+    
+    handleSessionInfo(sessionData) {
+        this.sessionInfo = sessionData;
+        
+        console.log('🏁 Processing session info:', {
+            track: sessionData?.WeekendInfo?.TrackDisplayName,
+            trackId: sessionData?.WeekendInfo?.TrackID,
+            eventType: sessionData?.WeekendInfo?.EventType,
+            seriesId: sessionData?.WeekendInfo?.SeriesID
+        });
+        
+        // Extract and display key session data
+        const trackName = sessionData?.WeekendInfo?.TrackDisplayName || '--';
+        const eventType = sessionData?.WeekendInfo?.EventType || '--';
+        const seriesId = sessionData?.WeekendInfo?.SeriesID || '--';
+        
+        // Get driver's car info
+        let carName = '--';
+        if (sessionData?.DriverInfo?.Drivers && sessionData.DriverInfo.Drivers.length > 0) {
+            const driverCar = sessionData.DriverInfo.Drivers[0];
+            carName = driverCar.CarScreenName || driverCar.CarPath || '--';
+        }
+        
+        // Update UI
+        this.elements.sessionTrack.textContent = trackName;
+        this.elements.sessionCar.textContent = carName;
+        this.elements.sessionType.textContent = eventType;
+        this.elements.sessionSeries.textContent = `Series ${seriesId}`;
+        
+        console.log('✅ Session info displayed:', {
+            track: trackName,
+            car: carName,
+            event: eventType,
+            series: seriesId
+        });
     }
     
     handleTelemetryUpdate(data) {
