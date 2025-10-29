@@ -9,7 +9,7 @@ class LiveStrategyTracker {
         this.currentStint = null;
         this.currentLap = 0;
         this.currentStintLap = 0;  // Laps completed in current stint (starts at 0)
-        this.currentStintNumber = 1;  // Stint number (starts at 1)
+        this.currentStintNumber = 0;  // Stint number (starts at 0)
         this.currentDriver = '--';  // Driver name from broadcaster
         this.sessionTimeRemain = 0;
         this.fuelLevel = 0;
@@ -18,6 +18,8 @@ class LiveStrategyTracker {
         this.sessionInfo = null;
         this.fuelPerLap = 0;
         this.pitStopDuration = 0;  // Pit stop time in seconds
+        this.pitStopStartTime = null;  // When pit road was entered
+        this.actualPitStopTime = 0;  // Actual measured pit stop duration
         
         // Fuel per lap calculation - track lap boundaries
         this.lastProcessedLap = -1;
@@ -232,14 +234,32 @@ class LiveStrategyTracker {
         this.fuelLevel = values.FuelLevel || 0;
         this.lastLapTime = values.LapLastLapTime || 0;
         
-        // Detect pit road transition - when driver exits pits (OnPitRoad: true -> false)
+        // Detect pit road transitions
         const isOnPitRoad = values.OnPitRoad || false;
+        
+        // When entering pit road
+        if (this.wasOnPitRoad === false && isOnPitRoad === true) {
+            this.pitStopStartTime = Date.now();
+            console.log('🛠️  Pit stop started');
+        }
+        
+        // When exiting pit road (driver just exited pits - NEW STINT STARTED)
         if (this.wasOnPitRoad === true && isOnPitRoad === false) {
-            // Driver just exited pit road - NEW STINT STARTED
+            // Calculate actual pit stop duration
+            if (this.pitStopStartTime) {
+                this.actualPitStopTime = Math.round((Date.now() - this.pitStopStartTime) / 1000);
+                this.pitStopDuration = this.actualPitStopTime;
+                console.log(`🛠️  Pit stop ended - Duration: ${this.actualPitStopTime}s`);
+                
+                // Update the pit row with actual time
+                this.updatePitRowWithActualTime();
+            }
+            
             this.finishCurrentStint();  // Save current stint data
             this.startNewStint();       // Initialize new stint
             console.log(`🏁 NEW STINT #${this.currentStintNumber} started!`);
         }
+        
         this.wasOnPitRoad = isOnPitRoad;
         
         // Calculate fuel per lap when lap boundaries are crossed
@@ -291,24 +311,52 @@ class LiveStrategyTracker {
         this.currentStintLapTimes = [];
         this.currentStintFuelUse = [];
         this.fuelAtLapStart = this.fuelLevel;
+        this.actualPitStopTime = 0;  // Reset pit stop time for new stint
+        this.pitStopStartTime = null;  // Reset pit timer
     }
     
     finishCurrentStint() {
         if (this.currentStintLap > 0) {
+            // Calculate total stint time (lap times + pit stop time if applicable)
+            const totalLapTime = this.currentStintLapTimes.reduce((a, b) => a + b, 0);
+            const totalStintTime = totalLapTime + this.actualPitStopTime;
+            
             // Only save if we completed at least one lap in the stint
             const stintData = {
                 stintNumber: this.currentStintNumber,
-                driver: this.currentDriver,
                 lapCount: this.currentStintLap,
                 lapTimes: [...this.currentStintLapTimes],
                 fuelUse: [...this.currentStintFuelUse],
+                pitStopTime: this.actualPitStopTime,
                 avgLapTime: this.getAverageLapTime(this.currentStintLapTimes),
-                avgFuelPerLap: this.getAverageFuelPerLap(this.currentStintFuelUse)
+                avgFuelPerLap: this.getAverageFuelPerLap(this.currentStintFuelUse),
+                totalLapTime: totalLapTime,
+                totalStintTime: totalStintTime
             };
             this.stintHistory.push(stintData);
             console.log(`✅ Stint #${this.currentStintNumber} completed:`, stintData);
             // Update display immediately
             this.updateStintDataDisplay();
+        }
+    }
+    
+    updatePitRowWithActualTime() {
+        const tbody = this.elements.stintTableBody;
+        if (!tbody) return;
+        
+        // Find the pit row for the current stint (the one before the next stint starts)
+        const pitRows = tbody.querySelectorAll('tr[data-role="pit-stop"]');
+        const pitRowIndex = this.currentStintNumber - 2;  // -1 for 0-based, -1 for pit after stint
+        
+        if (pitRowIndex >= 0 && pitRowIndex < pitRows.length) {
+            const pitRow = pitRows[pitRowIndex];
+            const cells = pitRow.querySelectorAll('td');
+            // Update the duration cell (index 5 - the pit stop duration column)
+            if (cells[5]) {
+                cells[5].textContent = `${this.actualPitStopTime}s`;
+                cells[5].classList.add('text-green-400');  // Highlight with actual time
+                console.log(`✅ Updated pit row ${pitRowIndex} with actual pit time: ${this.actualPitStopTime}s`);
+            }
         }
     }
     
