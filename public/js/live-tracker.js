@@ -515,30 +515,26 @@ class LiveStrategyTracker {
         
         stintRows.forEach(row => {
             const statusCell = row.querySelector('.status-cell');
-            const stintNumber = parseInt(row.getAttribute('data-stint'));  // 1-based stint number from table
+            const stintNumber = parseInt(row.getAttribute('data-stint'));  // 1-based from table
             
             // Remove all status classes
             row.classList.remove('stint-completed', 'stint-active', 'stint-upcoming');
             statusCell.classList.remove('text-green-500', 'text-blue-400', 'text-neutral-500');
             
-            // Check if this stint is in history (completed)
-            // stintHistory stores 0-based stintNumber, so convert table's 1-based to 0-based
-            const stintHistoryIndex = stintNumber - 1;
-            const isCompleted = this.stintHistory.some(s => s.stintNumber === stintHistoryIndex);
+            // Check if completed - stintHistory stores 0-based numbers
+            const isCompleted = this.stintHistory.some(s => s.stintNumber === stintNumber - 1);
             
             if (isCompleted) {
                 row.classList.add('stint-completed');
                 row.classList.add('opacity-50');
                 statusCell.textContent = '✓ Completed';
                 statusCell.classList.add('text-green-500');
-            } else if (stintNumber === this.currentStintNumber + 1) {
-                // Current stint is active
-                // currentStintNumber is 0-based, table is 1-based, so add 1
+            } else if (this.currentStintNumber > 0 && stintNumber - 1 === this.currentStintNumber) {
+                // Active: convert table's 1-based to 0-based and compare with currentStintNumber
                 row.classList.add('stint-active');
                 statusCell.textContent = '→ Active';
                 statusCell.classList.add('text-blue-400');
             } else {
-                // Upcoming stint
                 row.classList.add('stint-upcoming');
                 statusCell.textContent = '○ Upcoming';
                 statusCell.classList.add('text-neutral-500');
