@@ -527,8 +527,8 @@ class LiveStrategyTracker {
                 row.classList.add('opacity-50');
                 statusCell.textContent = '✓ Completed';
                 statusCell.classList.add('text-green-500');
-            } else if (stintNumber === this.currentStintNumber + 1) {
-                // Current stint is active
+            } else if (this.currentStintNumber > 0 && stintNumber === this.currentStintNumber + 1) {
+                // Current stint is active (only if we've actually left the pits: currentStintNumber > 0)
                 // currentStintNumber is 0-based, so +1 to match table's 1-based numbering
                 row.classList.add('stint-active');
                 statusCell.textContent = '→ Active';
