@@ -286,12 +286,6 @@ class LiveStrategyTracker {
                     // Increment stint lap count (completed laps)
                     this.currentStintLap++;
                     
-                    // Increment stint number when first lap of new stint completes
-                    if (this.currentStintLap === 1 && this.currentStintNumber === 0) {
-                        this.incrementStintNumber();
-                        this.updateStintTableStatus();
-                    }
-                    
                     console.log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${fuelUsedInLap.toFixed(2)}L, ${this.formatLapTime(this.lastLapTime)}`);
                 }
             }
