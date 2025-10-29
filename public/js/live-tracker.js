@@ -17,6 +17,7 @@ class LiveStrategyTracker {
         this.isConnected = false;
         this.sessionInfo = null;
         this.fuelPerLap = 0;
+        this.pitStopDuration = 0;  // Pit stop time in seconds
         
         // Fuel per lap calculation - track lap boundaries
         this.lastProcessedLap = -1;
@@ -332,6 +333,12 @@ class LiveStrategyTracker {
         // Last lap time
         this.elements.lastLapTime.textContent = this.lastLapTime ? this.formatLapTime(this.lastLapTime) : '--:--';
         
+        // Pit stop time
+        const pitStopEl = document.getElementById('pit-stop-time');
+        if (pitStopEl && this.pitStopDuration) {
+            pitStopEl.textContent = `${this.pitStopDuration}s`;
+        }
+        
         // Latest lap fuel per lap
         this.elements.fuelPerLap.textContent = this.fuelPerLap > 0 ? `${this.fuelPerLap.toFixed(2)} L` : '-- L';
         
@@ -605,38 +612,61 @@ class LiveStrategyTracker {
     populateStintTable() {
         if (!this.strategy) return;
         
-        // The strategy object from the planner contains stints array at top level
         const stints = this.strategy.stints;
         
         if (!stints || !Array.isArray(stints) || stints.length === 0) {
             const tbody = this.elements.stintTableBody;
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-neutral-500 py-4">No stints loaded</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-neutral-500 py-4">No stints loaded</td></tr>';
             return;
         }
         
         const tbody = this.elements.stintTableBody;
         tbody.innerHTML = '';
         
-        stints.forEach(stint => {
-            const row = document.createElement('tr');
-            row.setAttribute('data-stint', stint.stintNumber);
-            row.className = 'stint-upcoming';
+        // Get pit stop time from strategy
+        const pitStopTime = this.strategy.strategyState?.pitStopTime || 90;
+        this.pitStopDuration = pitStopTime;
+        
+        stints.forEach((stint, index) => {
+            // Create stint row
+            const stintRow = document.createElement('tr');
+            stintRow.setAttribute('data-role', 'stint');
+            stintRow.setAttribute('data-stint', stint.stintNumber);
+            stintRow.className = 'bg-neutral-800 hover:bg-neutral-700 transition-colors';
             
-            row.innerHTML = `
-                <td class="px-3 py-3 font-bold">#${stint.stintNumber}</td>
-                <td class="px-3 py-3">
-                    <span class="px-2 py-1 rounded text-xs bg-neutral-700">Upcoming</span>
-                </td>
-                <td class="px-3 py-3">${stint.driver || 'Unassigned'}</td>
-                <td class="px-3 py-3 text-right font-mono">${stint.startLap}</td>
-                <td class="px-3 py-3 text-right font-mono">${stint.endLap}</td>
-                <td class="px-3 py-3 text-right font-mono">${stint.laps.toFixed(1)}</td>
-                <td class="px-3 py-3 font-mono text-sm">${this.formatDateTime(stint.startTime)}</td>
-                <td class="px-3 py-3 font-mono text-sm">${this.formatDateTime(stint.endTime)}</td>
-                <td class="px-3 py-3 text-neutral-500">--</td>
+            stintRow.innerHTML = `
+                <td class="px-3 py-2 font-bold text-sm">#${stint.stintNumber}</td>
+                <td class="px-3 py-2 font-mono text-xs">${stint.startTime}</td>
+                <td class="px-3 py-2 font-mono text-xs">${stint.endTime}</td>
+                <td class="px-3 py-2 text-right font-mono text-sm">${stint.startLap}</td>
+                <td class="px-3 py-2 text-right font-mono text-sm">${stint.endLap}</td>
+                <td class="px-3 py-2 text-right font-mono text-blue-400 text-sm">${stint.laps.toFixed(1)}</td>
+                <td class="px-3 py-2 text-sm">${stint.driver || 'Unassigned'}</td>
+                <td class="px-3 py-2 text-sm">${stint.backup || '-'}</td>
             `;
             
-            tbody.appendChild(row);
+            tbody.appendChild(stintRow);
+            
+            // Create pit stop row (except after last stint)
+            if (index < stints.length - 1) {
+                const pitRow = document.createElement('tr');
+                pitRow.setAttribute('data-role', 'pit-stop');
+                pitRow.setAttribute('data-stint', stint.stintNumber);
+                pitRow.className = 'bg-neutral-900 transition-colors';
+                
+                pitRow.innerHTML = `
+                    <td class="px-3 py-1 text-neutral-600 text-xs"></td>
+                    <td class="px-3 py-1 text-neutral-500 text-xs">--</td>
+                    <td class="px-3 py-1 text-neutral-500 text-xs">--</td>
+                    <td class="px-3 py-1 text-center text-neutral-500 text-xs">PIT</td>
+                    <td class="px-3 py-1 text-center text-neutral-500 text-xs">PIT</td>
+                    <td class="px-3 py-1 text-right text-neutral-400 font-mono text-xs">${pitStopTime}s</td>
+                    <td class="px-3 py-1 text-neutral-600 text-xs">-</td>
+                    <td class="px-3 py-1 text-neutral-600 text-xs">-</td>
+                `;
+                
+                tbody.appendChild(pitRow);
+            }
         });
     }
     
