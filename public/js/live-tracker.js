@@ -339,6 +339,8 @@ class LiveStrategyTracker {
             console.log(`   Total lap time: ${totalLapTime}s, Pit time: ${this.actualPitStopTime}s`);
             // Update display immediately
             this.updateStintDataDisplay();
+            // Update table status
+            this.updateStintTableStatus();
         }
     }
     
@@ -431,7 +433,7 @@ class LiveStrategyTracker {
                         <div class="text-sm font-mono border-b border-neutral-700 pb-2 mb-2">
                             <div class="flex justify-between items-center">
                                 <span class="font-bold text-blue-400">Stint #${stint.stintNumber}</span>
-                                <span class="text-emerald-400">${stint.totalStintTime ? stint.totalStintTime.toFixed(1) + 's' : '--'}</span>
+                                <span class="text-emerald-400">${stint.totalStintTime ? this.formatLapTime(stint.totalStintTime) : '--'}</span>
                             </div>
                             <div class="text-xs text-neutral-400 mt-1">
                                 Laps: <span class="text-white">${stint.lapCount}</span> | 
@@ -439,7 +441,7 @@ class LiveStrategyTracker {
                                 Fuel: <span class="text-white">${stint.avgFuelPerLap.toFixed(2)}L</span>
                             </div>
                             <div class="text-xs text-neutral-500 mt-1">
-                                Pit: ${stint.pitStopTime}s | Lap Time: ${stint.totalLapTime ? stint.totalLapTime.toFixed(1) : '--'}s
+                                Pit: ${stint.pitStopTime}s | Lap Time: ${stint.totalLapTime ? this.formatLapTime(stint.totalLapTime) : '--'}
                             </div>
                         </div>
                     `)
@@ -505,24 +507,35 @@ class LiveStrategyTracker {
     }
     
     updateStintTableStatus() {
-        const rows = this.elements.stintTableBody.querySelectorAll('tr[data-stint]');
+        const tbody = this.elements.stintTableBody;
+        const stintRows = tbody.querySelectorAll('tr[data-role="stint"]');
         
-        rows.forEach(row => {
-            const stintNum = parseInt(row.getAttribute('data-stint'));
-            const stint = this.strategy.stints.find(s => s.stintNumber === stintNum);
-            
-            if (!stint) return;
+        stintRows.forEach(row => {
+            const statusCell = row.querySelector('.status-cell');
+            const stintIndex = parseInt(row.getAttribute('data-stint-index'));
             
             // Remove all status classes
             row.classList.remove('stint-completed', 'stint-active', 'stint-upcoming');
+            statusCell.classList.remove('text-green-500', 'text-blue-400', 'text-neutral-500');
             
-            // Apply status based on current lap
-            if (this.currentLap > stint.endLap) {
+            // Check if this stint is in history (completed)
+            const isCompleted = this.stintHistory.some(s => s.stintNumber === stintIndex);
+            
+            if (isCompleted) {
                 row.classList.add('stint-completed');
-            } else if (this.currentLap >= stint.startLap && this.currentLap <= stint.endLap) {
+                row.classList.add('opacity-50');
+                statusCell.textContent = '✓ Completed';
+                statusCell.classList.add('text-green-500');
+            } else if (stintIndex === this.currentStintNumber) {
+                // Current stint is active
                 row.classList.add('stint-active');
+                statusCell.textContent = '→ Active';
+                statusCell.classList.add('text-blue-400');
             } else {
+                // Upcoming stint
                 row.classList.add('stint-upcoming');
+                statusCell.textContent = '○ Upcoming';
+                statusCell.classList.add('text-neutral-500');
             }
         });
     }
@@ -685,6 +698,7 @@ class LiveStrategyTracker {
             const stintRow = document.createElement('tr');
             stintRow.setAttribute('data-role', 'stint');
             stintRow.setAttribute('data-stint', stint.stintNumber);
+            stintRow.setAttribute('data-stint-index', index);
             stintRow.className = 'bg-neutral-800 hover:bg-neutral-700 transition-colors';
             
             stintRow.innerHTML = `
@@ -695,7 +709,7 @@ class LiveStrategyTracker {
                 <td class="px-3 py-2 text-right font-mono text-sm">${stint.endLap}</td>
                 <td class="px-3 py-2 text-right font-mono text-blue-400 text-sm">${stint.laps.toFixed(1)}</td>
                 <td class="px-3 py-2 text-sm">${stint.driver || 'Unassigned'}</td>
-                <td class="px-3 py-2 text-sm">${stint.backup || '-'}</td>
+                <td class="px-3 py-2 text-sm status-cell text-neutral-500">--</td>
             `;
             
             tbody.appendChild(stintRow);
@@ -721,6 +735,9 @@ class LiveStrategyTracker {
                 tbody.appendChild(pitRow);
             }
         });
+        
+        // Mark first stint as active
+        this.updateStintTableStatus();
     }
     
     formatTime(seconds) {
