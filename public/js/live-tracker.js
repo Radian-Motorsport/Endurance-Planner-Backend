@@ -8,6 +8,7 @@ class LiveStrategyTracker {
         this.currentLap = 0;
         this.currentStintLap = 0;  // Laps completed in current stint (starts at 0)
         this.currentStintNumber = 1;  // Stint number (starts at 1)
+        this.currentDriver = '--';  // Driver name from broadcaster
         this.sessionTimeRemain = 0;
         this.fuelLevel = 0;
         this.lastLapTime = 0;
@@ -132,7 +133,8 @@ class LiveStrategyTracker {
         
         // Listen for driver info
         this.socket.on('currentBroadcaster', (info) => {
-            this.elements.currentDriver.textContent = info.driver || '--';
+            this.currentDriver = info.driver || '--';
+            this.elements.currentDriver.textContent = this.currentDriver;
         });
         
         // Listen for session info
@@ -267,6 +269,7 @@ class LiveStrategyTracker {
             // Only save if we completed at least one lap in the stint
             const stintData = {
                 stintNumber: this.currentStintNumber,
+                driver: this.currentDriver,
                 lapCount: this.currentStintLap,
                 lapTimes: [...this.currentStintLapTimes],
                 fuelUse: [...this.currentStintFuelUse],
@@ -275,6 +278,8 @@ class LiveStrategyTracker {
             };
             this.stintHistory.push(stintData);
             console.log(`✅ Stint #${this.currentStintNumber} completed:`, stintData);
+            // Update display immediately
+            this.updateStintDataDisplay();
         }
     }
     
@@ -338,9 +343,16 @@ class LiveStrategyTracker {
             if (this.stintHistory.length > 0) {
                 this.elements.stintHistoryList.innerHTML = this.stintHistory
                     .map(stint => `
-                        <div class="text-xs space-y-0">
-                            <div class="font-bold text-blue-400">Stint #${stint.stintNumber}</div>
-                            <div class="text-neutral-400">Laps: ${stint.lapCount} | Avg: ${this.formatLapTime(stint.avgLapTime)} | Fuel: ${stint.avgFuelPerLap.toFixed(2)}L</div>
+                        <div class="text-sm font-mono border-b border-neutral-700 pb-2 mb-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-blue-400">Stint #${stint.stintNumber}</span>
+                                <span class="text-neutral-400">${stint.driver}</span>
+                            </div>
+                            <div class="text-xs text-neutral-400 mt-1">
+                                Laps: <span class="text-white">${stint.lapCount}</span> | 
+                                Avg Time: <span class="text-white">${this.formatLapTime(stint.avgLapTime)}</span> | 
+                                Avg Fuel: <span class="text-white">${stint.avgFuelPerLap.toFixed(2)}L</span>
+                            </div>
                         </div>
                     `)
                     .join('');
