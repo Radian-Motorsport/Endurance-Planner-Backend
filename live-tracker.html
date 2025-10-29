@@ -109,8 +109,12 @@
                 <div id="session-time" class="text-2xl font-mono text-blue-400">--:--:--</div>
             </div>
             <div class="bg-neutral-800 rounded-lg p-4 text-center">
-                <div class="text-neutral-400 text-xs uppercase mb-1">Current Lap</div>
+                <div class="text-neutral-400 text-xs uppercase mb-1">Total Laps</div>
                 <div id="current-lap" class="text-2xl font-mono text-green-400">--</div>
+            </div>
+            <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="text-neutral-400 text-xs uppercase mb-1">Stint Number</div>
+                <div id="stint-number" class="text-2xl font-mono text-indigo-400">--</div>
             </div>
             <div class="bg-neutral-800 rounded-lg p-4 text-center">
                 <div class="text-neutral-400 text-xs uppercase mb-1">Stint Laps</div>
@@ -121,12 +125,51 @@
                 <div id="fuel-remaining" class="text-2xl font-mono text-yellow-400">-- L</div>
             </div>
             <div class="bg-neutral-800 rounded-lg p-4 text-center">
-                <div class="text-neutral-400 text-xs uppercase mb-1">Last Lap Time</div>
+                <div class="text-neutral-400 text-xs uppercase mb-1">Last Lap</div>
                 <div id="last-lap-time" class="text-2xl font-mono text-purple-400">--:--</div>
             </div>
+        </div>
+        
+        <!-- Stint Data Section -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div class="bg-neutral-800 rounded-lg p-4 text-center">
-                <div class="text-neutral-400 text-xs uppercase mb-1">Fuel/Lap</div>
-                <div id="fuel-per-lap" class="text-2xl font-mono text-orange-400">-- L</div>
+                <div class="text-neutral-400 text-xs uppercase mb-2">Fuel Per Lap</div>
+                <div id="fuel-per-lap" class="text-2xl font-mono text-orange-400 mb-2">-- L</div>
+                <div class="text-neutral-500 text-xs">Latest</div>
+            </div>
+            <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="text-neutral-400 text-xs uppercase mb-2">Avg Lap Time</div>
+                <div id="avg-lap-time" class="text-2xl font-mono text-pink-400">--:--</div>
+                <div class="text-neutral-500 text-xs">This Stint</div>
+            </div>
+            <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="text-neutral-400 text-xs uppercase mb-2">Avg Fuel/Lap</div>
+                <div id="avg-fuel-per-lap" class="text-2xl font-mono text-emerald-400">-- L</div>
+                <div class="text-neutral-500 text-xs">This Stint</div>
+            </div>
+            <div class="bg-neutral-800 rounded-lg p-4">
+                <div class="text-neutral-400 text-xs uppercase mb-2">Stint History</div>
+                <div class="text-sm font-mono text-neutral-300 max-h-24 overflow-y-auto">
+                    <div id="stint-history-list" class="space-y-1">
+                        <div class="text-neutral-500">No completed stints</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Lap Data Display -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="bg-neutral-800 rounded-lg p-4">
+                <div class="text-neutral-400 text-xs uppercase mb-3 font-bold">Lap Times (Current Stint)</div>
+                <div id="stint-lap-times-list" class="space-y-1 max-h-40 overflow-y-auto text-neutral-300">
+                    <div class="text-neutral-500 text-xs">No data yet</div>
+                </div>
+            </div>
+            <div class="bg-neutral-800 rounded-lg p-4">
+                <div class="text-neutral-400 text-xs uppercase mb-3 font-bold">Fuel Usage (Current Stint)</div>
+                <div id="stint-fuel-list" class="space-y-1 max-h-40 overflow-y-auto text-neutral-300">
+                    <div class="text-neutral-500 text-xs">No data yet</div>
+                </div>
             </div>
         </div>
         

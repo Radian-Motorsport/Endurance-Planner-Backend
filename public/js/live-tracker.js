@@ -6,7 +6,8 @@ class LiveStrategyTracker {
         this.strategy = null;
         this.currentStint = null;
         this.currentLap = 0;
-        this.currentStintLap = 0;  // Laps in current stint only
+        this.currentStintLap = 0;  // Laps completed in current stint (starts at 0)
+        this.currentStintNumber = 1;  // Stint number (starts at 1)
         this.sessionTimeRemain = 0;
         this.fuelLevel = 0;
         this.lastLapTime = 0;
@@ -22,6 +23,11 @@ class LiveStrategyTracker {
         // Stint tracking - pit road transition detection
         this.wasOnPitRoad = false;
         this.stintStartLap = 0;
+        
+        // Per-stint data storage
+        this.currentStintLapTimes = [];  // Lap times for current stint
+        this.currentStintFuelUse = [];   // Fuel use for each lap in current stint
+        this.stintHistory = [];          // Array of completed stints with their data
         
         this.elements = {};
         this.initializeElements();
@@ -46,11 +52,19 @@ class LiveStrategyTracker {
         
         // Live stats
         this.elements.sessionTime = document.getElementById('session-time');
-        this.elements.currentLap = document.getElementById('current-lap');
+        this.elements.totalLaps = document.getElementById('current-lap');  // Now shows total laps
+        this.elements.stintNumber = document.getElementById('stint-number');
         this.elements.stintLap = document.getElementById('stint-lap');
         this.elements.fuelRemaining = document.getElementById('fuel-remaining');
         this.elements.lastLapTime = document.getElementById('last-lap-time');
         this.elements.fuelPerLap = document.getElementById('fuel-per-lap');
+        
+        // Stint data displays
+        this.elements.avgLapTime = document.getElementById('avg-lap-time');
+        this.elements.avgFuelPerLap = document.getElementById('avg-fuel-per-lap');
+        this.elements.stintLapTimesList = document.getElementById('stint-lap-times-list');
+        this.elements.stintFuelList = document.getElementById('stint-fuel-list');
+        this.elements.stintHistoryList = document.getElementById('stint-history-list');
         
         // Strategy comparison
         this.elements.currentStintNumber = document.getElementById('current-stint-number');
@@ -190,13 +204,10 @@ class LiveStrategyTracker {
         // Detect pit road transition - when driver exits pits (OnPitRoad: true -> false)
         const isOnPitRoad = values.OnPitRoad || false;
         if (this.wasOnPitRoad === true && isOnPitRoad === false) {
-            // Driver just exited pit road - new stint started
-            this.stintStartLap = this.currentLap;
-            this.currentStintLap = 1;  // First lap of new stint
-            console.log(`🏁 New stint started! Lap ${this.currentLap} is lap 1 of stint`);
-        } else if (!isOnPitRoad && this.stintStartLap > 0) {
-            // On track during a stint - calculate stint lap
-            this.currentStintLap = this.currentLap - this.stintStartLap + 1;
+            // Driver just exited pit road - NEW STINT STARTED
+            this.finishCurrentStint();  // Save current stint data
+            this.startNewStint();       // Initialize new stint
+            console.log(`🏁 NEW STINT #${this.currentStintNumber} started!`);
         }
         this.wasOnPitRoad = isOnPitRoad;
         
@@ -210,14 +221,21 @@ class LiveStrategyTracker {
                 // Only record if fuel was actually consumed (not pit stop or refuel)
                 if (fuelUsedInLap > 0 && fuelUsedInLap < 10) {
                     this.fuelUsageHistory.push(fuelUsedInLap);
-                    // Keep rolling buffer of last 10 laps
+                    // Keep rolling buffer of last 10 laps for trend
                     if (this.fuelUsageHistory.length > 10) {
                         this.fuelUsageHistory.shift();
                     }
                     // Use latest lap fuel consumption
                     this.fuelPerLap = fuelUsedInLap;
                     
-                    console.log(`📊 Lap ${this.lastProcessedLap + 1} completed: ${fuelUsedInLap.toFixed(2)}L consumed`);
+                    // Store in current stint data
+                    this.currentStintFuelUse.push(fuelUsedInLap);
+                    this.currentStintLapTimes.push(this.lastLapTime);
+                    
+                    // Increment stint lap count (completed laps)
+                    this.currentStintLap++;
+                    
+                    console.log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${fuelUsedInLap.toFixed(2)}L, ${this.formatLapTime(this.lastLapTime)}`);
                 }
             }
             
@@ -235,17 +253,45 @@ class LiveStrategyTracker {
         }
     }
     
+    startNewStint() {
+        this.currentStintNumber++;
+        this.currentStintLap = 0;  // Reset to 0 laps completed
+        this.stintStartLap = this.currentLap;
+        this.currentStintLapTimes = [];
+        this.currentStintFuelUse = [];
+        this.fuelAtLapStart = this.fuelLevel;
+    }
+    
+    finishCurrentStint() {
+        if (this.currentStintLap > 0) {
+            // Only save if we completed at least one lap in the stint
+            const stintData = {
+                stintNumber: this.currentStintNumber,
+                lapCount: this.currentStintLap,
+                lapTimes: [...this.currentStintLapTimes],
+                fuelUse: [...this.currentStintFuelUse],
+                avgLapTime: this.getAverageLapTime(this.currentStintLapTimes),
+                avgFuelPerLap: this.getAverageFuelPerLap(this.currentStintFuelUse)
+            };
+            this.stintHistory.push(stintData);
+            console.log(`✅ Stint #${this.currentStintNumber} completed:`, stintData);
+        }
+    }
+    
     updateLiveStats() {
         // Session time (convert from seconds remaining to elapsed)
         const totalSessionTime = 28800; // 8 hours in seconds (you can get this from sessionInfo)
         const elapsedTime = totalSessionTime - this.sessionTimeRemain;
         this.elements.sessionTime.textContent = this.formatTime(elapsedTime);
         
-        // Current lap
-        this.elements.currentLap.textContent = this.currentLap || '--';
+        // Total laps in session
+        this.elements.totalLaps.textContent = this.currentLap || '--';
         
-        // Stint lap
-        this.elements.stintLap.textContent = this.currentStintLap > 0 ? this.currentStintLap : '--';
+        // Current stint number
+        this.elements.stintNumber.textContent = this.currentStintNumber || '--';
+        
+        // Stint laps completed
+        this.elements.stintLap.textContent = this.currentStintLap >= 0 ? this.currentStintLap : '--';
         
         // Fuel
         this.elements.fuelRemaining.textContent = this.fuelLevel ? `${this.fuelLevel.toFixed(1)} L` : '-- L';
@@ -253,8 +299,55 @@ class LiveStrategyTracker {
         // Last lap time
         this.elements.lastLapTime.textContent = this.lastLapTime ? this.formatLapTime(this.lastLapTime) : '--:--';
         
-        // Fuel per lap
+        // Latest lap fuel per lap
         this.elements.fuelPerLap.textContent = this.fuelPerLap > 0 ? `${this.fuelPerLap.toFixed(2)} L` : '-- L';
+        
+        // Average lap time for current stint
+        const avgLapTime = this.getAverageLapTime(this.currentStintLapTimes);
+        this.elements.avgLapTime.textContent = avgLapTime > 0 ? this.formatLapTime(avgLapTime) : '--:--';
+        
+        // Average fuel for current stint
+        const avgFuel = this.getAverageFuelPerLap(this.currentStintFuelUse);
+        this.elements.avgFuelPerLap.textContent = avgFuel > 0 ? `${avgFuel.toFixed(2)} L` : '-- L';
+        
+        // Update stint data displays
+        this.updateStintDataDisplay();
+    }
+    
+    updateStintDataDisplay() {
+        // Display lap times for current stint
+        if (this.elements.stintLapTimesList && this.currentStintLapTimes.length > 0) {
+            this.elements.stintLapTimesList.innerHTML = this.currentStintLapTimes
+                .map((time, idx) => `<div class="text-xs font-mono">L${idx + 1}: ${this.formatLapTime(time)}</div>`)
+                .join('');
+        } else if (this.elements.stintLapTimesList) {
+            this.elements.stintLapTimesList.innerHTML = '<div class="text-xs text-neutral-500">No data yet</div>';
+        }
+        
+        // Display fuel use for current stint
+        if (this.elements.stintFuelList && this.currentStintFuelUse.length > 0) {
+            this.elements.stintFuelList.innerHTML = this.currentStintFuelUse
+                .map((fuel, idx) => `<div class="text-xs font-mono">L${idx + 1}: ${fuel.toFixed(2)}L</div>`)
+                .join('');
+        } else if (this.elements.stintFuelList) {
+            this.elements.stintFuelList.innerHTML = '<div class="text-xs text-neutral-500">No data yet</div>';
+        }
+        
+        // Display stint history
+        if (this.elements.stintHistoryList) {
+            if (this.stintHistory.length > 0) {
+                this.elements.stintHistoryList.innerHTML = this.stintHistory
+                    .map(stint => `
+                        <div class="text-xs space-y-0">
+                            <div class="font-bold text-blue-400">Stint #${stint.stintNumber}</div>
+                            <div class="text-neutral-400">Laps: ${stint.lapCount} | Avg: ${this.formatLapTime(stint.avgLapTime)} | Fuel: ${stint.avgFuelPerLap.toFixed(2)}L</div>
+                        </div>
+                    `)
+                    .join('');
+            } else {
+                this.elements.stintHistoryList.innerHTML = '<div class="text-neutral-500 text-xs">No completed stints</div>';
+            }
+        }
     }
     
     updateStrategyComparison() {
@@ -441,16 +534,25 @@ class LiveStrategyTracker {
     }
     
     /**
-     * Get average fuel per lap from history
-     * @param {number} lapCount - Number of laps to average (default 5)
-     * @returns {number} Average fuel used per lap
+     * Get average lap time from array
+     * @param {Array<number>} lapTimes - Array of lap times in seconds
+     * @returns {number} Average lap time
      */
-    getAverageFuelPerLap(lapCount = 5) {
-        if (this.fuelUsageHistory.length === 0) return 0;
-        
-        const relevantLaps = this.fuelUsageHistory.slice(-lapCount);
-        const sum = relevantLaps.reduce((a, b) => a + b, 0);
-        return sum / relevantLaps.length;
+    getAverageLapTime(lapTimes) {
+        if (!lapTimes || lapTimes.length === 0) return 0;
+        const sum = lapTimes.reduce((a, b) => a + b, 0);
+        return sum / lapTimes.length;
+    }
+    
+    /**
+     * Get average fuel per lap from array
+     * @param {Array<number>} fuelUse - Array of fuel usage in liters
+     * @returns {number} Average fuel per lap
+     */
+    getAverageFuelPerLap(fuelUse) {
+        if (!fuelUse || fuelUse.length === 0) return 0;
+        const sum = fuelUse.reduce((a, b) => a + b, 0);
+        return sum / fuelUse.length;
     }
 }
 
