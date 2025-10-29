@@ -6,6 +6,7 @@ class LiveStrategyTracker {
         this.strategy = null;
         this.currentStint = null;
         this.currentLap = 0;
+        this.currentStintLap = 0;  // Laps in current stint only
         this.sessionTimeRemain = 0;
         this.fuelLevel = 0;
         this.lastLapTime = 0;
@@ -17,6 +18,10 @@ class LiveStrategyTracker {
         this.lastProcessedLap = -1;
         this.fuelAtLapStart = null;
         this.fuelUsageHistory = [];
+        
+        // Stint tracking - pit road transition detection
+        this.wasOnPitRoad = false;
+        this.stintStartLap = 0;
         
         this.elements = {};
         this.initializeElements();
@@ -42,6 +47,7 @@ class LiveStrategyTracker {
         // Live stats
         this.elements.sessionTime = document.getElementById('session-time');
         this.elements.currentLap = document.getElementById('current-lap');
+        this.elements.stintLap = document.getElementById('stint-lap');
         this.elements.fuelRemaining = document.getElementById('fuel-remaining');
         this.elements.lastLapTime = document.getElementById('last-lap-time');
         this.elements.fuelPerLap = document.getElementById('fuel-per-lap');
@@ -181,6 +187,19 @@ class LiveStrategyTracker {
         this.fuelLevel = values.FuelLevel || 0;
         this.lastLapTime = values.LapLastLapTime || 0;
         
+        // Detect pit road transition - when driver exits pits (OnPitRoad: true -> false)
+        const isOnPitRoad = values.OnPitRoad || false;
+        if (this.wasOnPitRoad === true && isOnPitRoad === false) {
+            // Driver just exited pit road - new stint started
+            this.stintStartLap = this.currentLap;
+            this.currentStintLap = 1;  // First lap of new stint
+            console.log(`🏁 New stint started! Lap ${this.currentLap} is lap 1 of stint`);
+        } else if (!isOnPitRoad && this.stintStartLap > 0) {
+            // On track during a stint - calculate stint lap
+            this.currentStintLap = this.currentLap - this.stintStartLap + 1;
+        }
+        this.wasOnPitRoad = isOnPitRoad;
+        
         // Calculate fuel per lap when lap boundaries are crossed
         if (this.currentLap > this.lastProcessedLap) {
             // Lap has incremented - lap just completed
@@ -224,6 +243,9 @@ class LiveStrategyTracker {
         
         // Current lap
         this.elements.currentLap.textContent = this.currentLap || '--';
+        
+        // Stint lap
+        this.elements.stintLap.textContent = this.currentStintLap > 0 ? this.currentStintLap : '--';
         
         // Fuel
         this.elements.fuelRemaining.textContent = this.fuelLevel ? `${this.fuelLevel.toFixed(1)} L` : '-- L';
