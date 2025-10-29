@@ -1,4 +1,5 @@
 // Live Strategy Tracker - Connects to RadianApp telemetry and displays race progress vs plan
+// Loads strategies the exact same way the planner does and calculates stint tables
 
 class LiveStrategyTracker {
     constructor() {
@@ -509,8 +510,63 @@ class LiveStrategyTracker {
         console.log('✅ Strategy loaded:', strategy);
         this.strategy = strategy;
         
-        // Populate stint table
+        // Calculate stints from strategy data (same way planner does)
+        if (strategy.strategyState && strategy.formData) {
+            this.calculateStints();
+        } else {
+            // Fallback: if stints already calculated and stored, use them
+            this.populateStintTable();
+        }
+    }
+    
+    calculateStints() {
+        if (!this.strategy.strategyState || !this.strategy.formData) return;
+        
+        const state = this.strategy.strategyState;
+        const formData = this.strategy.formData;
+        
+        // Calculate basic stint parameters
+        const totalStints = state.totalStints;
+        const raceDuration = state.raceDurationSeconds;
+        const lapsPerStint = state.lapsPerStint;
+        const pitStopTime = state.pitStopTime || 90; // Default pit stop time
+        
+        const stints = [];
+        let currentLap = 1;
+        let currentTime = 0;
+        
+        for (let i = 1; i <= totalStints; i++) {
+            const stintDriver = this.strategy.stintDriverAssignments?.[i-1] || 'Unassigned';
+            const startLap = currentLap;
+            const endLap = currentLap + lapsPerStint - 1;
+            
+            // Format times
+            const startTime = this.formatTimeSeconds(currentTime);
+            currentTime += (lapsPerStint * (raceDuration / state.totalStints / lapsPerStint)) + pitStopTime;
+            const endTime = this.formatTimeSeconds(currentTime);
+            
+            stints.push({
+                stintNumber: i,
+                driver: stintDriver,
+                startLap: startLap,
+                endLap: endLap,
+                laps: lapsPerStint,
+                startTime: startTime,
+                endTime: endTime
+            });
+            
+            currentLap = endLap + 1;
+        }
+        
+        this.strategy.stints = stints;
         this.populateStintTable();
+    }
+    
+    formatTimeSeconds(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
     
     populateStintTable() {

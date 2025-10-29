@@ -2863,6 +2863,7 @@ class RadianPlannerApp {
             const stintDrivers = {};
             const stintBackupDrivers = {};
             const tbody = document.getElementById('stint-table-body');
+            const stints = [];
             
             if (tbody) {
                 const rows = tbody.querySelectorAll('tr[data-role="stint"]');
@@ -2877,6 +2878,21 @@ class RadianPlannerApp {
                     const backupSelect = row.querySelector('.backup-select-stint');
                     if (backupSelect && backupSelect.value) {
                         stintBackupDrivers[index] = backupSelect.value;
+                    }
+                    
+                    // Extract stint data from row cells
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 8) {
+                        stints.push({
+                            stintNumber: index + 1,
+                            driver: driverSelect?.value || 'Unassigned',
+                            backup: backupSelect?.value || null,
+                            startTime: cells[1].textContent.trim(),
+                            endTime: cells[2].textContent.trim(),
+                            startLap: parseInt(cells[3].textContent.trim()),
+                            endLap: parseInt(cells[4].textContent.trim()),
+                            laps: parseFloat(cells[5].textContent.trim())
+                        });
                     }
                 });
             }
@@ -2897,6 +2913,9 @@ class RadianPlannerApp {
                 selectedTrack: this.selectedTrack,
                 selectedCar: this.selectedCar,
                 selectedDrivers: this.selectedDrivers,
+
+                // Calculated stints (for Live Tracker display)
+                stints: stints,
 
                 // Page 2 form data
                 formData: this.collectPage2FormData(),
