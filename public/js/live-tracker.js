@@ -100,6 +100,7 @@ class LiveStrategyTracker {
         this.elements.manualStartBtn = document.getElementById('manual-start-btn');
         this.elements.manualStopBtn = document.getElementById('manual-stop-btn');
         this.elements.manualResetBtn = document.getElementById('manual-reset-btn');
+        this.elements.manualRecalcBtn = document.getElementById('manual-recalc-btn');
     }
     
     setupEventListeners() {
@@ -147,6 +148,7 @@ class LiveStrategyTracker {
         this.elements.manualStartBtn?.addEventListener('click', () => this.startManualTimer());
         this.elements.manualStopBtn?.addEventListener('click', () => this.stopManualTimer());
         this.elements.manualResetBtn?.addEventListener('click', () => this.resetManualTimer());
+        this.elements.manualRecalcBtn?.addEventListener('click', () => this.recalculateRemainingStints());
     }
     
     connectToTelemetry() {
