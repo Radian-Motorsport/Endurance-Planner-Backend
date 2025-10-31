@@ -888,19 +888,34 @@ class LiveStrategyTracker {
      * Uses running averages from completed stints
      */
     recalculateRemainingStints() {
-        if (!this.strategy || !this.strategy.stints || this.stintHistory.length === 0) return;
+        if (!this.strategy || !this.strategy.stints) {
+            console.warn('⚠️ No strategy loaded');
+            return;
+        }
         
-        // Calculate running averages
-        const totalLapTime = this.stintHistory.reduce((sum, s) => sum + s.totalLapTime, 0);
-        const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
-        const actualAvgLapTime = totalLaps > 0 ? totalLapTime / totalLaps : 300;
+        // Start with planned values as baseline
+        const formData = this.strategy.formData || {};
+        const avgLapTimeMinutes = parseInt(formData.avgLapTimeMinutes || 0);
+        const avgLapTimeSeconds = parseInt(formData.avgLapTimeSeconds || 0);
+        let actualAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds || 300;
+        let actualAvgFuelPerLap = parseFloat(formData.fuelPerLap) || 1.0;
+        let avgPitStopTime = this.strategy.strategyState?.pitStopTime || 90;
+        let dataSource = 'PLANNED';
         
-        const totalFuel = this.stintHistory.reduce((sum, s) => sum + s.fuelUse.reduce((a, b) => a + b, 0), 0);
-        const actualAvgFuelPerLap = totalLaps > 0 ? totalFuel / totalLaps : 1.0;
+        // Override with actual data if stint history exists
+        if (this.stintHistory.length > 0) {
+            const totalLapTime = this.stintHistory.reduce((sum, s) => sum + s.totalLapTime, 0);
+            const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
+            actualAvgLapTime = totalLaps > 0 ? totalLapTime / totalLaps : actualAvgLapTime;
+            
+            const totalFuel = this.stintHistory.reduce((sum, s) => sum + s.fuelUse.reduce((a, b) => a + b, 0), 0);
+            actualAvgFuelPerLap = totalLaps > 0 ? totalFuel / totalLaps : actualAvgFuelPerLap;
+            
+            avgPitStopTime = this.getAveragePitStopTime();
+            dataSource = 'ACTUAL';
+        }
         
-        const avgPitStopTime = this.getAveragePitStopTime();
-        
-        console.log(`🔄 Recalculating stints with actuals:`, {
+        console.log(`🔄 Recalculating stints with ${dataSource} data:`, {
             avgLapTime: actualAvgLapTime.toFixed(2),
             avgFuelPerLap: actualAvgFuelPerLap.toFixed(2),
             avgPitStopTime: avgPitStopTime.toFixed(1)
@@ -924,9 +939,8 @@ class LiveStrategyTracker {
         }
         
         // Calculate new stint structure
-        const lastEndLap = this.strategy.stints[completedStints - 1].endLap;
+        const lastEndLap = completedStints > 0 ? this.strategy.stints[completedStints - 1].endLap : 0;
         let newCurrentLap = lastEndLap + 1;
-        let currentTime = (lastEndLap * actualAvgLapTime) + avgPitStopTime;
         
         console.log(`📍 Recalculating from lap ${newCurrentLap}, ${(remainingSessionTime / 60).toFixed(1)} min remaining`);
         
