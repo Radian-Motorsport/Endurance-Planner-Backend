@@ -80,8 +80,8 @@
         </div>
         
         <!-- Session Info Display -->
-        <div class="bg-neutral-800 rounded-lg p-4 mb-6">
-            <h3 class="text-xs uppercase text-neutral-400 font-bold mb-3">Current Session</h3>
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+            <h3 class="text-xl font-bold road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Current Session</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Track</div>
@@ -135,9 +135,9 @@
         </div>
         
         <!-- Time Mode Toggle (Auto/Manual) -->
-        <div class="bg-neutral-800 rounded-lg p-4 mb-6">
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm uppercase font-bold text-neutral-300">Session Time Mode</h3>
+                <h3 class="text-xl font-bold road-rage-font" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Session Time Mode</h3>
                 <div class="flex items-center space-x-2">
                     <button id="time-mode-auto" class="time-mode-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition active">
                         Auto
@@ -200,8 +200,8 @@
         </div>
         
         <!-- Stint History - Full Width -->
-        <div class="bg-neutral-800 rounded-lg p-4 mb-6">
-            <h3 class="text-sm uppercase font-bold text-neutral-300 mb-3">Stint History</h3>
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+            <h3 class="text-xl font-bold road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Stint History</h3>
             <div id="stint-history-list" class="space-y-0">
                 <div class="text-neutral-500 text-xs">No completed stints</div>
             </div>
@@ -226,7 +226,7 @@
         <!-- Strategy vs Actual Comparison -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <h2 class="text-xl font-bold mb-4">Strategy Status</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
                 <div>
                     <div class="text-neutral-400 text-sm mb-1">Current Stint</div>
                     <div class="flex items-baseline space-x-2">
@@ -246,6 +246,27 @@
                     <div class="flex items-baseline space-x-2">
                         <span id="next-pit-lap" class="text-3xl font-bold text-orange-400">--</span>
                         <span class="text-neutral-400 text-sm">laps</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="text-neutral-400 text-sm mb-1">Avg Lap Time</div>
+                    <div class="flex items-baseline space-x-2">
+                        <span id="running-avg-lap-time" class="text-3xl font-bold text-pink-400">--:--</span>
+                        <span class="text-neutral-400 text-sm">running</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="text-neutral-400 text-sm mb-1">Avg Fuel/Lap</div>
+                    <div class="flex items-baseline space-x-2">
+                        <span id="running-avg-fuel" class="text-3xl font-bold text-emerald-400">-- L</span>
+                        <span class="text-neutral-400 text-sm">running</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="text-neutral-400 text-sm mb-1">Avg Pit Time</div>
+                    <div class="flex items-baseline space-x-2">
+                        <span id="running-avg-pit-time" class="text-3xl font-bold text-yellow-400">-- s</span>
+                        <span class="text-neutral-400 text-sm">running</span>
                     </div>
                 </div>
             </div>

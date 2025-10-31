@@ -90,6 +90,11 @@ class LiveStrategyTracker {
         this.elements.lapDelta = document.getElementById('lap-delta');
         this.elements.nextPitLap = document.getElementById('next-pit-lap');
         
+        // Running averages (Strategy Status box)
+        this.elements.runningAvgLapTime = document.getElementById('running-avg-lap-time');
+        this.elements.runningAvgFuel = document.getElementById('running-avg-fuel');
+        this.elements.runningAvgPitTime = document.getElementById('running-avg-pit-time');
+        
         // Table
         this.elements.stintTableBody = document.getElementById('stint-table-body');
         
@@ -977,6 +982,19 @@ class LiveStrategyTracker {
             avgFuelPerLap: actualAvgFuelPerLap.toFixed(2),
             avgPitStopTime: avgPitStopTime.toFixed(1)
         });
+        
+        // Update running averages display in Strategy Status box
+        if (this.elements.runningAvgLapTime) {
+            const minutes = Math.floor(actualAvgLapTime / 60);
+            const seconds = (actualAvgLapTime % 60).toFixed(3);
+            this.elements.runningAvgLapTime.textContent = `${minutes}:${seconds.padStart(6, '0')}`;
+        }
+        if (this.elements.runningAvgFuel) {
+            this.elements.runningAvgFuel.textContent = `${actualAvgFuelPerLap.toFixed(2)} L`;
+        }
+        if (this.elements.runningAvgPitTime) {
+            this.elements.runningAvgPitTime.textContent = `${avgPitStopTime.toFixed(1)} s`;
+        }
         
         // Get tank capacity and remaining session time
         const tankCapacity = this.strategy.formData?.tankCapacity || 100;
