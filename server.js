@@ -827,7 +827,11 @@ app.post('/api/strategies', async (req, res) => {
         const strategyData = req.body;
         const uniqueId = require('crypto').randomUUID(); // Generate a unique ID
 
+        console.log('📥 SERVER RECEIVED stints?', strategyData.stints ? `YES - ${strategyData.stints.length} stints` : 'NO');
+        
         await pool.query('INSERT INTO strategies (id, strategy_data) VALUES ($1, $2)', [uniqueId, strategyData]);
+        
+        console.log('✅ SERVER INSERTED strategy ID:', uniqueId);
         
         res.status(201).json({ id: uniqueId });
     } catch (err) {
@@ -843,7 +847,9 @@ app.get('/api/strategies/:id', async (req, res) => {
         const result = await pool.query('SELECT strategy_data FROM strategies WHERE id = $1', [id]);
         
         if (result.rows.length > 0) {
-            res.json(result.rows[0].strategy_data);
+            const retrieved = result.rows[0].strategy_data;
+            console.log('📤 SERVER RETRIEVED stints?', retrieved.stints ? `YES - ${retrieved.stints.length} stints` : 'NO');
+            res.json(retrieved);
         } else {
             res.status(404).send('Strategy not found');
         }
