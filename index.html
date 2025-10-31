@@ -98,8 +98,8 @@
                 <!-- Driver Selection Section -->
                 <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg">
                     <h1 class="text-xl mb-4 road-rage-font">Drivers</h1>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <select id="driver-select" class="p-3 border-neutral-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full bg-neutral-900 text-neutral-400 text-sm">
+                    <div class="flex flex-wrap items-center gap-2 mb-4">
+                        <select id="driver-select" class="p-3 border-neutral-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 flex-1 min-w-[200px] bg-neutral-900 text-neutral-400 text-sm">
                             <option value="">Select a Driver...</option>
                         </select>
                         <button id="add-driver-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105" title="Add Driver">
@@ -112,8 +112,8 @@
                             <i class="fas fa-cloud"></i>
                         </button>
                     </div>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <input type="number" id="new-driver-cust-id" placeholder="Enter iRacing Customer ID" class="p-3 border-neutral-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200 bg-neutral-900 text-neutral-400 text-sm flex-1">
+                    <div class="flex flex-wrap items-center gap-2 mb-4">
+                        <input type="number" id="new-driver-cust-id" placeholder="Enter iRacing Customer ID" class="p-3 border-neutral-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200 bg-neutral-900 text-neutral-400 text-sm flex-1 min-w-[200px]">
                         <button id="add-driver-by-id-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105" title="Add Driver by Customer ID">
                             <i class="fas fa-user-plus"></i>
                         </button>
@@ -648,7 +648,7 @@
                     <h1 class="text-xl mb-4 road-rage-font">Stints</h1>
                     
                     <!-- Dynamic Adjustments - Horizontal Layout -->
-                    <div class="grid grid-cols-2 gap-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <!-- Fuel Adjustment -->
                         <div class="flex flex-col">
                             <div class="flex items-center justify-between mb-2">
