@@ -251,7 +251,8 @@ class LiveStrategyTracker {
         this.manualTimerInterval = setInterval(() => {
             if (this.manualTimeRemaining > 0) {
                 this.manualTimeRemaining--;
-                // Update display will be called in updateLiveStats()
+                // Force telemetry update to refresh display
+                this.handleTelemetryUpdate({ values: {} });
             } else {
                 this.stopManualTimer();
                 console.log('⏱️ Manual timer finished');
