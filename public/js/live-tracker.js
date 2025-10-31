@@ -670,6 +670,9 @@ class LiveStrategyTracker {
             if (response.ok) {
                 const strategy = await response.json();
                 console.log('✅ Strategy loaded from server');
+                console.log('📊 FULL STRATEGY OBJECT:', strategy);
+                console.log('📊 Has stints?', 'stints' in strategy);
+                console.log('📊 stints value:', strategy.stints);
                 this.loadStrategy(strategy);
                 
                 // Store strategy ID in sessionStorage for persistence
