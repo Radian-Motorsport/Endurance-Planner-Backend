@@ -35,6 +35,11 @@ class LiveStrategyTracker {
         this.currentStintFuelUse = [];   // Fuel use for each lap in current stint
         this.stintHistory = [];          // Array of completed stints with their data
         
+        // Time mode (Auto = live telemetry, Manual = user countdown)
+        this.timeMode = 'auto';  // 'auto' or 'manual'
+        this.manualTimerInterval = null;
+        this.manualTimeRemaining = 0;
+        
         this.elements = {};
         this.initializeElements();
         this.setupEventListeners();
@@ -84,6 +89,17 @@ class LiveStrategyTracker {
         // Modal
         this.elements.loadModal = document.getElementById('load-modal');
         this.elements.strategyInput = document.getElementById('strategy-input');
+        
+        // Time mode controls
+        this.elements.timeAutoBtn = document.getElementById('time-mode-auto');
+        this.elements.timeManualBtn = document.getElementById('time-mode-manual');
+        this.elements.manualControls = document.getElementById('manual-mode-controls');
+        this.elements.manualHours = document.getElementById('manual-hours');
+        this.elements.manualMinutes = document.getElementById('manual-minutes');
+        this.elements.manualSeconds = document.getElementById('manual-seconds');
+        this.elements.manualStartBtn = document.getElementById('manual-start-btn');
+        this.elements.manualStopBtn = document.getElementById('manual-stop-btn');
+        this.elements.manualResetBtn = document.getElementById('manual-reset-btn');
     }
     
     setupEventListeners() {
@@ -122,6 +138,15 @@ class LiveStrategyTracker {
         document.getElementById('reconnect-btn').addEventListener('click', () => {
             this.connectToTelemetry();
         });
+        
+        // Time mode toggle
+        this.elements.timeAutoBtn?.addEventListener('click', () => this.setTimeMode('auto'));
+        this.elements.timeManualBtn?.addEventListener('click', () => this.setTimeMode('manual'));
+        
+        // Manual timer controls
+        this.elements.manualStartBtn?.addEventListener('click', () => this.startManualTimer());
+        this.elements.manualStopBtn?.addEventListener('click', () => this.stopManualTimer());
+        this.elements.manualResetBtn?.addEventListener('click', () => this.resetManualTimer());
     }
     
     connectToTelemetry() {
@@ -187,6 +212,70 @@ class LiveStrategyTracker {
         }
     }
     
+    setTimeMode(mode) {
+        this.timeMode = mode;
+        console.log(`⏱️ Time mode set to: ${mode}`);
+        
+        // Update button states
+        if (this.elements.timeAutoBtn && this.elements.timeManualBtn) {
+            if (mode === 'auto') {
+                this.elements.timeAutoBtn.classList.add('bg-blue-600');
+                this.elements.timeAutoBtn.classList.remove('bg-neutral-700');
+                this.elements.timeManualBtn.classList.remove('bg-blue-600');
+                this.elements.timeManualBtn.classList.add('bg-neutral-700');
+                this.elements.manualControls.classList.add('hidden');
+            } else {
+                this.elements.timeManualBtn.classList.add('bg-blue-600');
+                this.elements.timeManualBtn.classList.remove('bg-neutral-700');
+                this.elements.timeAutoBtn.classList.remove('bg-blue-600');
+                this.elements.timeAutoBtn.classList.add('bg-neutral-700');
+                this.elements.manualControls.classList.remove('hidden');
+                this.resetManualTimer();
+            }
+        }
+    }
+    
+    startManualTimer() {
+        if (this.manualTimerInterval) {
+            this.stopManualTimer();
+        }
+        
+        // Get current values from inputs
+        const hours = parseInt(this.elements.manualHours?.value || '8');
+        const minutes = parseInt(this.elements.manualMinutes?.value || '0');
+        const seconds = parseInt(this.elements.manualSeconds?.value || '0');
+        
+        this.manualTimeRemaining = (hours * 3600) + (minutes * 60) + seconds;
+        console.log(`⏱️ Manual timer started: ${this.formatTime(this.manualTimeRemaining)}`);
+        
+        this.manualTimerInterval = setInterval(() => {
+            if (this.manualTimeRemaining > 0) {
+                this.manualTimeRemaining--;
+                // Update display will be called in updateLiveStats()
+            } else {
+                this.stopManualTimer();
+                console.log('⏱️ Manual timer finished');
+            }
+        }, 1000);
+    }
+    
+    stopManualTimer() {
+        if (this.manualTimerInterval) {
+            clearInterval(this.manualTimerInterval);
+            this.manualTimerInterval = null;
+            console.log('⏱️ Manual timer stopped');
+        }
+    }
+    
+    resetManualTimer() {
+        this.stopManualTimer();
+        const hours = parseInt(this.elements.manualHours?.value || '8');
+        const minutes = parseInt(this.elements.manualMinutes?.value || '0');
+        const seconds = parseInt(this.elements.manualSeconds?.value || '0');
+        this.manualTimeRemaining = (hours * 3600) + (minutes * 60) + seconds;
+        console.log(`⏱️ Manual timer reset to: ${this.formatTime(this.manualTimeRemaining)}`);
+    }
+
     handleSessionInfo(sessionData) {
         this.sessionInfo = sessionData;
         
@@ -228,9 +317,15 @@ class LiveStrategyTracker {
         
         const values = data.values;
         
-        // Update live stats
+        // Update live stats - use manual timer if in manual mode, otherwise use telemetry
+        if (this.timeMode === 'manual') {
+            this.sessionTimeRemain = this.manualTimeRemaining;
+        } else {
+            this.sessionTimeRemain = values.SessionTimeRemain || 0;
+        }
+        
+        // Update remaining stats
         this.currentLap = values.Lap || 0;
-        this.sessionTimeRemain = values.SessionTimeRemain || 0;
         this.fuelLevel = values.FuelLevel || 0;
         this.lastLapTime = values.LapLastLapTime || 0;
         
@@ -339,10 +434,16 @@ class LiveStrategyTracker {
             console.log(`✅ Stint #${this.currentStintNumber} completed:`, stintData);
             console.log(`   Lap times: ${JSON.stringify(this.currentStintLapTimes)}`);
             console.log(`   Total lap time: ${totalLapTime}s, Pit time: ${this.actualPitStopTime}s`);
+            
             // Update display immediately
             this.updateStintDataDisplay();
             // Update table status
             this.updateStintTableStatus();
+            
+            // Recalculate remaining stints based on actual performance
+            if (this.strategy && this.strategy.stints && this.stintHistory.length > 0) {
+                this.recalculateRemainingStints();
+            }
         }
     }
     
@@ -616,11 +717,16 @@ class LiveStrategyTracker {
         console.log('✅ Strategy loaded:', strategy);
         this.strategy = strategy;
         
-        // Calculate stints from strategy data (same way planner does)
-        if (strategy.strategyState && strategy.formData) {
+        // Use pre-calculated stints from planner (already in strategy.stints)
+        if (strategy.stints && Array.isArray(strategy.stints)) {
+            console.log('✅ Using pre-calculated stints from planner');
+            this.populateStintTable();
+        } else if (strategy.strategyState && strategy.formData) {
+            // Fallback: recalculate if stints not present
+            console.log('⚠️ Pre-calculated stints not found, recalculating...');
             this.calculateStints();
         } else {
-            // Fallback: if stints already calculated and stored, use them
+            console.warn('❌ No stints or strategy state found');
             this.populateStintTable();
         }
     }
@@ -740,6 +846,114 @@ class LiveStrategyTracker {
         });
     }
     
+    /**
+     * Get average pit stop time with 10% variance filter
+     * Ignores outliers (accidents/repairs) that exceed baseline by 10%
+     */
+    getAveragePitStopTime() {
+        if (!this.strategy || !this.strategy.strategyState) {
+            return 90; // Default fallback
+        }
+        
+        // Use baseline from planner pit stop time
+        const baseline = this.strategy.strategyState.pitStopTime || 90;
+        
+        if (this.stintHistory.length === 0) {
+            return baseline;
+        }
+        
+        const threshold = baseline * 0.1; // 10% variance
+        
+        // Filter pit times within threshold of baseline
+        const validPitTimes = this.stintHistory
+            .map(s => s.pitStopTime)
+            .filter(time => Math.abs(time - baseline) <= threshold);
+        
+        if (validPitTimes.length === 0) {
+            // No valid samples, return baseline
+            console.log(`⚠️ No pit stops within threshold, using baseline: ${baseline}s`);
+            return baseline;
+        }
+        
+        const avg = validPitTimes.reduce((a, b) => a + b, 0) / validPitTimes.length;
+        console.log(`📊 Pit stop average: ${avg.toFixed(1)}s (baseline: ${baseline}s, valid samples: ${validPitTimes.length}/${this.stintHistory.length})`);
+        return avg;
+    }
+    
+    /**
+     * Recalculate remaining stints based on actual performance
+     * Uses running averages from completed stints
+     */
+    recalculateRemainingStints() {
+        if (!this.strategy || !this.strategy.stints || this.stintHistory.length === 0) return;
+        
+        // Calculate running averages
+        const totalLapTime = this.stintHistory.reduce((sum, s) => sum + s.totalLapTime, 0);
+        const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
+        const actualAvgLapTime = totalLaps > 0 ? totalLapTime / totalLaps : 300;
+        
+        const totalFuel = this.stintHistory.reduce((sum, s) => sum + s.fuelUse.reduce((a, b) => a + b, 0), 0);
+        const actualAvgFuelPerLap = totalLaps > 0 ? totalFuel / totalLaps : 1.0;
+        
+        const avgPitStopTime = this.getAveragePitStopTime();
+        
+        console.log(`🔄 Recalculating stints with actuals:`, {
+            avgLapTime: actualAvgLapTime.toFixed(2),
+            avgFuelPerLap: actualAvgFuelPerLap.toFixed(2),
+            avgPitStopTime: avgPitStopTime.toFixed(1)
+        });
+        
+        // Get tank capacity and remaining session time
+        const tankCapacity = this.strategy.formData?.tankCapacity || 100;
+        const remainingSessionTime = this.sessionTimeRemain;
+        
+        // Calculate laps per stint based on fuel and tank
+        const lapsPerTank = Math.floor(tankCapacity / actualAvgFuelPerLap);
+        
+        // Recalculate remaining stints
+        const totalStints = this.strategy.stints.length;
+        const completedStints = this.stintHistory.length;
+        const remainingStints = totalStints - completedStints;
+        
+        if (remainingStints <= 0) {
+            console.log('✅ All stints completed');
+            return;
+        }
+        
+        // Calculate new stint structure
+        const lastEndLap = this.strategy.stints[completedStints - 1].endLap;
+        let newCurrentLap = lastEndLap + 1;
+        let currentTime = (lastEndLap * actualAvgLapTime) + avgPitStopTime;
+        
+        console.log(`📍 Recalculating from lap ${newCurrentLap}, ${(remainingSessionTime / 60).toFixed(1)} min remaining`);
+        
+        // Update remaining stints in strategy
+        for (let i = completedStints; i < totalStints; i++) {
+            const originalStint = this.strategy.stints[i];
+            const startLap = Math.floor(newCurrentLap);
+            const endLap = Math.floor(startLap + lapsPerTank - 1);
+            
+            const startTime = this.formatTimeSeconds((startLap - 1) * actualAvgLapTime);
+            const endTime = this.formatTimeSeconds(endLap * actualAvgLapTime);
+            
+            this.strategy.stints[i] = {
+                ...originalStint,
+                startLap: startLap,
+                endLap: endLap,
+                laps: endLap - startLap + 1,
+                startTime: startTime,
+                endTime: endTime
+            };
+            
+            console.log(`✏️  Stint #${i + 1} recalculated: laps ${startLap}-${endLap} (${endLap - startLap + 1} laps)`);
+            
+            newCurrentLap = endLap + 1;
+        }
+        
+        // Refresh table display
+        this.populateStintTable();
+    }
+
     formatTime(seconds) {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
