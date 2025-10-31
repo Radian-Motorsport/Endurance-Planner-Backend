@@ -148,9 +148,14 @@ class LiveStrategyTracker {
             this.elements.loadModal.classList.add('hidden');
         });
         
-        // Reconnect button
-        document.getElementById('reconnect-btn').addEventListener('click', () => {
-            this.connectToTelemetry();
+        // Back to planner button
+        document.getElementById('back-to-planner-btn')?.addEventListener('click', () => {
+            const strategyId = this.currentStrategyId;
+            if (strategyId) {
+                window.location.href = `/?strategy=${strategyId}`;
+            } else {
+                window.location.href = '/';
+            }
         });
         
         // Time mode toggle
