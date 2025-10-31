@@ -746,12 +746,18 @@ class LiveStrategyTracker {
         const state = this.strategy.strategyState;
         const formData = this.strategy.formData;
         
+        // Extract average lap time from separate minute/second fields
+        const avgLapTimeMinutes = parseInt(formData.avgLapTimeMinutes || 0);
+        const avgLapTimeSeconds = parseInt(formData.avgLapTimeSeconds || 0);
+        const avgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds || 300;
+        
         // Calculate basic stint parameters
         const totalStints = state.totalStints;
         const raceDuration = state.raceDurationSeconds;
         const lapsPerStint = state.lapsPerStint;
         const pitStopTime = state.pitStopTime || 90; // Default pit stop time
-        const avgLapTime = formData.avgLapTime || 300; // Average lap time in seconds
+        
+        console.log(`🔧 Calculating stints fallback: totalStints=${totalStints}, lapsPerStint=${lapsPerStint}, avgLapTime=${avgLapTime}s`);
         
         const stints = [];
         let currentLap = 1;
