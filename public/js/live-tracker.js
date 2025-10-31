@@ -639,9 +639,28 @@ class LiveStrategyTracker {
     }
     
     getPlannedLapForTime(sessionTimeRemain) {
-        // This would need the race start time and elapsed time
-        // For now, return a simple estimation
-        return Math.floor(this.currentLap); // Placeholder
+        // Calculate what lap we SHOULD be on based on the original planned lap time
+        if (!this.strategy || !this.strategy.formData || !this.strategy.strategyState) {
+            return this.currentLap; // Fallback if no strategy loaded
+        }
+        
+        // Get the original planned average lap time from the strategy
+        const avgLapTimeMinutes = parseInt(this.strategy.formData.avgLapTimeMinutes || 0);
+        const avgLapTimeSeconds = parseInt(this.strategy.formData.avgLapTimeSeconds || 0);
+        const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+        
+        if (plannedAvgLapTime === 0) {
+            return this.currentLap; // Fallback if invalid lap time
+        }
+        
+        // Calculate elapsed time (total race duration - time remaining)
+        const totalRaceDuration = this.strategy.strategyState.raceDurationSeconds || 0;
+        const elapsedTime = totalRaceDuration - sessionTimeRemain;
+        
+        // Calculate what lap we should be on based on elapsed time and planned lap time
+        const plannedLap = Math.floor(elapsedTime / plannedAvgLapTime);
+        
+        return plannedLap;
     }
     
     updateStintTableStatus() {
