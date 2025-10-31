@@ -718,6 +718,8 @@ class LiveStrategyTracker {
     
     loadStrategy(strategy) {
         console.log('✅ Strategy loaded:', strategy);
+        console.log('STINTS:', strategy.stints);
+        console.log('📥 Strategy stints present?', strategy.stints ? 'YES' : 'NO');
         this.strategy = strategy;
         
         // Initialize sessionTimeRemain with full race duration from strategy
@@ -727,7 +729,7 @@ class LiveStrategyTracker {
         }
         
         // Use pre-calculated stints from planner (already in strategy.stints)
-        if (strategy.stints && Array.isArray(strategy.stints)) {
+        if (strategy.stints && Array.isArray(strategy.stints) && strategy.stints.length > 0) {
             console.log('✅ Using pre-calculated stints from planner');
             this.populateStintTable();
         } else if (strategy.strategyState && strategy.formData) {
