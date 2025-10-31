@@ -733,7 +733,9 @@ class LiveStrategyTracker {
         
         // Use pre-calculated stints from planner (already in strategy.stints)
         if (strategy.stints && Array.isArray(strategy.stints) && strategy.stints.length > 0) {
-            console.log('✅ Using pre-calculated stints from planner');
+            console.log('✅ Using pre-calculated stints from planner - CALLING populateStintTable()');
+            console.log('STINTS ARRAY LENGTH:', strategy.stints.length);
+            console.log('FIRST STINT:', strategy.stints[0]);
             this.populateStintTable();
         } else if (strategy.strategyState && strategy.formData) {
             // Fallback: recalculate if stints not present
@@ -847,7 +849,7 @@ class LiveStrategyTracker {
                 <td class="px-3 py-2 font-mono text-xs">${stint.endTime}</td>
                 <td class="px-3 py-2 text-right font-mono text-sm">${stint.startLap}</td>
                 <td class="px-3 py-2 text-right font-mono text-sm">${stint.endLap}</td>
-                <td class="px-3 py-2 text-right font-mono text-blue-400 text-sm">${stint.laps}</td>
+                <td class="px-3 py-2 text-right font-mono text-blue-400 text-sm">${Math.floor(stint.laps)}</td>
                 <td class="px-3 py-2 text-sm">${stint.driver || 'Unassigned'}</td>
                 <td class="px-3 py-2 text-sm status-cell text-neutral-500">--</td>
             `;

@@ -323,8 +323,8 @@ export class StrategyCalculator {
                 cells[3].textContent = Math.floor(currentLap);
                 // End Lap (cell[4]) - MUST be integer
                 cells[4].textContent = Math.floor(currentLap + stintLaps - 1);
-                // Laps (cell[5]) - formatted with 1 decimal
-                cells[5].textContent = stintLaps.toFixed(1);
+                // Laps (cell[5]) - display as integer (no decimals)
+                cells[5].textContent = Math.floor(stintLaps);
                 // cell[6] = color strip, cell[7-8] = driver/backup selects (don't touch)
             }
 
