@@ -274,6 +274,8 @@ class LiveStrategyTracker {
         const minutes = parseInt(this.elements.manualMinutes?.value || '0');
         const seconds = parseInt(this.elements.manualSeconds?.value || '0');
         this.manualTimeRemaining = (hours * 3600) + (minutes * 60) + seconds;
+        // Force display update to show reset value
+        this.handleTelemetryUpdate({ values: {} });
         console.log(`⏱️ Manual timer reset to: ${this.formatTime(this.manualTimeRemaining)}`);
     }
 
@@ -469,10 +471,8 @@ class LiveStrategyTracker {
     }
     
     updateLiveStats() {
-        // Session time (convert from seconds remaining to elapsed)
-        const totalSessionTime = 28800; // 8 hours in seconds (you can get this from sessionInfo)
-        const elapsedTime = totalSessionTime - this.sessionTimeRemain;
-        this.elements.sessionTime.textContent = this.formatTime(elapsedTime);
+        // Session time - just display remaining time directly
+        this.elements.sessionTime.textContent = this.formatTime(this.sessionTimeRemain);
         
         // Total laps in session
         this.elements.totalLaps.textContent = this.currentLap || '--';
