@@ -48,30 +48,12 @@
 </head>
 <body class="bg-neutral-900 text-neutral-200">
     
-    <!-- Navigation Header -->
-    <div class="bg-neutral-800 border-b border-neutral-700 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <h1 class="text-xl font-bold">Live Strategy Tracker</h1>
-                <span id="current-strategy-info" class="text-sm text-neutral-400"></span>
-            </div>
-            <div class="flex items-center space-x-3">
-                <button id="nav-back-planner" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition">
-                    ← Back to Planner
-                </button>
-                <button id="nav-load-strategy" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm transition">
-                    ⚙ Load Strategy
-                </button>
-            </div>
-        </div>
-    </div>
-    
     <div class="max-w-7xl mx-auto p-6">
         <!-- Header -->
         <div class="text-center mb-8">
             <img src="assets/g457912.png" alt="RadianPlanner Logo" class="mx-auto w-32 h-auto mb-4">
-            <h1 class="text-5xl road-rage-font mb-2">LIVE STRATEGY TRACKER</h1>
-            <p class="text-neutral-400">Real-time race progress vs planned strategy</p>
+            <h1 class="text-5xl road-rage-font mb-2" style="background-image: linear-gradient(to right, #00ffff, #d400ff); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">LIVE</h1>
+            <p class="text-neutral-400">Real-time Analysis</p>
         </div>
         
         <!-- Connection Status Bar -->
@@ -83,15 +65,15 @@
                         <span class="text-sm">Telemetry: <span id="telemetry-status-text">Disconnected</span></span>
                     </div>
                     <div class="text-sm">
-                        Driver: <span id="current-driver" class="font-mono text-blue-400">--</span>
+                        Strategy: <span id="current-strategy-info" class="font-mono text-purple-400">Not loaded</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
                     <button id="load-strategy-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition">
                         <i class="fas fa-upload mr-2"></i>Load Strategy
                     </button>
-                    <button id="reconnect-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">
-                        <i class="fas fa-sync-alt mr-2"></i>Reconnect
+                    <button id="back-to-planner-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Planner
                     </button>
                 </div>
             </div>
@@ -158,10 +140,10 @@
                 <h3 class="text-sm uppercase font-bold text-neutral-300">Session Time Mode</h3>
                 <div class="flex items-center space-x-2">
                     <button id="time-mode-auto" class="time-mode-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition active">
-                        Auto (Live)
+                        Auto
                     </button>
                     <button id="time-mode-manual" class="time-mode-btn bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2 rounded text-sm transition">
-                        Manual (Test)
+                        Manual
                     </button>
                 </div>
             </div>

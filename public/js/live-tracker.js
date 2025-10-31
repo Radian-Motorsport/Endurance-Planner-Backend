@@ -40,6 +40,10 @@ class LiveStrategyTracker {
         this.manualTimerInterval = null;
         this.manualTimeRemaining = 0;
         
+        // Telemetry activity tracking
+        this.lastTelemetryTime = null;
+        this.telemetryTimeoutCheck = null;
+        
         this.elements = {};
         this.initializeElements();
         this.setupEventListeners();
@@ -47,6 +51,9 @@ class LiveStrategyTracker {
         
         // Check for strategy in URL on load
         this.checkURLForStrategy();
+        
+        // Start telemetry timeout checker
+        this.startTelemetryTimeoutCheck();
     }
     
     initializeElements() {
@@ -176,6 +183,7 @@ class LiveStrategyTracker {
         
         // Listen for telemetry data
         this.socket.on('telemetry', (data) => {
+            this.lastTelemetryTime = Date.now();  // Track last telemetry received
             this.handleTelemetryUpdate(data);
         });
         
@@ -212,6 +220,25 @@ class LiveStrategyTracker {
             this.elements.telemetryStatus.classList.add('status-offline');
             this.elements.telemetryStatusText.textContent = 'Disconnected';
         }
+    }
+    
+    startTelemetryTimeoutCheck() {
+        // Check every 2 seconds if telemetry data is still being received
+        this.telemetryTimeoutCheck = setInterval(() => {
+            if (this.lastTelemetryTime) {
+                const timeSinceLastTelemetry = Date.now() - this.lastTelemetryTime;
+                
+                // If no telemetry received in last 5 seconds, mark as disconnected
+                if (timeSinceLastTelemetry > 5000) {
+                    this.updateConnectionStatus(false);
+                } else {
+                    this.updateConnectionStatus(true);
+                }
+            } else {
+                // No telemetry ever received
+                this.updateConnectionStatus(false);
+            }
+        }, 2000);
     }
     
     setTimeMode(mode) {
