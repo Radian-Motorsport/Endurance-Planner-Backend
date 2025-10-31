@@ -720,6 +720,12 @@ class LiveStrategyTracker {
         console.log('✅ Strategy loaded:', strategy);
         this.strategy = strategy;
         
+        // Initialize sessionTimeRemain with full race duration from strategy
+        if (strategy.strategyState && strategy.strategyState.raceDurationSeconds) {
+            this.sessionTimeRemain = strategy.strategyState.raceDurationSeconds;
+            console.log(`⏱️ Race duration initialized: ${this.formatTime(this.sessionTimeRemain)}`);
+        }
+        
         // Use pre-calculated stints from planner (already in strategy.stints)
         if (strategy.stints && Array.isArray(strategy.stints)) {
             console.log('✅ Using pre-calculated stints from planner');
