@@ -749,21 +749,33 @@ class LiveStrategyTracker {
         const formData = this.strategy.formData;
         
         // Extract average lap time from separate minute/second fields
-        const avgLapTimeMinutes = parseInt(formData.avgLapTimeMinutes || 0);
-        const avgLapTimeSeconds = parseInt(formData.avgLapTimeSeconds || 0);
-        const avgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds || 300;
+        const avgLapTimeMinutes = parseInt(formData.avgLapTimeMinutes) || 0;
+        const avgLapTimeSeconds = parseInt(formData.avgLapTimeSeconds) || 0;
+        let avgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+        
+        console.log(`🔍 formData.avgLapTimeMinutes=${formData.avgLapTimeMinutes}, avgLapTimeSeconds=${formData.avgLapTimeSeconds}, calculated=${avgLapTime}`);
+        
+        // If both are zero, check if formData has race duration to estimate
+        if (avgLapTime === 0 && state.raceDurationSeconds && state.totalStints) {
+            avgLapTime = Math.floor(state.raceDurationSeconds / (state.totalStints * state.lapsPerStint));
+            console.log(`⚠️ No lap time in formData, estimated from race duration: ${avgLapTime}s`);
+        }
+        
+        // Last resort default
+        if (avgLapTime === 0) {
+            avgLapTime = 300;
+            console.log(`⚠️ Using default lap time: 300s`);
+        }
         
         // Calculate basic stint parameters
         const totalStints = state.totalStints;
-        const raceDuration = state.raceDurationSeconds;
         const lapsPerStint = state.lapsPerStint;
-        const pitStopTime = state.pitStopTime || 90; // Default pit stop time
+        const pitStopTime = state.pitStopTime || 90;
         
-        console.log(`🔧 Calculating stints fallback: totalStints=${totalStints}, lapsPerStint=${lapsPerStint}, avgLapTime=${avgLapTime}s`);
+        console.log(`🔧 Calculating stints: totalStints=${totalStints}, lapsPerStint=${lapsPerStint}, avgLapTime=${avgLapTime}s`);
         
         const stints = [];
         let currentLap = 1;
-        let currentTime = 0;
         
         for (let i = 1; i <= totalStints; i++) {
             const stintDriver = this.strategy.stintDriverAssignments?.[i-1] || 'Unassigned';
@@ -787,7 +799,6 @@ class LiveStrategyTracker {
             
             // Next stint starts after this one ends + pit stop time
             currentLap = endLap + 1;
-            currentTime = (endLap * avgLapTime) + pitStopTime;
         }
         
         this.strategy.stints = stints;
