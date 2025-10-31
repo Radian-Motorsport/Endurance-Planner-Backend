@@ -70,6 +70,7 @@ class LiveStrategyTracker {
         
         // Live stats
         this.elements.sessionTime = document.getElementById('session-time');
+        this.elements.lapsRemaining = document.getElementById('laps-remaining');
         this.elements.totalLaps = document.getElementById('current-lap');  // Now shows total laps
         this.elements.stintNumber = document.getElementById('stint-number');
         this.elements.stintLap = document.getElementById('stint-lap');
@@ -520,6 +521,17 @@ class LiveStrategyTracker {
         // Fuel
         this.elements.fuelRemaining.textContent = this.fuelLevel ? `${this.fuelLevel.toFixed(1)} L` : '-- L';
         
+        // Laps remaining (calculated from fuel remaining / running avg fuel per lap)
+        if (this.elements.lapsRemaining) {
+            const runningAvgFuel = this.getRunningAvgFuelPerLap();
+            if (this.fuelLevel && runningAvgFuel > 0) {
+                const lapsRemaining = Math.floor(this.fuelLevel / runningAvgFuel);
+                this.elements.lapsRemaining.textContent = lapsRemaining;
+            } else {
+                this.elements.lapsRemaining.textContent = '--';
+            }
+        }
+        
         // Last lap time
         this.elements.lastLapTime.textContent = this.lastLapTime ? this.formatLapTime(this.lastLapTime) : '--:--';
         
@@ -962,6 +974,28 @@ class LiveStrategyTracker {
         const avg = validPitTimes.reduce((a, b) => a + b, 0) / validPitTimes.length;
         console.log(`📊 Pit stop average: ${avg.toFixed(1)}s (baseline: ${baseline}s, valid samples: ${validPitTimes.length}/${this.stintHistory.length})`);
         return avg;
+    }
+    
+    /**
+     * Get running average fuel per lap from stint history
+     * Returns planned value if no history, otherwise actual average
+     */
+    getRunningAvgFuelPerLap() {
+        if (!this.strategy || !this.strategy.formData) {
+            return 1.0; // Default fallback
+        }
+        
+        const plannedFuelPerLap = parseFloat(this.strategy.formData.fuelPerLap) || 1.0;
+        
+        if (this.stintHistory.length === 0) {
+            return plannedFuelPerLap;
+        }
+        
+        // Calculate actual average from stint history
+        const totalFuel = this.stintHistory.reduce((sum, s) => sum + s.fuelUse.reduce((a, b) => a + b, 0), 0);
+        const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
+        
+        return totalLaps > 0 ? totalFuel / totalLaps : plannedFuelPerLap;
     }
     
     /**

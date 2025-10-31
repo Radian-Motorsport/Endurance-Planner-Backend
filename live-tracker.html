@@ -53,7 +53,7 @@
         <div class="text-center mb-8">
             <img src="assets/g457912.png" alt="RadianPlanner Logo" class="mx-auto w-32 h-auto mb-4">
             <h1 class="text-5xl road-rage-font mb-2" style="background-image: linear-gradient(to right, #00ffff, #d400ff); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">LIVE</h1>
-            <p class="text-neutral-400">Real-time Analysis</p>
+            <p class="text-neutral-400"></p>
         </div>
         
         <!-- Connection Status Bar -->
@@ -81,7 +81,7 @@
         
         <!-- Session Info Display -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <h3 class="text-xl font-bold road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Current Session</h3>
+            <h3 class="text-xl road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Current Session</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Track</div>
@@ -102,42 +102,10 @@
             </div>
         </div>
         
-        <!-- Live Race Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-7 gap-4 mb-6">
-            <div class="bg-neutral-800 rounded-lg p-4 text-center">
-                <div class="text-neutral-400 text-xs uppercase mb-1">Session Time</div>
-                <div id="session-time" class="text-2xl font-mono text-blue-400">--:--:--</div>
-            </div>
-            <div class="bg-neutral-800 rounded-lg p-4 text-center">
-                <div class="text-neutral-400 text-xs uppercase mb-1">Total Laps</div>
-                <div id="current-lap" class="text-2xl font-mono text-green-400">--</div>
-            </div>
-            <div class="bg-neutral-800 rounded-lg p-4 text-center">
-                <div class="text-neutral-400 text-xs uppercase mb-1">Stint Number</div>
-                <div id="stint-number" class="text-2xl font-mono text-indigo-400">--</div>
-            </div>
-            <div class="bg-neutral-800 rounded-lg p-4 text-center">
-                <div class="text-neutral-400 text-xs uppercase mb-1">Stint Laps</div>
-                <div id="stint-lap" class="text-2xl font-mono text-cyan-400">--</div>
-            </div>
-            <div class="bg-neutral-800 rounded-lg p-4 text-center">
-                <div class="text-neutral-400 text-xs uppercase mb-1">Fuel Remaining</div>
-                <div id="fuel-remaining" class="text-2xl font-mono text-yellow-400">-- L</div>
-            </div>
-            <div class="bg-neutral-800 rounded-lg p-4 text-center">
-                <div class="text-neutral-400 text-xs uppercase mb-1">Last Lap</div>
-                <div id="last-lap-time" class="text-2xl font-mono text-purple-400">--:--</div>
-            </div>
-            <div class="bg-neutral-800 rounded-lg p-4 text-center">
-                <div class="text-neutral-400 text-xs uppercase mb-1">Pit Stop Time</div>
-                <div id="pit-stop-time" class="text-2xl font-mono text-red-400">-- s</div>
-            </div>
-        </div>
-        
         <!-- Time Mode Toggle (Auto/Manual) -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold road-rage-font" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Session Time Mode</h3>
+                <h3 class="text-xl road-rage-font" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Session Time Mode</h3>
                 <div class="flex items-center space-x-2">
                     <button id="time-mode-auto" class="time-mode-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition active">
                         Auto
@@ -145,6 +113,14 @@
                     <button id="time-mode-manual" class="time-mode-btn bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2 rounded text-sm transition">
                         Manual
                     </button>
+                </div>
+            </div>
+            
+            <!-- Session Time Display -->
+            <div class="mb-4">
+                <div class="bg-neutral-700 rounded-lg p-4 text-center">
+                    <div class="text-neutral-400 text-xs uppercase mb-1">Session Time</div>
+                    <div id="session-time" class="text-2xl font-mono text-blue-400">--:--:--</div>
                 </div>
             </div>
             
@@ -181,6 +157,38 @@
             </div>
         </div>
         
+        <!-- Live Race Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-7 gap-4 mb-6">
+            <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="text-neutral-400 text-xs uppercase mb-1">Laps Remaining</div>
+                <div id="laps-remaining" class="text-2xl font-mono text-orange-400">--</div>
+            </div>
+            <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="text-neutral-400 text-xs uppercase mb-1">Total Laps</div>
+                <div id="current-lap" class="text-2xl font-mono text-green-400">--</div>
+            </div>
+            <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="text-neutral-400 text-xs uppercase mb-1">Stint Number</div>
+                <div id="stint-number" class="text-2xl font-mono text-indigo-400">--</div>
+            </div>
+            <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="text-neutral-400 text-xs uppercase mb-1">Stint Laps</div>
+                <div id="stint-lap" class="text-2xl font-mono text-cyan-400">--</div>
+            </div>
+            <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="text-neutral-400 text-xs uppercase mb-1">Fuel Remaining</div>
+                <div id="fuel-remaining" class="text-2xl font-mono text-yellow-400">-- L</div>
+            </div>
+            <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="text-neutral-400 text-xs uppercase mb-1">Last Lap</div>
+                <div id="last-lap-time" class="text-2xl font-mono text-purple-400">--:--</div>
+            </div>
+            <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="text-neutral-400 text-xs uppercase mb-1">Pit Stop Time</div>
+                <div id="pit-stop-time" class="text-2xl font-mono text-red-400">-- s</div>
+            </div>
+        </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="bg-neutral-800 rounded-lg p-4 text-center">
                 <div class="text-neutral-400 text-xs uppercase mb-2">Fuel Per Lap</div>
@@ -201,7 +209,7 @@
         
         <!-- Stint History - Full Width -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <h3 class="text-xl font-bold road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Stint History</h3>
+            <h3 class="text-xl road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Stint History</h3>
             <div id="stint-history-list" class="space-y-0">
                 <div class="text-neutral-500 text-xs">No completed stints</div>
             </div>
@@ -225,47 +233,47 @@
         
         <!-- Strategy vs Actual Comparison -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <h2 class="text-xl font-bold mb-4">Strategy Status</h2>
+            <h2 class="text-xl road-rage-font mb-4">Strategy Status</h2>
             <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
                 <div>
                     <div class="text-neutral-400 text-sm mb-1">Current Stint</div>
                     <div class="flex items-baseline space-x-2">
-                        <span id="current-stint-number" class="text-3xl font-bold text-white">--</span>
+                        <span id="current-stint-number" class="text-2xl font-bold text-white">--</span>
                         <span class="text-neutral-400">of <span id="total-stints">--</span></span>
                     </div>
                 </div>
                 <div>
                     <div class="text-neutral-400 text-sm mb-1">Lap Delta</div>
                     <div class="flex items-baseline space-x-2">
-                        <span id="lap-delta" class="text-3xl font-bold delta-neutral">--</span>
+                        <span id="lap-delta" class="text-2xl font-bold delta-neutral">--</span>
                         <span class="text-neutral-400 text-sm">vs planned</span>
                     </div>
                 </div>
                 <div>
                     <div class="text-neutral-400 text-sm mb-1">Next Pit Stop</div>
                     <div class="flex items-baseline space-x-2">
-                        <span id="next-pit-lap" class="text-3xl font-bold text-orange-400">--</span>
+                        <span id="next-pit-lap" class="text-2xl font-bold text-orange-400">--</span>
                         <span class="text-neutral-400 text-sm">laps</span>
                     </div>
                 </div>
                 <div>
                     <div class="text-neutral-400 text-sm mb-1">Avg Lap Time</div>
                     <div class="flex items-baseline space-x-2">
-                        <span id="running-avg-lap-time" class="text-3xl font-bold text-pink-400">--:--</span>
+                        <span id="running-avg-lap-time" class="text-2xl font-bold text-pink-400">--:--</span>
                         <span class="text-neutral-400 text-sm">running</span>
                     </div>
                 </div>
                 <div>
                     <div class="text-neutral-400 text-sm mb-1">Avg Fuel/Lap</div>
                     <div class="flex items-baseline space-x-2">
-                        <span id="running-avg-fuel" class="text-3xl font-bold text-emerald-400">-- L</span>
+                        <span id="running-avg-fuel" class="text-2xl font-bold text-emerald-400">-- L</span>
                         <span class="text-neutral-400 text-sm">running</span>
                     </div>
                 </div>
                 <div>
                     <div class="text-neutral-400 text-sm mb-1">Avg Pit Time</div>
                     <div class="flex items-baseline space-x-2">
-                        <span id="running-avg-pit-time" class="text-3xl font-bold text-yellow-400">-- s</span>
+                        <span id="running-avg-pit-time" class="text-2xl font-bold text-yellow-400">-- s</span>
                         <span class="text-neutral-400 text-sm">running</span>
                     </div>
                 </div>
@@ -274,7 +282,7 @@
         
         <!-- Stint Table -->
         <div class="bg-neutral-800 rounded-lg p-6">
-            <h2 class="text-xl font-bold mb-4">Stint Breakdown</h2>
+            <h2 class="text-xl road-rage-font mb-4">Stint Breakdown</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-neutral-900">
