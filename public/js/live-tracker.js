@@ -927,34 +927,52 @@ class LiveStrategyTracker {
         
         // Calculate laps per stint based on fuel and tank
         const lapsPerTank = Math.floor(tankCapacity / actualAvgFuelPerLap);
+        const timePerStint = (lapsPerTank * actualAvgLapTime) + avgPitStopTime; // time per stint including pit
         
-        // Recalculate remaining stints
-        const totalStints = this.strategy.stints.length;
+        // Calculate how many stints fit in remaining time
         const completedStints = this.stintHistory.length;
-        const remainingStints = totalStints - completedStints;
+        const remainingLapsNeeded = Math.ceil(remainingSessionTime / actualAvgLapTime);
+        const newStintCount = Math.ceil(remainingLapsNeeded / lapsPerTank);
+        const totalNewStints = completedStints + newStintCount;
         
-        if (remainingStints <= 0) {
-            console.log('✅ All stints completed');
+        console.log(`📊 Time analysis:`, {
+            remainingTime: `${(remainingSessionTime / 60).toFixed(1)} min`,
+            lapsPerTank: lapsPerTank,
+            timePerStint: `${(timePerStint / 60).toFixed(1)} min`,
+            remainingLaps: remainingLapsNeeded,
+            newStintCount: newStintCount,
+            totalNewStints: totalNewStints
+        });
+        
+        if (newStintCount <= 0) {
+            console.log('✅ All time remaining stints completed');
             return;
         }
         
-        // Calculate new stint structure
+        // Rebuild remaining stints array (trim or add stints as needed)
         const lastEndLap = completedStints > 0 ? this.strategy.stints[completedStints - 1].endLap : 0;
         let newCurrentLap = lastEndLap + 1;
         
-        console.log(`📍 Recalculating from lap ${newCurrentLap}, ${(remainingSessionTime / 60).toFixed(1)} min remaining`);
+        console.log(`📍 Recalculating from lap ${newCurrentLap}, need ${newStintCount} stints`);
         
-        // Update remaining stints in strategy
-        for (let i = completedStints; i < totalStints; i++) {
-            const originalStint = this.strategy.stints[i];
+        // Remove old remaining stints
+        this.strategy.stints = this.strategy.stints.slice(0, completedStints);
+        
+        // Create new remaining stints
+        for (let i = 0; i < newStintCount; i++) {
+            const stintIndex = completedStints + i;
+            const originalStint = this.strategy.stints[stintIndex - 1] || {}; // Get previous stint as template
+            
             const startLap = Math.floor(newCurrentLap);
             const endLap = Math.floor(startLap + lapsPerTank - 1);
             
             const startTime = this.formatTimeSeconds((startLap - 1) * actualAvgLapTime);
             const endTime = this.formatTimeSeconds(endLap * actualAvgLapTime);
             
-            this.strategy.stints[i] = {
-                ...originalStint,
+            const newStint = {
+                stintNumber: stintIndex + 1,
+                driver: originalStint.driver || 'Unassigned',
+                backup: originalStint.backup || null,
                 startLap: startLap,
                 endLap: endLap,
                 laps: endLap - startLap + 1,
@@ -962,7 +980,9 @@ class LiveStrategyTracker {
                 endTime: endTime
             };
             
-            console.log(`✏️  Stint #${i + 1} recalculated: laps ${startLap}-${endLap} (${endLap - startLap + 1} laps)`);
+            this.strategy.stints.push(newStint);
+            
+            console.log(`✏️  Stint #${stintIndex + 1} created: laps ${startLap}-${endLap} (${endLap - startLap + 1} laps)`);
             
             newCurrentLap = endLap + 1;
         }
