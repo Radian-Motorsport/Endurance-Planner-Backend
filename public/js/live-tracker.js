@@ -636,6 +636,7 @@ class LiveStrategyTracker {
         const raceDuration = state.raceDurationSeconds;
         const lapsPerStint = state.lapsPerStint;
         const pitStopTime = state.pitStopTime || 90; // Default pit stop time
+        const avgLapTime = formData.avgLapTime || 300; // Average lap time in seconds
         
         const stints = [];
         let currentLap = 1;
@@ -643,25 +644,27 @@ class LiveStrategyTracker {
         
         for (let i = 1; i <= totalStints; i++) {
             const stintDriver = this.strategy.stintDriverAssignments?.[i-1] || 'Unassigned';
-            const startLap = currentLap;
-            const endLap = currentLap + lapsPerStint - 1;
+            const startLap = Math.floor(currentLap);
+            const endLap = Math.floor(currentLap + lapsPerStint - 1);
+            const laps = endLap - startLap + 1;
             
-            // Format times
-            const startTime = this.formatTimeSeconds(currentTime);
-            currentTime += (lapsPerStint * (raceDuration / state.totalStints / lapsPerStint)) + pitStopTime;
-            const endTime = this.formatTimeSeconds(currentTime);
+            // Calculate times based on: startTime = (startLap - 1) * avgLapTime, endTime = endLap * avgLapTime
+            const startTime = this.formatTimeSeconds((startLap - 1) * avgLapTime);
+            const endTime = this.formatTimeSeconds(endLap * avgLapTime);
             
             stints.push({
                 stintNumber: i,
                 driver: stintDriver,
                 startLap: startLap,
                 endLap: endLap,
-                laps: lapsPerStint,
+                laps: laps,
                 startTime: startTime,
                 endTime: endTime
             });
             
+            // Next stint starts after this one ends + pit stop time
             currentLap = endLap + 1;
+            currentTime = (endLap * avgLapTime) + pitStopTime;
         }
         
         this.strategy.stints = stints;
@@ -707,7 +710,7 @@ class LiveStrategyTracker {
                 <td class="px-3 py-2 font-mono text-xs">${stint.endTime}</td>
                 <td class="px-3 py-2 text-right font-mono text-sm">${stint.startLap}</td>
                 <td class="px-3 py-2 text-right font-mono text-sm">${stint.endLap}</td>
-                <td class="px-3 py-2 text-right font-mono text-blue-400 text-sm">${stint.laps.toFixed(1)}</td>
+                <td class="px-3 py-2 text-right font-mono text-blue-400 text-sm">${stint.laps}</td>
                 <td class="px-3 py-2 text-sm">${stint.driver || 'Unassigned'}</td>
                 <td class="px-3 py-2 text-sm status-cell text-neutral-500">--</td>
             `;
