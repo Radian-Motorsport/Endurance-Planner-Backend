@@ -264,6 +264,8 @@ class LiveStrategyTracker {
                 this.elements.timeManualBtn.classList.remove('bg-blue-600');
                 this.elements.timeManualBtn.classList.add('bg-neutral-700');
                 this.elements.manualControls.classList.add('hidden');
+                // Stop manual timer when switching to auto
+                this.stopManualTimer();
             } else {
                 this.elements.timeManualBtn.classList.add('bg-blue-600');
                 this.elements.timeManualBtn.classList.remove('bg-neutral-700');
@@ -521,7 +523,7 @@ class LiveStrategyTracker {
         this.elements.stintNumber.textContent = this.currentStintNumber || '--';
         
         // Stint laps completed
-        this.elements.stintLap.textContent = this.currentStintLap >= 0 ? this.currentStintLap : '--';
+        this.elements.stintLap.textContent = this.currentStintLap > 0 ? this.currentStintLap : '--';
         
         // Fuel
         this.elements.fuelRemaining.textContent = this.fuelLevel ? `${this.fuelLevel.toFixed(1)} L` : '-- L';
