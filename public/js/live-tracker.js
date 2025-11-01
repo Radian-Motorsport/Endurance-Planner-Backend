@@ -1127,19 +1127,46 @@ class LiveStrategyTracker {
         const tankCapacity = this.strategy.formData?.tankCapacity || 100;
         const remainingSessionTime = this.sessionTimeRemain;
         
+        console.log(`🔍 Tank and time data:`, {
+            tankCapacity: tankCapacity,
+            remainingSessionTime: remainingSessionTime,
+            sessionTimeRemainFormatted: this.formatTime(remainingSessionTime)
+        });
+        
         // Calculate laps per stint based on fuel and tank
         const lapsPerTank = Math.floor(tankCapacity / actualAvgFuelPerLap);
+        
+        // Estimate number of pit stops needed
+        const estimatedLapsNeeded = Math.ceil(remainingSessionTime / actualAvgLapTime);
+        const estimatedStints = Math.ceil(estimatedLapsNeeded / lapsPerTank);
+        const estimatedPitStops = Math.max(0, estimatedStints - 1); // One less than stints
+        
+        // Subtract pit stop time from available racing time
+        const timeForPitStops = estimatedPitStops * avgPitStopTime;
+        const actualRacingTime = Math.max(0, remainingSessionTime - timeForPitStops);
+        
+        console.log(`⏱️ Pit stop adjustment:`, {
+            estimatedStints: estimatedStints,
+            estimatedPitStops: estimatedPitStops,
+            timeForPitStops: `${timeForPitStops}s`,
+            actualRacingTime: `${(actualRacingTime / 60).toFixed(1)} min`
+        });
+        
+        // Calculate actual laps needed with adjusted time
+        const remainingLapsNeeded = Math.ceil(actualRacingTime / actualAvgLapTime);
+        const newStintCount = Math.ceil(remainingLapsNeeded / lapsPerTank);
+        
         const timePerStint = (lapsPerTank * actualAvgLapTime) + avgPitStopTime; // time per stint including pit
         
         // Calculate how many stints fit in remaining time
         const completedStints = this.stintHistory.length;
-        const remainingLapsNeeded = Math.ceil(remainingSessionTime / actualAvgLapTime);
-        const newStintCount = Math.ceil(remainingLapsNeeded / lapsPerTank);
         const totalNewStints = completedStints + newStintCount;
         
         console.log(`📊 Time analysis:`, {
             remainingTime: `${(remainingSessionTime / 60).toFixed(1)} min`,
             lapsPerTank: lapsPerTank,
+            tankCapacity: tankCapacity,
+            actualAvgFuelPerLap: actualAvgFuelPerLap,
             timePerStint: `${(timePerStint / 60).toFixed(1)} min`,
             remainingLaps: remainingLapsNeeded,
             newStintCount: newStintCount,
