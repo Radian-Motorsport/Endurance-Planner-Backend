@@ -362,6 +362,11 @@ class LiveStrategyTracker {
         
         const values = data.values;
         
+        // Log CarIdxLapDistPct to console for debugging
+        if (values.CarIdxLapDistPct) {
+            console.log('🏁 CarIdxLapDistPct:', values.CarIdxLapDistPct);
+        }
+        
         // Update live stats - use manual timer if in manual mode, otherwise use telemetry
         if (this.timeMode === 'manual') {
             this.sessionTimeRemain = this.manualTimeRemaining;
@@ -405,6 +410,9 @@ class LiveStrategyTracker {
         // Calculate fuel per lap when lap boundaries are crossed
         if (this.currentLap > this.lastProcessedLap) {
             // Lap has incremented - lap just completed
+            // Sync currentStintLap with calculated value
+            this.currentStintLap = Math.max(0, this.currentLap - this.stintStartLap);
+            
             if (this.fuelAtLapStart !== null && this.fuelAtLapStart > 0) {
                 // Calculate fuel used in the lap that just completed
                 const fuelUsedInLap = this.fuelAtLapStart - this.fuelLevel;
@@ -523,7 +531,10 @@ class LiveStrategyTracker {
         this.elements.stintNumber.textContent = this.currentStintNumber || '--';
         
         // Stint laps completed
-        this.elements.stintLap.textContent = this.currentStintLap > 0 ? this.currentStintLap : '--';
+        // Calculate from the difference between current lap and stint start lap
+        // This updates immediately without waiting for fuel calculation logic
+        const calculatedStintLap = this.stintStartLap !== undefined ? Math.max(0, this.currentLap - this.stintStartLap) : this.currentStintLap;
+        this.elements.stintLap.textContent = calculatedStintLap > 0 ? calculatedStintLap : '--';
         
         // Fuel
         this.elements.fuelRemaining.textContent = this.fuelLevel ? `${this.fuelLevel.toFixed(1)} L` : '-- L';
@@ -622,17 +633,36 @@ class LiveStrategyTracker {
             this.elements.currentStintNumber.textContent = currentStint.stintNumber;
             this.elements.totalStints.textContent = this.strategy.stints.length;
             
-            // Calculate lap delta (actual vs planned)
-            const plannedLap = this.getPlannedLapForTime(this.sessionTimeRemain);
-            const delta = this.currentLap - plannedLap;
+            // Calculate lap time delta (running avg vs planned avg)
+            // Get planned lap time
+            const avgLapTimeMinutes = parseInt(this.strategy.formData.avgLapTimeMinutes || 0);
+            const avgLapTimeSeconds = parseInt(this.strategy.formData.avgLapTimeSeconds || 0);
+            const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
             
-            this.elements.lapDelta.textContent = delta > 0 ? `+${delta}` : delta;
-            this.elements.lapDelta.classList.remove('delta-positive', 'delta-negative', 'delta-neutral');
-            if (delta > 0) {
-                this.elements.lapDelta.classList.add('delta-positive');
-            } else if (delta < 0) {
-                this.elements.lapDelta.classList.add('delta-negative');
+            // Get running average lap time from stint history
+            const runningAvgLapTime = this.getRunningAvgLapTime();
+            
+            // Delta is the difference in seconds (positive = slower than planned, negative = faster than planned)
+            const lapTimeDelta = runningAvgLapTime - plannedAvgLapTime;
+            
+            console.log(`📊 Lap Delta Debug: plannedAvgLapTime=${plannedAvgLapTime}s, runningAvgLapTime=${runningAvgLapTime.toFixed(2)}s, delta=${lapTimeDelta.toFixed(2)}s`);
+            
+            // Display as +/- seconds, or show "--" if no data yet
+            if (runningAvgLapTime > 0) {
+                this.elements.lapDelta.textContent = lapTimeDelta > 0 ? `+${lapTimeDelta.toFixed(1)}s` : `${lapTimeDelta.toFixed(1)}s`;
             } else {
+                this.elements.lapDelta.textContent = '--';
+            }
+            
+            this.elements.lapDelta.classList.remove('delta-positive', 'delta-negative', 'delta-neutral');
+            if (lapTimeDelta > 0.5) {
+                // More than 0.5s slower than planned = negative (red)
+                this.elements.lapDelta.classList.add('delta-negative');
+            } else if (lapTimeDelta < -0.5) {
+                // More than 0.5s faster than planned = positive (green)
+                this.elements.lapDelta.classList.add('delta-positive');
+            } else {
+                // Within 0.5s = neutral (gray)
                 this.elements.lapDelta.classList.add('delta-neutral');
             }
             
@@ -669,12 +699,15 @@ class LiveStrategyTracker {
         const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
         
         if (plannedAvgLapTime === 0) {
+            console.warn('⚠️ Planned lap time is 0, cannot calculate delta');
             return this.currentLap; // Fallback if invalid lap time
         }
         
         // Calculate elapsed time (total race duration - time remaining)
         const totalRaceDuration = this.strategy.strategyState.raceDurationSeconds || 0;
         const elapsedTime = totalRaceDuration - sessionTimeRemain;
+        
+        console.log(`⏱️ Planned Lap Calc: totalRaceDuration=${totalRaceDuration}s, sessionTimeRemain=${sessionTimeRemain}s, elapsedTime=${elapsedTime}s, avgLapTime=${plannedAvgLapTime}s`);
         
         // Calculate what lap we should be on based on elapsed time and planned lap time
         const plannedLap = Math.floor(elapsedTime / plannedAvgLapTime);
@@ -1003,6 +1036,22 @@ class LiveStrategyTracker {
         const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
         
         return totalLaps > 0 ? totalFuel / totalLaps : plannedFuelPerLap;
+    }
+    
+    /**
+     * Get running average lap time from stint history
+     * Returns 0 if no history
+     */
+    getRunningAvgLapTime() {
+        if (this.stintHistory.length === 0) {
+            return 0;
+        }
+        
+        // Calculate actual average from stint history
+        const totalLapTime = this.stintHistory.reduce((sum, s) => sum + s.totalLapTime, 0);
+        const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
+        
+        return totalLaps > 0 ? totalLapTime / totalLaps : 0;
     }
     
     /**
