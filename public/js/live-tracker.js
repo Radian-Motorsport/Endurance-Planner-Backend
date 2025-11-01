@@ -634,36 +634,36 @@ class LiveStrategyTracker {
             this.elements.totalStints.textContent = this.strategy.stints.length;
             
             // Calculate lap time delta (running avg vs planned avg)
-            // Get planned lap time
-            const avgLapTimeMinutes = parseInt(this.strategy.formData.avgLapTimeMinutes || 0);
-            const avgLapTimeSeconds = parseInt(this.strategy.formData.avgLapTimeSeconds || 0);
-            const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
-            
-            // Get running average lap time from stint history
-            const runningAvgLapTime = this.getRunningAvgLapTime();
-            
-            // Delta is the difference in seconds (positive = slower than planned, negative = faster than planned)
-            const lapTimeDelta = runningAvgLapTime - plannedAvgLapTime;
-            
-            console.log(`📊 Lap Delta Debug: plannedAvgLapTime=${plannedAvgLapTime}s, runningAvgLapTime=${runningAvgLapTime.toFixed(2)}s, delta=${lapTimeDelta.toFixed(2)}s`);
-            
-            // Display as +/- seconds, or show "--" if no data yet
-            if (runningAvgLapTime > 0) {
-                this.elements.lapDelta.textContent = lapTimeDelta > 0 ? `+${lapTimeDelta.toFixed(1)}s` : `${lapTimeDelta.toFixed(1)}s`;
-            } else {
-                this.elements.lapDelta.textContent = '--';
-            }
-            
-            this.elements.lapDelta.classList.remove('delta-positive', 'delta-negative', 'delta-neutral');
-            if (lapTimeDelta > 0.5) {
-                // More than 0.5s slower than planned = negative (red)
-                this.elements.lapDelta.classList.add('delta-negative');
-            } else if (lapTimeDelta < -0.5) {
-                // More than 0.5s faster than planned = positive (green)
-                this.elements.lapDelta.classList.add('delta-positive');
-            } else {
-                // Within 0.5s = neutral (gray)
-                this.elements.lapDelta.classList.add('delta-neutral');
+            if (this.elements.lapDelta) {
+                try {
+                    const avgLapTimeMinutes = parseInt(this.strategy.formData.avgLapTimeMinutes || 0);
+                    const avgLapTimeSeconds = parseInt(this.strategy.formData.avgLapTimeSeconds || 0);
+                    const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+                    
+                    const runningAvgLapTime = this.getRunningAvgLapTime();
+                    const lapTimeDelta = runningAvgLapTime - plannedAvgLapTime;
+                    
+                    if (runningAvgLapTime > 0) {
+                        this.elements.lapDelta.textContent = lapTimeDelta > 0 ? `+${lapTimeDelta.toFixed(1)}s` : `${lapTimeDelta.toFixed(1)}s`;
+                        this.elements.lapDelta.classList.remove('delta-positive', 'delta-negative', 'delta-neutral');
+                        if (lapTimeDelta > 0.5) {
+                            this.elements.lapDelta.classList.add('delta-negative');
+                        } else if (lapTimeDelta < -0.5) {
+                            this.elements.lapDelta.classList.add('delta-positive');
+                        } else {
+                            this.elements.lapDelta.classList.add('delta-neutral');
+                        }
+                    } else {
+                        this.elements.lapDelta.textContent = '--';
+                        this.elements.lapDelta.classList.remove('delta-positive', 'delta-negative', 'delta-neutral');
+                        this.elements.lapDelta.classList.add('delta-neutral');
+                    }
+                } catch (e) {
+                    console.error('Error updating lap delta:', e);
+                    if (this.elements.lapDelta) {
+                        this.elements.lapDelta.textContent = '--';
+                    }
+                }
             }
             
             // Next pit stop
@@ -1043,15 +1043,22 @@ class LiveStrategyTracker {
      * Returns 0 if no history
      */
     getRunningAvgLapTime() {
-        if (this.stintHistory.length === 0) {
+        if (!this.stintHistory || this.stintHistory.length === 0) {
             return 0;
         }
         
-        // Calculate actual average from stint history
-        const totalLapTime = this.stintHistory.reduce((sum, s) => sum + s.totalLapTime, 0);
-        const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
-        
-        return totalLaps > 0 ? totalLapTime / totalLaps : 0;
+        try {
+            // Calculate actual average from stint history
+            const totalLapTime = this.stintHistory.reduce((sum, s) => sum + (s.totalLapTime || 0), 0);
+            const totalLaps = this.stintHistory.reduce((sum, s) => sum + (s.lapCount || 0), 0);
+            
+            console.log(`🏁 Running avg lap time calc: totalLapTime=${totalLapTime}s, totalLaps=${totalLaps}, avg=${(totalLapTime / totalLaps).toFixed(2)}s`);
+            
+            return totalLaps > 0 ? totalLapTime / totalLaps : 0;
+        } catch (error) {
+            console.error('❌ Error in getRunningAvgLapTime:', error, this.stintHistory);
+            return 0;
+        }
     }
     
     /**
