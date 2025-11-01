@@ -1190,6 +1190,10 @@ class LiveStrategyTracker {
     }
     
     formatLapTime(seconds) {
+        // Handle invalid values
+        if (!seconds || seconds < 0 || isNaN(seconds)) {
+            return '--:--';
+        }
         const minutes = Math.floor(seconds / 60);
         const secs = (seconds % 60).toFixed(3);
         return `${minutes}:${String(secs).padStart(6, '0')}`;
