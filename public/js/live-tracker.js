@@ -607,11 +607,16 @@ class LiveStrategyTracker {
         // Last lap time
         this.elements.lastLapTime.textContent = this.lastLapTime ? this.formatLapTime(this.lastLapTime) : '--:--';
         
-        // Pit stop time - use actual pit stop time from stint history average
+        // Pit stop time - only update if NOT currently in pit (let live timer show)
         const pitStopEl = document.getElementById('pit-stop-time');
-        if (pitStopEl) {
-            const avgPitTime = this.getAveragePitStopTime();
-            pitStopEl.textContent = `${avgPitTime.toFixed(1)}s`;
+        if (pitStopEl && !this.pitTimerInterval) {
+            // Not in pits - show average or default
+            if (this.stintHistory.length > 0) {
+                const avgPitTime = this.getAveragePitStopTime();
+                pitStopEl.textContent = `${avgPitTime.toFixed(1)}s`;
+            } else {
+                pitStopEl.textContent = '--';
+            }
         }
         
         // Latest lap fuel per lap
@@ -684,50 +689,58 @@ class LiveStrategyTracker {
         // Find current stint based on current lap
         const currentStint = this.findCurrentStint(this.currentLap);
         
+        // Always update stint number from table lookup (or fallback to counter)
+        if (this.elements.currentStintNumber) {
+            if (currentStint) {
+                this.elements.currentStintNumber.textContent = currentStint.stintNumber;
+                this.elements.totalStints.textContent = this.strategy.stints.length;
+            } else {
+                this.elements.currentStintNumber.textContent = this.currentStintNumber || '--';
+                this.elements.totalStints.textContent = this.strategy.stints.length;
+            }
+        }
+        
+        // Always calculate lap time delta if we have data
+        if (this.elements.lapDelta && this.strategy.formData) {
+            const avgLapTimeMinutes = parseInt(this.strategy.formData.avgLapTimeMinutes || 0);
+            const avgLapTimeSeconds = parseInt(this.strategy.formData.avgLapTimeSeconds || 0);
+            const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+            
+            const runningAvgLapTime = this.getRunningAvgLapTime();
+            
+            if (plannedAvgLapTime > 0 && runningAvgLapTime > 0) {
+                const lapTimeDelta = runningAvgLapTime - plannedAvgLapTime;
+                this.elements.lapDelta.textContent = lapTimeDelta > 0 ? `+${lapTimeDelta.toFixed(1)}s` : `${lapTimeDelta.toFixed(1)}s`;
+                this.elements.lapDelta.classList.remove('delta-positive', 'delta-negative', 'delta-neutral');
+                if (lapTimeDelta > 0.5) {
+                    this.elements.lapDelta.classList.add('delta-negative');
+                } else if (lapTimeDelta < -0.5) {
+                    this.elements.lapDelta.classList.add('delta-positive');
+                } else {
+                    this.elements.lapDelta.classList.add('delta-neutral');
+                }
+            } else {
+                this.elements.lapDelta.textContent = '--';
+                this.elements.lapDelta.classList.remove('delta-positive', 'delta-negative', 'delta-neutral');
+                this.elements.lapDelta.classList.add('delta-neutral');
+            }
+        }
+        
+        // Always calculate next pit stop based on fuel
+        if (this.elements.nextPitLap) {
+            const avgFuelThisStint = this.getAverageFuelPerLap(this.currentStintFuelUse);
+            const fuelPerLap = avgFuelThisStint > 0 ? avgFuelThisStint : this.getRunningAvgFuelPerLap();
+            
+            if (this.fuelLevel > 0 && fuelPerLap > 0) {
+                const lapsRemaining = this.fuelLevel / fuelPerLap;
+                this.elements.nextPitLap.textContent = lapsRemaining.toFixed(1);
+            } else {
+                this.elements.nextPitLap.textContent = '--';
+            }
+        }
+        
         if (currentStint) {
             this.currentStint = currentStint;
-            
-            // Update stint number
-            this.elements.currentStintNumber.textContent = currentStint.stintNumber;
-            this.elements.totalStints.textContent = this.strategy.stints.length;
-            
-            // Calculate lap time delta (running avg vs planned avg)
-            if (this.elements.lapDelta) {
-                try {
-                    const avgLapTimeMinutes = parseInt(this.strategy.formData.avgLapTimeMinutes || 0);
-                    const avgLapTimeSeconds = parseInt(this.strategy.formData.avgLapTimeSeconds || 0);
-                    const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
-                    
-                    const runningAvgLapTime = this.getRunningAvgLapTime();
-                    
-                    // Show delta if we have valid planned and running times
-                    if (plannedAvgLapTime > 0 && runningAvgLapTime > 0) {
-                        const lapTimeDelta = runningAvgLapTime - plannedAvgLapTime;
-                        this.elements.lapDelta.textContent = lapTimeDelta > 0 ? `+${lapTimeDelta.toFixed(1)}s` : `${lapTimeDelta.toFixed(1)}s`;
-                        this.elements.lapDelta.classList.remove('delta-positive', 'delta-negative', 'delta-neutral');
-                        if (lapTimeDelta > 0.5) {
-                            this.elements.lapDelta.classList.add('delta-negative');
-                        } else if (lapTimeDelta < -0.5) {
-                            this.elements.lapDelta.classList.add('delta-positive');
-                        } else {
-                            this.elements.lapDelta.classList.add('delta-neutral');
-                        }
-                    } else {
-                        this.elements.lapDelta.textContent = '--';
-                        this.elements.lapDelta.classList.remove('delta-positive', 'delta-negative', 'delta-neutral');
-                        this.elements.lapDelta.classList.add('delta-neutral');
-                    }
-                } catch (e) {
-                    console.error('Error updating lap delta:', e);
-                    if (this.elements.lapDelta) {
-                        this.elements.lapDelta.textContent = '--';
-                    }
-                }
-            }
-            
-            // Next pit stop - 1 decimal
-            const lapsToNextPit = currentStint.endLap - this.currentLap;
-            this.elements.nextPitLap.textContent = lapsToNextPit > 0 ? lapsToNextPit.toFixed(1) : '--';
         }
         
         // Update stint table rows
@@ -1376,6 +1389,12 @@ class LiveStrategyTracker {
         const tankSizeEl = document.getElementById('setup-tank-size');
         if (tankSizeEl && formData.tankCapacity) {
             tankSizeEl.textContent = `${parseFloat(formData.tankCapacity).toFixed(1)} L`;
+        }
+        
+        // Pit Stop Time (baseline from planner)
+        const pitTimeEl = document.getElementById('setup-pit-time');
+        if (pitTimeEl && state.pitStopTime) {
+            pitTimeEl.textContent = `${parseFloat(state.pitStopTime).toFixed(1)}s`;
         }
         
         console.log('📊 Setup data displayed from strategy');
