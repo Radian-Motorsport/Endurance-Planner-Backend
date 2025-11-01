@@ -20,6 +20,7 @@ class LiveStrategyTracker {
         this.pitStopDuration = 0;  // Pit stop time in seconds
         this.pitStopStartTime = null;  // When pit road was entered
         this.actualPitStopTime = 0;  // Actual measured pit stop duration
+        this.pitTimerInterval = null;  // Interval for live pit timer display
         
         // Fuel per lap calculation - track lap boundaries
         this.lastProcessedLap = -1;
@@ -320,6 +321,37 @@ class LiveStrategyTracker {
         this.updateSessionTimeDisplay();
         console.log(`⏱️ Manual timer reset to: ${this.formatTime(this.manualTimeRemaining)}`);
     }
+    
+    startPitTimer() {
+        // Clear any existing timer
+        if (this.pitTimerInterval) {
+            clearInterval(this.pitTimerInterval);
+        }
+        
+        const pitStopEl = document.getElementById('pit-stop-time');
+        if (!pitStopEl) return;
+        
+        // Update display every 100ms for smooth counting
+        this.pitTimerInterval = setInterval(() => {
+            if (this.pitStopStartTime) {
+                const elapsed = (Date.now() - this.pitStopStartTime) / 1000;
+                pitStopEl.textContent = `${elapsed.toFixed(1)}s`;
+                pitStopEl.classList.add('text-yellow-400'); // Highlight during pit
+            }
+        }, 100);
+    }
+    
+    stopPitTimer() {
+        if (this.pitTimerInterval) {
+            clearInterval(this.pitTimerInterval);
+            this.pitTimerInterval = null;
+        }
+        
+        const pitStopEl = document.getElementById('pit-stop-time');
+        if (pitStopEl) {
+            pitStopEl.classList.remove('text-yellow-400');
+        }
+    }
 
     handleSessionInfo(sessionData) {
         this.sessionInfo = sessionData;
@@ -386,6 +418,9 @@ class LiveStrategyTracker {
         if (this.wasOnPitRoad === false && isOnPitRoad === true) {
             this.pitStopStartTime = Date.now();
             console.log('🛠️  Pit stop started');
+            
+            // Start live pit timer
+            this.startPitTimer();
         }
         
         // When exiting pit road (driver just exited pits - NEW STINT STARTED)
@@ -395,6 +430,9 @@ class LiveStrategyTracker {
                 this.actualPitStopTime = Math.round((Date.now() - this.pitStopStartTime) / 1000);
                 this.pitStopDuration = this.actualPitStopTime;
                 console.log(`🛠️  Pit stop ended - Duration: ${this.actualPitStopTime}s`);
+                
+                // Stop live pit timer
+                this.stopPitTimer();
                 
                 // Update the pit row with actual time
                 this.updatePitRowWithActualTime();
@@ -552,15 +590,15 @@ class LiveStrategyTracker {
         const calculatedStintLap = this.stintStartLap !== undefined ? Math.max(0, this.currentLap - this.stintStartLap) : this.currentStintLap;
         this.elements.stintLap.textContent = calculatedStintLap > 0 ? calculatedStintLap : '--';
         
-        // Fuel
-        this.elements.fuelRemaining.textContent = this.fuelLevel ? `${this.fuelLevel.toFixed(1)} L` : '-- L';
+        // Fuel - 2 decimals
+        this.elements.fuelRemaining.textContent = this.fuelLevel ? `${this.fuelLevel.toFixed(2)} L` : '-- L';
         
-        // Laps remaining (calculated from fuel remaining / running avg fuel per lap)
+        // Laps remaining (calculated from fuel remaining / running avg fuel per lap) - 1 decimal
         if (this.elements.lapsRemaining) {
             const runningAvgFuel = this.getRunningAvgFuelPerLap();
             if (this.fuelLevel && runningAvgFuel > 0) {
-                const lapsRemaining = Math.floor(this.fuelLevel / runningAvgFuel);
-                this.elements.lapsRemaining.textContent = lapsRemaining;
+                const lapsRemaining = this.fuelLevel / runningAvgFuel;
+                this.elements.lapsRemaining.textContent = lapsRemaining.toFixed(1);
             } else {
                 this.elements.lapsRemaining.textContent = '--';
             }
@@ -569,10 +607,11 @@ class LiveStrategyTracker {
         // Last lap time
         this.elements.lastLapTime.textContent = this.lastLapTime ? this.formatLapTime(this.lastLapTime) : '--:--';
         
-        // Pit stop time
+        // Pit stop time - use actual pit stop time from stint history average
         const pitStopEl = document.getElementById('pit-stop-time');
-        if (pitStopEl && this.pitStopDuration) {
-            pitStopEl.textContent = `${this.pitStopDuration}s`;
+        if (pitStopEl) {
+            const avgPitTime = this.getAveragePitStopTime();
+            pitStopEl.textContent = `${avgPitTime.toFixed(1)}s`;
         }
         
         // Latest lap fuel per lap
@@ -585,6 +624,9 @@ class LiveStrategyTracker {
         // Average fuel for current stint
         const avgFuel = this.getAverageFuelPerLap(this.currentStintFuelUse);
         this.elements.avgFuelPerLap.textContent = avgFuel > 0 ? `${avgFuel.toFixed(2)} L` : '-- L';
+        
+        // Update strategy status running averages live
+        this.updateStrategyStatusAverages();
         
         // Update stint data displays
         this.updateStintDataDisplay();
@@ -657,9 +699,10 @@ class LiveStrategyTracker {
                     const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
                     
                     const runningAvgLapTime = this.getRunningAvgLapTime();
-                    const lapTimeDelta = runningAvgLapTime - plannedAvgLapTime;
                     
-                    if (runningAvgLapTime > 0) {
+                    // Show delta if we have valid planned and running times
+                    if (plannedAvgLapTime > 0 && runningAvgLapTime > 0) {
+                        const lapTimeDelta = runningAvgLapTime - plannedAvgLapTime;
                         this.elements.lapDelta.textContent = lapTimeDelta > 0 ? `+${lapTimeDelta.toFixed(1)}s` : `${lapTimeDelta.toFixed(1)}s`;
                         this.elements.lapDelta.classList.remove('delta-positive', 'delta-negative', 'delta-neutral');
                         if (lapTimeDelta > 0.5) {
@@ -682,13 +725,43 @@ class LiveStrategyTracker {
                 }
             }
             
-            // Next pit stop
+            // Next pit stop - 1 decimal
             const lapsToNextPit = currentStint.endLap - this.currentLap;
-            this.elements.nextPitLap.textContent = lapsToNextPit > 0 ? lapsToNextPit : '--';
+            this.elements.nextPitLap.textContent = lapsToNextPit > 0 ? lapsToNextPit.toFixed(1) : '--';
         }
         
         // Update stint table rows
         this.updateStintTableStatus();
+    }
+    
+    /**
+     * Update strategy status running averages (called live with telemetry)
+     */
+    updateStrategyStatusAverages() {
+        if (!this.strategy || !this.strategy.formData) return;
+        
+        const avgLapTimeMinutes = parseInt(this.strategy.formData.avgLapTimeMinutes || 0);
+        const avgLapTimeSeconds = parseInt(this.strategy.formData.avgLapTimeSeconds || 0);
+        const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+        const plannedFuelPerLap = parseFloat(this.strategy.formData.fuelPerLap) || 1.0;
+        
+        // Get running averages (falls back to planned if no history)
+        const actualAvgLapTime = this.getRunningAvgLapTime();
+        const actualAvgFuelPerLap = this.getRunningAvgFuelPerLap();
+        const avgPitStopTime = this.getAveragePitStopTime();
+        
+        // Update displays
+        if (this.elements.runningAvgLapTime && actualAvgLapTime > 0) {
+            const minutes = Math.floor(actualAvgLapTime / 60);
+            const seconds = (actualAvgLapTime % 60).toFixed(3);
+            this.elements.runningAvgLapTime.textContent = `${minutes}:${seconds.padStart(6, '0')}`;
+        }
+        if (this.elements.runningAvgFuel) {
+            this.elements.runningAvgFuel.textContent = `${actualAvgFuelPerLap.toFixed(2)} L`;
+        }
+        if (this.elements.runningAvgPitTime) {
+            this.elements.runningAvgPitTime.textContent = `${avgPitStopTime.toFixed(1)} s`;
+        }
     }
     
     findCurrentStint(currentLap) {
@@ -1002,8 +1075,8 @@ class LiveStrategyTracker {
     }
     
     /**
-     * Get average pit stop time with 10% variance filter
-     * Ignores outliers (accidents/repairs) that exceed baseline by 10%
+     * Get average pit stop time with outlier filter
+     * Ignores extreme outliers (accidents/repairs) that are > 3x the minimum
      */
     getAveragePitStopTime() {
         if (!this.strategy || !this.strategy.strategyState) {
@@ -1017,21 +1090,25 @@ class LiveStrategyTracker {
             return baseline;
         }
         
-        const threshold = baseline * 0.1; // 10% variance
+        const pitTimes = this.stintHistory.map(s => s.pitStopTime).filter(t => t > 0);
         
-        // Filter pit times within threshold of baseline
-        const validPitTimes = this.stintHistory
-            .map(s => s.pitStopTime)
-            .filter(time => Math.abs(time - baseline) <= threshold);
+        if (pitTimes.length === 0) {
+            return baseline;
+        }
+        
+        // Find minimum pit time as reference
+        const minPitTime = Math.min(...pitTimes);
+        
+        // Filter out extreme outliers (3x minimum = likely accident/repair)
+        const validPitTimes = pitTimes.filter(time => time <= minPitTime * 3);
         
         if (validPitTimes.length === 0) {
-            // No valid samples, return baseline
-            console.log(`⚠️ No pit stops within threshold, using baseline: ${baseline}s`);
+            console.log(`⚠️ No valid pit stops, using baseline: ${baseline}s`);
             return baseline;
         }
         
         const avg = validPitTimes.reduce((a, b) => a + b, 0) / validPitTimes.length;
-        console.log(`📊 Pit stop average: ${avg.toFixed(1)}s (baseline: ${baseline}s, valid samples: ${validPitTimes.length}/${this.stintHistory.length})`);
+        console.log(`📊 Pit stop average: ${avg.toFixed(1)}s (min: ${minPitTime}s, valid samples: ${validPitTimes.length}/${pitTimes.length})`);
         return avg;
     }
     
@@ -1102,16 +1179,8 @@ class LiveStrategyTracker {
             return;
         }
         
-        // If in manual mode, update manualTimeRemaining from input fields
-        if (this.timeMode === 'manual') {
-            const hours = parseInt(this.elements.manualHours?.value || '0');
-            const minutes = parseInt(this.elements.manualMinutes?.value || '0');
-            const seconds = parseInt(this.elements.manualSeconds?.value || '0');
-            this.manualTimeRemaining = (hours * 3600) + (minutes * 60) + seconds;
-            console.log(`⏱️ Updated manual time from inputs: ${this.formatTime(this.manualTimeRemaining)}`);
-            // Force display update
-            this.updateLiveStats();
-        }
+        // Don't reset manual timer - it should only be controlled by user buttons
+        // Manual mode uses this.manualTimeRemaining which is managed separately
         
         // Start with planned values as baseline
         const formData = this.strategy.formData || {};
