@@ -293,8 +293,8 @@ class LiveStrategyTracker {
         this.manualTimerInterval = setInterval(() => {
             if (this.manualTimeRemaining > 0) {
                 this.manualTimeRemaining--;
-                // Force telemetry update to refresh display
-                this.handleTelemetryUpdate({ values: {} });
+                // Only update the session time display, telemetry continues streaming normally
+                this.updateSessionTimeDisplay();
             } else {
                 this.stopManualTimer();
                 console.log('⏱️ Manual timer finished');
@@ -316,8 +316,8 @@ class LiveStrategyTracker {
         const minutes = parseInt(this.elements.manualMinutes?.value || '0');
         const seconds = parseInt(this.elements.manualSeconds?.value || '0');
         this.manualTimeRemaining = (hours * 3600) + (minutes * 60) + seconds;
-        // Force display update to show reset value
-        this.handleTelemetryUpdate({ values: {} });
+        // Only update the session time display
+        this.updateSessionTimeDisplay();
         console.log(`⏱️ Manual timer reset to: ${this.formatTime(this.manualTimeRemaining)}`);
     }
 
@@ -526,6 +526,11 @@ class LiveStrategyTracker {
         }
     }
     
+    updateSessionTimeDisplay() {
+        // Only update the session time display (used by manual timer)
+        this.elements.sessionTime.textContent = this.formatTime(this.sessionTimeRemain);
+    }
+    
     updateLiveStats() {
         // Session time - just display remaining time directly
         this.elements.sessionTime.textContent = this.formatTime(this.sessionTimeRemain);
@@ -533,8 +538,13 @@ class LiveStrategyTracker {
         // Total laps in session
         this.elements.totalLaps.textContent = this.currentLap || '--';
         
-        // Current stint number
-        this.elements.stintNumber.textContent = this.currentStintNumber || '--';
+        // Current stint number - match the active stint in the table
+        const currentStintFromTable = this.findCurrentStint(this.currentLap);
+        if (currentStintFromTable) {
+            this.elements.stintNumber.textContent = currentStintFromTable.stintNumber;
+        } else {
+            this.elements.stintNumber.textContent = this.currentStintNumber || '--';
+        }
         
         // Stint laps completed
         // Calculate from the difference between current lap and stint start lap
@@ -840,6 +850,9 @@ class LiveStrategyTracker {
             console.log(`⏱️ Race duration initialized: ${this.formatTime(this.sessionTimeRemain)}`);
         }
         
+        // Display setup data from strategy
+        this.displaySetupData();
+        
         // Use pre-calculated stints from planner (already in strategy.stints)
         if (strategy.stints && Array.isArray(strategy.stints) && strategy.stints.length > 0) {
             console.log('✅ Using pre-calculated stints from planner - CALLING populateStintTable()');
@@ -1027,18 +1040,16 @@ class LiveStrategyTracker {
      * Returns planned value if no history, otherwise actual average
      */
     getRunningAvgFuelPerLap() {
-        if (!this.strategy || !this.strategy.formData) {
-            return 1.0; // Default fallback
-        }
+        // Start with planned baseline from strategy
+        const plannedFuelPerLap = this.strategy?.formData?.fuelPerLap ? parseFloat(this.strategy.formData.fuelPerLap) : 1.0;
         
-        const plannedFuelPerLap = parseFloat(this.strategy.formData.fuelPerLap) || 1.0;
-        
-        if (this.stintHistory.length === 0) {
+        // If no stint history, return planned value
+        if (!this.stintHistory || this.stintHistory.length === 0) {
             return plannedFuelPerLap;
         }
         
-        // Calculate actual average from stint history
-        const totalFuel = this.stintHistory.reduce((sum, s) => sum + s.fuelUse.reduce((a, b) => a + b, 0), 0);
+        // Calculate actual average using avgFuelPerLap from each stint in history
+        const totalFuel = this.stintHistory.reduce((sum, s) => sum + (s.avgFuelPerLap * s.lapCount), 0);
         const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
         
         return totalLaps > 0 ? totalFuel / totalLaps : plannedFuelPerLap;
@@ -1046,24 +1057,38 @@ class LiveStrategyTracker {
     
     /**
      * Get running average lap time from stint history
-     * Returns 0 if no history
+     * Uses avgLapTime from each stint, weighted by lap count
+     * Falls back to planned value if no history
      */
     getRunningAvgLapTime() {
-        if (!this.stintHistory || this.stintHistory.length === 0) {
+        // Start with planned baseline from strategy
+        if (!this.strategy || !this.strategy.formData) {
             return 0;
         }
         
+        const avgLapTimeMinutes = parseInt(this.strategy.formData.avgLapTimeMinutes || 0);
+        const avgLapTimeSeconds = parseInt(this.strategy.formData.avgLapTimeSeconds || 0);
+        const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+        
+        // If no stint history, return planned value
+        if (!this.stintHistory || this.stintHistory.length === 0) {
+            return plannedAvgLapTime;
+        }
+        
         try {
-            // Calculate actual average from stint history
-            const totalLapTime = this.stintHistory.reduce((sum, s) => sum + (s.totalLapTime || 0), 0);
-            const totalLaps = this.stintHistory.reduce((sum, s) => sum + (s.lapCount || 0), 0);
+            // Calculate actual average using avgLapTime from each stint in history
+            // Weight each stint's average by its lap count
+            const totalWeightedTime = this.stintHistory.reduce((sum, s) => sum + (s.avgLapTime * s.lapCount), 0);
+            const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
             
-            console.log(`🏁 Running avg lap time calc: totalLapTime=${totalLapTime}s, totalLaps=${totalLaps}, avg=${(totalLapTime / totalLaps).toFixed(2)}s`);
+            const runningAvg = totalLaps > 0 ? totalWeightedTime / totalLaps : plannedAvgLapTime;
             
-            return totalLaps > 0 ? totalLapTime / totalLaps : 0;
+            console.log(`🏁 Running avg lap time: ${runningAvg.toFixed(2)}s (${totalLaps} laps across ${this.stintHistory.length} stints)`);
+            
+            return runningAvg;
         } catch (error) {
             console.error('❌ Error in getRunningAvgLapTime:', error, this.stintHistory);
-            return 0;
+            return plannedAvgLapTime;
         }
     }
     
@@ -1098,14 +1123,10 @@ class LiveStrategyTracker {
         let dataSource = 'PLANNED';
         
         // Override with actual data if stint history exists
+        // Use the running average functions which properly weight by stint averages
         if (this.stintHistory.length > 0) {
-            const totalLapTime = this.stintHistory.reduce((sum, s) => sum + s.totalLapTime, 0);
-            const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
-            actualAvgLapTime = totalLaps > 0 ? totalLapTime / totalLaps : actualAvgLapTime;
-            
-            const totalFuel = this.stintHistory.reduce((sum, s) => sum + s.fuelUse.reduce((a, b) => a + b, 0), 0);
-            actualAvgFuelPerLap = totalLaps > 0 ? totalFuel / totalLaps : actualAvgFuelPerLap;
-            
+            actualAvgLapTime = this.getRunningAvgLapTime();
+            actualAvgFuelPerLap = this.getRunningAvgFuelPerLap();
             avgPitStopTime = this.getAveragePitStopTime();
             dataSource = 'ACTUAL';
         }
@@ -1248,6 +1269,47 @@ class LiveStrategyTracker {
         const hours = date.getHours();
         const minutes = date.getMinutes();
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    }
+    
+    /**
+     * Display setup data from strategy in the session container
+     */
+    displaySetupData() {
+        if (!this.strategy) return;
+        
+        const state = this.strategy.strategyState;
+        const formData = this.strategy.formData;
+        
+        if (!state || !formData) return;
+        
+        // Session Time
+        const sessionTimeEl = document.getElementById('setup-session-time');
+        if (sessionTimeEl && state.raceDurationSeconds) {
+            sessionTimeEl.textContent = this.formatTime(state.raceDurationSeconds);
+        }
+        
+        // Avg Lap Time
+        const avgLapTimeEl = document.getElementById('setup-avg-lap-time');
+        if (avgLapTimeEl) {
+            const avgLapTimeMinutes = parseInt(formData.avgLapTimeMinutes) || 0;
+            const avgLapTimeSeconds = parseInt(formData.avgLapTimeSeconds) || 0;
+            const avgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+            avgLapTimeEl.textContent = avgLapTime > 0 ? this.formatLapTime(avgLapTime) : '--';
+        }
+        
+        // Avg Fuel Use
+        const avgFuelEl = document.getElementById('setup-avg-fuel-use');
+        if (avgFuelEl && formData.fuelPerLap) {
+            avgFuelEl.textContent = `${parseFloat(formData.fuelPerLap).toFixed(2)} L`;
+        }
+        
+        // Tank Size
+        const tankSizeEl = document.getElementById('setup-tank-size');
+        if (tankSizeEl && formData.tankCapacity) {
+            tankSizeEl.textContent = `${parseFloat(formData.tankCapacity).toFixed(1)} L`;
+        }
+        
+        console.log('📊 Setup data displayed from strategy');
     }
     
     /**
