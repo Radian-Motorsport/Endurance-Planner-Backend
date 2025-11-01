@@ -446,7 +446,7 @@ class LiveStrategyTracker {
         // Update UI
         this.updateLiveStats();
         
-        // Update strategy comparison if strategy is loaded
+        // Update strategy comparison (works for both auto and manual modes)
         if (this.strategy) {
             this.updateStrategyComparison();
         }
@@ -1069,6 +1069,17 @@ class LiveStrategyTracker {
         if (!this.strategy || !this.strategy.stints) {
             console.warn('⚠️ No strategy loaded');
             return;
+        }
+        
+        // If in manual mode, update manualTimeRemaining from input fields
+        if (this.timeMode === 'manual') {
+            const hours = parseInt(this.elements.manualHours?.value || '0');
+            const minutes = parseInt(this.elements.manualMinutes?.value || '0');
+            const seconds = parseInt(this.elements.manualSeconds?.value || '0');
+            this.manualTimeRemaining = (hours * 3600) + (minutes * 60) + seconds;
+            console.log(`⏱️ Updated manual time from inputs: ${this.formatTime(this.manualTimeRemaining)}`);
+            // Force display update
+            this.updateLiveStats();
         }
         
         // Start with planned values as baseline
