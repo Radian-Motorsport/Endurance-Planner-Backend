@@ -466,12 +466,18 @@ class LiveStrategyTracker {
     }
     
     finishCurrentStint() {
-        if (this.currentStintLap > 0) {
+        // Only save stint if we completed at least one lap AND have valid lap times
+        if (this.currentStintLap > 0 && this.currentStintLapTimes.length > 0) {
             // Calculate total stint time (lap times + pit stop time if applicable)
             const totalLapTime = this.currentStintLapTimes.reduce((a, b) => a + b, 0);
             const totalStintTime = totalLapTime + this.actualPitStopTime;
             
-            // Only save if we completed at least one lap in the stint
+            // Only save if we actually have valid lap time data
+            if (totalLapTime === 0) {
+                console.log(`⏭️ Skipping stint #${this.currentStintNumber} - no valid lap times recorded`);
+                return;
+            }
+            
             const stintData = {
                 stintNumber: this.currentStintNumber,
                 lapCount: this.currentStintLap,
@@ -1251,8 +1257,19 @@ class LiveStrategyTracker {
      */
     getAverageLapTime(lapTimes) {
         if (!lapTimes || lapTimes.length === 0) return 0;
-        const sum = lapTimes.reduce((a, b) => a + b, 0);
-        return sum / lapTimes.length;
+        
+        // Filter out invalid lap times (0, null, undefined, NaN, negative)
+        const validLapTimes = lapTimes.filter(time => 
+            time != null && 
+            !isNaN(time) && 
+            time > 0 && 
+            isFinite(time)
+        );
+        
+        if (validLapTimes.length === 0) return 0;
+        
+        const sum = validLapTimes.reduce((a, b) => a + b, 0);
+        return sum / validLapTimes.length;
     }
     
     /**
@@ -1262,8 +1279,19 @@ class LiveStrategyTracker {
      */
     getAverageFuelPerLap(fuelUse) {
         if (!fuelUse || fuelUse.length === 0) return 0;
-        const sum = fuelUse.reduce((a, b) => a + b, 0);
-        return sum / fuelUse.length;
+        
+        // Filter out invalid fuel values (0, null, undefined, NaN, negative)
+        const validFuelUse = fuelUse.filter(fuel => 
+            fuel != null && 
+            !isNaN(fuel) && 
+            fuel > 0 && 
+            isFinite(fuel)
+        );
+        
+        if (validFuelUse.length === 0) return 0;
+        
+        const sum = validFuelUse.reduce((a, b) => a + b, 0);
+        return sum / validFuelUse.length;
     }
 }
 
