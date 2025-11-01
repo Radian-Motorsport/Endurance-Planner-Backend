@@ -1236,15 +1236,15 @@ class RadianPlannerApp {
             saveUpdateBtn.addEventListener('click', () => this.updateShareLink());
         }
         
-        // Live tracker button
+        // Live tracker button - open in new tab to preserve live data
         const liveTrackerBtn = document.getElementById('live-tracker-btn');
         if (liveTrackerBtn) {
             liveTrackerBtn.addEventListener('click', () => {
                 const strategyId = sessionStorage.getItem('currentStrategyId');
                 if (strategyId) {
-                    window.location.href = `live-tracker.html?strategy=${strategyId}`;
+                    window.open(`live-tracker.html?strategy=${strategyId}`, '_blank');
                 } else {
-                    window.location.href = 'live-tracker.html';
+                    window.open('live-tracker.html', '_blank');
                 }
             });
         }

@@ -149,16 +149,6 @@ class LiveStrategyTracker {
             this.elements.loadModal.classList.add('hidden');
         });
         
-        // Back to planner button
-        document.getElementById('back-to-planner-btn')?.addEventListener('click', () => {
-            const strategyId = this.currentStrategyId;
-            if (strategyId) {
-                window.location.href = `/?strategy=${strategyId}`;
-            } else {
-                window.location.href = '/';
-            }
-        });
-        
         // Time mode toggle
         this.elements.timeAutoBtn?.addEventListener('click', () => this.setTimeMode('auto'));
         this.elements.timeManualBtn?.addEventListener('click', () => this.setTimeMode('manual'));
@@ -726,13 +716,12 @@ class LiveStrategyTracker {
             }
         }
         
-        // Always calculate next pit stop based on fuel
+        // Always calculate next pit stop based on fuel (use running average, not stint average)
         if (this.elements.nextPitLap) {
-            const avgFuelThisStint = this.getAverageFuelPerLap(this.currentStintFuelUse);
-            const fuelPerLap = avgFuelThisStint > 0 ? avgFuelThisStint : this.getRunningAvgFuelPerLap();
+            const runningAvgFuel = this.getRunningAvgFuelPerLap();
             
-            if (this.fuelLevel > 0 && fuelPerLap > 0) {
-                const lapsRemaining = this.fuelLevel / fuelPerLap;
+            if (this.fuelLevel > 0 && runningAvgFuel > 0) {
+                const lapsRemaining = this.fuelLevel / runningAvgFuel;
                 this.elements.nextPitLap.textContent = lapsRemaining.toFixed(1);
             } else {
                 this.elements.nextPitLap.textContent = '--';
@@ -1127,20 +1116,30 @@ class LiveStrategyTracker {
     
     /**
      * Get running average fuel per lap from stint history
+     * Includes current stint data for live updates
      * Returns planned value if no history, otherwise actual average
      */
     getRunningAvgFuelPerLap() {
         // Start with planned baseline from strategy
         const plannedFuelPerLap = this.strategy?.formData?.fuelPerLap ? parseFloat(this.strategy.formData.fuelPerLap) : 1.0;
         
-        // If no stint history, return planned value
-        if (!this.stintHistory || this.stintHistory.length === 0) {
-            return plannedFuelPerLap;
+        let totalFuel = 0;
+        let totalLaps = 0;
+        
+        // Include completed stints from history
+        if (this.stintHistory && this.stintHistory.length > 0) {
+            totalFuel = this.stintHistory.reduce((sum, s) => sum + (s.avgFuelPerLap * s.lapCount), 0);
+            totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
         }
         
-        // Calculate actual average using avgFuelPerLap from each stint in history
-        const totalFuel = this.stintHistory.reduce((sum, s) => sum + (s.avgFuelPerLap * s.lapCount), 0);
-        const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
+        // Include current stint fuel use for live updates
+        if (this.currentStintFuelUse && this.currentStintFuelUse.length > 0) {
+            const currentStintAvgFuel = this.getAverageFuelPerLap(this.currentStintFuelUse);
+            if (currentStintAvgFuel > 0) {
+                totalFuel += currentStintAvgFuel * this.currentStintFuelUse.length;
+                totalLaps += this.currentStintFuelUse.length;
+            }
+        }
         
         return totalLaps > 0 ? totalFuel / totalLaps : plannedFuelPerLap;
     }
@@ -1148,6 +1147,7 @@ class LiveStrategyTracker {
     /**
      * Get running average lap time from stint history
      * Uses avgLapTime from each stint, weighted by lap count
+     * Includes current stint data for live updates
      * Falls back to planned value if no history
      */
     getRunningAvgLapTime() {
@@ -1160,20 +1160,27 @@ class LiveStrategyTracker {
         const avgLapTimeSeconds = parseInt(this.strategy.formData.avgLapTimeSeconds || 0);
         const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
         
-        // If no stint history, return planned value
-        if (!this.stintHistory || this.stintHistory.length === 0) {
-            return plannedAvgLapTime;
-        }
-        
         try {
-            // Calculate actual average using avgLapTime from each stint in history
-            // Weight each stint's average by its lap count
-            const totalWeightedTime = this.stintHistory.reduce((sum, s) => sum + (s.avgLapTime * s.lapCount), 0);
-            const totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
+            let totalWeightedTime = 0;
+            let totalLaps = 0;
             
+            // Include completed stints from history
+            if (this.stintHistory && this.stintHistory.length > 0) {
+                totalWeightedTime = this.stintHistory.reduce((sum, s) => sum + (s.avgLapTime * s.lapCount), 0);
+                totalLaps = this.stintHistory.reduce((sum, s) => sum + s.lapCount, 0);
+            }
+            
+            // Include current stint lap times for live updates
+            if (this.currentStintLapTimes && this.currentStintLapTimes.length > 0) {
+                const currentStintAvg = this.getAverageLapTime(this.currentStintLapTimes);
+                if (currentStintAvg > 0) {
+                    totalWeightedTime += currentStintAvg * this.currentStintLapTimes.length;
+                    totalLaps += this.currentStintLapTimes.length;
+                }
+            }
+            
+            // If we have data, return weighted average, otherwise return planned
             const runningAvg = totalLaps > 0 ? totalWeightedTime / totalLaps : plannedAvgLapTime;
-            
-            console.log(`🏁 Running avg lap time: ${runningAvg.toFixed(2)}s (${totalLaps} laps across ${this.stintHistory.length} stints)`);
             
             return runningAvg;
         } catch (error) {
