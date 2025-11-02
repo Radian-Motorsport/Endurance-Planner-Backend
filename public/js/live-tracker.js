@@ -1214,6 +1214,13 @@ class LiveStrategyTracker {
         console.log('📥 Strategy stints present?', strategy.stints ? 'YES' : 'NO');
         this.strategy = strategy;
         
+        // Update URL to reflect currently loaded strategy
+        if (this.currentStrategyId) {
+            const newUrl = `${window.location.pathname}?strategy=${this.currentStrategyId}`;
+            window.history.replaceState({ strategyId: this.currentStrategyId }, '', newUrl);
+            console.log('🔗 URL updated:', newUrl);
+        }
+        
         // Initialize sessionTimeRemain with full race duration from strategy
         if (strategy.strategyState && strategy.strategyState.raceDurationSeconds) {
             this.sessionTimeRemain = strategy.strategyState.raceDurationSeconds;
