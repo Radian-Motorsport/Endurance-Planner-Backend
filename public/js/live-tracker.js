@@ -1,6 +1,116 @@
 // Live Strategy Tracker - Connects to RadianApp telemetry and displays race progress vs plan
 // Loads strategies the exact same way the planner does and calculates stint tables
 
+/**
+ * PedalTrace - A visualization component for racing pedal inputs
+ */
+class PedalTrace {
+    constructor(socket, canvasId, options = {}) {
+        this.socket = socket;
+        this.canvas = document.getElementById(canvasId);
+        if (!this.canvas) {
+            console.warn('PedalTrace: Canvas element not found');
+            return;
+        }
+        this.ctx = this.canvas.getContext('2d');
+        
+        // Configuration with defaults
+        this.options = {
+            maxPoints: options.maxPoints || 300,
+            throttleColor: options.throttleColor || '#10b981',  // Green
+            brakeColor: options.brakeColor || '#ef4444',        // Red
+            gearColor: options.gearColor || '#3b82f6',          // Blue
+            maxGear: options.maxGear || 8,
+            ...options
+        };
+        
+        // Data buffer
+        this.buffer = [];
+        
+        // Set up telemetry listener
+        this.setupListeners();
+        
+        // Start animation
+        this.startAnimation();
+    }
+    
+    setupListeners() {
+        this.socket.on('telemetry', (data) => {
+            const values = data?.values;
+            if (!values) return;
+            
+            const throttleVal = values.Throttle ?? values.ThrottleRaw ?? 0;
+            
+            this.buffer.push({
+                throttle: (values.ThrottleRaw ?? 0) * 100,
+                brake: (values.Brake ?? 0) * 100,
+                gear: ((values.Gear ?? 0) / this.options.maxGear) * 100,
+                coasting: (values.Brake ?? 0) < 0.02 && throttleVal < 0.02,
+                overlap: throttleVal > 0.20 && (values.Brake ?? 0) > 0.05
+            });
+            
+            if (this.buffer.length > this.options.maxPoints) {
+                this.buffer.shift();
+            }
+        });
+    }
+    
+    startAnimation() {
+        requestAnimationFrame(this.draw.bind(this));
+    }
+    
+    draw() {
+        if (!this.ctx) return;
+        
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Throttle line
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = this.options.throttleColor;
+        this.ctx.lineWidth = 2;
+        this.buffer.forEach((point, i) => {
+            const x = i * (this.canvas.width / this.options.maxPoints);
+            const y = this.canvas.height - point.throttle * (this.canvas.height / 100);
+            i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
+        });
+        this.ctx.stroke();
+        
+        // Brake line
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = this.options.brakeColor;
+        this.ctx.lineWidth = 2;
+        this.buffer.forEach((point, i) => {
+            const x = i * (this.canvas.width / this.options.maxPoints);
+            const y = this.canvas.height - point.brake * (this.canvas.height / 100);
+            i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
+        });
+        this.ctx.stroke();
+        
+        // Gear line
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = this.options.gearColor;
+        this.ctx.lineWidth = 1;
+        this.buffer.forEach((point, i) => {
+            const x = i * (this.canvas.width / this.options.maxPoints);
+            const y = this.canvas.height - point.gear * (this.canvas.height / 100);
+            i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
+        });
+        this.ctx.stroke();
+        
+        // Status indicators
+        const latestData = this.buffer[this.buffer.length - 1];
+        if (latestData) {
+            this.ctx.font = '12px Inter, sans-serif';
+            this.ctx.fillStyle = latestData.coasting ? '#fb923c' : '#6b7280';
+            this.ctx.fillText('COASTING', 10, 15);
+            this.ctx.fillStyle = latestData.overlap ? '#14b8a6' : '#6b7280';
+            this.ctx.fillText('OVERLAP', 10, 30);
+        }
+        
+        requestAnimationFrame(this.draw.bind(this));
+    }
+}
+
 class LiveStrategyTracker {
     constructor() {
         this.socket = null;
@@ -115,6 +225,17 @@ class LiveStrategyTracker {
         this.elements.manualStopBtn = document.getElementById('manual-stop-btn');
         this.elements.manualResetBtn = document.getElementById('manual-reset-btn');
         this.elements.manualRecalcBtn = document.getElementById('manual-recalc-btn');
+        
+        // Driver inputs elements
+        this.elements.inputThrottle = document.getElementById('input-throttle');
+        this.elements.inputBrake = document.getElementById('input-brake');
+        this.elements.inputClutch = document.getElementById('input-clutch');
+        this.elements.inputGear = document.getElementById('input-gear');
+        this.elements.inputRPM = document.getElementById('input-rpm');
+        this.elements.inputSpeed = document.getElementById('input-speed');
+        this.elements.inputSteering = document.getElementById('input-steering');
+        this.elements.inputCoasting = document.getElementById('input-coasting');
+        this.elements.inputOverlap = document.getElementById('input-overlap');
     }
     
     setupEventListeners() {
@@ -149,6 +270,21 @@ class LiveStrategyTracker {
             this.elements.loadModal.classList.add('hidden');
         });
         
+        // Pedal trace toggle
+        const togglePedalBtn = document.getElementById('toggle-pedal-inputs');
+        const pedalInputsDetails = document.getElementById('driver-inputs-details');
+        if (togglePedalBtn && pedalInputsDetails) {
+            togglePedalBtn.addEventListener('click', () => {
+                if (pedalInputsDetails.classList.contains('hidden')) {
+                    pedalInputsDetails.classList.remove('hidden');
+                    togglePedalBtn.textContent = 'Hide Inputs ▲';
+                } else {
+                    pedalInputsDetails.classList.add('hidden');
+                    togglePedalBtn.textContent = 'Show Inputs ▼';
+                }
+            });
+        }
+        
         // Time mode toggle
         this.elements.timeAutoBtn?.addEventListener('click', () => this.setTimeMode('auto'));
         this.elements.timeManualBtn?.addEventListener('click', () => this.setTimeMode('manual'));
@@ -170,6 +306,9 @@ class LiveStrategyTracker {
             console.log('✅ Connected to telemetry server');
             this.isConnected = true;
             this.updateConnectionStatus(true);
+            
+            // Initialize pedal trace visualization
+            this.initializePedalTrace();
         });
         
         this.socket.on('disconnect', () => {
@@ -187,6 +326,7 @@ class LiveStrategyTracker {
         this.socket.on('telemetry', (data) => {
             this.lastTelemetryTime = Date.now();  // Track last telemetry received
             this.handleTelemetryUpdate(data);
+            this.updateDriverInputs(data);  // Update driver inputs display
         });
         
         // Listen for driver info
@@ -210,6 +350,61 @@ class LiveStrategyTracker {
                 console.log('✅ Live tracker strategy refreshed');
             }
         });
+    }
+    
+    initializePedalTrace() {
+        if (!this.pedalTrace && this.socket) {
+            try {
+                this.pedalTrace = new PedalTrace(this.socket, 'pedal-canvas', {
+                    maxPoints: 300,
+                    maxGear: 8
+                });
+                console.log('✅ Pedal trace initialized');
+            } catch (error) {
+                console.error('❌ Failed to initialize pedal trace:', error);
+            }
+        }
+    }
+    
+    updateDriverInputs(data) {
+        const values = data?.values;
+        if (!values) return;
+        
+        // Update inputs with formatting
+        if (this.elements.inputThrottle) {
+            this.elements.inputThrottle.textContent = `${((values.ThrottleRaw ?? 0) * 100).toFixed(0)}%`;
+        }
+        if (this.elements.inputBrake) {
+            this.elements.inputBrake.textContent = `${((values.Brake ?? 0) * 100).toFixed(0)}%`;
+        }
+        if (this.elements.inputClutch) {
+            this.elements.inputClutch.textContent = `${((values.Clutch ?? 0) * 100).toFixed(0)}%`;
+        }
+        if (this.elements.inputGear) {
+            this.elements.inputGear.textContent = values.Gear ?? '--';
+        }
+        if (this.elements.inputRPM) {
+            this.elements.inputRPM.textContent = values.RPM ? `${Math.round(values.RPM)}` : '--';
+        }
+        if (this.elements.inputSpeed) {
+            this.elements.inputSpeed.textContent = values.Speed ? `${Math.round(values.Speed * 3.6)} km/h` : '--';
+        }
+        if (this.elements.inputSteering) {
+            const steering = (values.SteeringWheelAngle ?? 0) * (180 / Math.PI);
+            this.elements.inputSteering.textContent = `${steering.toFixed(0)}°`;
+        }
+        
+        // Calculate and display coasting/overlap status
+        const throttleVal = values.Throttle ?? values.ThrottleRaw ?? 0;
+        const isCoasting = (values.Brake ?? 0) < 0.02 && throttleVal < 0.02;
+        const isOverlap = throttleVal > 0.20 && (values.Brake ?? 0) > 0.05;
+        
+        if (this.elements.inputCoasting) {
+            this.elements.inputCoasting.textContent = isCoasting ? 'YES' : 'NO';
+        }
+        if (this.elements.inputOverlap) {
+            this.elements.inputOverlap.textContent = isOverlap ? 'YES' : 'NO';
+        }
     }
     
     updateConnectionStatus(connected) {
