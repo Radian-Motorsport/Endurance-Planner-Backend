@@ -488,15 +488,21 @@ class LiveStrategyTracker {
             return;
         }
         
-        const lapDistPct = values.LapDistPct;
-        if (lapDistPct != null && !isNaN(lapDistPct)) {
-            this.carPositionTracker.updatePosition(lapDistPct * 100);  // Convert 0-1 to 0-100
-            
-            // Change color when in pits
-            if (values.IsOnPitRoad) {
-                this.carPositionTracker.setCarColor('#f97316');  // Orange in pits
-            } else {
-                this.carPositionTracker.setCarColor('#06b6d4');  // Cyan on track
+        // Get player car index and lap distance percentage from telemetry
+        const playerCarIdx = values.PlayerCarIdx;
+        const carIdxLapDistPct = values.CarIdxLapDistPct;
+        
+        if (playerCarIdx != null && carIdxLapDistPct && carIdxLapDistPct[playerCarIdx] != null) {
+            const lapDistPct = carIdxLapDistPct[playerCarIdx];
+            if (!isNaN(lapDistPct)) {
+                this.carPositionTracker.updatePosition(lapDistPct * 100);  // Convert 0-1 to 0-100
+                
+                // Change color when in pits
+                if (values.OnPitRoad) {
+                    this.carPositionTracker.setCarColor('#f97316');  // Orange in pits
+                } else {
+                    this.carPositionTracker.setCarColor('#06b6d4');  // Cyan on track
+                }
             }
         }
     }

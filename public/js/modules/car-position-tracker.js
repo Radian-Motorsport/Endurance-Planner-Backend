@@ -87,6 +87,11 @@ export class CarPositionTracker {
         this.carMarker.setAttribute('opacity', '0.9');
         this.carMarker.style.transition = 'cx 0.1s linear, cy 0.1s linear';
         
+        // Initialize at start line (0% lap distance)
+        const startPoint = this.trackPath.getPointAtLength(0);
+        this.carMarker.setAttribute('cx', startPoint.x);
+        this.carMarker.setAttribute('cy', startPoint.y);
+        
         // Add pulsing animation
         const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
         animate.setAttribute('attributeName', 'opacity');
@@ -98,7 +103,7 @@ export class CarPositionTracker {
         // Append to SVG (on top of everything)
         this.svg.appendChild(this.carMarker);
         
-        console.log('✅ Car marker created');
+        console.log('✅ Car marker created at start line');
     }
     
     /**
