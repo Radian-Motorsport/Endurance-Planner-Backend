@@ -358,6 +358,27 @@
             </div>
         </div>
         
+        <!-- Track Map with Car Position -->
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl road-rage-font">Track Map</h2>
+                <button id="toggle-track-map" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                    Show Map ▼
+                </button>
+            </div>
+            
+            <!-- Track Map Container (Collapsible) -->
+            <div id="track-map-details" class="hidden">
+                <div id="track-map-container-live">
+                    <!-- Track map SVG will be loaded here by TrackMapComponent -->
+                    <div class="flex items-center justify-center py-8 text-neutral-400">
+                        <i class="fas fa-map-marked-alt text-3xl mr-3"></i>
+                        <span>Track map will load when strategy is loaded</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Stint Table -->
         <div class="bg-neutral-800 rounded-lg p-6">
             <h2 class="text-xl road-rage-font mb-4">Stint Breakdown</h2>
@@ -419,6 +440,16 @@
             </div>
         </div>
     </div>
+    
+    <!-- Track Map Modules -->
+    <script type="module">
+        import { TrackMapComponent } from '/public/js/modules/track-map.js';
+        import { CarPositionTracker } from '/public/js/modules/car-position-tracker.js';
+        
+        // Make available globally for live-tracker.js
+        window.TrackMapComponent = TrackMapComponent;
+        window.CarPositionTracker = CarPositionTracker;
+    </script>
     
     <script src="/public/js/live-tracker.js"></script>
 </body>

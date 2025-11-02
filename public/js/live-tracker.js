@@ -155,6 +155,10 @@ class LiveStrategyTracker {
         this.lastTelemetryTime = null;
         this.telemetryTimeoutCheck = null;
         
+        // Track map and car position tracking
+        this.trackMapComponent = null;
+        this.carPositionTracker = null;
+        
         this.elements = {};
         this.initializeElements();
         this.setupEventListeners();
@@ -285,6 +289,21 @@ class LiveStrategyTracker {
             });
         }
         
+        // Track map toggle
+        const toggleTrackMapBtn = document.getElementById('toggle-track-map');
+        const trackMapDetails = document.getElementById('track-map-details');
+        if (toggleTrackMapBtn && trackMapDetails) {
+            toggleTrackMapBtn.addEventListener('click', () => {
+                if (trackMapDetails.classList.contains('hidden')) {
+                    trackMapDetails.classList.remove('hidden');
+                    toggleTrackMapBtn.textContent = 'Hide Map ▲';
+                } else {
+                    trackMapDetails.classList.add('hidden');
+                    toggleTrackMapBtn.textContent = 'Show Map ▼';
+                }
+            });
+        }
+        
         // Time mode toggle
         this.elements.timeAutoBtn?.addEventListener('click', () => this.setTimeMode('auto'));
         this.elements.timeManualBtn?.addEventListener('click', () => this.setTimeMode('manual'));
@@ -404,6 +423,73 @@ class LiveStrategyTracker {
         }
         if (this.elements.inputOverlap) {
             this.elements.inputOverlap.textContent = isOverlap ? 'YES' : 'NO';
+        }
+        
+        // Update car position on track map
+        this.updateCarPosition(values);
+    }
+    
+    async loadTrackMap(trackId) {
+        if (!window.TrackMapComponent || !window.CarPositionTracker) {
+            console.warn('⚠️ Track map components not loaded');
+            return;
+        }
+        
+        try {
+            console.log('🗺️ Loading track map for track ID:', trackId);
+            
+            // Initialize track map component if not already done
+            if (!this.trackMapComponent) {
+                this.trackMapComponent = new window.TrackMapComponent('track-map-container-live', {
+                    showControls: true,
+                    defaultLayers: ['background', 'active'],
+                    maxHeight: '400px'
+                });
+            }
+            
+            // Load track map from API
+            await this.trackMapComponent.loadTrackFromAPI(trackId);
+            
+            // Initialize car position tracker after map loads
+            if (!this.carPositionTracker) {
+                this.carPositionTracker = new window.CarPositionTracker('track-map-container-live', {
+                    carRadius: 12,
+                    carColor: '#06b6d4',  // Cyan
+                    carStroke: '#0e7490',
+                    carStrokeWidth: 3,
+                    trackLayerName: 'active'
+                });
+                
+                // Wait a bit for SVG to be fully rendered
+                setTimeout(() => {
+                    if (this.carPositionTracker.initialize()) {
+                        console.log('✅ Car position tracker ready');
+                    }
+                }, 500);
+            }
+            
+            console.log('✅ Track map loaded successfully');
+            
+        } catch (error) {
+            console.warn('❌ Failed to load track map:', error);
+        }
+    }
+    
+    updateCarPosition(values) {
+        if (!this.carPositionTracker || !this.carPositionTracker.isInitialized) {
+            return;
+        }
+        
+        const lapDistPct = values.LapDistPct;
+        if (lapDistPct != null && !isNaN(lapDistPct)) {
+            this.carPositionTracker.updatePosition(lapDistPct * 100);  // Convert 0-1 to 0-100
+            
+            // Change color when in pits
+            if (values.IsOnPitRoad) {
+                this.carPositionTracker.setCarColor('#f97316');  // Orange in pits
+            } else {
+                this.carPositionTracker.setCarColor('#06b6d4');  // Cyan on track
+            }
         }
     }
     
@@ -1122,6 +1208,11 @@ class LiveStrategyTracker {
         
         // Display setup data from strategy
         this.displaySetupData();
+        
+        // Load track map if track info is available
+        if (strategy.selectedTrack && strategy.selectedTrack.track_id) {
+            this.loadTrackMap(strategy.selectedTrack.track_id);
+        }
         
         // Use pre-calculated stints from planner (already in strategy.stints)
         if (strategy.stints && Array.isArray(strategy.stints) && strategy.stints.length > 0) {
