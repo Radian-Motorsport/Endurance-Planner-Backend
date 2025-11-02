@@ -442,7 +442,7 @@ class LiveStrategyTracker {
             if (!this.trackMapComponent) {
                 this.trackMapComponent = new window.TrackMapComponent('track-map-container-live', {
                     showControls: true,
-                    defaultLayers: ['background', 'active'],
+                    defaultLayers: ['background', 'active', 'start-finish'],
                     maxHeight: '400px'
                 });
             }
