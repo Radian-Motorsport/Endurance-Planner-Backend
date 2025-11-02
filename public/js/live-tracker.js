@@ -458,23 +458,29 @@ class LiveStrategyTracker {
             // Load track map from API (same as planner)
             await this.trackMapComponent.loadTrackFromAPI(sessionDetails.track_id);
             
-            // Initialize car position tracker after map loads
-            if (!this.carPositionTracker) {
-                this.carPositionTracker = new window.CarPositionTracker('track-map-container-live', {
-                    carRadius: 12,
-                    carColor: '#06b6d4',  // Cyan
-                    carStroke: '#0e7490',
-                    carStrokeWidth: 3,
-                    trackLayerName: 'active'
-                });
-                
-                // Wait a bit for SVG to be fully rendered
-                setTimeout(() => {
-                    if (this.carPositionTracker.initialize()) {
-                        console.log('✅ Car position tracker ready');
-                    }
-                }, 500);
+            // Destroy old car position tracker if it exists
+            if (this.carPositionTracker) {
+                this.carPositionTracker.destroy();
+                this.carPositionTracker = null;
             }
+            
+            // Initialize car position tracker after map loads
+            this.carPositionTracker = new window.CarPositionTracker('track-map-container-live', {
+                carRadius: 12,
+                carColor: '#06b6d4',  // Cyan
+                carStroke: '#0e7490',
+                carStrokeWidth: 3,
+                trackLayerName: 'active'
+            });
+            
+            // Wait a bit for SVG to be fully rendered
+            setTimeout(() => {
+                if (this.carPositionTracker.initialize()) {
+                    console.log('✅ Car position tracker ready');
+                } else {
+                    console.warn('⚠️ Car position tracker failed to initialize');
+                }
+            }, 500);
             
             console.log('✅ Track map loaded successfully');
             
