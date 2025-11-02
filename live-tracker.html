@@ -79,42 +79,45 @@
         <!-- Session Info Display -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <h3 class="text-xl road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Current Session</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Track</div>
-                    <div id="session-track" class="text-lg font-bold text-white truncate">--</div>
+                    <div id="session-track" class="text-xs font-bold text-white truncate">--</div>
                 </div>
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Car</div>
-                    <div id="session-car" class="text-lg font-bold text-white truncate">--</div>
+                    <div id="session-car" class="text-xs font-bold text-white truncate">--</div>
                 </div>
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Event Type</div>
-                    <div id="session-type" class="text-lg font-bold text-white truncate">--</div>
+                    <div id="session-type" class="text-xs font-bold text-white truncate">--</div>
                 </div>
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Series</div>
-                    <div id="session-series" class="text-lg font-bold text-white truncate">--</div>
+                    <div id="session-series" class="text-xs font-bold text-white truncate">--</div>
                 </div>
+            </div>  
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Session Time</div>
-                    <div id="setup-session-time" class="text-lg font-bold text-cyan-400 truncate">--</div>
+                    <div id="setup-session-time" class="text-xs font-bold text-cyan-400 truncate">--</div>
                 </div>
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Avg Lap Time</div>
-                    <div id="setup-avg-lap-time" class="text-lg font-bold text-cyan-400 truncate">--</div>
+                    <div id="setup-avg-lap-time" class="text-xs font-bold text-cyan-400 truncate">--</div>
                 </div>
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Avg Fuel Use</div>
-                    <div id="setup-avg-fuel-use" class="text-lg font-bold text-cyan-400 truncate">--</div>
+                    <div id="setup-avg-fuel-use" class="text-xs font-bold text-cyan-400 truncate">--</div>
                 </div>
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Tank Size</div>
-                    <div id="setup-tank-size" class="text-lg font-bold text-cyan-400 truncate">--</div>
+                    <div id="setup-tank-size" class="text-xs font-bold text-cyan-400 truncate">--</div>
                 </div>
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Pit Stop Time</div>
-                    <div id="setup-pit-time" class="text-lg font-bold text-cyan-400 truncate">--</div>
+                    <div id="setup-pit-time" class="text-xs font-bold text-cyan-400 truncate">--</div>
                 </div>
             </div>
         </div>
@@ -146,7 +149,7 @@
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex items-center space-x-2">
                         <label class="text-xs text-neutral-400">Hours</label>
-                        <input type="number" id="manual-hours" min="0" max="23" value="8" class="w-16 bg-neutral-700 border border-neutral-600 rounded px-2 py-1 text-white text-sm">
+                        <input type="number" id="manual-hours" min="0" max="23" value="0" class="w-16 bg-neutral-700 border border-neutral-600 rounded px-2 py-1 text-white text-sm">
                     </div>
                     <div class="flex items-center space-x-2">
                         <label class="text-xs text-neutral-400">Minutes</label>
@@ -162,13 +165,13 @@
                         ▶ Start
                     </button>
                     <button id="manual-stop-btn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm transition">
-                        ⏸ Stop
+                        ⏹ Stop
                     </button>
                     <button id="manual-reset-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm transition">
                         ⟲ Reset
                     </button>
                     <button id="manual-recalc-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm transition">
-                        🔄 Recalculate
+                        Recalculate
                     </button>
                 </div>
             </div>
@@ -215,12 +218,12 @@
             </div>
             <div class="bg-neutral-800 rounded-lg p-4 text-center">
                 <div class="text-neutral-400 text-xs uppercase mb-2">Avg Lap Time</div>
-                <div id="avg-lap-time" class="text-2xl font-mono text-pink-400">--:--</div>
+                <div id="avg-lap-time" class="text-2xl font-mono text-pink-400 mb-2">--:--</div>
                 <div class="text-neutral-500 text-xs">This Stint</div>
             </div>
             <div class="bg-neutral-800 rounded-lg p-4 text-center">
                 <div class="text-neutral-400 text-xs uppercase mb-2">Avg Fuel/Lap</div>
-                <div id="avg-fuel-per-lap" class="text-2xl font-mono text-emerald-400">-- L</div>
+                <div id="avg-fuel-per-lap" class="text-2xl font-mono text-emerald-400 mb-2">-- L</div>
                 <div class="text-neutral-500 text-xs">This Stint</div>
             </div>
         </div>
