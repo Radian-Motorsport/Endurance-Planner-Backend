@@ -429,14 +429,14 @@ class LiveStrategyTracker {
         this.updateCarPosition(values);
     }
     
-    async loadTrackMap(trackId) {
+    async loadTrackMap(sessionDetails) {
         if (!window.TrackMapComponent || !window.CarPositionTracker) {
             console.warn('⚠️ Track map components not loaded');
             return;
         }
         
         try {
-            console.log('🗺️ Loading track map for track ID:', trackId);
+            console.log('🗺️ Loading track map for:', sessionDetails.track_name);
             
             // Initialize track map component if not already done
             if (!this.trackMapComponent) {
@@ -447,8 +447,16 @@ class LiveStrategyTracker {
                 });
             }
             
-            // Load track map from API
-            await this.trackMapComponent.loadTrackFromAPI(trackId);
+            // Show track map section (unhide the container)
+            const trackMapDetails = document.getElementById('track-map-details');
+            if (trackMapDetails && trackMapDetails.classList.contains('hidden')) {
+                trackMapDetails.classList.remove('hidden');
+                const toggleBtn = document.getElementById('toggle-track-map');
+                if (toggleBtn) toggleBtn.textContent = 'Hide Map ▲';
+            }
+            
+            // Load track map from API (same as planner)
+            await this.trackMapComponent.loadTrackFromAPI(sessionDetails.track_id);
             
             // Initialize car position tracker after map loads
             if (!this.carPositionTracker) {
@@ -1209,9 +1217,12 @@ class LiveStrategyTracker {
         // Display setup data from strategy
         this.displaySetupData();
         
-        // Load track map if track info is available
-        if (strategy.selectedTrack && strategy.selectedTrack.track_id) {
-            this.loadTrackMap(strategy.selectedTrack.track_id);
+        // Load track map if track info is available (pass entire selectedEvent like planner does)
+        if (strategy.selectedEvent) {
+            console.log('🗺️ Loading track map for:', strategy.selectedEvent.track_name);
+            this.loadTrackMap(strategy.selectedEvent);
+        } else {
+            console.warn('⚠️ No selectedEvent found in strategy:', strategy);
         }
         
         // Use pre-calculated stints from planner (already in strategy.stints)
