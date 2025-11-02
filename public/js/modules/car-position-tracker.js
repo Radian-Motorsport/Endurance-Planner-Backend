@@ -82,8 +82,13 @@ export class CarPositionTracker {
      */
     calculateStartFinishOffset() {
         try {
-            // Find the start-finish layer
-            const startFinishLayer = this.svg.querySelector('#layer-start-finish');
+            // Find the start-finish layer or group
+            let startFinishLayer = this.svg.querySelector('#layer-start-finish');
+            
+            if (!startFinishLayer) {
+                // Try alternative ID format
+                startFinishLayer = this.svg.querySelector('#Start_finish_link, [id*="start"], [id*="Start"], [id*="finish"]');
+            }
             
             if (!startFinishLayer) {
                 console.warn('⚠️ Start/finish layer not found, using 0 offset');
@@ -91,13 +96,19 @@ export class CarPositionTracker {
                 return;
             }
             
-            // Look for red line element (path or line)
-            let startFinishElement = startFinishLayer.querySelector('path[style*="ff0000"], path[stroke*="ff0000"], path[stroke*="#ff0000"]');
+            console.log('📍 Found start/finish layer:', startFinishLayer.id);
+            
+            // Look for path elements with dark red stroke (#991b1b or similar red shades)
+            let startFinishElement = startFinishLayer.querySelector('path[stroke="#991b1b"]');
             if (!startFinishElement) {
-                startFinishElement = startFinishLayer.querySelector('line[style*="ff0000"], line[stroke*="ff0000"], line[stroke*="#ff0000"]');
+                startFinishElement = startFinishLayer.querySelector('path[stroke*="991b1b"]');
             }
             if (!startFinishElement) {
-                startFinishElement = startFinishLayer.querySelector('path[style*="red"], line[style*="red"]');
+                // Try other red variations
+                startFinishElement = startFinishLayer.querySelector('path[stroke*="ff0000"], path[stroke*="red"], path.st0');
+            }
+            if (!startFinishElement) {
+                startFinishElement = startFinishLayer.querySelector('line[stroke*="991b1b"], line[stroke*="ff0000"]');
             }
             
             if (!startFinishElement) {
@@ -105,6 +116,8 @@ export class CarPositionTracker {
                 this.startFinishOffset = 0;
                 return;
             }
+            
+            console.log('📍 Found start/finish element:', startFinishElement.tagName, startFinishElement.getAttribute('class'));
             
             // Get midpoint of the start/finish line
             let midpointX, midpointY;
