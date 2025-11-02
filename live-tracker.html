@@ -359,6 +359,7 @@
         </div>
         
         <!-- Track Map with Car Position -->
+        <!-- COMMENTED OUT - Complex project for later
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl road-rage-font">Track Map</h2>
@@ -367,15 +368,25 @@
                 </button>
             </div>
             
-            <!-- Track Map Container (Collapsible) -->
             <div id="track-map-details" class="hidden">
                 <div id="track-map-container-live">
-                    <!-- Track map SVG will be loaded here by TrackMapComponent -->
                     <div class="flex items-center justify-center py-8 text-neutral-400">
                         <i class="fas fa-map-marked-alt text-3xl mr-3"></i>
                         <span>Track map will load when strategy is loaded</span>
                     </div>
                 </div>
+            </div>
+        </div>
+        -->
+        
+        <!-- Lap Progress Bar -->
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+            <h2 class="text-xl road-rage-font mb-4">Lap Progress</h2>
+            <div class="relative w-full h-12 flex items-center">
+                <!-- Progress line -->
+                <div class="absolute w-full h-0.5 bg-white"></div>
+                <!-- Car position dot -->
+                <div id="lap-progress-dot" class="absolute w-4 h-4 bg-cyan-400 rounded-full shadow-lg transition-all duration-100" style="left: 0%; transform: translateX(-50%);"></div>
             </div>
         </div>
         

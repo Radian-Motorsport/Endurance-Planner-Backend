@@ -448,6 +448,7 @@ class LiveStrategyTracker {
             }
             
             // Show track map section (unhide the container)
+            /* COMMENTED OUT - Track map loading (for later)
             const trackMapDetails = document.getElementById('track-map-details');
             if (trackMapDetails && trackMapDetails.classList.contains('hidden')) {
                 trackMapDetails.classList.remove('hidden');
@@ -481,6 +482,7 @@ class LiveStrategyTracker {
                     console.warn('⚠️ Car position tracker failed to initialize');
                 }
             }, 500);
+            */
             
             console.log('✅ Track map loaded successfully');
             
@@ -490,34 +492,53 @@ class LiveStrategyTracker {
     }
     
     updateCarPosition(values) {
+        // Update simple lap progress bar
+        const lapProgressDot = document.getElementById('lap-progress-dot');
+        
+        if (lapProgressDot) {
+            const playerCarIdx = values.PlayerCarIdx;
+            const carIdxLapDistPct = values.CarIdxLapDistPct;
+            
+            if (playerCarIdx != null && carIdxLapDistPct && carIdxLapDistPct[playerCarIdx] != null) {
+                const lapDistPct = carIdxLapDistPct[playerCarIdx];
+                if (!isNaN(lapDistPct)) {
+                    // Convert 0-1 to 0-100 percentage
+                    const percentage = lapDistPct * 100;
+                    lapProgressDot.style.left = `${percentage}%`;
+                    
+                    // Change color when in pits
+                    if (values.OnPitRoad) {
+                        lapProgressDot.classList.remove('bg-cyan-400');
+                        lapProgressDot.classList.add('bg-orange-400');
+                    } else {
+                        lapProgressDot.classList.remove('bg-orange-400');
+                        lapProgressDot.classList.add('bg-cyan-400');
+                    }
+                }
+            }
+        }
+        
+        /* COMMENTED OUT - Track map car position (for later)
         if (!this.carPositionTracker || !this.carPositionTracker.isInitialized) {
             return;
         }
         
-        // Get player car index and lap distance percentage from telemetry
         const playerCarIdx = values.PlayerCarIdx;
         const carIdxLapDistPct = values.CarIdxLapDistPct;
-        
-        // Debug logging
-        if (playerCarIdx != null && carIdxLapDistPct) {
-            console.log('🚗 PlayerCarIdx:', playerCarIdx);
-            console.log('🚗 CarIdxLapDistPct array:', carIdxLapDistPct);
-            console.log('🚗 Player car LapDistPct:', carIdxLapDistPct[playerCarIdx]);
-        }
         
         if (playerCarIdx != null && carIdxLapDistPct && carIdxLapDistPct[playerCarIdx] != null) {
             const lapDistPct = carIdxLapDistPct[playerCarIdx];
             if (!isNaN(lapDistPct)) {
-                this.carPositionTracker.updatePosition(lapDistPct * 100);  // Convert 0-1 to 0-100
+                this.carPositionTracker.updatePosition(lapDistPct * 100);
                 
-                // Change color when in pits
                 if (values.OnPitRoad) {
-                    this.carPositionTracker.setCarColor('#f97316');  // Orange in pits
+                    this.carPositionTracker.setCarColor('#f97316');
                 } else {
-                    this.carPositionTracker.setCarColor('#06b6d4');  // Cyan on track
+                    this.carPositionTracker.setCarColor('#06b6d4');
                 }
             }
         }
+        */
     }
     
     updateConnectionStatus(connected) {
