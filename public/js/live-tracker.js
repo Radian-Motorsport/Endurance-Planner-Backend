@@ -1369,6 +1369,27 @@ class LiveStrategyTracker {
         const state = this.strategy.strategyState;
         const formData = this.strategy.formData;
         
+        // Display session metadata (track, car, event type, series)
+        const trackEl = document.getElementById('session-track');
+        if (trackEl && this.strategy.selectedTrack) {
+            trackEl.textContent = this.strategy.selectedTrack.trackName || '--';
+        }
+        
+        const carEl = document.getElementById('session-car');
+        if (carEl && this.strategy.selectedCar) {
+            carEl.textContent = this.strategy.selectedCar.carName || '--';
+        }
+        
+        const typeEl = document.getElementById('session-type');
+        if (typeEl && this.strategy.selectedEvent) {
+            typeEl.textContent = this.strategy.selectedEvent.sessionType || '--';
+        }
+        
+        const seriesEl = document.getElementById('session-series');
+        if (seriesEl && this.strategy.selectedSeries) {
+            seriesEl.textContent = this.strategy.selectedSeries.seriesName || '--';
+        }
+        
         if (!state || !formData) return;
         
         // Session Time
