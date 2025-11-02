@@ -498,6 +498,13 @@ class LiveStrategyTracker {
         const playerCarIdx = values.PlayerCarIdx;
         const carIdxLapDistPct = values.CarIdxLapDistPct;
         
+        // Debug logging
+        if (playerCarIdx != null && carIdxLapDistPct) {
+            console.log('🚗 PlayerCarIdx:', playerCarIdx);
+            console.log('🚗 CarIdxLapDistPct array:', carIdxLapDistPct);
+            console.log('🚗 Player car LapDistPct:', carIdxLapDistPct[playerCarIdx]);
+        }
+        
         if (playerCarIdx != null && carIdxLapDistPct && carIdxLapDistPct[playerCarIdx] != null) {
             const lapDistPct = carIdxLapDistPct[playerCarIdx];
             if (!isNaN(lapDistPct)) {
