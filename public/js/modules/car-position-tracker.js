@@ -22,6 +22,7 @@ export class CarPositionTracker {
         this.carMarker = null;
         this.isInitialized = false;
         this.lastLapPct = null;
+        this.startFinishOffset = 0;  // Distance along path where start/finish line is located
     }
     
     /**
@@ -58,6 +59,9 @@ export class CarPositionTracker {
             this.totalLength = this.trackPath.getTotalLength();
             console.log(`📏 Track path total length: ${this.totalLength.toFixed(2)} units`);
             
+            // Find start/finish line offset
+            this.calculateStartFinishOffset();
+            
             // Create car marker
             this.createCarMarker();
             
@@ -70,6 +74,101 @@ export class CarPositionTracker {
             console.error('❌ Failed to initialize car position tracker:', error);
             this.isInitialized = false;
             return false;
+        }
+    }
+    
+    /**
+     * Calculate the offset distance along the track path where the start/finish line is located
+     */
+    calculateStartFinishOffset() {
+        try {
+            // Find the start-finish layer
+            const startFinishLayer = this.svg.querySelector('#layer-start-finish');
+            
+            if (!startFinishLayer) {
+                console.warn('⚠️ Start/finish layer not found, using 0 offset');
+                this.startFinishOffset = 0;
+                return;
+            }
+            
+            // Look for red line element (path or line)
+            let startFinishElement = startFinishLayer.querySelector('path[style*="ff0000"], path[stroke*="ff0000"], path[stroke*="#ff0000"]');
+            if (!startFinishElement) {
+                startFinishElement = startFinishLayer.querySelector('line[style*="ff0000"], line[stroke*="ff0000"], line[stroke*="#ff0000"]');
+            }
+            if (!startFinishElement) {
+                startFinishElement = startFinishLayer.querySelector('path[style*="red"], line[style*="red"]');
+            }
+            
+            if (!startFinishElement) {
+                console.warn('⚠️ Start/finish line element not found, using 0 offset');
+                this.startFinishOffset = 0;
+                return;
+            }
+            
+            // Get midpoint of the start/finish line
+            let midpointX, midpointY;
+            
+            if (startFinishElement.tagName === 'line') {
+                const x1 = parseFloat(startFinishElement.getAttribute('x1')) || 0;
+                const y1 = parseFloat(startFinishElement.getAttribute('y1')) || 0;
+                const x2 = parseFloat(startFinishElement.getAttribute('x2')) || 0;
+                const y2 = parseFloat(startFinishElement.getAttribute('y2')) || 0;
+                midpointX = (x1 + x2) / 2;
+                midpointY = (y1 + y2) / 2;
+            } else if (startFinishElement.tagName === 'path') {
+                // For path, get the point at 50% of its length
+                const lineLength = startFinishElement.getTotalLength();
+                const midpoint = startFinishElement.getPointAtLength(lineLength / 2);
+                midpointX = midpoint.x;
+                midpointY = midpoint.y;
+            } else {
+                console.warn('⚠️ Unknown start/finish element type, using 0 offset');
+                this.startFinishOffset = 0;
+                return;
+            }
+            
+            console.log(`🎯 Start/finish line midpoint: (${midpointX.toFixed(2)}, ${midpointY.toFixed(2)})`);
+            
+            // Find the closest point on the track path to this midpoint
+            let closestDistance = Infinity;
+            let closestPathDistance = 0;
+            const sampleRate = 10; // Check every 10 units along the path
+            
+            for (let dist = 0; dist <= this.totalLength; dist += sampleRate) {
+                const point = this.trackPath.getPointAtLength(dist);
+                const dx = point.x - midpointX;
+                const dy = point.y - midpointY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestPathDistance = dist;
+                }
+            }
+            
+            // Refine the search around the closest point (fine-tune with 0.5 unit precision)
+            const searchRange = sampleRate;
+            for (let dist = Math.max(0, closestPathDistance - searchRange); 
+                 dist <= Math.min(this.totalLength, closestPathDistance + searchRange); 
+                 dist += 0.5) {
+                const point = this.trackPath.getPointAtLength(dist);
+                const dx = point.x - midpointX;
+                const dy = point.y - midpointY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestPathDistance = dist;
+                }
+            }
+            
+            this.startFinishOffset = closestPathDistance;
+            console.log(`✅ Start/finish offset calculated: ${this.startFinishOffset.toFixed(2)} units (${((this.startFinishOffset / this.totalLength) * 100).toFixed(1)}% of track)`);
+            
+        } catch (error) {
+            console.error('❌ Error calculating start/finish offset:', error);
+            this.startFinishOffset = 0;
         }
     }
     
@@ -87,8 +186,8 @@ export class CarPositionTracker {
         this.carMarker.setAttribute('opacity', '0.9');
         this.carMarker.style.transition = 'cx 0.1s linear, cy 0.1s linear';
         
-        // Initialize at start line (0% lap distance)
-        const startPoint = this.trackPath.getPointAtLength(0);
+        // Initialize at start/finish line (applying offset)
+        const startPoint = this.trackPath.getPointAtLength(this.startFinishOffset);
         this.carMarker.setAttribute('cx', startPoint.x);
         this.carMarker.setAttribute('cy', startPoint.y);
         
@@ -121,11 +220,15 @@ export class CarPositionTracker {
         }
         
         try {
-            // Calculate distance along the path
-            const distance = (lapDistancePercentage / 100) * this.totalLength;
+            // Calculate distance along the path (applying start/finish offset)
+            // LapDistPct from telemetry: 0% = start/finish, 100% = back at start/finish
+            const adjustedDistance = (lapDistancePercentage / 100) * this.totalLength + this.startFinishOffset;
+            
+            // Wrap around if we exceed total length
+            const wrappedDistance = adjustedDistance % this.totalLength;
             
             // Get the point at that distance
-            const point = this.trackPath.getPointAtLength(distance);
+            const point = this.trackPath.getPointAtLength(wrappedDistance);
             
             // Update car marker position
             this.carMarker.setAttribute('cx', point.x);
