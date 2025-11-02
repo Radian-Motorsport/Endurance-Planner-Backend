@@ -1240,7 +1240,23 @@ class RadianPlannerApp {
         const liveTrackerBtn = document.getElementById('live-tracker-btn');
         if (liveTrackerBtn) {
             liveTrackerBtn.addEventListener('click', () => {
-                const strategyId = sessionStorage.getItem('currentStrategyId');
+                // Get strategy ID from share link output box (most current)
+                const shareLinkOutput = document.getElementById('share-link-output');
+                let strategyId = null;
+                
+                if (shareLinkOutput && shareLinkOutput.value) {
+                    // Extract strategy ID from the share link URL
+                    const urlMatch = shareLinkOutput.value.match(/strategy=([a-f0-9-]+)/i);
+                    if (urlMatch) {
+                        strategyId = urlMatch[1];
+                    }
+                }
+                
+                // Fallback to sessionStorage if share link not available
+                if (!strategyId) {
+                    strategyId = sessionStorage.getItem('currentStrategyId');
+                }
+                
                 if (strategyId) {
                     window.open(`live-tracker.html?strategy=${strategyId}`, '_blank');
                 } else {

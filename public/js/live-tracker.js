@@ -1196,11 +1196,14 @@ class LiveStrategyTracker {
                 console.log('📊 FULL STRATEGY OBJECT:', strategy);
                 console.log('📊 Has stints?', 'stints' in strategy);
                 console.log('📊 stints value:', strategy.stints);
-                this.loadStrategy(strategy);
                 
-                // Store strategy ID in sessionStorage for persistence
+                // Store strategy ID BEFORE calling loadStrategy so URL update works
                 this.currentStrategyId = strategyId;
                 sessionStorage.setItem('currentStrategyId', strategyId);
+                
+                // Now load the strategy (this will update the URL)
+                this.loadStrategy(strategy);
+                
                 this.updateStrategyHeader();
                 
                 // Close modal
