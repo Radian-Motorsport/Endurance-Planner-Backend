@@ -20,9 +20,9 @@ export class CarPositionTracker {
         
         // Dynamic class color palette - vibrant, distinct colors for multiclass racing
         this.classColorPalette = [
-            '#10b981', // Green
-            '#f59e0b', // Amber
-            '#8b5cf6', // Purple
+            '#01a871ff', // Green
+            '#e0fd05ea', // Amber
+            '#6c30f8ff', // Purple
             '#ec4899', // Pink
             '#3b82f6', // Blue
             '#ef4444', // Red
@@ -31,7 +31,7 @@ export class CarPositionTracker {
             '#06b6d4', // Cyan (alternate)
             '#a855f7', // Violet
             '#84cc16', // Lime
-            '#f43f5e', // Rose
+            '#f43f5e', // Rose2
         ];
         
         this.svg = null;
