@@ -390,6 +390,26 @@ app.get('/api/track-assets/:trackId', async (req, res) => {
             return res.status(404).json({ error: 'Track assets not found' });
         }
         
+        // Fetch racing line data from tracks table
+        let racingLine = null;
+        try {
+            const racingLineResult = await pool.query(`
+                SELECT racing_line 
+                FROM tracks 
+                WHERE track_id = $1
+            `, [trackId]);
+            
+            if (racingLineResult.rows.length > 0 && racingLineResult.rows[0].racing_line) {
+                racingLine = racingLineResult.rows[0].racing_line;
+                console.log('✅ Racing line data found for track ID:', trackId, 
+                    `(${racingLine.point_count || racingLine.points?.length || 0} points)`);
+            } else {
+                console.log('⚠️ No racing line data found for track ID:', trackId);
+            }
+        } catch (racingLineErr) {
+            console.warn('⚠️ Error fetching racing line (column may not exist):', racingLineErr.message);
+        }
+        
         // Convert individual SVG columns to track_map_layers format expected by frontend
         const trackAssets = result.rows[0];
         const track_map_layers = {
@@ -410,7 +430,8 @@ app.get('/api/track-assets/:trackId', async (req, res) => {
             inactive_svg: trackAssets.inactive_svg,
             pitroad_svg: trackAssets.pitroad_svg,
             start_finish_svg: trackAssets.start_finish_svg,
-            turns_svg: trackAssets.turns_svg
+            turns_svg: trackAssets.turns_svg,
+            racing_line: racingLine  // Add racing line data
         };
         
         console.log('✅ Track assets found for track ID:', trackId);

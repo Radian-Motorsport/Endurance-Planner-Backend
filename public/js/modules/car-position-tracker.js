@@ -13,6 +13,7 @@ export class CarPositionTracker {
             carStrokeWidth: options.carStrokeWidth || 3,
             trackLayerName: options.trackLayerName || 'active',
             showDebugInfo: options.showDebugInfo || false,
+            useRacingLine: options.useRacingLine || false,  // Use racing line points instead of SVG path
             ...options
         };
         
@@ -23,6 +24,29 @@ export class CarPositionTracker {
         this.isInitialized = false;
         this.lastLapPct = null;
         this.startFinishOffset = 0;  // Distance along path where start/finish line is located
+        
+        // Racing line mode properties
+        this.racingLinePoints = null;  // Array of {x, y} points from database
+        this.racingLineLayer = null;   // SVG polyline element for racing line visualization
+    }
+    
+    /**
+     * Set racing line data from database
+     * @param {Object} racingLineData - Racing line data with points array and start_finish position
+     */
+    setRacingLineData(racingLineData) {
+        if (!racingLineData || !racingLineData.points || racingLineData.points.length === 0) {
+            console.warn('⚠️ Invalid racing line data provided');
+            return false;
+        }
+        
+        this.racingLinePoints = racingLineData.points;
+        this.options.useRacingLine = true;
+        
+        console.log(`✅ Racing line data loaded: ${this.racingLinePoints.length} points`);
+        console.log(`📍 Start/finish position:`, racingLineData.start_finish);
+        
+        return true;
     }
     
     /**
@@ -42,6 +66,24 @@ export class CarPositionTracker {
             if (!this.svg) {
                 throw new Error('SVG element not found in container');
             }
+            
+            // Racing line mode: use points array instead of SVG path
+            if (this.options.useRacingLine && this.racingLinePoints) {
+                console.log('🏁 Initializing car tracker with racing line data');
+                
+                // Create racing line visualization layer (invisible initially)
+                this.createRacingLineLayer();
+                
+                // Create car marker at start position
+                this.createCarMarker();
+                
+                this.isInitialized = true;
+                console.log('✅ Car position tracker initialized (racing line mode)');
+                return true;
+            }
+            
+            // Fallback to SVG path mode
+            console.log('🏁 Initializing car tracker with SVG path (fallback mode)');
             
             // Find the track path (try active layer first, then background as fallback)
             this.trackPath = this.svg.querySelector(`#layer-${this.options.trackLayerName} path`);
@@ -74,6 +116,46 @@ export class CarPositionTracker {
             console.error('❌ Failed to initialize car position tracker:', error);
             this.isInitialized = false;
             return false;
+        }
+    }
+    
+    /**
+     * Create racing line visualization layer (SVG polyline)
+     */
+    createRacingLineLayer() {
+        if (!this.racingLinePoints || this.racingLinePoints.length === 0) {
+            return;
+        }
+        
+        // Convert points array to SVG polyline points string
+        const pointsString = this.racingLinePoints
+            .map(p => `${p.x},${p.y}`)
+            .join(' ');
+        
+        // Create polyline element
+        this.racingLineLayer = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        this.racingLineLayer.setAttribute('id', 'racing-line-overlay');
+        this.racingLineLayer.setAttribute('points', pointsString);
+        this.racingLineLayer.setAttribute('fill', 'none');
+        this.racingLineLayer.setAttribute('stroke', '#10b981');  // Green
+        this.racingLineLayer.setAttribute('stroke-width', '2');
+        this.racingLineLayer.setAttribute('opacity', '0');  // Invisible initially
+        this.racingLineLayer.style.pointerEvents = 'none';
+        
+        // Add to SVG (below car marker layer)
+        this.svg.appendChild(this.racingLineLayer);
+        
+        console.log('✅ Racing line layer created (invisible)');
+    }
+    
+    /**
+     * Toggle racing line visibility for alignment testing
+     * @param {boolean} visible - Show or hide racing line
+     */
+    toggleRacingLineVisibility(visible) {
+        if (this.racingLineLayer) {
+            this.racingLineLayer.setAttribute('opacity', visible ? '0.8' : '0');
+            console.log(`🎨 Racing line ${visible ? 'visible' : 'hidden'}`);
         }
     }
     
@@ -199,8 +281,16 @@ export class CarPositionTracker {
         this.carMarker.setAttribute('opacity', '0.9');
         this.carMarker.style.transition = 'cx 0.1s linear, cy 0.1s linear';
         
-        // Initialize at start/finish line (applying offset)
-        const startPoint = this.trackPath.getPointAtLength(this.startFinishOffset);
+        // Initialize at start/finish line
+        let startPoint;
+        if (this.options.useRacingLine && this.racingLinePoints) {
+            // Racing line mode: start at first point (index 0 = start/finish)
+            startPoint = this.racingLinePoints[0];
+        } else {
+            // SVG path mode: start at offset position
+            startPoint = this.trackPath.getPointAtLength(this.startFinishOffset);
+        }
+        
         this.carMarker.setAttribute('cx', startPoint.x);
         this.carMarker.setAttribute('cy', startPoint.y);
         
@@ -233,15 +323,33 @@ export class CarPositionTracker {
         }
         
         try {
-            // Calculate distance along the path (applying start/finish offset)
-            // LapDistPct from telemetry: 0% = start/finish, 100% = back at start/finish
-            const adjustedDistance = (lapDistancePercentage / 100) * this.totalLength + this.startFinishOffset;
+            let point;
             
-            // Wrap around if we exceed total length
-            const wrappedDistance = adjustedDistance % this.totalLength;
-            
-            // Get the point at that distance
-            const point = this.trackPath.getPointAtLength(wrappedDistance);
+            if (this.options.useRacingLine && this.racingLinePoints) {
+                // Racing line mode: use LapDistPct as direct array index
+                // Convert 0-100% to array index (0 to points.length-1)
+                const normalizedPct = lapDistancePercentage / 100; // 0 to 1
+                const index = Math.floor(normalizedPct * this.racingLinePoints.length);
+                
+                // Wrap around if index exceeds array bounds
+                const wrappedIndex = index % this.racingLinePoints.length;
+                
+                // Get point at this index
+                point = this.racingLinePoints[wrappedIndex];
+                
+                if (this.options.showDebugInfo && Math.random() < 0.01) {
+                    console.log(`🚗 Car position (racing line): ${lapDistancePercentage.toFixed(1)}% → index ${wrappedIndex}/${this.racingLinePoints.length} → (${point.x.toFixed(1)}, ${point.y.toFixed(1)})`);
+                }
+            } else {
+                // SVG path mode (fallback): use path length calculation
+                const adjustedDistance = (lapDistancePercentage / 100) * this.totalLength + this.startFinishOffset;
+                const wrappedDistance = adjustedDistance % this.totalLength;
+                point = this.trackPath.getPointAtLength(wrappedDistance);
+                
+                if (this.options.showDebugInfo && Math.random() < 0.01) {
+                    console.log(`🚗 Car position (SVG path): ${lapDistancePercentage.toFixed(1)}% → (${point.x.toFixed(1)}, ${point.y.toFixed(1)})`);
+                }
+            }
             
             // Update car marker position
             this.carMarker.setAttribute('cx', point.x);
@@ -249,10 +357,6 @@ export class CarPositionTracker {
             
             // Store last position for debugging
             this.lastLapPct = lapDistancePercentage;
-            
-            if (this.options.showDebugInfo && Math.random() < 0.01) {
-                console.log(`🚗 Car position: ${lapDistancePercentage.toFixed(1)}% → (${point.x.toFixed(1)}, ${point.y.toFixed(1)})`);
-            }
             
         } catch (error) {
             console.error('❌ Failed to update car position:', error);
@@ -287,9 +391,15 @@ export class CarPositionTracker {
             this.carMarker.parentNode.removeChild(this.carMarker);
         }
         
+        if (this.racingLineLayer && this.racingLineLayer.parentNode) {
+            this.racingLineLayer.parentNode.removeChild(this.racingLineLayer);
+        }
+        
         this.svg = null;
         this.trackPath = null;
         this.carMarker = null;
+        this.racingLineLayer = null;
+        this.racingLinePoints = null;
         this.isInitialized = false;
         
         console.log('🗑️ Car position tracker destroyed');

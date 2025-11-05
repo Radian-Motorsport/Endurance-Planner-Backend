@@ -448,7 +448,6 @@ class LiveStrategyTracker {
             }
             
             // Show track map section (unhide the container)
-            /* COMMENTED OUT - Track map loading (for later)
             const trackMapDetails = document.getElementById('track-map-details');
             if (trackMapDetails && trackMapDetails.classList.contains('hidden')) {
                 trackMapDetails.classList.remove('hidden');
@@ -457,7 +456,12 @@ class LiveStrategyTracker {
             }
             
             // Load track map from API (same as planner)
-            await this.trackMapComponent.loadTrackFromAPI(sessionDetails.track_id);
+            const trackAssets = await this.loadTrackAssetsWithRacingLine(sessionDetails.track_id);
+            
+            // Load SVG layers
+            if (trackAssets) {
+                await this.trackMapComponent.loadTrackMap(trackAssets);
+            }
             
             // Destroy old car position tracker if it exists
             if (this.carPositionTracker) {
@@ -471,8 +475,17 @@ class LiveStrategyTracker {
                 carColor: '#06b6d4',  // Cyan
                 carStroke: '#0e7490',
                 carStrokeWidth: 3,
-                trackLayerName: 'active'
+                trackLayerName: 'active',
+                useRacingLine: false  // Will be set to true if racing line data available
             });
+            
+            // If racing line data is available, use it
+            if (trackAssets && trackAssets.racing_line) {
+                console.log('🏁 Racing line data available, using racing line mode');
+                this.carPositionTracker.setRacingLineData(trackAssets.racing_line);
+            } else {
+                console.log('⚠️ No racing line data, using SVG path fallback');
+            }
             
             // Wait a bit for SVG to be fully rendered
             setTimeout(() => {
@@ -482,12 +495,45 @@ class LiveStrategyTracker {
                     console.warn('⚠️ Car position tracker failed to initialize');
                 }
             }, 500);
-            */
             
             console.log('✅ Track map loaded successfully');
             
         } catch (error) {
             console.warn('❌ Failed to load track map:', error);
+        }
+    }
+    
+    /**
+     * Load track assets including racing line data from API
+     */
+    async loadTrackAssetsWithRacingLine(trackId) {
+        try {
+            const response = await fetch(`/api/track-assets/${trackId}`);
+            
+            if (response.status === 404) {
+                throw new Error('Track assets not available for this track');
+            }
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch track assets: ${response.status}`);
+            }
+            
+            const trackAssets = await response.json();
+            
+            if (!trackAssets || !trackAssets.track_map || !trackAssets.track_map_layers) {
+                throw new Error('Track map data not available');
+            }
+            
+            console.log('✅ Track assets loaded:', {
+                track_map: trackAssets.track_map ? 'yes' : 'no',
+                racing_line: trackAssets.racing_line ? `yes (${trackAssets.racing_line.points?.length || 0} points)` : 'no'
+            });
+            
+            return trackAssets;
+            
+        } catch (error) {
+            console.warn('❌ Failed to load track assets:', error.message);
+            return null;
         }
     }
     
@@ -518,7 +564,7 @@ class LiveStrategyTracker {
             }
         }
         
-        /* COMMENTED OUT - Track map car position (for later)
+        // Update car position on track map
         if (!this.carPositionTracker || !this.carPositionTracker.isInitialized) {
             return;
         }
@@ -538,7 +584,6 @@ class LiveStrategyTracker {
                 }
             }
         }
-        */
     }
     
     updateConnectionStatus(connected) {
@@ -1823,4 +1868,17 @@ class LiveStrategyTracker {
 // Initialize tracker when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.liveTracker = new LiveStrategyTracker();
+    
+    // Add console helper functions for testing
+    window.toggleRacingLine = function(visible) {
+        if (window.liveTracker && window.liveTracker.carPositionTracker) {
+            window.liveTracker.carPositionTracker.toggleRacingLineVisibility(visible);
+            console.log(`🎨 Racing line ${visible ? 'shown' : 'hidden'} for alignment testing`);
+        } else {
+            console.warn('⚠️ Car position tracker not initialized');
+        }
+    };
+    
+    console.log('💡 Test alignment: toggleRacingLine(true) to show, toggleRacingLine(false) to hide');
 });
+
