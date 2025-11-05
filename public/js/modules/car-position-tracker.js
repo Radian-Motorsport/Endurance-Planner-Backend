@@ -274,6 +274,11 @@ export class CarPositionTracker {
             console.log('  PlayerCarClass:', PlayerCarClass);
             console.log('  CarIdxLapDistPct length:', CarIdxLapDistPct?.length);
             console.log('  CarIdxClass length:', CarIdxClass?.length);
+            console.log('  CarIdxTrackSurface:', CarIdxTrackSurface);
+            console.log('  CarIdxTrackSurface length:', CarIdxTrackSurface?.length);
+            if (CarIdxTrackSurface && PlayerCarIdx != null) {
+                console.log('  Player track surface value:', CarIdxTrackSurface[PlayerCarIdx]);
+            }
             console.log('  showOnlyPlayerClass:', this.options.showOnlyPlayerClass);
             console.log('  showAllCars:', this.options.showAllCars);
             this.hasLoggedFirstUpdate = true;
@@ -349,9 +354,15 @@ export class CarPositionTracker {
                 marker.setAttribute('cx', interpolatedX);
                 marker.setAttribute('cy', interpolatedY);
                 
-                // Update stroke color based on track surface (player car only)
-                if (isPlayer && CarIdxTrackSurface && CarIdxTrackSurface[carIdx] != null) {
-                    this.setCarStrokeColor(marker, CarIdxTrackSurface[carIdx]);
+                // Update stroke color based on track surface (all cars)
+                if (CarIdxTrackSurface && CarIdxTrackSurface[carIdx] != null) {
+                    const surfaceValue = CarIdxTrackSurface[carIdx];
+                    this.setCarStrokeColor(marker, surfaceValue);
+                    
+                    // Debug log occasionally for player car
+                    if (isPlayer && Math.random() < 0.05) {
+                        console.log(`🎨 Player car (${carIdx}) track surface: ${surfaceValue}`);
+                    }
                 }
             }
             
