@@ -7,23 +7,18 @@ export class CarPositionTracker {
     constructor(svgContainerId, options = {}) {
         this.svgContainerId = svgContainerId;
         this.options = {
-            carRadius: options.carRadius || 12,
+            carRadius: options.carRadius || 14,
             carColor: options.carColor || '#06b6d4',  // Cyan
             carStroke: options.carStroke || '#0e7490',
             carStrokeWidth: options.carStrokeWidth || 3,
-            trackLayerName: options.trackLayerName || 'active',
             showDebugInfo: options.showDebugInfo || false,
-            useRacingLine: options.useRacingLine || false,  // Use racing line points instead of SVG path
             ...options
         };
         
         this.svg = null;
-        this.trackPath = null;
-        this.totalLength = 0;
         this.carMarker = null;
         this.isInitialized = false;
         this.lastLapPct = null;
-        this.startFinishOffset = 0;  // Distance along path where start/finish line is located
         
         // Racing line mode properties
         this.racingLinePoints = null;  // Array of {x, y} points from database
@@ -32,7 +27,7 @@ export class CarPositionTracker {
     
     /**
      * Set racing line data from database
-     * @param {Object} racingLineData - Racing line data with points array and start_finish position
+     * @param {Object} racingLineData - Racing line data with points array
      */
     setRacingLineData(racingLineData) {
         if (!racingLineData || !racingLineData.points || racingLineData.points.length === 0) {
@@ -41,10 +36,8 @@ export class CarPositionTracker {
         }
         
         this.racingLinePoints = racingLineData.points;
-        this.options.useRacingLine = true;
         
         console.log(`✅ Racing line data loaded: ${this.racingLinePoints.length} points`);
-        console.log(`📍 Start/finish position:`, racingLineData.start_finish);
         
         return true;
     }
@@ -67,49 +60,21 @@ export class CarPositionTracker {
                 throw new Error('SVG element not found in container');
             }
             
-            // Racing line mode: use points array instead of SVG path
-            if (this.options.useRacingLine && this.racingLinePoints) {
-                console.log('🏁 Initializing car tracker with racing line data');
-                
-                // Create racing line visualization layer (invisible initially)
-                this.createRacingLineLayer();
-                
-                // Create car marker at start position
-                this.createCarMarker();
-                
-                this.isInitialized = true;
-                console.log('✅ Car position tracker initialized (racing line mode)');
-                return true;
+            // Verify racing line data is loaded
+            if (!this.racingLinePoints || this.racingLinePoints.length === 0) {
+                throw new Error('Racing line data not loaded. Call setRacingLineData() first.');
             }
             
-            // Fallback to SVG path mode
-            console.log('🏁 Initializing car tracker with SVG path (fallback mode)');
+            console.log('🏁 Initializing car tracker with racing line data');
             
-            // Find the track path (try active layer first, then background as fallback)
-            this.trackPath = this.svg.querySelector(`#layer-${this.options.trackLayerName} path`);
+            // Create racing line visualization layer (invisible initially)
+            this.createRacingLineLayer();
             
-            if (!this.trackPath) {
-                // Fallback to background layer
-                this.trackPath = this.svg.querySelector('#layer-background path');
-            }
-            
-            if (!this.trackPath) {
-                throw new Error('Track path not found in SVG');
-            }
-            
-            // Calculate total path length
-            this.totalLength = this.trackPath.getTotalLength();
-            console.log(`📏 Track path total length: ${this.totalLength.toFixed(2)} units`);
-            
-            // Find start/finish line offset
-            this.calculateStartFinishOffset();
-            
-            // Create car marker
+            // Create car marker at start position
             this.createCarMarker();
             
             this.isInitialized = true;
             console.log('✅ Car position tracker initialized');
-            
             return true;
             
         } catch (error) {
@@ -160,114 +125,6 @@ export class CarPositionTracker {
     }
     
     /**
-     * Calculate the offset distance along the track path where the start/finish line is located
-     */
-    calculateStartFinishOffset() {
-        try {
-            // Find the start-finish layer or group
-            let startFinishLayer = this.svg.querySelector('#layer-start-finish');
-            
-            if (!startFinishLayer) {
-                // Try alternative ID format
-                startFinishLayer = this.svg.querySelector('#Start_finish_link, [id*="start"], [id*="Start"], [id*="finish"]');
-            }
-            
-            if (!startFinishLayer) {
-                console.warn('⚠️ Start/finish layer not found, using 0 offset');
-                this.startFinishOffset = 0;
-                return;
-            }
-            
-            console.log('📍 Found start/finish layer:', startFinishLayer.id);
-            
-            // Look for path elements with dark red stroke (#991b1b or similar red shades)
-            let startFinishElement = startFinishLayer.querySelector('path[stroke="#991b1b"]');
-            if (!startFinishElement) {
-                startFinishElement = startFinishLayer.querySelector('path[stroke*="991b1b"]');
-            }
-            if (!startFinishElement) {
-                // Try other red variations
-                startFinishElement = startFinishLayer.querySelector('path[stroke*="ff0000"], path[stroke*="red"], path.st0');
-            }
-            if (!startFinishElement) {
-                startFinishElement = startFinishLayer.querySelector('line[stroke*="991b1b"], line[stroke*="ff0000"]');
-            }
-            
-            if (!startFinishElement) {
-                console.warn('⚠️ Start/finish line element not found, using 0 offset');
-                this.startFinishOffset = 0;
-                return;
-            }
-            
-            console.log('📍 Found start/finish element:', startFinishElement.tagName, startFinishElement.getAttribute('class'));
-            
-            // Get midpoint of the start/finish line
-            let midpointX, midpointY;
-            
-            if (startFinishElement.tagName === 'line') {
-                const x1 = parseFloat(startFinishElement.getAttribute('x1')) || 0;
-                const y1 = parseFloat(startFinishElement.getAttribute('y1')) || 0;
-                const x2 = parseFloat(startFinishElement.getAttribute('x2')) || 0;
-                const y2 = parseFloat(startFinishElement.getAttribute('y2')) || 0;
-                midpointX = (x1 + x2) / 2;
-                midpointY = (y1 + y2) / 2;
-            } else if (startFinishElement.tagName === 'path') {
-                // For path, get the point at 50% of its length
-                const lineLength = startFinishElement.getTotalLength();
-                const midpoint = startFinishElement.getPointAtLength(lineLength / 2);
-                midpointX = midpoint.x;
-                midpointY = midpoint.y;
-            } else {
-                console.warn('⚠️ Unknown start/finish element type, using 0 offset');
-                this.startFinishOffset = 0;
-                return;
-            }
-            
-            console.log(`🎯 Start/finish line midpoint: (${midpointX.toFixed(2)}, ${midpointY.toFixed(2)})`);
-            
-            // Find the closest point on the track path to this midpoint
-            let closestDistance = Infinity;
-            let closestPathDistance = 0;
-            const sampleRate = 10; // Check every 10 units along the path
-            
-            for (let dist = 0; dist <= this.totalLength; dist += sampleRate) {
-                const point = this.trackPath.getPointAtLength(dist);
-                const dx = point.x - midpointX;
-                const dy = point.y - midpointY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closestPathDistance = dist;
-                }
-            }
-            
-            // Refine the search around the closest point (fine-tune with 0.5 unit precision)
-            const searchRange = sampleRate;
-            for (let dist = Math.max(0, closestPathDistance - searchRange); 
-                 dist <= Math.min(this.totalLength, closestPathDistance + searchRange); 
-                 dist += 0.5) {
-                const point = this.trackPath.getPointAtLength(dist);
-                const dx = point.x - midpointX;
-                const dy = point.y - midpointY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closestPathDistance = dist;
-                }
-            }
-            
-            this.startFinishOffset = closestPathDistance;
-            console.log(`✅ Start/finish offset calculated: ${this.startFinishOffset.toFixed(2)} units (${((this.startFinishOffset / this.totalLength) * 100).toFixed(1)}% of track)`);
-            
-        } catch (error) {
-            console.error('❌ Error calculating start/finish offset:', error);
-            this.startFinishOffset = 0;
-        }
-    }
-    
-    /**
      * Create the SVG car marker element
      */
     createCarMarker() {
@@ -281,16 +138,8 @@ export class CarPositionTracker {
         this.carMarker.setAttribute('opacity', '0.9');
         this.carMarker.style.transition = 'cx 0.1s linear, cy 0.1s linear';
         
-        // Initialize at start/finish line
-        let startPoint;
-        if (this.options.useRacingLine && this.racingLinePoints) {
-            // Racing line mode: start at first point (index 0 = start/finish)
-            startPoint = this.racingLinePoints[0];
-        } else {
-            // SVG path mode: start at offset position
-            startPoint = this.trackPath.getPointAtLength(this.startFinishOffset);
-        }
-        
+        // Initialize at start/finish (first point in racing line)
+        const startPoint = this.racingLinePoints[0];
         this.carMarker.setAttribute('cx', startPoint.x);
         this.carMarker.setAttribute('cy', startPoint.y);
         
@@ -323,37 +172,32 @@ export class CarPositionTracker {
         }
         
         try {
-            let point;
+            // Convert 0-100% to exact position in array (with decimals for interpolation)
+            const normalizedPct = lapDistancePercentage / 100; // 0 to 1
+            const exactPosition = normalizedPct * this.racingLinePoints.length;
             
-            if (this.options.useRacingLine && this.racingLinePoints) {
-                // Racing line mode: use LapDistPct as direct array index
-                // Convert 0-100% to array index (0 to points.length-1)
-                const normalizedPct = lapDistancePercentage / 100; // 0 to 1
-                const index = Math.floor(normalizedPct * this.racingLinePoints.length);
-                
-                // Wrap around if index exceeds array bounds
-                const wrappedIndex = index % this.racingLinePoints.length;
-                
-                // Get point at this index
-                point = this.racingLinePoints[wrappedIndex];
-                
-                if (this.options.showDebugInfo && Math.random() < 0.01) {
-                    console.log(`🚗 Car position (racing line): ${lapDistancePercentage.toFixed(1)}% → index ${wrappedIndex}/${this.racingLinePoints.length} → (${point.x.toFixed(1)}, ${point.y.toFixed(1)})`);
-                }
-            } else {
-                // SVG path mode (fallback): use path length calculation
-                const adjustedDistance = (lapDistancePercentage / 100) * this.totalLength + this.startFinishOffset;
-                const wrappedDistance = adjustedDistance % this.totalLength;
-                point = this.trackPath.getPointAtLength(wrappedDistance);
-                
-                if (this.options.showDebugInfo && Math.random() < 0.01) {
-                    console.log(`🚗 Car position (SVG path): ${lapDistancePercentage.toFixed(1)}% → (${point.x.toFixed(1)}, ${point.y.toFixed(1)})`);
-                }
+            // Get the two surrounding points for interpolation
+            const index1 = Math.floor(exactPosition) % this.racingLinePoints.length;
+            const index2 = (index1 + 1) % this.racingLinePoints.length;
+            
+            // Calculate interpolation factor (0 to 1 between the two points)
+            const t = exactPosition - Math.floor(exactPosition);
+            
+            // Get the two points
+            const point1 = this.racingLinePoints[index1];
+            const point2 = this.racingLinePoints[index2];
+            
+            // Linear interpolation between the two points
+            const interpolatedX = point1.x + (point2.x - point1.x) * t;
+            const interpolatedY = point1.y + (point2.y - point1.y) * t;
+            
+            if (this.options.showDebugInfo && Math.random() < 0.01) {
+                console.log(`🚗 Car position: ${lapDistancePercentage.toFixed(1)}% → interpolating between ${index1}-${index2} (t=${t.toFixed(3)}) → (${interpolatedX.toFixed(1)}, ${interpolatedY.toFixed(1)})`);
             }
             
-            // Update car marker position
-            this.carMarker.setAttribute('cx', point.x);
-            this.carMarker.setAttribute('cy', point.y);
+            // Update car marker position with interpolated coordinates
+            this.carMarker.setAttribute('cx', interpolatedX);
+            this.carMarker.setAttribute('cy', interpolatedY);
             
             // Store last position for debugging
             this.lastLapPct = lapDistancePercentage;
@@ -364,7 +208,124 @@ export class CarPositionTracker {
     }
     
     /**
-     * Change car color (e.g., when in pits)
+     * Change car stroke color based on status (e.g., pit lane, track surface)
+     * @param {string} color - CSS color string for the outer ring
+     */
+    setCarStrokeColor(color) {
+        if (this.carMarker) {
+            this.carMarker.setAttribute('stroke', color);
+        }
+    }
+    
+    /**
+     * Set car appearance based on track surface location
+     * Uses iRacing CarIdxTrackSurface enum (irsdk_TrkLoc)
+     * @param {number} trackSurface - Track surface type
+     * 
+     * irsdk_TrkLoc enum values:
+     * -1 = NotInWorld
+     *  0 = OffTrack
+     *  1 = InPitStall
+     *  2 = AproachingPits
+     *  3 = OnTrack
+     */
+    setTrackSurface(trackSurface) {
+        if (!this.carMarker) return;
+        
+        switch(trackSurface) {
+            case -1: // NotInWorld
+                this.setCarStrokeColor('#6b7280'); // Gray
+                break;
+            case 0: // OffTrack
+                this.setCarStrokeColor('#dc2626'); // Red
+                break;
+            case 1: // InPitStall
+                this.setCarStrokeColor('#f97316'); // Orange
+                break;
+            case 2: // AproachingPits
+                this.setCarStrokeColor('#facc15'); // Yellow
+                break;
+            case 3: // OnTrack
+                this.setCarStrokeColor('#0e7490'); // Default cyan stroke
+                break;
+            default:
+                this.setCarStrokeColor('#0e7490'); // Default cyan stroke
+        }
+    }
+    
+    /**
+     * Set car appearance based on track surface material
+     * Uses iRacing CarIdxTrackSurfaceMaterial enum (irsdk_TrkSurf)
+     * @param {number} surfaceMaterial - Surface material type
+     * 
+     * irsdk_TrkSurf enum values:
+     * 0 = SurfaceNotInWorld
+     * 1 = UndefinedMaterial
+     * 2 = Asphalt1Material
+     * 3 = Asphalt2Material
+     * 4 = Asphalt3Material
+     * 5 = Asphalt4Material
+     * 6 = Concrete1Material
+     * 7 = Concrete2Material
+     * 8 = RacingDirt1Material
+     * 9 = RacingDirt2Material
+     * 10 = Paint1Material
+     * 11 = Paint2Material
+     * 12 = Rumble1Material
+     * 13 = Rumble2Material
+     * 14 = Rumble3Material
+     * 15 = Rumble4Material
+     * 16 = Grass1Material
+     * 17 = Grass2Material
+     * 18 = Grass3Material
+     * 19 = Grass4Material
+     * 20 = Dirt1Material
+     * 21 = Dirt2Material
+     * 22 = Dirt3Material
+     * 23 = Dirt4Material
+     * 24 = SandMaterial
+     * 25 = Gravel1Material
+     * 26 = Gravel2Material
+     * 27 = GrasscreteMaterial
+     * 28 = AstroturfMaterial
+     */
+    setTrackSurfaceMaterial(surfaceMaterial) {
+        if (!this.carMarker) return;
+        
+        // Categorize materials into groups with distinct colors
+        if (surfaceMaterial >= 2 && surfaceMaterial <= 5) {
+            // Asphalt - default cyan (on track)
+            this.setCarStrokeColor('#0e7490');
+        } else if (surfaceMaterial >= 6 && surfaceMaterial <= 7) {
+            // Concrete - light blue
+            this.setCarStrokeColor('#06b6d4');
+        } else if (surfaceMaterial >= 8 && surfaceMaterial <= 9) {
+            // Racing dirt - brown
+            this.setCarStrokeColor('#92400e');
+        } else if (surfaceMaterial >= 10 && surfaceMaterial <= 11) {
+            // Paint (pit lane markings) - orange
+            this.setCarStrokeColor('#f97316');
+        } else if (surfaceMaterial >= 12 && surfaceMaterial <= 15) {
+            // Rumble strips - yellow
+            this.setCarStrokeColor('#eab308');
+        } else if (surfaceMaterial >= 16 && surfaceMaterial <= 19) {
+            // Grass - green
+            this.setCarStrokeColor('#16a34a');
+        } else if (surfaceMaterial >= 20 && surfaceMaterial <= 26) {
+            // Dirt/Sand/Gravel - red (off track)
+            this.setCarStrokeColor('#dc2626');
+        } else if (surfaceMaterial === 27 || surfaceMaterial === 28) {
+            // Grasscrete/Astroturf - light green
+            this.setCarStrokeColor('#22c55e');
+        } else {
+            // Not in world / undefined - gray
+            this.setCarStrokeColor('#6b7280');
+        }
+    }
+    
+    /**
+     * Change car fill color (DEPRECATED - use setTrackSurface/Material instead)
+     * Kept for backward compatibility
      * @param {string} color - CSS color string
      */
     setCarColor(color) {

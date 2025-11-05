@@ -571,17 +571,30 @@ class LiveStrategyTracker {
         
         const playerCarIdx = values.PlayerCarIdx;
         const carIdxLapDistPct = values.CarIdxLapDistPct;
+        const carIdxTrackSurface = values.CarIdxTrackSurface;
+        const carIdxTrackSurfaceMaterial = values.CarIdxTrackSurfaceMaterial;
         
         if (playerCarIdx != null && carIdxLapDistPct && carIdxLapDistPct[playerCarIdx] != null) {
             const lapDistPct = carIdxLapDistPct[playerCarIdx];
             if (!isNaN(lapDistPct)) {
                 this.carPositionTracker.updatePosition(lapDistPct * 100);
                 
-                if (values.OnPitRoad) {
-                    this.carPositionTracker.setCarColor('#f97316');
+                // Update car appearance based on track surface location
+                // Priority: Use TrackSurface for location-based colors (pit lane, off track, etc.)
+                if (carIdxTrackSurface && carIdxTrackSurface[playerCarIdx] != null) {
+                    this.carPositionTracker.setTrackSurface(carIdxTrackSurface[playerCarIdx]);
+                } else if (values.OnPitRoad) {
+                    // Fallback to old OnPitRoad boolean if TrackSurface not available
+                    this.carPositionTracker.setCarStrokeColor('#f97316'); // Orange for pit lane
                 } else {
-                    this.carPositionTracker.setCarColor('#06b6d4');
+                    this.carPositionTracker.setCarStrokeColor('#0e7490'); // Default cyan
                 }
+                
+                // Optional: Also use surface material for additional detail
+                // Uncomment below to override stroke color based on material (grass, gravel, etc.)
+                // if (carIdxTrackSurfaceMaterial && carIdxTrackSurfaceMaterial[playerCarIdx] != null) {
+                //     this.carPositionTracker.setTrackSurfaceMaterial(carIdxTrackSurfaceMaterial[playerCarIdx]);
+                // }
             }
         }
     }
