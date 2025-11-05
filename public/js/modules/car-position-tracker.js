@@ -206,8 +206,8 @@ export class CarPositionTracker {
         marker.setAttribute('data-class-id', classId);
         
         // Get color for this car's class
-        const isSameClass = classId === this.playerCarClass;
-        const fillColor = this.getClassColor(classId, isSameClass);
+        // Only the PLAYER car gets the playerCarColor, not the whole class
+        const fillColor = isPlayer ? this.options.playerCarColor : this.getClassColor(classId, false);
         marker.setAttribute('fill', fillColor);
         marker.setAttribute('stroke', this.options.carStroke);
         
@@ -430,7 +430,17 @@ export class CarPositionTracker {
                 strokeColor = 'transparent'; // Transparent - default
         }
         
+        // Debug log occasionally
+        if (Math.random() < 0.01) {
+            console.log(`🔧 Setting stroke: surface=${trackSurface}, color=${strokeColor}, current stroke=${marker.getAttribute('stroke')}`);
+        }
+        
         marker.setAttribute('stroke', strokeColor);
+        
+        // Verify it was set
+        if (Math.random() < 0.01) {
+            console.log(`✅ Stroke after setting: ${marker.getAttribute('stroke')}`);
+        }
     }
     
     /**
