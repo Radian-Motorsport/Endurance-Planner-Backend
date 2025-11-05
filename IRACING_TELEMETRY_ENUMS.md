@@ -2,6 +2,55 @@
 
 This document maps the enum values used in iRacing telemetry for track surface detection and car position tracking.
 
+## Multi-Class Racing Support
+
+The car position tracker now supports **dynamic class color assignment**. Classes are discovered in real-time from telemetry data and assigned distinct colors automatically.
+
+### Class Color System
+
+**Dynamic Assignment:**
+- Colors are assigned automatically as classes are discovered during the session
+- Each class gets a unique, vibrant color from a 12-color palette
+- Player's class always uses cyan (highlighted with pulsing animation)
+- Same class = same color across all cars
+
+**Color Palette (in order):**
+1. 🟢 Green `#10b981`
+2. 🟡 Amber `#f59e0b`
+3. 🟣 Purple `#8b5cf6`
+4. 🌸 Pink `#ec4899`
+5. 🔵 Blue `#3b82f6`
+6. 🔴 Red `#ef4444`
+7. 🔷 Teal `#14b8a6`
+8. 🟠 Orange `#f97316`
+9. 🔷 Cyan `#06b6d4`
+10. 🟪 Violet `#a855f7`
+11. 🟢 Lime `#84cc16`
+12. 🌹 Rose `#f43f5e`
+
+**Note:** If more than 12 classes exist (rare), colors will cycle/repeat.
+
+### Viewing Options
+
+**Filter by Player Class (Default):**
+```javascript
+carPositionTracker.options.showOnlyPlayerClass = true;  // Show only your class
+```
+Shows only cars in the same class as the player (multiclass focus).
+
+**Show All Classes:**
+```javascript
+carPositionTracker.options.showAllCars = true;
+carPositionTracker.options.showOnlyPlayerClass = false;
+```
+Shows all cars on track with distinct colors per class.
+
+**Get Class Information:**
+```javascript
+const classInfo = carPositionTracker.getClassInfo();
+// Returns: [{classId: 0, color: '#10b981', carCount: 12, isPlayerClass: true}, ...]
+```
+
 ## CarIdxTrackSurface (irsdk_TrkLoc)
 
 Indicates where the car is located on the track.

@@ -564,39 +564,13 @@ class LiveStrategyTracker {
             }
         }
         
-        // Update car position on track map
+        // Update car positions on track map (now supports multiple cars filtered by class)
         if (!this.carPositionTracker || !this.carPositionTracker.isInitialized) {
             return;
         }
         
-        const playerCarIdx = values.PlayerCarIdx;
-        const carIdxLapDistPct = values.CarIdxLapDistPct;
-        const carIdxTrackSurface = values.CarIdxTrackSurface;
-        const carIdxTrackSurfaceMaterial = values.CarIdxTrackSurfaceMaterial;
-        
-        if (playerCarIdx != null && carIdxLapDistPct && carIdxLapDistPct[playerCarIdx] != null) {
-            const lapDistPct = carIdxLapDistPct[playerCarIdx];
-            if (!isNaN(lapDistPct)) {
-                this.carPositionTracker.updatePosition(lapDistPct * 100);
-                
-                // Update car appearance based on track surface location
-                // Priority: Use TrackSurface for location-based colors (pit lane, off track, etc.)
-                if (carIdxTrackSurface && carIdxTrackSurface[playerCarIdx] != null) {
-                    this.carPositionTracker.setTrackSurface(carIdxTrackSurface[playerCarIdx]);
-                } else if (values.OnPitRoad) {
-                    // Fallback to old OnPitRoad boolean if TrackSurface not available
-                    this.carPositionTracker.setCarStrokeColor('#f97316'); // Orange for pit lane
-                } else {
-                    this.carPositionTracker.setCarStrokeColor('#0e7490'); // Default cyan
-                }
-                
-                // Optional: Also use surface material for additional detail
-                // Uncomment below to override stroke color based on material (grass, gravel, etc.)
-                // if (carIdxTrackSurfaceMaterial && carIdxTrackSurfaceMaterial[playerCarIdx] != null) {
-                //     this.carPositionTracker.setTrackSurfaceMaterial(carIdxTrackSurfaceMaterial[playerCarIdx]);
-                // }
-            }
-        }
+        // Pass full telemetry data to update all cars
+        this.carPositionTracker.updateAllPositions(values);
     }
     
     updateConnectionStatus(connected) {

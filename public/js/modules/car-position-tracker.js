@@ -1,6 +1,7 @@
 /**
  * Car Position Tracker Module
- * Displays real-time car position on SVG track map based on lap distance percentage
+ * Displays real-time car positions on SVG track map based on lap distance percentage
+ * Supports multiple cars with dynamic class color assignment
  */
 
 export class CarPositionTracker {
@@ -8,21 +9,73 @@ export class CarPositionTracker {
         this.svgContainerId = svgContainerId;
         this.options = {
             carRadius: options.carRadius || 14,
-            carColor: options.carColor || '#06b6d4',  // Cyan
-            carStroke: options.carStroke || '#0e7490',
+            playerCarColor: options.playerCarColor || '#06b6d4',  // Cyan for player
+            carStroke: options.carStroke || 'transparent',  // Transparent by default (on track)
             carStrokeWidth: options.carStrokeWidth || 3,
             showDebugInfo: options.showDebugInfo || false,
+            showOnlyPlayerClass: options.showOnlyPlayerClass !== false,  // Default true
+            showAllCars: options.showAllCars || false,  // Default false
             ...options
         };
         
+        // Dynamic class color palette - vibrant, distinct colors for multiclass racing
+        this.classColorPalette = [
+            '#10b981', // Green
+            '#f59e0b', // Amber
+            '#8b5cf6', // Purple
+            '#ec4899', // Pink
+            '#3b82f6', // Blue
+            '#ef4444', // Red
+            '#14b8a6', // Teal
+            '#f97316', // Orange
+            '#06b6d4', // Cyan (alternate)
+            '#a855f7', // Violet
+            '#84cc16', // Lime
+            '#f43f5e', // Rose
+        ];
+        
         this.svg = null;
-        this.carMarker = null;
+        this.carMarkers = new Map();  // Map of carIdx -> SVG circle element
+        this.classColors = new Map();  // Map of classId -> assigned color
+        this.discoveredClasses = new Set();  // Set of all discovered class IDs
         this.isInitialized = false;
-        this.lastLapPct = null;
+        this.playerCarIdx = null;
+        this.playerCarClass = null;
         
         // Racing line mode properties
         this.racingLinePoints = null;  // Array of {x, y} points from database
         this.racingLineLayer = null;   // SVG polyline element for racing line visualization
+    }
+    
+    /**
+     * Get color for a specific class, assigning one if not yet discovered
+     * @param {number} classId - The class ID
+     * @param {boolean} isPlayerClass - Whether this is the player's class
+     * @returns {string} The color for this class
+     */
+    getClassColor(classId, isPlayerClass) {
+        // Player's class always uses player color
+        if (isPlayerClass) {
+            return this.options.playerCarColor;
+        }
+        
+        // Check if we've already assigned a color to this class
+        if (this.classColors.has(classId)) {
+            return this.classColors.get(classId);
+        }
+        
+        // Assign next available color from palette
+        const colorIndex = this.discoveredClasses.size % this.classColorPalette.length;
+        const assignedColor = this.classColorPalette[colorIndex];
+        
+        this.classColors.set(classId, assignedColor);
+        this.discoveredClasses.add(classId);
+        
+        if (this.options.showDebugInfo) {
+            console.log(`🎨 Assigned color ${assignedColor} to class ${classId} (${this.discoveredClasses.size} classes total)`);
+        }
+        
+        return assignedColor;
     }
     
     /**
@@ -125,102 +178,173 @@ export class CarPositionTracker {
     }
     
     /**
-     * Create the SVG car marker element
+     * Create or get a car marker for a specific car index
+     * @param {number} carIdx - Car index
+     * @param {boolean} isPlayer - Whether this is the player's car
+     * @param {number} classId - The car's class ID
+     * @returns {SVGCircleElement} The car marker element
      */
-    createCarMarker() {
-        // Create car marker as a circle
-        this.carMarker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        this.carMarker.setAttribute('id', 'car-position-marker');
-        this.carMarker.setAttribute('r', this.options.carRadius);
-        this.carMarker.setAttribute('fill', this.options.carColor);
-        this.carMarker.setAttribute('stroke', this.options.carStroke);
-        this.carMarker.setAttribute('stroke-width', this.options.carStrokeWidth);
-        this.carMarker.setAttribute('opacity', '0.9');
-        this.carMarker.style.transition = 'cx 0.1s linear, cy 0.1s linear';
+    getOrCreateCarMarker(carIdx, isPlayer, classId) {
+        // Check if marker already exists
+        if (this.carMarkers.has(carIdx)) {
+            return this.carMarkers.get(carIdx);
+        }
+        
+        // Create new car marker as a circle
+        const marker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        marker.setAttribute('id', `car-marker-${carIdx}`);
+        marker.setAttribute('r', this.options.carRadius);
+        marker.setAttribute('stroke-width', this.options.carStrokeWidth);
+        marker.setAttribute('opacity', '0.9');
+        marker.style.transition = 'cx 0.1s linear, cy 0.1s linear';
+        marker.setAttribute('data-car-idx', carIdx);
+        marker.setAttribute('data-class-id', classId);
+        
+        // Get color for this car's class
+        const isSameClass = classId === this.playerCarClass;
+        const fillColor = this.getClassColor(classId, isSameClass);
+        marker.setAttribute('fill', fillColor);
+        marker.setAttribute('stroke', this.options.carStroke);
+        
+        // Add pulsing animation for player car only
+        if (isPlayer) {
+            const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+            animate.setAttribute('attributeName', 'opacity');
+            animate.setAttribute('values', '0.9;1;0.9');
+            animate.setAttribute('dur', '2s');
+            animate.setAttribute('repeatCount', 'indefinite');
+            marker.appendChild(animate);
+        }
         
         // Initialize at start/finish (first point in racing line)
         const startPoint = this.racingLinePoints[0];
-        this.carMarker.setAttribute('cx', startPoint.x);
-        this.carMarker.setAttribute('cy', startPoint.y);
+        marker.setAttribute('cx', startPoint.x);
+        marker.setAttribute('cy', startPoint.y);
         
-        // Add pulsing animation
-        const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-        animate.setAttribute('attributeName', 'opacity');
-        animate.setAttribute('values', '0.9;1;0.9');
-        animate.setAttribute('dur', '2s');
-        animate.setAttribute('repeatCount', 'indefinite');
-        this.carMarker.appendChild(animate);
+        // Append to SVG
+        this.svg.appendChild(marker);
         
-        // Append to SVG (on top of everything)
-        this.svg.appendChild(this.carMarker);
+        // Store in map
+        this.carMarkers.set(carIdx, marker);
         
-        console.log('✅ Car marker created at start line');
+        return marker;
     }
     
     /**
-     * Update car position based on lap distance percentage
-     * @param {number} lapDistancePercentage - 0-100% around the lap
+     * Remove a car marker
+     * @param {number} carIdx - Car index to remove
      */
-    updatePosition(lapDistancePercentage) {
+    removeCarMarker(carIdx) {
+        const marker = this.carMarkers.get(carIdx);
+        if (marker && marker.parentNode) {
+            marker.parentNode.removeChild(marker);
+            this.carMarkers.delete(carIdx);
+        }
+    }
+    
+    /**
+     * Update all car positions based on telemetry data
+     * @param {Object} telemetryData - Full telemetry data object with CarIdx arrays
+     */
+    updateAllPositions(telemetryData) {
         if (!this.isInitialized) {
             console.warn('⚠️ Car position tracker not initialized');
             return;
         }
         
-        if (lapDistancePercentage == null || isNaN(lapDistancePercentage)) {
+        const {
+            PlayerCarIdx,
+            PlayerCarClass,
+            CarIdxLapDistPct,
+            CarIdxClass,
+            CarIdxTrackSurface
+        } = telemetryData;
+        
+        if (!PlayerCarIdx == null || !CarIdxLapDistPct || !CarIdxClass) {
             return;
         }
         
+        // Store player info
+        this.playerCarIdx = PlayerCarIdx;
+        this.playerCarClass = PlayerCarClass;
+        
+        // Track which cars we've updated
+        const activeCars = new Set();
+        
         try {
-            // Convert 0-100% to exact position in array (with decimals for interpolation)
-            const normalizedPct = lapDistancePercentage / 100; // 0 to 1
-            const exactPosition = normalizedPct * this.racingLinePoints.length;
-            
-            // Get the two surrounding points for interpolation
-            const index1 = Math.floor(exactPosition) % this.racingLinePoints.length;
-            const index2 = (index1 + 1) % this.racingLinePoints.length;
-            
-            // Calculate interpolation factor (0 to 1 between the two points)
-            const t = exactPosition - Math.floor(exactPosition);
-            
-            // Get the two points
-            const point1 = this.racingLinePoints[index1];
-            const point2 = this.racingLinePoints[index2];
-            
-            // Linear interpolation between the two points
-            const interpolatedX = point1.x + (point2.x - point1.x) * t;
-            const interpolatedY = point1.y + (point2.y - point1.y) * t;
-            
-            if (this.options.showDebugInfo && Math.random() < 0.01) {
-                console.log(`🚗 Car position: ${lapDistancePercentage.toFixed(1)}% → interpolating between ${index1}-${index2} (t=${t.toFixed(3)}) → (${interpolatedX.toFixed(1)}, ${interpolatedY.toFixed(1)})`);
+            // Loop through all cars
+            for (let carIdx = 0; carIdx < CarIdxLapDistPct.length; carIdx++) {
+                const lapDistPct = CarIdxLapDistPct[carIdx];
+                const carClass = CarIdxClass[carIdx];
+                
+                // Skip if no valid position data or invalid class
+                if (lapDistPct == null || isNaN(lapDistPct) || lapDistPct < 0) {
+                    continue;
+                }
+                
+                // Determine if we should show this car
+                const isPlayer = carIdx === PlayerCarIdx;
+                const isSameClass = carClass === PlayerCarClass;
+                
+                // Filter logic
+                if (!isPlayer && this.options.showOnlyPlayerClass && !isSameClass) {
+                    // Skip cars not in player's class
+                    continue;
+                }
+                
+                if (!isPlayer && !this.options.showAllCars && !this.options.showOnlyPlayerClass) {
+                    // Skip non-player cars if not showing all
+                    continue;
+                }
+                
+                // Get or create marker for this car
+                const marker = this.getOrCreateCarMarker(carIdx, isPlayer, carClass);
+                activeCars.add(carIdx);
+                
+                // Calculate interpolated position
+                const normalizedPct = lapDistPct; // Already 0-1 from telemetry
+                const exactPosition = normalizedPct * this.racingLinePoints.length;
+                
+                const index1 = Math.floor(exactPosition) % this.racingLinePoints.length;
+                const index2 = (index1 + 1) % this.racingLinePoints.length;
+                const t = exactPosition - Math.floor(exactPosition);
+                
+                const point1 = this.racingLinePoints[index1];
+                const point2 = this.racingLinePoints[index2];
+                
+                const interpolatedX = point1.x + (point2.x - point1.x) * t;
+                const interpolatedY = point1.y + (point2.y - point1.y) * t;
+                
+                // Update marker position
+                marker.setAttribute('cx', interpolatedX);
+                marker.setAttribute('cy', interpolatedY);
+                
+                // Update stroke color based on track surface (player car only)
+                if (isPlayer && CarIdxTrackSurface && CarIdxTrackSurface[carIdx] != null) {
+                    this.setCarStrokeColor(marker, CarIdxTrackSurface[carIdx]);
+                }
             }
             
-            // Update car marker position with interpolated coordinates
-            this.carMarker.setAttribute('cx', interpolatedX);
-            this.carMarker.setAttribute('cy', interpolatedY);
+            // Remove markers for cars that are no longer active
+            for (const [carIdx, marker] of this.carMarkers.entries()) {
+                if (!activeCars.has(carIdx)) {
+                    this.removeCarMarker(carIdx);
+                }
+            }
             
-            // Store last position for debugging
-            this.lastLapPct = lapDistancePercentage;
+            if (this.options.showDebugInfo && Math.random() < 0.01) {
+                console.log(`🚗 Tracking ${activeCars.size} cars (Player class: ${PlayerCarClass})`);
+            }
             
         } catch (error) {
-            console.error('❌ Failed to update car position:', error);
+            console.error('❌ Failed to update car positions:', error);
         }
     }
     
     /**
-     * Change car stroke color based on status (e.g., pit lane, track surface)
-     * @param {string} color - CSS color string for the outer ring
-     */
-    setCarStrokeColor(color) {
-        if (this.carMarker) {
-            this.carMarker.setAttribute('stroke', color);
-        }
-    }
-    
-    /**
-     * Set car appearance based on track surface location
-     * Uses iRacing CarIdxTrackSurface enum (irsdk_TrkLoc)
-     * @param {number} trackSurface - Track surface type
+     * Change car stroke color based on track surface status
+     * @param {SVGCircleElement} marker - The car marker element
+     * @param {number} trackSurface - Track surface enum value (irsdk_TrkLoc)
      * 
      * irsdk_TrkLoc enum values:
      * -1 = NotInWorld
@@ -229,28 +353,32 @@ export class CarPositionTracker {
      *  2 = AproachingPits
      *  3 = OnTrack
      */
-    setTrackSurface(trackSurface) {
-        if (!this.carMarker) return;
+    setCarStrokeColor(marker, trackSurface) {
+        if (!marker) return;
+        
+        let strokeColor;
         
         switch(trackSurface) {
             case -1: // NotInWorld
-                this.setCarStrokeColor('#6b7280'); // Gray
+                strokeColor = '#6b7280'; // Gray
                 break;
             case 0: // OffTrack
-                this.setCarStrokeColor('#dc2626'); // Red
+                strokeColor = '#dc2626'; // Red
                 break;
             case 1: // InPitStall
-                this.setCarStrokeColor('#f97316'); // Orange
+                strokeColor = '#f97316'; // Orange
                 break;
             case 2: // AproachingPits
-                this.setCarStrokeColor('#facc15'); // Yellow
+                strokeColor = '#facc15'; // Yellow
                 break;
             case 3: // OnTrack
-                this.setCarStrokeColor('#0e7490'); // Default cyan stroke
+                strokeColor = 'transparent'; // Transparent - normal racing
                 break;
             default:
-                this.setCarStrokeColor('#0e7490'); // Default cyan stroke
+                strokeColor = 'transparent'; // Transparent - default
         }
+        
+        marker.setAttribute('stroke', strokeColor);
     }
     
     /**
@@ -294,11 +422,11 @@ export class CarPositionTracker {
         
         // Categorize materials into groups with distinct colors
         if (surfaceMaterial >= 2 && surfaceMaterial <= 5) {
-            // Asphalt - default cyan (on track)
-            this.setCarStrokeColor('#0e7490');
+            // Asphalt - transparent (normal racing surface)
+            this.setCarStrokeColor('transparent');
         } else if (surfaceMaterial >= 6 && surfaceMaterial <= 7) {
-            // Concrete - light blue
-            this.setCarStrokeColor('#06b6d4');
+            // Concrete - transparent (normal racing surface)
+            this.setCarStrokeColor('transparent');
         } else if (surfaceMaterial >= 8 && surfaceMaterial <= 9) {
             // Racing dirt - brown
             this.setCarStrokeColor('#92400e');
@@ -348,21 +476,53 @@ export class CarPositionTracker {
      * Clean up resources
      */
     destroy() {
-        if (this.carMarker && this.carMarker.parentNode) {
-            this.carMarker.parentNode.removeChild(this.carMarker);
+        // Remove all car markers
+        for (const [carIdx, marker] of this.carMarkers.entries()) {
+            if (marker && marker.parentNode) {
+                marker.parentNode.removeChild(marker);
+            }
         }
+        this.carMarkers.clear();
         
         if (this.racingLineLayer && this.racingLineLayer.parentNode) {
             this.racingLineLayer.parentNode.removeChild(this.racingLineLayer);
         }
         
         this.svg = null;
-        this.trackPath = null;
-        this.carMarker = null;
         this.racingLineLayer = null;
         this.racingLinePoints = null;
+        this.classColors.clear();
+        this.discoveredClasses.clear();
         this.isInitialized = false;
         
         console.log('🗑️ Car position tracker destroyed');
     }
+    
+    /**
+     * Get information about discovered classes
+     * @returns {Array} Array of {classId, color, carCount} objects
+     */
+    getClassInfo() {
+        const classInfo = [];
+        const classCounts = new Map();
+        
+        // Count cars per class
+        for (const marker of this.carMarkers.values()) {
+            const classId = parseInt(marker.getAttribute('data-class-id'));
+            classCounts.set(classId, (classCounts.get(classId) || 0) + 1);
+        }
+        
+        // Build info array
+        for (const [classId, color] of this.classColors.entries()) {
+            classInfo.push({
+                classId,
+                color,
+                carCount: classCounts.get(classId) || 0,
+                isPlayerClass: classId === this.playerCarClass
+            });
+        }
+        
+        return classInfo.sort((a, b) => a.classId - b.classId);
+    }
 }
+
