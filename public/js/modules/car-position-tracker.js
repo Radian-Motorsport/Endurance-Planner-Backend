@@ -119,15 +119,20 @@ export class CarPositionTracker {
             }
             
             console.log('🏁 Initializing car tracker with racing line data');
+            console.log('  SVG container:', this.svgContainerId);
+            console.log('  Racing line points:', this.racingLinePoints.length);
+            console.log('  Show only player class:', this.options.showOnlyPlayerClass);
+            console.log('  Show all cars:', this.options.showAllCars);
             
             // Create racing line visualization layer (invisible initially)
             this.createRacingLineLayer();
             
-            // Create car marker at start position
-            this.createCarMarker();
+            // No longer create markers upfront - they are created dynamically
             
             this.isInitialized = true;
-            console.log('✅ Car position tracker initialized');
+            this.hasLoggedFirstUpdate = false;  // Reset logging flag
+            console.log('✅ Car position tracker initialized (multi-car mode)');
+            console.log('  Waiting for telemetry data to create car markers...');
             return true;
             
         } catch (error) {
@@ -227,6 +232,8 @@ export class CarPositionTracker {
         // Store in map
         this.carMarkers.set(carIdx, marker);
         
+        console.log(`✅ Created car marker: idx=${carIdx}, class=${classId}, color=${fillColor}, isPlayer=${isPlayer}, position=(${startPoint.x.toFixed(1)}, ${startPoint.y.toFixed(1)})`);
+        
         return marker;
     }
     
@@ -260,7 +267,24 @@ export class CarPositionTracker {
             CarIdxTrackSurface
         } = telemetryData;
         
-        if (!PlayerCarIdx == null || !CarIdxLapDistPct || !CarIdxClass) {
+        // Debug logging for first call
+        if (!this.hasLoggedFirstUpdate) {
+            console.log('🔍 First car position update:');
+            console.log('  PlayerCarIdx:', PlayerCarIdx);
+            console.log('  PlayerCarClass:', PlayerCarClass);
+            console.log('  CarIdxLapDistPct length:', CarIdxLapDistPct?.length);
+            console.log('  CarIdxClass length:', CarIdxClass?.length);
+            console.log('  showOnlyPlayerClass:', this.options.showOnlyPlayerClass);
+            console.log('  showAllCars:', this.options.showAllCars);
+            this.hasLoggedFirstUpdate = true;
+        }
+        
+        if (PlayerCarIdx == null || !CarIdxLapDistPct || !CarIdxClass) {
+            console.warn('⚠️ Missing required telemetry data:', {
+                hasPlayerCarIdx: PlayerCarIdx != null,
+                hasCarIdxLapDistPct: !!CarIdxLapDistPct,
+                hasCarIdxClass: !!CarIdxClass
+            });
             return;
         }
         
@@ -270,6 +294,9 @@ export class CarPositionTracker {
         
         // Track which cars we've updated
         const activeCars = new Set();
+        let carsProcessed = 0;
+        let carsSkippedNoPosition = 0;
+        let carsSkippedWrongClass = 0;
         
         try {
             // Loop through all cars
@@ -279,6 +306,7 @@ export class CarPositionTracker {
                 
                 // Skip if no valid position data or invalid class
                 if (lapDistPct == null || isNaN(lapDistPct) || lapDistPct < 0) {
+                    carsSkippedNoPosition++;
                     continue;
                 }
                 
@@ -289,6 +317,7 @@ export class CarPositionTracker {
                 // Filter logic
                 if (!isPlayer && this.options.showOnlyPlayerClass && !isSameClass) {
                     // Skip cars not in player's class
+                    carsSkippedWrongClass++;
                     continue;
                 }
                 
@@ -300,6 +329,7 @@ export class CarPositionTracker {
                 // Get or create marker for this car
                 const marker = this.getOrCreateCarMarker(carIdx, isPlayer, carClass);
                 activeCars.add(carIdx);
+                carsProcessed++;
                 
                 // Calculate interpolated position
                 const normalizedPct = lapDistPct; // Already 0-1 from telemetry
@@ -332,8 +362,19 @@ export class CarPositionTracker {
                 }
             }
             
-            if (this.options.showDebugInfo && Math.random() < 0.01) {
-                console.log(`🚗 Tracking ${activeCars.size} cars (Player class: ${PlayerCarClass})`);
+            if (this.options.showDebugInfo || (carsProcessed === 0 && Math.random() < 0.1)) {
+                console.log(`🚗 Car tracking: ${carsProcessed} visible, ${carsSkippedWrongClass} wrong class, ${carsSkippedNoPosition} no position (Player class: ${PlayerCarClass})`);
+            }
+            
+            // Remove markers for cars that are no longer active
+            for (const [carIdx, marker] of this.carMarkers.entries()) {
+                if (!activeCars.has(carIdx)) {
+                    this.removeCarMarker(carIdx);
+                }
+            }
+            
+            if (this.options.showDebugInfo || (carsProcessed === 0 && Math.random() < 0.1)) {
+                console.log(`🚗 Car tracking: ${carsProcessed} visible, ${carsSkippedWrongClass} wrong class, ${carsSkippedNoPosition} no position (Player class: ${PlayerCarClass})`);
             }
             
         } catch (error) {
