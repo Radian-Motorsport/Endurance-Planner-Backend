@@ -471,10 +471,10 @@ class LiveStrategyTracker {
             
             // Initialize car position tracker after map loads
             this.carPositionTracker = new window.CarPositionTracker('track-map-container-live', {
-                carRadius: 12,
+                carRadius: 18, // was 12
                 carColor: '#06b6d4',  // Cyan
                 carStroke: '#0e7490',
-                carStrokeWidth: 3,
+                carStrokeWidth: 4,
                 trackLayerName: 'active',
                 useRacingLine: false  // Will be set to true if racing line data available
             });
