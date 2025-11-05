@@ -410,37 +410,33 @@ export class CarPositionTracker {
         
         let strokeColor;
         
+        // Handle both numeric and string values from telemetry
         switch(trackSurface) {
-            case -1: // NotInWorld
+            case -1:
+            case 'NotInWorld':
                 strokeColor = '#6b7280'; // Gray
                 break;
-            case 0: // OffTrack
+            case 0:
+            case 'OffTrack':
                 strokeColor = '#dc2626'; // Red
                 break;
-            case 1: // InPitStall
+            case 1:
+            case 'InPitStall':
                 strokeColor = '#f97316'; // Orange
                 break;
-            case 2: // AproachingPits
+            case 2:
+            case 'AproachingPits':
                 strokeColor = '#facc15'; // Yellow
                 break;
-            case 3: // OnTrack
+            case 3:
+            case 'OnTrack':
                 strokeColor = 'transparent'; // Transparent - normal racing
                 break;
             default:
                 strokeColor = 'transparent'; // Transparent - default
         }
         
-        // Debug log occasionally
-        if (Math.random() < 0.01) {
-            console.log(`🔧 Setting stroke: surface=${trackSurface}, color=${strokeColor}, current stroke=${marker.getAttribute('stroke')}`);
-        }
-        
         marker.setAttribute('stroke', strokeColor);
-        
-        // Verify it was set
-        if (Math.random() < 0.01) {
-            console.log(`✅ Stroke after setting: ${marker.getAttribute('stroke')}`);
-        }
     }
     
     /**
