@@ -477,7 +477,8 @@ class LiveStrategyTracker {
                 carStrokeWidth: 6,
                 trackLayerName: 'active',
                 useRacingLine: false,  // Will be set to true if racing line data available
-                showOnlyPlayerClass: false  // Show all cars from all classes
+                showOnlyPlayerClass: false,  // Don't filter by class
+                showAllCars: true  // Show all cars from all classes
             });
             
             // If racing line data is available, use it
