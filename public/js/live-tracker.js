@@ -1735,19 +1735,13 @@ class LiveStrategyTracker {
             console.warn(`⚠️ No lap time, using default: ${avgLapTime}s`);
         }
         
-        // Get fuel parameters from strategy
-        const tankSize = state.tankSize || 100;
-        const fuelPerLap = state.fuelPerLap || 2.0;
+        // Get fuel parameters from formData (where planner stores them)
+        const tankSize = parseFloat(formData.tankCapacity) || 100;
+        const fuelPerLap = parseFloat(formData.fuelPerLap) || 2.0;
         const pitStopTime = state.pitStopTime || 90;
-        
-        console.log('📊 DEBUG - Fuel values from strategy:');
-        console.log('  tankSize:', tankSize);
-        console.log('  fuelPerLap:', fuelPerLap);
-        console.log('  Raw calculation: tankSize / fuelPerLap =', tankSize / fuelPerLap);
         
         // Calculate laps per stint based on fuel
         const lapsPerStint = Math.floor(tankSize / fuelPerLap);
-        console.log('  Laps per stint (floored):', lapsPerStint);
         
         // Calculate total laps remaining in session
         const totalLapsRemaining = Math.floor(this.sessionTimeRemain / avgLapTime);
