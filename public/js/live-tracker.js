@@ -164,8 +164,17 @@ class LiveStrategyTracker {
         this.playerCarIdx = null;
         this.playerCarClass = null;
         this.selectedCarIdx = null;
+        this.selectedClassFilter = 'player'; // 'player', 'GTP', 'GT3', 'GT4', 'LMP'
         this.carAnalysisData = {};
         this.lastCarAnalysisUpdate = 0; // Throttle position updates
+        
+        // Class ID mapping
+        this.classMapping = {
+            'GTP': [4029, 4074],
+            'GT3': [4046, 4091, 4090, 4083, 4072, 4011],
+            'GT4': [4088, 4084],
+            'LMP': [2523]
+        };
         
         this.elements = {};
         this.initializeElements();
@@ -326,6 +335,14 @@ class LiveStrategyTracker {
                 }
             });
         }
+        
+        // Class filter tabs
+        document.querySelectorAll('.class-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const selectedClass = e.target.dataset.class;
+                this.setClassFilter(selectedClass);
+            });
+        });
         
         // Time mode toggle
         this.elements.timeAutoBtn?.addEventListener('click', () => this.setTimeMode('auto'));
@@ -604,10 +621,8 @@ class LiveStrategyTracker {
     updateCarAnalysisData(values) {
         if (!this.playerCarClass || !this.driversList.length) return;
         
-        // Update car data for all drivers in player's class
+        // Update car data for ALL drivers (not just player's class)
         this.driversList.forEach((driver, idx) => {
-            if (driver.CarClassID !== this.playerCarClass) return;
-            
             const carIdx = driver.CarIdx;
             if (carIdx === undefined) return;
             
@@ -892,23 +907,52 @@ class LiveStrategyTracker {
             playerCarClass: this.playerCarClass
         });
         
-        // Render initial car list
+        // Render initial car list with "My Class" selected
+        this.setClassFilter('player');
+    }
+    
+    setClassFilter(classFilter) {
+        this.selectedClassFilter = classFilter;
+        
+        // Update tab styling
+        document.querySelectorAll('.class-tab').forEach(tab => {
+            if (tab.dataset.class === classFilter) {
+                tab.classList.add('border-cyan-400', 'text-white');
+                tab.classList.remove('border-transparent', 'text-neutral-400');
+            } else {
+                tab.classList.remove('border-cyan-400', 'text-white');
+                tab.classList.add('border-transparent', 'text-neutral-400');
+            }
+        });
+        
+        // Re-render car list with new filter
         this.renderCarList();
+    }
+    
+    getClassIds(className) {
+        // Return class IDs for a given class name
+        if (className === 'player') {
+            return [this.playerCarClass];
+        }
+        return this.classMapping[className] || [];
     }
     
     renderCarList() {
         const carListContainer = document.getElementById('car-list');
         if (!carListContainer || !this.driversList.length) return;
         
-        // Filter drivers in player's class
+        // Get class IDs to filter by
+        const targetClassIds = this.getClassIds(this.selectedClassFilter);
+        
+        // Filter drivers by selected class
         const classDrivers = this.driversList.filter(driver => 
-            driver.CarClassID === this.playerCarClass && driver.CarIdx !== undefined
+            targetClassIds.includes(driver.CarClassID) && driver.CarIdx !== undefined
         );
         
         if (classDrivers.length === 0) {
             carListContainer.innerHTML = `
                 <div class="text-neutral-500 text-sm text-center py-4">
-                    No other cars in your class
+                    No cars in this class
                 </div>
             `;
             return;
