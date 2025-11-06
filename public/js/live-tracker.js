@@ -529,7 +529,11 @@ class LiveStrategyTracker {
                 trackLayerName: 'active',
                 useRacingLine: false,  // Will be set to true if racing line data available
                 showOnlyPlayerClass: false,  // Don't filter by class
-                showAllCars: true  // Show all cars from all classes
+                showAllCars: true,  // Show all cars from all classes
+                onCarClick: (carIdx) => {
+                    console.log(`🖱️ Car marker clicked: ${carIdx}`);
+                    this.selectCar(carIdx);
+                }
             });
             
             // If racing line data is available, use it
@@ -1099,6 +1103,22 @@ class LiveStrategyTracker {
     selectCar(carIdx) {
         this.selectedCarIdx = carIdx;
         
+        // Find the driver and their class to potentially switch tabs
+        const driver = this.driversList.find(d => d.CarIdx === carIdx);
+        if (driver) {
+            // Find which class tab this car belongs to
+            for (const [className, classIds] of Object.entries(this.classMapping)) {
+                if (classIds.includes(driver.CarClassID)) {
+                    // Switch to this class tab if not already selected
+                    if (this.selectedClassFilter !== className) {
+                        console.log(`🔄 Switching to ${className} tab for selected car`);
+                        this.setClassFilter(className);
+                    }
+                    break;
+                }
+            }
+        }
+        
         // Update selected car details
         this.updateCarDetails();
         
@@ -1109,7 +1129,6 @@ class LiveStrategyTracker {
         }
         
         // Update selected car name
-        const driver = this.driversList.find(d => d.CarIdx === carIdx);
         const selectedCarName = document.getElementById('selected-car-name');
         if (selectedCarName && driver) {
             selectedCarName.textContent = `${driver.TeamName || 'No Team'} - ${driver.UserName || 'Unknown'}`;

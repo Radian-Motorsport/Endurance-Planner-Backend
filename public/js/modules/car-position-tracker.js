@@ -15,6 +15,7 @@ export class CarPositionTracker {
             showDebugInfo: options.showDebugInfo || false,
             showOnlyPlayerClass: options.showOnlyPlayerClass !== false,  // Default true
             showAllCars: options.showAllCars || false,  // Default false
+            onCarClick: options.onCarClick || null,  // Callback when car marker is clicked
             ...options
         };
         
@@ -232,8 +233,17 @@ export class CarPositionTracker {
         marker.setAttribute('stroke-width', this.options.carStrokeWidth);
         marker.setAttribute('opacity', '0.9');
         marker.style.transition = 'cx 0.1s linear, cy 0.1s linear';
+        marker.style.cursor = 'pointer';  // Show pointer cursor on hover
         marker.setAttribute('data-car-idx', carIdx);
         marker.setAttribute('data-class-id', classId);
+        
+        // Add click handler if callback provided
+        if (this.options.onCarClick) {
+            marker.addEventListener('click', (e) => {
+                e.stopPropagation();  // Prevent event bubbling
+                this.options.onCarClick(carIdx);
+            });
+        }
         
         // Get color for this car's class
         // Only the PLAYER car gets the playerCarColor, not the whole class
