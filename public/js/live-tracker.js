@@ -910,8 +910,20 @@ class LiveStrategyTracker {
             playerCarClass: this.playerCarClass
         });
         
-        // Render initial car list with "My Class" selected
-        this.setClassFilter('player');
+        // Determine which class tab to select based on player's class
+        let initialClassTab = 'GTP'; // Default
+        
+        for (const [className, classIds] of Object.entries(this.classMapping)) {
+            if (classIds.includes(this.playerCarClass)) {
+                initialClassTab = className;
+                break;
+            }
+        }
+        
+        console.log(`🎯 Setting initial class tab to: ${initialClassTab} (player class: ${this.playerCarClass})`);
+        
+        // Set initial filter to player's class tab (only called once at initialization)
+        this.setClassFilter(initialClassTab);
     }
     
     setClassFilter(classFilter) {
@@ -934,9 +946,6 @@ class LiveStrategyTracker {
     
     getClassIds(className) {
         // Return class IDs for a given class name
-        if (className === 'player') {
-            return [this.playerCarClass];
-        }
         return this.classMapping[className] || [];
     }
     
