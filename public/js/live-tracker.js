@@ -1079,6 +1079,15 @@ class LiveStrategyTracker {
         
         if (!container || !this.sectors.length) return;
         
+        // PRESERVE incident state before clearing
+        const incidentStates = new Map();
+        this.sectors.forEach(sector => {
+            const existingCard = document.getElementById(`sector-card-${sector.number}`);
+            if (existingCard && existingCard.classList.contains('incident-active')) {
+                incidentStates.set(sector.number, true);
+            }
+        });
+        
         container.innerHTML = '';
         sectorInfoDisplay.innerHTML = '';
         
@@ -1107,7 +1116,11 @@ class LiveStrategyTracker {
             
             const sectorCard = document.createElement('div');
             sectorCard.id = `sector-card-${sector.number}`;
-            sectorCard.className = 'bg-neutral-700 rounded px-2 py-1 text-center transition-colors';
+            // RESTORE incident state if it existed
+            const hadIncident = incidentStates.get(sector.number);
+            sectorCard.className = hadIncident 
+                ? 'bg-yellow-500 incident-active rounded px-2 py-1 text-center transition-colors'
+                : 'bg-neutral-700 rounded px-2 py-1 text-center transition-colors';
             sectorCard.innerHTML = `
                 <div class="font-bold text-xs">S${sector.number}</div>
                 <div class="text-[10px] text-neutral-400">${sectorLength.toFixed(1)}%</div>
@@ -1116,7 +1129,7 @@ class LiveStrategyTracker {
             sectorInfoDisplay.appendChild(sectorCard);
         });
         
-        console.log('✅ Sector markers drawn');
+        console.log('✅ Sector markers drawn (preserved incident states:', Array.from(incidentStates.keys()), ')');
     }
     
     /**
@@ -1232,22 +1245,22 @@ class LiveStrategyTracker {
                     
                     console.log(`   activeSectorIncidents after:`, Array.from(this.activeSectorIncidents));
                     
-                    // Clear any existing timeout for this sector
-                    if (this.sectorIncidentTimeouts.has(carSectorNum)) {
-                        console.log(`   Clearing existing timeout for sector ${carSectorNum}`);
-                        clearTimeout(this.sectorIncidentTimeouts.get(carSectorNum));
+                    // Only set timeout if one doesn't already exist for this sector
+                    // This prevents resetting the timer on every telemetry frame
+                    if (!this.sectorIncidentTimeouts.has(carSectorNum)) {
+                        // Auto-clear after timeout
+                        const timeoutId = setTimeout(() => {
+                            console.log(`⏰ TIMEOUT EXECUTING: Clearing yellow for sector ${carSectorNum} after ${this.incidentTimeout}ms`);
+                            this.activeSectorIncidents.delete(carSectorNum);
+                            this.sectorIncidentTimeouts.delete(carSectorNum);
+                            this.updateSectorIncidentDisplay(carSectorNum, false);
+                        }, this.incidentTimeout);
+                        
+                        this.sectorIncidentTimeouts.set(carSectorNum, timeoutId);
+                        console.log(`   NEW timeout set with ID: ${timeoutId}, will fire in ${this.incidentTimeout}ms`);
+                    } else {
+                        console.log(`   ⏱️ Timeout already running for sector ${carSectorNum}, NOT resetting`);
                     }
-                    
-                    // Auto-clear after timeout
-                    const timeoutId = setTimeout(() => {
-                        console.log(`⏰ TIMEOUT EXECUTING: Clearing yellow for sector ${carSectorNum} after ${this.incidentTimeout}ms`);
-                        this.activeSectorIncidents.delete(carSectorNum);
-                        this.sectorIncidentTimeouts.delete(carSectorNum);
-                        this.updateSectorIncidentDisplay(carSectorNum, false);
-                    }, this.incidentTimeout);
-                    
-                    this.sectorIncidentTimeouts.set(carSectorNum, timeoutId);
-                    console.log(`   Timeout set with ID: ${timeoutId}, will fire in ${this.incidentTimeout}ms`);
                 }
             }
         } else {
