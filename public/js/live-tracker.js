@@ -1137,7 +1137,7 @@ class LiveStrategyTracker {
             container.appendChild(marker);
             container.appendChild(label);
             
-            // Create sector info card with width matching sector length
+            // Create narrow sector indicator bar with width matching sector length
             const nextSector = this.sectors[index + 1];
             const sectorEndPct = nextSector ? nextSector.startPct : 1.0;
             const sectorLength = (sectorEndPct - sector.startPct) * 100;
@@ -1147,13 +1147,10 @@ class LiveStrategyTracker {
             // RESTORE incident state if it existed
             const hadIncident = incidentStates.get(sector.number);
             sectorCard.className = hadIncident 
-                ? 'bg-yellow-500 incident-active rounded px-2 py-1 text-center transition-colors'
-                : 'bg-neutral-700 rounded px-2 py-1 text-center transition-colors';
+                ? 'absolute h-full bg-yellow-500 incident-active rounded transition-colors'
+                : 'absolute h-full bg-neutral-600 rounded transition-colors';
+            sectorCard.style.left = `${sector.startPct * 100}%`;
             sectorCard.style.width = `${sectorLength}%`;
-            sectorCard.innerHTML = `
-                <div class="font-bold text-xs">S${sector.number}</div>
-                <div class="text-[10px] text-neutral-400">${sectorLength.toFixed(1)}%</div>
-            `;
             
             sectorInfoDisplay.appendChild(sectorCard);
         });
