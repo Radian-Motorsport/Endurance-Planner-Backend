@@ -624,13 +624,25 @@ class LiveStrategyTracker {
             };
         });
         
-        // Re-render car list to update positions
-        this.renderCarList();
+        // Only update positions in existing cards instead of full re-render
+        this.updateCarListPositions();
         
         // Update selected car details if one is selected
         if (this.selectedCarIdx !== null) {
             this.updateCarDetails();
         }
+    }
+    
+    updateCarListPositions() {
+        // Update positions without re-rendering entire list (prevents flashing)
+        document.querySelectorAll('.car-card').forEach(card => {
+            const carIdx = parseInt(card.dataset.carIdx);
+            const position = this.carAnalysisData[carIdx]?.classPosition || '--';
+            const positionEl = card.querySelector('.car-position');
+            if (positionEl) {
+                positionEl.textContent = position;
+            }
+        });
     }
     
     getTrackSurfaceName(value) {
@@ -863,24 +875,24 @@ class LiveStrategyTracker {
         // Render car cards
         carListContainer.innerHTML = classDrivers.map(driver => {
             const isPlayer = driver.CarIdx === this.playerCarIdx;
+            const isSelected = driver.CarIdx === this.selectedCarIdx;
             const position = this.carAnalysisData[driver.CarIdx]?.classPosition || '--';
             
             return `
-                <div class="car-card bg-neutral-700 hover:bg-neutral-600 rounded-lg p-3 cursor-pointer transition ${isPlayer ? 'border-2 border-cyan-400' : ''}"
+                <div class="car-card bg-neutral-700 hover:bg-neutral-600 rounded-lg p-3 cursor-pointer transition ${isPlayer ? 'border-2 border-cyan-400' : ''} ${isSelected ? 'ring-2 ring-blue-500' : ''}"
                      data-car-idx="${driver.CarIdx}">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-lg font-bold text-white">${position}</span>
-                            <span class="text-sm font-semibold text-neutral-200">${driver.TeamName || 'No Team'}</span>
-                            ${isPlayer ? '<span class="text-xs bg-cyan-500 text-black px-2 py-0.5 rounded">YOU</span>' : ''}
+                    <div class="grid grid-cols-[auto,1fr,auto] gap-3 items-center">
+                        <span class="car-position text-xl font-bold text-white">${position}</span>
+                        <div class="min-w-0">
+                            <div class="text-sm font-semibold text-neutral-200 truncate">${driver.TeamName || 'No Team'} ${isPlayer ? '<span class="text-xs bg-cyan-500 text-black px-2 py-0.5 rounded ml-1">YOU</span>' : ''}</div>
+                            <div class="text-xs text-neutral-400 truncate">${driver.UserName || 'Unknown'}</div>
+                        </div>
+                        <div class="text-right text-xs space-y-1">
+                            <div class="text-neutral-500">Div ${driver.DivisionID || '--'}</div>
+                            <div class="text-yellow-400">iR: ${driver.IRating || '--'}</div>
                         </div>
                     </div>
-                    <div class="text-xs text-neutral-300 mb-1">${driver.CarScreenNameShort || driver.CarPath || 'Unknown Car'}</div>
-                    <div class="text-xs text-neutral-400">${driver.UserName || 'Unknown Driver'}</div>
-                    <div class="flex items-center space-x-3 mt-2 text-xs">
-                        <span class="text-neutral-500">Div ${driver.DivisionID || '--'}</span>
-                        <span class="text-yellow-400">iR: ${driver.IRating || '--'}</span>
-                    </div>
+                    <div class="text-xs text-neutral-500 mt-1 truncate">${driver.CarScreenNameShort || driver.CarPath || 'Unknown Car'}</div>
                 </div>
             `;
         }).join('');
