@@ -64,13 +64,18 @@ class PedalTrace {
         
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
+        // Add padding to prevent trace from covering text labels
+        const topPadding = 40;  // Space for COASTING/OVERLAP text
+        const bottomPadding = 10; // Space at bottom
+        const drawHeight = this.canvas.height - topPadding - bottomPadding;
+        
         // Throttle line
         this.ctx.beginPath();
         this.ctx.strokeStyle = this.options.throttleColor;
         this.ctx.lineWidth = 2;
         this.buffer.forEach((point, i) => {
             const x = i * (this.canvas.width / this.options.maxPoints);
-            const y = this.canvas.height - point.throttle * (this.canvas.height / 100);
+            const y = topPadding + (drawHeight - point.throttle * (drawHeight / 100));
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();
@@ -81,7 +86,7 @@ class PedalTrace {
         this.ctx.lineWidth = 2;
         this.buffer.forEach((point, i) => {
             const x = i * (this.canvas.width / this.options.maxPoints);
-            const y = this.canvas.height - point.brake * (this.canvas.height / 100);
+            const y = topPadding + (drawHeight - point.brake * (drawHeight / 100));
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();
@@ -92,7 +97,7 @@ class PedalTrace {
         this.ctx.lineWidth = 1;
         this.buffer.forEach((point, i) => {
             const x = i * (this.canvas.width / this.options.maxPoints);
-            const y = this.canvas.height - point.gear * (this.canvas.height / 100);
+            const y = topPadding + (drawHeight - point.gear * (drawHeight / 100));
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();
@@ -319,15 +324,15 @@ class LiveStrategyTracker {
         
         // Pedal trace toggle
         const togglePedalBtn = document.getElementById('toggle-pedal-inputs');
-        const pedalInputsDetails = document.getElementById('driver-inputs-details');
-        if (togglePedalBtn && pedalInputsDetails) {
+        const pedalTraceContainer = document.getElementById('pedal-trace-container');
+        if (togglePedalBtn && pedalTraceContainer) {
             togglePedalBtn.addEventListener('click', () => {
-                if (pedalInputsDetails.classList.contains('hidden')) {
-                    pedalInputsDetails.classList.remove('hidden');
-                    togglePedalBtn.textContent = 'Hide Inputs ▲';
+                if (pedalTraceContainer.classList.contains('hidden')) {
+                    pedalTraceContainer.classList.remove('hidden');
+                    togglePedalBtn.textContent = 'Hide Trace ▲';
                 } else {
-                    pedalInputsDetails.classList.add('hidden');
-                    togglePedalBtn.textContent = 'Show Inputs ▼';
+                    pedalTraceContainer.classList.add('hidden');
+                    togglePedalBtn.textContent = 'Show Trace ▼';
                 }
             });
         }
