@@ -186,7 +186,7 @@ class LiveStrategyTracker {
         this.trackLength = null;
         
         // Sector incident tracking
-        this.sectorIncidents = new Map(); // carIdx -> { sectorNum, startTime, active }
+        this.sectorIncidents = new Map(); // carIdx -> { sectorNum, startTime, active, triggered }
         this.activeSectorIncidents = new Set(); // Set of sector numbers with active incidents
         this.incidentTimeout = 15000; // Clear incident markers after 15 seconds
         this.incidentMinDuration = 1000; // Off-track must last 1+ seconds to trigger incident
@@ -1082,8 +1082,8 @@ class LiveStrategyTracker {
             this.sectors.forEach(sector => {
                 const card = document.getElementById(`sector-card-${sector.number}`);
                 if (card) {
-                    // Don't override incident warnings
-                    const hasIncident = card.classList.contains('bg-yellow-500');
+                    // Don't override incident warnings (yellow always takes priority)
+                    const hasIncident = card.classList.contains('incident-active');
                     
                     if (sector.number === currentSectorNum) {
                         if (!hasIncident) {
@@ -1142,30 +1142,37 @@ class LiveStrategyTracker {
                 this.sectorIncidents.set(carIdx, {
                     sectorNum: carSectorNum,
                     startTime: now,
-                    active: true
+                    active: true,
+                    triggered: false
                 });
             } else {
                 // Continue tracking - check if duration threshold met
                 const duration = now - incident.startTime;
                 
-                if (duration >= this.incidentMinDuration) {
-                    // Incident confirmed - mark sector
+                if (duration >= this.incidentMinDuration && !incident.triggered) {
+                    // Incident confirmed - mark sector (only once)
+                    incident.triggered = true;
+                    
                     if (!this.activeSectorIncidents.has(carSectorNum)) {
                         this.activeSectorIncidents.add(carSectorNum);
                         this.updateSectorIncidentDisplay(carSectorNum, true);
+                        
+                        console.log(`⚠️ Incident detected in sector ${carSectorNum} (car ${carIdx} off-track for ${duration}ms)`);
                         
                         // Auto-clear after timeout
                         setTimeout(() => {
                             this.activeSectorIncidents.delete(carSectorNum);
                             this.updateSectorIncidentDisplay(carSectorNum, false);
+                            console.log(`✅ Incident cleared in sector ${carSectorNum} after ${this.incidentTimeout}ms`);
                         }, this.incidentTimeout);
                     }
                 }
             }
         } else {
-            // Car back on track - clear tracking
+            // Car back on track - only clear active flag, don't reset triggered incidents
             if (incident && incident.active) {
                 this.sectorIncidents.set(carIdx, { ...incident, active: false });
+                console.log(`🏁 Car ${carIdx} back on track (was in sector ${incident.sectorNum}, triggered: ${incident.triggered})`);
             }
         }
     }
@@ -1178,20 +1185,22 @@ class LiveStrategyTracker {
         if (!card) return;
         
         if (hasIncident) {
-            // Yellow warning for incident
+            // Yellow warning for incident - overrides everything
             card.classList.remove('bg-neutral-700', 'bg-cyan-600');
-            card.classList.add('bg-yellow-500');
+            card.classList.add('bg-yellow-500', 'incident-active');
             card.title = 'Incident detected in this sector';
         } else {
-            // Clear incident - restore normal color
-            card.classList.remove('bg-yellow-500');
-            card.classList.add('bg-neutral-700');
+            // Clear incident - restore appropriate color
+            card.classList.remove('bg-yellow-500', 'incident-active');
             card.title = '';
             
-            // Re-apply cyan if this is the current sector
+            // Re-apply cyan if this is the current sector, otherwise neutral
             if (this.currentSector === sectorNum) {
                 card.classList.remove('bg-neutral-700');
                 card.classList.add('bg-cyan-600');
+            } else {
+                card.classList.remove('bg-cyan-600');
+                card.classList.add('bg-neutral-700');
             }
         }
     }
