@@ -343,6 +343,53 @@ export class TrackMapComponent {
             }
         }
         // ============================= END MAP COLOURS ====================================
+
+        // ========== START-FINISH STYLING: Line and arrow customization ==========
+        // Separate styling for start-finish line and arrow elements
+        if (layerName === 'start-finish') {
+            const startFinishGroup = layerGroup.querySelector('g[id="Start_Finish_Link"]');
+            if (startFinishGroup) {
+                const paths = startFinishGroup.querySelectorAll('path');
+                
+                // Configuration for line and arrow
+                const lineConfig = {
+                    colour: '#dc2626',      // Line colour (red)
+                    strokeWidth: '2px'
+                };
+                
+                const arrowConfig = {
+                    colour: '#dc2626',      // Arrow colour (lighter red for distinction)
+                    strokeWidth: '2px',
+                    scale: 0.3              // Scale factor for arrow (0.7 = 70% of original size)
+                };
+
+                paths.forEach((path, index) => {
+                    if (index === 0) {
+                        // First path = LINE
+                        path.setAttribute('fill', lineConfig.colour);
+                        path.style.setProperty('fill', lineConfig.colour, 'important');
+                        path.setAttribute('stroke-width', lineConfig.strokeWidth);
+                        path.style.setProperty('stroke-width', lineConfig.strokeWidth, 'important');
+                    } else if (index === 1) {
+                        // Second path = ARROW
+                        path.setAttribute('fill', arrowConfig.colour);
+                        path.style.setProperty('fill', arrowConfig.colour, 'important');
+                        path.setAttribute('stroke-width', arrowConfig.strokeWidth);
+                        path.style.setProperty('stroke-width', arrowConfig.strokeWidth, 'important');
+                        
+                        // Apply scale to arrow
+                        if (arrowConfig.scale && arrowConfig.scale !== 1) {
+                            const bbox = path.getBBox();
+                            const centerX = bbox.x + bbox.width / 2;
+                            const centerY = bbox.y + bbox.height / 2;
+                            const scaleTransform = `translate(${centerX}, ${centerY}) scale(${arrowConfig.scale}) translate(${-centerX}, ${-centerY})`;
+                            path.setAttribute('transform', scaleTransform);
+                        }
+                    }
+                });
+            }
+        }
+        // ========================= END START-FINISH STYLING ===========================
     }
     
     toggleLayer(layerName, visible) {
