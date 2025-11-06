@@ -269,12 +269,12 @@ export class TrackMapComponent {
     applyLayerStyles(layerGroup, layerName) {
         // Apply your exact color styles based on layer name
         const styles = {
-            'background': { fill: '#5a5a5a', stroke: '#5a5a5a', strokeWidth: '2px' },
+            'background': { fill: '#5a5a5a', stroke: '#5a5a5a', strokeWidth: '1px' },
             'active': { fill: '#d1d1d1', stroke: '#d1d1d1', strokeWidth: '1px' },
             'inactive': { fill: '#111827', stroke: '#1f2937', strokeWidth: '1px' },
-            'pitroad': { fill: '#059669', stroke: '#047857', strokeWidth: '2px' },
-            'start-finish': { fill: '#dc2626', stroke: '#991b1b', strokeWidth: '3px' },
-            'turns': { fill: '#ffbf00', stroke: '#ffea00', strokeWidth: '1px', fontFamily: 'Arial, sans-serif', fontSize: '24px', fontWeight: 'bold' }
+            'pitroad': { fill: '#059669', stroke: '#047857', strokeWidth: '1px' },
+            'start-finish': { fill: '#dc2626', stroke: '#991b1b', strokeWidth: '1px' },
+            'turns': { fill: '#ffbf00', stroke: 'rgba(255, 234, 0, 0)', strokeWidth: '1px', fontFamily: 'Arial, sans-serif', fontSize: '24px', fontWeight: 'bold' }
         };
 
         if (styles[layerName]) {
@@ -322,8 +322,8 @@ export class TrackMapComponent {
         // Colours for individual background elements (Pavement, Buildings, Water, Bridge)
         if (layerName === 'background') {
             const elementColours = {
-                'Pavement': '#646464ff',       // Dark gray (keep default)
-                'Buildings': '#585858ff',      // Darker gray for buildings
+                'Pavement': '#8c8c8cff',       // Dark gray (keep default)
+                'Buildings': '#494949ff',      // Darker gray for buildings
                 'Water': '#8990fcff',          // Blue for water bodies
                 'Bridge': '#636466',         // Dark gray (keep default, same as Pavement)
                 'Bridge_1_': '#636466',      // Dark gray for numbered bridges
