@@ -959,6 +959,9 @@ class LiveStrategyTracker {
             return seconds.toFixed(1) + 's';
         };
         
+        // Get off-track count from car position tracker
+        const offTrackCount = this.carPositionTracker?.getOffTrackCount(this.selectedCarIdx) || 0;
+        
         // Update detail fields
         document.getElementById('detail-best-lap').textContent = formatLapTime(data.bestLapTime);
         document.getElementById('detail-class-pos').textContent = data.classPosition || '--';
@@ -969,6 +972,7 @@ class LiveStrategyTracker {
         document.getElementById('detail-pit-road').textContent = data.onPitRoad ? 'YES' : 'NO';
         document.getElementById('detail-track-surface').textContent = data.trackSurface || '--';
         document.getElementById('detail-surface-material').textContent = data.surfaceMaterial || '--';
+        document.getElementById('detail-off-track').textContent = offTrackCount;
     }
     
     handleTelemetryUpdate(data) {

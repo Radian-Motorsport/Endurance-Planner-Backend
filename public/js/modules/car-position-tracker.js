@@ -51,6 +51,10 @@ export class CarPositionTracker {
         this.playerCarIdx = null;
         this.playerCarClass = null;
         
+        // Off-track incident tracking
+        this.offTrackCounts = new Map();  // Map of carIdx -> count
+        this.previousTrackSurface = new Map();  // Map of carIdx -> last track surface state
+        
         // Racing line mode properties
         this.racingLinePoints = null;  // Array of {x, y} points from database
         this.racingLineLayer = null;   // SVG polyline element for racing line visualization
@@ -374,6 +378,9 @@ export class CarPositionTracker {
                     const surfaceValue = CarIdxTrackSurface[carIdx];
                     this.setCarStrokeColor(marker, surfaceValue);
                     
+                    // Track off-track incidents (detect transition to OffTrack)
+                    this.trackOffTrackIncident(carIdx, surfaceValue);
+                    
                     // Debug log occasionally for player car
                     if (isPlayer && Math.random() < 0.05) {
                         console.log(`🎨 Player car (${carIdx}) track surface: ${surfaceValue}`);
@@ -452,6 +459,47 @@ export class CarPositionTracker {
         }
         
         marker.setAttribute('stroke', strokeColor);
+    }
+    
+    /**
+     * Track off-track incidents by detecting transitions to OffTrack state
+     * @param {number} carIdx - Car index
+     * @param {number|string} currentSurface - Current track surface value
+     */
+    trackOffTrackIncident(carIdx, currentSurface) {
+        // Initialize counter if this is first time seeing this car
+        if (!this.offTrackCounts.has(carIdx)) {
+            this.offTrackCounts.set(carIdx, 0);
+        }
+        
+        // Get previous state
+        const previousSurface = this.previousTrackSurface.get(carIdx);
+        
+        // Detect transition TO OffTrack (0 or 'OffTrack')
+        const isNowOffTrack = currentSurface === 0 || currentSurface === 'OffTrack';
+        const wasOffTrack = previousSurface === 0 || previousSurface === 'OffTrack';
+        
+        // Increment counter if transitioning from any other state to OffTrack
+        if (isNowOffTrack && !wasOffTrack && previousSurface !== undefined) {
+            const newCount = this.offTrackCounts.get(carIdx) + 1;
+            this.offTrackCounts.set(carIdx, newCount);
+            
+            if (this.options.showDebugInfo) {
+                console.log(`🚨 Car ${carIdx} went off-track (incident #${newCount})`);
+            }
+        }
+        
+        // Store current state for next comparison
+        this.previousTrackSurface.set(carIdx, currentSurface);
+    }
+    
+    /**
+     * Get off-track incident count for a specific car
+     * @param {number} carIdx - Car index
+     * @returns {number} Number of off-track incidents
+     */
+    getOffTrackCount(carIdx) {
+        return this.offTrackCounts.get(carIdx) || 0;
     }
     
     /**
