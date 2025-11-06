@@ -1016,7 +1016,7 @@ class LiveStrategyTracker {
             };
             
             return `
-                <div class="car-card bg-neutral-700 hover:bg-neutral-600 rounded-lg p-3 cursor-pointer transition ${isPlayer ? 'border-2 border-cyan-400' : ''} ${isSelected ? 'ring-2 ring-blue-500' : ''}"
+                <div class="car-card bg-neutral-700 hover:bg-neutral-600 rounded-lg px-3 py-1 cursor-pointer transition ${isPlayer ? 'border-2 border-cyan-400' : ''} ${isSelected ? 'ring-2 ring-blue-500' : ''}"
                      data-car-idx="${driver.CarIdx}">
                     <div class="grid grid-cols-[auto,1fr,1fr,auto] gap-3 items-center mb-2">
                         <span class="car-position text-xl font-bold text-white">${position}</span>
