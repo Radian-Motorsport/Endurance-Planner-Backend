@@ -354,13 +354,14 @@ export class TrackMapComponent {
                 // Configuration for line and arrow
                 const lineConfig = {
                     colour: '#dc2626',      // Line colour (red)
-                    strokeWidth: '2px'
+                    strokeWidth: '1px',
+                    scale: 0.5
                 };
                 
                 const arrowConfig = {
                     colour: '#dc2626',      // Arrow colour (lighter red for distinction)
-                    strokeWidth: '2px',
-                    scale: 0.3              // Scale factor for arrow (0.7 = 70% of original size)
+                    strokeWidth: '1px',
+                    scale: 0.5              // Scale factor for arrow (0.7 = 70% of original size)
                 };
 
                 paths.forEach((path, index) => {
