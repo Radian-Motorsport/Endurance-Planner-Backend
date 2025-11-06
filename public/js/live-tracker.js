@@ -146,6 +146,9 @@ class LiveStrategyTracker {
         this.currentStintFuelUse = [];   // Fuel use for each lap in current stint
         this.stintHistory = [];          // Array of completed stints with their data
         
+        // Stint calculation flag
+        this.hasCalculatedStints = false; // Track if stints have been calculated with live session time
+        
         // Time mode (Auto = live telemetry, Manual = user countdown)
         this.timeMode = 'auto';  // 'auto' or 'manual'
         this.manualTimerInterval = null;
@@ -1095,6 +1098,13 @@ class LiveStrategyTracker {
             this.sessionTimeRemain = values.SessionTimeRemain || 0;
         }
         
+        // Calculate stints on first telemetry update with actual session time
+        if (!this.hasCalculatedStints && this.strategy && this.sessionTimeRemain > 0) {
+            console.log(`🔄 First telemetry update - recalculating stints for ${this.formatTime(this.sessionTimeRemain)} remaining`);
+            this.calculateStintsForRemainingTime();
+            this.hasCalculatedStints = true;
+        }
+        
         // Update remaining stats
         this.currentLap = values.Lap || 0;
         this.fuelLevel = values.FuelLevel || 0;
@@ -1629,6 +1639,7 @@ class LiveStrategyTracker {
         }
         
         // Initialize sessionTimeRemain with full race duration from strategy
+        // This will be overwritten by telemetry data when it arrives
         if (strategy.strategyState && strategy.strategyState.raceDurationSeconds) {
             this.sessionTimeRemain = strategy.strategyState.raceDurationSeconds;
             console.log(`⏱️ Race duration initialized: ${this.formatTime(this.sessionTimeRemain)}`);
@@ -1645,20 +1656,84 @@ class LiveStrategyTracker {
             console.warn('⚠️ No selectedEvent found in strategy:', strategy);
         }
         
-        // Use pre-calculated stints from planner (already in strategy.stints)
-        if (strategy.stints && Array.isArray(strategy.stints) && strategy.stints.length > 0) {
-            console.log('✅ Using pre-calculated stints from planner - CALLING populateStintTable()');
-            console.log('STINTS ARRAY LENGTH:', strategy.stints.length);
-            console.log('FIRST STINT:', strategy.stints[0]);
-            this.populateStintTable();
-        } else if (strategy.strategyState && strategy.formData) {
-            // Fallback: recalculate if stints not present
-            console.log('⚠️ Pre-calculated stints not found, recalculating...');
-            this.calculateStints();
-        } else {
-            console.warn('❌ No stints or strategy state found');
-            this.populateStintTable();
+        // Don't populate stint table yet - wait for telemetry to get actual session time
+        // The table will be populated when handleTelemetryUpdate receives SessionTimeRemain
+        console.log('⏳ Waiting for telemetry data to calculate stints based on actual session time...');
+    }
+    
+    calculateStintsForRemainingTime() {
+        if (!this.strategy || !this.strategy.strategyState || !this.strategy.formData) {
+            console.warn('⚠️ Cannot calculate stints - missing strategy data');
+            return;
         }
+        
+        const state = this.strategy.strategyState;
+        const formData = this.strategy.formData;
+        
+        // Get average lap time
+        const avgLapTimeMinutes = parseInt(formData.avgLapTimeMinutes) || 0;
+        const avgLapTimeSeconds = parseInt(formData.avgLapTimeSeconds) || 0;
+        let avgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
+        
+        if (avgLapTime === 0) {
+            avgLapTime = 120; // 2 minute default
+            console.warn(`⚠️ No lap time, using default: ${avgLapTime}s`);
+        }
+        
+        // Get fuel parameters from strategy
+        const tankSize = state.tankSize || 100;
+        const fuelPerLap = state.fuelPerLap || 2.0;
+        const pitStopTime = state.pitStopTime || 90;
+        
+        // Calculate laps per stint based on fuel
+        const lapsPerStint = Math.floor(tankSize / fuelPerLap);
+        
+        // Calculate total laps remaining in session
+        const totalLapsRemaining = Math.floor(this.sessionTimeRemain / avgLapTime);
+        
+        // Calculate number of stints needed
+        const totalStints = Math.ceil(totalLapsRemaining / lapsPerStint);
+        
+        console.log(`🔧 Calculating stints for remaining time:
+  Session time remaining: ${this.formatTime(this.sessionTimeRemain)}
+  Avg lap time: ${avgLapTime}s
+  Total laps remaining: ${totalLapsRemaining}
+  Laps per stint (fuel): ${lapsPerStint}
+  Stints needed: ${totalStints}`);
+        
+        const stints = [];
+        let currentLap = 1;
+        
+        for (let i = 1; i <= totalStints; i++) {
+            const stintDriver = this.strategy.stintDriverAssignments?.[i-1] || 'Unassigned';
+            const startLap = Math.floor(currentLap);
+            const endLap = Math.min(Math.floor(currentLap + lapsPerStint - 1), totalLapsRemaining);
+            const laps = endLap - startLap + 1;
+            
+            // Calculate times
+            const startTime = this.formatTimeSeconds((startLap - 1) * avgLapTime);
+            const endTime = this.formatTimeSeconds(endLap * avgLapTime);
+            
+            stints.push({
+                stintNumber: i,
+                driver: stintDriver,
+                startLap: startLap,
+                endLap: endLap,
+                laps: laps,
+                startTime: startTime,
+                endTime: endTime
+            });
+            
+            // Next stint starts after this one ends
+            currentLap = endLap + 1;
+            
+            // Stop if we've reached the end of the session
+            if (currentLap > totalLapsRemaining) break;
+        }
+        
+        this.strategy.stints = stints;
+        console.log(`✅ Calculated ${stints.length} stints for remaining session time`);
+        this.populateStintTable();
     }
     
     calculateStints() {
@@ -1769,6 +1844,8 @@ class LiveStrategyTracker {
         this.pitStopDuration = pitStopTime;
         
         stints.forEach((stint, index) => {
+            console.log(`  Creating row for stint ${stint.stintNumber}:`, stint);
+            
             // Create stint row
             const stintRow = document.createElement('tr');
             stintRow.setAttribute('data-role', 'stint');
@@ -1788,6 +1865,7 @@ class LiveStrategyTracker {
             `;
             
             tbody.appendChild(stintRow);
+            console.log(`  ✅ Stint row appended to tbody`);
             
             // Create pit stop row (except after last stint)
             if (index < stints.length - 1) {
@@ -1810,6 +1888,9 @@ class LiveStrategyTracker {
                 tbody.appendChild(pitRow);
             }
         });
+        
+        console.log(`✅ Stint table populated with ${stints.length} stints`);
+        console.log(`  Total rows in tbody:`, tbody.children.length);
     }
     
     /**
