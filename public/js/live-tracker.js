@@ -1000,12 +1000,25 @@ class LiveStrategyTracker {
         carListContainer.innerHTML = classDrivers.map(driver => {
             const isPlayer = driver.CarIdx === this.playerCarIdx;
             const isSelected = driver.CarIdx === this.selectedCarIdx;
-            const position = this.carAnalysisData[driver.CarIdx]?.classPosition || '--';
+            const carData = this.carAnalysisData[driver.CarIdx] || {};
+            
+            const position = carData.classPosition || '--';
+            const offTrackCount = this.carPositionTracker?.getOffTrackCount(driver.CarIdx) || 0;
+            const stintLaps = carData.stintLaps || 0;
+            const lastLapTime = carData.lastLapTime || 0;
+            
+            // Format last lap time
+            const formatLapTime = (seconds) => {
+                if (!seconds || seconds <= 0) return '--';
+                const mins = Math.floor(seconds / 60);
+                const secs = (seconds % 60).toFixed(3);
+                return `${mins}:${secs.padStart(6, '0')}`;
+            };
             
             return `
                 <div class="car-card bg-neutral-700 hover:bg-neutral-600 rounded-lg p-3 cursor-pointer transition ${isPlayer ? 'border-2 border-cyan-400' : ''} ${isSelected ? 'ring-2 ring-blue-500' : ''}"
                      data-car-idx="${driver.CarIdx}">
-                    <div class="grid grid-cols-[auto,1fr,1fr,auto] gap-3 items-center">
+                    <div class="grid grid-cols-[auto,1fr,1fr,auto] gap-3 items-center mb-2">
                         <span class="car-position text-xl font-bold text-white">${position}</span>
                         <div class="min-w-0">
                             <div class="text-sm font-semibold text-neutral-200 truncate">${driver.TeamName || 'No Team'} ${isPlayer ? '<span class="text-xs bg-cyan-500 text-black px-2 py-0.5 rounded ml-1">YOU</span>' : ''}</div>
@@ -1017,6 +1030,20 @@ class LiveStrategyTracker {
                         <div class="text-right text-xs space-y-1">
                             <div class="text-neutral-500">Div ${driver.DivisionID || '--'}</div>
                             <div class="text-yellow-400">iR: ${driver.IRating || '--'}</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-xs border-t border-neutral-600 pt-2">
+                        <div>
+                            <span class="text-neutral-500">Inc:</span>
+                            <span class="text-red-400 font-mono ml-1">${offTrackCount}</span>
+                        </div>
+                        <div>
+                            <span class="text-neutral-500">Last:</span>
+                            <span class="text-cyan-400 font-mono ml-1">${formatLapTime(lastLapTime)}</span>
+                        </div>
+                        <div>
+                            <span class="text-neutral-500">Stint:</span>
+                            <span class="text-green-400 font-mono ml-1">${stintLaps}L</span>
                         </div>
                     </div>
                 </div>
