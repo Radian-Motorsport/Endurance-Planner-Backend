@@ -165,6 +165,7 @@ class LiveStrategyTracker {
         this.playerCarClass = null;
         this.selectedCarIdx = null;
         this.carAnalysisData = {};
+        this.lastCarAnalysisUpdate = 0; // Throttle position updates
         
         this.elements = {};
         this.initializeElements();
@@ -624,10 +625,14 @@ class LiveStrategyTracker {
             };
         });
         
-        // Only update positions in existing cards instead of full re-render
-        this.updateCarListPositions();
+        // Throttle position updates to every 500ms to prevent flashing
+        const now = Date.now();
+        if (now - this.lastCarAnalysisUpdate > 500) {
+            this.updateCarListPositions();
+            this.lastCarAnalysisUpdate = now;
+        }
         
-        // Update selected car details if one is selected
+        // Update selected car details if one is selected (always update this)
         if (this.selectedCarIdx !== null) {
             this.updateCarDetails();
         }
