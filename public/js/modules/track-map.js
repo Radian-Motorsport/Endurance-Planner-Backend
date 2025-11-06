@@ -322,9 +322,9 @@ export class TrackMapComponent {
         // Colours for individual background elements (Pavement, Buildings, Water, Bridge)
         if (layerName === 'background') {
             const elementColours = {
-                'Pavement': '#636466',       // Dark gray (keep default)
-                'Buildings': '#2a2a2a',      // Darker gray for buildings
-                'Water': '#8991ff',          // Blue for water bodies
+                'Pavement': '#646464ff',       // Dark gray (keep default)
+                'Buildings': '#585858ff',      // Darker gray for buildings
+                'Water': '#8990fcff',          // Blue for water bodies
                 'Bridge': '#636466',         // Dark gray (keep default, same as Pavement)
                 'Bridge_1_': '#636466',      // Dark gray for numbered bridges
                 'Bridge_2_': '#636466',
