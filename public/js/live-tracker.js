@@ -886,18 +886,20 @@ class LiveStrategyTracker {
             return `
                 <div class="car-card bg-neutral-700 hover:bg-neutral-600 rounded-lg p-3 cursor-pointer transition ${isPlayer ? 'border-2 border-cyan-400' : ''} ${isSelected ? 'ring-2 ring-blue-500' : ''}"
                      data-car-idx="${driver.CarIdx}">
-                    <div class="grid grid-cols-[auto,1fr,auto] gap-3 items-center">
+                    <div class="grid grid-cols-[auto,1fr,1fr,auto] gap-3 items-center">
                         <span class="car-position text-xl font-bold text-white">${position}</span>
                         <div class="min-w-0">
                             <div class="text-sm font-semibold text-neutral-200 truncate">${driver.TeamName || 'No Team'} ${isPlayer ? '<span class="text-xs bg-cyan-500 text-black px-2 py-0.5 rounded ml-1">YOU</span>' : ''}</div>
                             <div class="text-xs text-neutral-400 truncate">${driver.UserName || 'Unknown'}</div>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="text-xs text-neutral-400 truncate">${driver.CarScreenNameShort || driver.CarPath || 'Unknown Car'}</div>
                         </div>
                         <div class="text-right text-xs space-y-1">
                             <div class="text-neutral-500">Div ${driver.DivisionID || '--'}</div>
                             <div class="text-yellow-400">iR: ${driver.IRating || '--'}</div>
                         </div>
                     </div>
-                    <div class="text-xs text-neutral-500 mt-1 truncate">${driver.CarScreenNameShort || driver.CarPath || 'Unknown Car'}</div>
                 </div>
             `;
         }).join('');
@@ -938,6 +940,11 @@ class LiveStrategyTracker {
                 card.classList.remove('ring-2', 'ring-blue-500');
             }
         });
+        
+        // Highlight selected car on track map
+        if (this.carPositionTracker) {
+            this.carPositionTracker.setSelectedCar(carIdx);
+        }
     }
     
     updateCarDetails() {

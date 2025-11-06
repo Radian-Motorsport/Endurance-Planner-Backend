@@ -30,12 +30,12 @@ export class CarPositionTracker {
             // LMP
             2523: '#598afcea',
             // GT3
-            4046: '#fc26e3ff',
-            4091: '#fc26e3ff',
-            4090: '#fc26e3ff',
-            4083: '#fc26e3ff',
-            4072: '#fc26e3ff',
-            4011: '#fc26e3ff',
+            4046: '#fa59e7ff',
+            4091: '#fa59e7ff',
+            4090: '#fa59e7ff',
+            4083: '#fa59e7ff',
+            4072: '#fa59e7ff',
+            4011: '#fa59e7ff',
             // GT4
             4088: '#35ff12ff',
             4084: '#35ff12ff'
@@ -45,6 +45,7 @@ export class CarPositionTracker {
         
         this.svg = null;
         this.carMarkers = new Map();  // Map of carIdx -> SVG circle element
+        this.carCenterDots = new Map();  // Map of carIdx -> center dot element for selected cars
         this.classColors = new Map();  // Map of classId -> assigned color (now just for tracking)
         this.discoveredClasses = new Set();  // Set of all discovered class IDs
         this.isInitialized = false;
@@ -54,6 +55,9 @@ export class CarPositionTracker {
         // Off-track incident tracking
         this.offTrackCounts = new Map();  // Map of carIdx -> count
         this.previousTrackSurface = new Map();  // Map of carIdx -> last track surface state
+        
+        // Selected car tracking (for car analysis UI)
+        this.selectedCarIdx = null;
         
         // Racing line mode properties
         this.racingLinePoints = null;  // Array of {x, y} points from database
@@ -251,6 +255,20 @@ export class CarPositionTracker {
         // Store in map
         this.carMarkers.set(carIdx, marker);
         
+        // Create center dot for selection indicator (initially hidden)
+        const centerDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        centerDot.setAttribute('id', `car-center-dot-${carIdx}`);
+        centerDot.setAttribute('r', this.options.carRadius / 3); // 1/3 of main marker size
+        centerDot.setAttribute('fill', '#000000'); // Black dot
+        centerDot.setAttribute('opacity', '0'); // Hidden by default
+        centerDot.setAttribute('cx', startPoint.x);
+        centerDot.setAttribute('cy', startPoint.y);
+        centerDot.style.transition = 'cx 0.1s linear, cy 0.1s linear, opacity 0.2s';
+        centerDot.style.pointerEvents = 'none'; // Don't block clicks
+        
+        this.svg.appendChild(centerDot);
+        this.carCenterDots.set(carIdx, centerDot);
+        
         console.log(`✅ Created car marker: idx=${carIdx}, class=${classId}, color=${fillColor}, isPlayer=${isPlayer}, position=(${startPoint.x.toFixed(1)}, ${startPoint.y.toFixed(1)})`);
         
         return marker;
@@ -265,6 +283,12 @@ export class CarPositionTracker {
         if (marker && marker.parentNode) {
             marker.parentNode.removeChild(marker);
             this.carMarkers.delete(carIdx);
+        }
+        
+        const centerDot = this.carCenterDots.get(carIdx);
+        if (centerDot && centerDot.parentNode) {
+            centerDot.parentNode.removeChild(centerDot);
+            this.carCenterDots.delete(carIdx);
         }
     }
     
@@ -372,6 +396,13 @@ export class CarPositionTracker {
                 // Update marker position
                 marker.setAttribute('cx', interpolatedX);
                 marker.setAttribute('cy', interpolatedY);
+                
+                // Update center dot position if it exists
+                const centerDot = this.carCenterDots.get(carIdx);
+                if (centerDot) {
+                    centerDot.setAttribute('cx', interpolatedX);
+                    centerDot.setAttribute('cy', interpolatedY);
+                }
                 
                 // Update stroke color based on track surface (all cars)
                 if (CarIdxTrackSurface && CarIdxTrackSurface[carIdx] != null) {
@@ -644,6 +675,36 @@ export class CarPositionTracker {
         }
         
         return classInfo.sort((a, b) => a.classId - b.classId);
+    }
+    
+    /**
+     * Set the selected car for analysis UI highlighting
+     * Shows a black center dot on the selected car's marker
+     * @param {number|null} carIdx - Car index to select, or null to clear selection
+     */
+    setSelectedCar(carIdx) {
+        // Hide previous selection's center dot
+        if (this.selectedCarIdx !== null) {
+            const prevDot = this.carCenterDots.get(this.selectedCarIdx);
+            if (prevDot) {
+                prevDot.setAttribute('opacity', '0');
+            }
+        }
+        
+        // Update selected car
+        this.selectedCarIdx = carIdx;
+        
+        // Show new selection's center dot
+        if (carIdx !== null) {
+            const newDot = this.carCenterDots.get(carIdx);
+            if (newDot) {
+                newDot.setAttribute('opacity', '1');
+                
+                if (this.options.showDebugInfo) {
+                    console.log(`🎯 Selected car ${carIdx} on track map`);
+                }
+            }
+        }
     }
 }
 
