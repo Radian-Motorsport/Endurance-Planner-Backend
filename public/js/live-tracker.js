@@ -184,6 +184,7 @@ class LiveStrategyTracker {
         this.sectors = [];
         this.currentSector = null;
         this.trackLength = null;
+        this.sectorsInitialized = false;
         
         // Sector incident tracking
         this.sectorIncidents = new Map(); // carIdx -> { sectorNum, startTime, active, triggered }
@@ -191,6 +192,10 @@ class LiveStrategyTracker {
         this.sectorIncidentTimeouts = new Map(); // sectorNum -> timeoutId for clearing
         this.incidentTimeout = 10000; // Clear incident markers after 10 seconds
         this.incidentMinDuration = 1000; // Off-track must last 1+ seconds to trigger incident
+        
+        // Sector time tracking for class comparison
+        this.carSectorTimes = new Map(); // carIdx -> Map(sectorNum -> lastSectorTime)
+        this.previousCarSectors = new Map(); // carIdx -> last completed sector number
         
         // Lap progress multi-car display
         this.showAllCarsOnProgress = false;
@@ -628,6 +633,9 @@ class LiveStrategyTracker {
     }
     
     updateCarPosition(values) {
+        // Track sector times for class comparison
+        this.trackSectorTimes(values);
+        
         // Update simple lap progress bar
         const lapProgressDot = document.getElementById('lap-progress-dot');
         
@@ -1196,6 +1204,229 @@ class LiveStrategyTracker {
     }
     
     /**
+     * Track sector completion times for cars in player's class
+     * Records the time taken to complete each sector for comparison
+     */
+    trackSectorTimes(values) {
+        if (!this.sectors.length || !this.playerCarClass || !this.driversList.length) return;
+        
+        const CarIdxLapDistPct = values.CarIdxLapDistPct || [];
+        const CarIdxEstTime = values.CarIdxEstTime || [];
+        
+        // Track sector times for cars in player's class (including player)
+        this.driversList.forEach(driver => {
+            const carIdx = driver.CarIdx;
+            if (carIdx === undefined) return;
+            
+            // Only track cars in player's class
+            if (driver.CarClassID !== this.playerCarClass) return;
+            
+            const lapDistPct = CarIdxLapDistPct[carIdx];
+            const estTime = CarIdxEstTime[carIdx];
+            
+            if (lapDistPct === undefined || estTime === undefined) return;
+            
+            // Determine current sector for this car
+            let currentSectorNum = null;
+            for (let i = 0; i < this.sectors.length; i++) {
+                const sector = this.sectors[i];
+                const nextSector = this.sectors[i + 1];
+                
+                if (nextSector) {
+                    if (lapDistPct >= sector.startPct && lapDistPct < nextSector.startPct) {
+                        currentSectorNum = sector.number;
+                        break;
+                    }
+                } else {
+                    if (lapDistPct >= sector.startPct || lapDistPct < this.sectors[0].startPct) {
+                        currentSectorNum = sector.number;
+                        break;
+                    }
+                }
+            }
+            
+            if (currentSectorNum === null) return;
+            
+            // Initialize maps for this car if needed
+            if (!this.carSectorTimes.has(carIdx)) {
+                this.carSectorTimes.set(carIdx, new Map());
+            }
+            
+            const previousSector = this.previousCarSectors.get(carIdx);
+            
+            // Detect sector boundary crossing (sector changed)
+            if (previousSector !== undefined && previousSector !== currentSectorNum) {
+                // Car just completed previousSector, now in currentSectorNum
+                // Record the time for the completed sector
+                const sectorTimes = this.carSectorTimes.get(carIdx);
+                
+                // Store EstTime as the completion time for this sector
+                // (This is cumulative time, so delta between sectors = sector time)
+                sectorTimes.set(previousSector, estTime);
+            }
+            
+            // Update previous sector
+            this.previousCarSectors.set(carIdx, currentSectorNum);
+        });
+    }
+    
+    /**
+     * Get sector time for a specific car and sector
+     * Returns the last recorded time for that sector, or null if not yet recorded
+     */
+    getCarSectorTime(carIdx, sectorNum) {
+        const sectorTimes = this.carSectorTimes.get(carIdx);
+        if (!sectorTimes) return null;
+        return sectorTimes.get(sectorNum) || null;
+    }
+    
+    /**
+     * Get best sector time in player's class for a specific sector
+     * Returns { carIdx, time, driver } or null
+     */
+    getBestSectorTime(sectorNum) {
+        if (!this.playerCarClass || !this.driversList.length) return null;
+        
+        let bestTime = null;
+        let bestCarIdx = null;
+        
+        this.driversList.forEach(driver => {
+            const carIdx = driver.CarIdx;
+            if (carIdx === undefined) return;
+            if (driver.CarClassID !== this.playerCarClass) return;
+            
+            const time = this.getCarSectorTime(carIdx, sectorNum);
+            if (time !== null && (bestTime === null || time < bestTime)) {
+                bestTime = time;
+                bestCarIdx = carIdx;
+            }
+        });
+        
+        if (bestTime === null) return null;
+        
+        return {
+            carIdx: bestCarIdx,
+            time: bestTime,
+            driver: this.driversList.find(d => d.CarIdx === bestCarIdx)
+        };
+    }
+    
+    /**
+     * Update sector comparison display
+     * Shows sector times for car ahead, player, and car behind in class
+     */
+    updateSectorComparison(values) {
+        const container = document.getElementById('sector-comparison-container');
+        if (!container || !this.sectors.length || !this.driversList.length) return;
+        
+        const playerCarIdx = values.PlayerCarIdx;
+        if (playerCarIdx === undefined) return;
+        
+        // Find player in drivers list
+        const playerDriver = this.driversList.find(d => d.CarIdx === playerCarIdx);
+        if (!playerDriver) return;
+        
+        const playerClassPos = values.CarIdxClassPosition?.[playerCarIdx];
+        if (playerClassPos === undefined) return;
+        
+        // Find car ahead and behind in class
+        let carAhead = null;
+        let carBehind = null;
+        
+        this.driversList.forEach(driver => {
+            const carIdx = driver.CarIdx;
+            if (carIdx === playerCarIdx) return; // Skip player
+            if (driver.CarClassID !== playerDriver.CarClassID) return; // Same class only
+            
+            const classPos = values.CarIdxClassPosition?.[carIdx];
+            if (classPos === undefined) return;
+            
+            if (classPos === playerClassPos - 1) {
+                carAhead = { driver, carIdx };
+            } else if (classPos === playerClassPos + 1) {
+                carBehind = { driver, carIdx };
+            }
+        });
+        
+        // Build comparison grid
+        let html = '<div class="grid grid-cols-1 gap-1">';
+        
+        // Header row
+        html += '<div class="grid gap-1" style="grid-template-columns: 150px repeat(' + this.sectors.length + ', 1fr);">';
+        html += '<div class="bg-neutral-900 px-3 py-2 text-xs font-bold text-neutral-400 rounded">Driver</div>';
+        this.sectors.forEach(sector => {
+            html += `<div class="bg-neutral-900 px-2 py-2 text-xs font-bold text-center text-neutral-400 rounded">S${sector.number}</div>`;
+        });
+        html += '</div>';
+        
+        // Car ahead row
+        if (carAhead) {
+            html += this.renderSectorComparisonRow(carAhead.driver, carAhead.carIdx, playerCarIdx, values, 'ahead');
+        }
+        
+        // Player row
+        html += this.renderSectorComparisonRow(playerDriver, playerCarIdx, playerCarIdx, values, 'player');
+        
+        // Car behind row
+        if (carBehind) {
+            html += this.renderSectorComparisonRow(carBehind.driver, carBehind.carIdx, playerCarIdx, values, 'behind');
+        }
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    /**
+     * Render a single row for sector comparison
+     */
+    renderSectorComparisonRow(driver, carIdx, playerCarIdx, values, position) {
+        const isPlayer = carIdx === playerCarIdx;
+        const bgClass = isPlayer ? 'bg-blue-900/30' : 'bg-neutral-900/50';
+        
+        let html = '<div class="grid gap-1" style="grid-template-columns: 150px repeat(' + this.sectors.length + ', 1fr);">';
+        
+        // Driver name cell
+        const positionLabel = position === 'ahead' ? '↑ ' : position === 'behind' ? '↓ ' : '';
+        html += `<div class="${bgClass} px-3 py-2 text-sm rounded truncate ${isPlayer ? 'font-bold text-cyan-400' : 'text-neutral-300'}">`;
+        html += `${positionLabel}${driver.UserName || 'Unknown'}`;
+        html += '</div>';
+        
+        // Sector time cells
+        this.sectors.forEach(sector => {
+            const sectorTime = this.getCarSectorTime(carIdx, sector.number);
+            const playerSectorTime = this.getCarSectorTime(playerCarIdx, sector.number);
+            
+            let cellBg = bgClass;
+            let textColor = 'text-neutral-400';
+            
+            // Color coding for non-player cars
+            if (!isPlayer && sectorTime !== null && playerSectorTime !== null) {
+                if (sectorTime < playerSectorTime) {
+                    // Competitor is faster - BAD for player (red)
+                    cellBg = 'bg-red-900/40';
+                    textColor = 'text-red-300';
+                } else if (sectorTime > playerSectorTime) {
+                    // Competitor is slower - GOOD for player (green)
+                    cellBg = 'bg-green-900/40';
+                    textColor = 'text-green-300';
+                } else {
+                    // Same time (yellow)
+                    cellBg = 'bg-yellow-900/40';
+                    textColor = 'text-yellow-300';
+                }
+            } else if (isPlayer && sectorTime !== null) {
+                textColor = 'text-cyan-400';
+            }
+            
+            const timeDisplay = sectorTime !== null ? sectorTime.toFixed(3) : '--';
+            html += `<div class="${cellBg} px-2 py-2 text-xs font-mono text-center ${textColor} rounded">${timeDisplay}</div>`;
+        });
+        
+        html += '</div>';
+        return html;
+    }
+    
+    /**
      * Track off-track incidents per sector
      * If a car is off-track for >1 second, mark that sector with incident warning
      */
@@ -1680,6 +1911,9 @@ class LiveStrategyTracker {
         if (this.strategy) {
             this.updateStrategyComparison();
         }
+        
+        // Update sector comparison display
+        this.updateSectorComparison(values);
     }
     
     startNewStint() {
