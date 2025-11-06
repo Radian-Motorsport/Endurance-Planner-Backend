@@ -2,7 +2,7 @@
 // Loads strategies the exact same way the planner does and calculates stint tables
 
 // Debug flag - set to false to disable all debug logging
-const DEBUG = true;
+const DEBUG = false;
 const debug = (...args) => { if (DEBUG) console.log(...args); };
 
 /**
@@ -1836,8 +1836,8 @@ class LiveStrategyTracker {
         // Reject out-of-order packets - time should only decrease (counting down)
         if (this.lastSessionTimeRemain !== null && values.SessionTimeRemain != null) {
             const timeDiff = values.SessionTimeRemain - this.lastSessionTimeRemain;
-            // If time goes UP by more than 1 second, it's an old packet
-            if (timeDiff > 1) {
+            // If time goes UP by more than 0.5 seconds, it's an old packet
+            if (timeDiff > 0.5) {
                 debug(`⏭️ REJECTED old packet: time jumped from ${this.lastSessionTimeRemain}s to ${values.SessionTimeRemain}s (+${timeDiff}s)`);
                 return; // Discard this packet
             }
