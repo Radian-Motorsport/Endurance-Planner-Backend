@@ -191,6 +191,9 @@ class LiveStrategyTracker {
         this.incidentTimeout = 15000; // Clear incident markers after 15 seconds
         this.incidentMinDuration = 1000; // Off-track must last 1+ seconds to trigger incident
         
+        // Lap progress multi-car display
+        this.showAllCarsOnProgress = false;
+        
         this.elements = {};
         this.initializeElements();
         this.setupEventListeners();
@@ -318,6 +321,24 @@ class LiveStrategyTracker {
                 } else {
                     pedalInputsDetails.classList.add('hidden');
                     togglePedalBtn.textContent = 'Show Inputs ▼';
+                }
+            });
+        }
+        
+        // Lap progress all cars toggle
+        const toggleProgressCarsBtn = document.getElementById('toggle-progress-cars');
+        if (toggleProgressCarsBtn) {
+            toggleProgressCarsBtn.addEventListener('click', () => {
+                this.showAllCarsOnProgress = !this.showAllCarsOnProgress;
+                toggleProgressCarsBtn.textContent = this.showAllCarsOnProgress ? 'Show Player Only' : 'Show All Cars';
+                const progressCarsContainer = document.getElementById('progress-car-dots-container');
+                if (progressCarsContainer) {
+                    if (this.showAllCarsOnProgress) {
+                        progressCarsContainer.classList.remove('hidden');
+                        this.renderProgressCars();
+                    } else {
+                        progressCarsContainer.classList.add('hidden');
+                    }
                 }
             });
         }
@@ -635,6 +656,11 @@ class LiveStrategyTracker {
             }
         }
         
+        // Update all cars on progress bar if enabled
+        if (this.showAllCarsOnProgress && values.CarIdxLapDistPct) {
+            this.renderProgressCars(values);
+        }
+        
         // Update car positions on track map (now supports multiple cars filtered by class)
         if (!this.carPositionTracker || !this.carPositionTracker.isInitialized) {
             return;
@@ -645,6 +671,54 @@ class LiveStrategyTracker {
         
         // Update car analysis data
         this.updateCarAnalysisData(values);
+    }
+    
+    renderProgressCars(values) {
+        const container = document.getElementById('progress-car-dots-container');
+        if (!container || !this.driversList.length) return;
+        
+        const playerCarIdx = values.PlayerCarIdx;
+        const carIdxLapDistPct = values.CarIdxLapDistPct;
+        
+        this.driversList.forEach(driver => {
+            const carIdx = driver.CarIdx;
+            if (carIdx === undefined || carIdx === playerCarIdx) return; // Skip player (shown separately)
+            
+            const lapDistPct = carIdxLapDistPct[carIdx];
+            if (lapDistPct == null || isNaN(lapDistPct)) return;
+            
+            // Create or get existing dot
+            let dot = container.querySelector(`[data-car-idx="${carIdx}"]`);
+            if (!dot) {
+                dot = document.createElement('div');
+                dot.dataset.carIdx = carIdx;
+                dot.className = 'absolute w-3 h-3 rounded-full transition-all duration-100 z-5';
+                dot.title = driver.UserName || `Car ${carIdx}`;
+                container.appendChild(dot);
+            }
+            
+            // Position the dot
+            const percentage = lapDistPct * 100;
+            dot.style.left = `${percentage}%`;
+            dot.style.transform = 'translateX(-50%)';
+            
+            // Color by class
+            const carClass = driver.CarClassShortName;
+            let bgColor = 'bg-neutral-500'; // default
+            
+            if (carClass === 'GT3') {
+                bgColor = 'bg-green-500';
+            } else if (carClass === 'GTE') {
+                bgColor = 'bg-blue-500';
+            } else if (carClass === 'LMP2') {
+                bgColor = 'bg-red-500';
+            } else if (carClass === 'LMP') {
+                bgColor = 'bg-purple-500';
+            }
+            
+            // Reset classes and apply new color
+            dot.className = `absolute w-3 h-3 rounded-full transition-all duration-100 z-5 ${bgColor}`;
+        });
     }
     
     updateCarAnalysisData(values) {
