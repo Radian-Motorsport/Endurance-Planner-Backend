@@ -450,16 +450,14 @@
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <h2 class="text-xl road-rage-font mb-4">Lap Progress</h2>
             <div class="relative w-full h-12 flex items-center">
-                <!-- Progress line -->
-                <div class="absolute w-full h-0.5 bg-white"></div>
-                <!-- Car position dot -->
-                <div id="lap-progress-dot" class="absolute w-4 h-4 bg-cyan-400 rounded-full shadow-lg transition-all duration-100" style="left: 0%; transform: translateX(-50%);"></div>
+                Progress line: <div class="absolute w-full h-0.5 bg-white"></div>
+                Car position dot: <div id="lap-progress-dot" class="absolute w-4 h-4 bg-cyan-400 rounded-full shadow-lg transition-all duration-100" style="left: 0%; transform: translateX(-50%);"></div>
             </div>
         </div>
         -->
         
         <!-- Stint Table -->
-        <div class="bg-neutral-800 rounded-lg p-6">
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <h2 class="text-xl road-rage-font mb-4">Stint Breakdown</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -486,8 +484,9 @@
                 </table>
             </div>
         </div>
-        
-        <!-- Strategy Load Modal -->
+    </div>
+    
+    <!-- Strategy Load Modal -->
         <div id="load-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
             <div class="bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4">
                 <h3 class="text-xl font-bold mb-4">Load Strategy</h3>
