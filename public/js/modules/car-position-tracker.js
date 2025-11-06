@@ -56,6 +56,13 @@ export class CarPositionTracker {
         this.offTrackCounts = new Map();  // Map of carIdx -> count
         this.previousTrackSurface = new Map();  // Map of carIdx -> last track surface state
         
+        // Stint and pit tracking
+        this.stintLapCounts = new Map();  // Map of carIdx -> laps completed this stint
+        this.previousOnPitRoad = new Map();  // Map of carIdx -> previous OnPitRoad state
+        this.previousLapCompleted = new Map();  // Map of carIdx -> previous LapCompleted value
+        this.lastPitDuration = new Map();  // Map of carIdx -> last pit stop duration in seconds
+        this.pitEntryTime = new Map();  // Map of carIdx -> timestamp when entered pit stall
+        
         // Selected car tracking (for car analysis UI)
         this.selectedCarIdx = null;
         

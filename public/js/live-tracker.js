@@ -611,18 +611,62 @@ class LiveStrategyTracker {
             const carIdx = driver.CarIdx;
             if (carIdx === undefined) return;
             
-            // Extract telemetry data for this car
-            this.carAnalysisData[carIdx] = {
-                bestLapTime: values.CarIdxBestLapTime?.[carIdx] || 0,
-                classPosition: values.CarIdxClassPosition?.[carIdx] || 0,
-                estTime: values.CarIdxEstTime?.[carIdx] || 0,
-                lap: values.CarIdxLap?.[carIdx] || 0,
-                lapCompleted: values.CarIdxLapCompleted?.[carIdx] || 0,
-                lastLapTime: values.CarIdxLastLapTime?.[carIdx] || 0,
-                onPitRoad: values.CarIdxOnPitRoad?.[carIdx] || false,
-                trackSurface: this.getTrackSurfaceName(values.CarIdxTrackSurface?.[carIdx]),
-                surfaceMaterial: this.getSurfaceMaterialName(values.CarIdxTrackSurfaceMaterial?.[carIdx])
-            };
+            // Get current values
+            const currentOnPitRoad = values.CarIdxOnPitRoad?.[carIdx] || false;
+            const currentLapCompleted = values.CarIdxLapCompleted?.[carIdx] || 0;
+            const currentTrackSurface = values.CarIdxTrackSurface?.[carIdx];
+            
+            // Initialize tracking data if first time seeing this car
+            if (!this.carAnalysisData[carIdx]) {
+                this.carAnalysisData[carIdx] = {
+                    stintLaps: 0,
+                    lastPitDuration: 0,
+                    pitEntryTime: null,
+                    previousOnPitRoad: false,
+                    previousLapCompleted: currentLapCompleted
+                };
+            }
+            
+            const carData = this.carAnalysisData[carIdx];
+            
+            // Track stint laps: increment when lap completes and not on pit road
+            if (currentLapCompleted > carData.previousLapCompleted && !currentOnPitRoad) {
+                carData.stintLaps++;
+            }
+            
+            // Detect pit road exit: reset stint lap counter
+            if (carData.previousOnPitRoad === true && currentOnPitRoad === false) {
+                carData.stintLaps = 0;
+            }
+            
+            // Track pit stop duration: start timer when entering pit stall
+            const isInPitStall = currentTrackSurface === 1 || currentTrackSurface === 'InPitStall';
+            const wasInPitStall = carData.pitEntryTime !== null;
+            
+            if (isInPitStall && !wasInPitStall) {
+                // Entering pit stall - start timer
+                carData.pitEntryTime = Date.now();
+            } else if (!isInPitStall && wasInPitStall) {
+                // Exiting pit stall - calculate duration and save it
+                const pitDuration = (Date.now() - carData.pitEntryTime) / 1000; // Convert to seconds
+                carData.lastPitDuration = pitDuration;
+                carData.pitEntryTime = null;
+            }
+            
+            // Update telemetry data
+            carData.bestLapTime = values.CarIdxBestLapTime?.[carIdx] || 0;
+            carData.classPosition = values.CarIdxClassPosition?.[carIdx] || 0;
+            carData.estTime = values.CarIdxEstTime?.[carIdx] || 0;
+            carData.lap = values.CarIdxLap?.[carIdx] || 0;
+            carData.lapCompleted = currentLapCompleted;
+            carData.lastLapTime = values.CarIdxLastLapTime?.[carIdx] || 0;
+            carData.onPitRoad = currentOnPitRoad;
+            carData.trackSurface = this.getTrackSurfaceName(currentTrackSurface);
+            carData.surfaceMaterial = this.getSurfaceMaterialName(values.CarIdxTrackSurfaceMaterial?.[carIdx]);
+            
+            // Store previous states for next comparison
+            carData.previousOnPitRoad = currentOnPitRoad;
+            carData.previousLapCompleted = currentLapCompleted;
         });
         
         // Throttle position updates to every 500ms to prevent flashing
@@ -966,6 +1010,12 @@ class LiveStrategyTracker {
             return seconds.toFixed(1) + 's';
         };
         
+        // Helper to format pit duration
+        const formatPitDuration = (seconds) => {
+            if (!seconds || seconds <= 0) return '--';
+            return seconds.toFixed(1) + 's';
+        };
+        
         // Get off-track count from car position tracker
         const offTrackCount = this.carPositionTracker?.getOffTrackCount(this.selectedCarIdx) || 0;
         
@@ -980,6 +1030,8 @@ class LiveStrategyTracker {
         document.getElementById('detail-track-surface').textContent = data.trackSurface || '--';
         document.getElementById('detail-surface-material').textContent = data.surfaceMaterial || '--';
         document.getElementById('detail-off-track').textContent = offTrackCount;
+        document.getElementById('detail-stint-laps').textContent = data.stintLaps || 0;
+        document.getElementById('detail-pit-duration').textContent = formatPitDuration(data.lastPitDuration);
     }
     
     handleTelemetryUpdate(data) {
