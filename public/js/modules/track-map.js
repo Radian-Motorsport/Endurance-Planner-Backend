@@ -316,8 +316,33 @@ export class TrackMapComponent {
                 }
             });
 
-
         }
+
+        // ========== MAP COLOURS: Selective element styling for background layer ==========
+        // Colours for individual background elements (Pavement, Buildings, Water, Bridge)
+        if (layerName === 'background') {
+            const elementColours = {
+                'Pavement': '#636466',       // Dark gray (keep default)
+                'Buildings': '#2a2a2a',      // Darker gray for buildings
+                'Water': '#8991ff',          // Blue for water bodies
+                'Bridge': '#636466',         // Dark gray (keep default, same as Pavement)
+                'Bridge_1_': '#636466',      // Dark gray for numbered bridges
+                'Bridge_2_': '#636466',
+                'Bridge_3_': '#636466'
+            };
+
+            // Apply colours to specific element groups
+            for (const [groupName, colour] of Object.entries(elementColours)) {
+                const groupElements = layerGroup.querySelectorAll(`g[id="${groupName}"] *`);
+                groupElements.forEach(el => {
+                    el.setAttribute('fill', colour);
+                    el.style.setProperty('fill', colour, 'important');
+                    el.setAttribute('stroke', colour);
+                    el.style.setProperty('stroke', colour, 'important');
+                });
+            }
+        }
+        // ============================= END MAP COLOURS ====================================
     }
     
     toggleLayer(layerName, visible) {
