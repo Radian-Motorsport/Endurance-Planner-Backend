@@ -126,6 +126,7 @@ class LiveStrategyTracker {
         this.currentStintNumber = 0;  // Stint number (starts at 0)
         this.currentDriver = '--';  // Driver name from broadcaster
         this.sessionTimeRemain = 0;
+        this.lastSessionTimeRemain = null;  // Track last valid time to detect out-of-order packets
         this.fuelLevel = 0;
         this.lastLapTime = 0;
         this.isConnected = false;
@@ -1832,11 +1833,22 @@ class LiveStrategyTracker {
         
         const values = data.values;
         
+        // Reject out-of-order packets - time should only decrease (counting down)
+        if (this.lastSessionTimeRemain !== null && values.SessionTimeRemain != null) {
+            const timeDiff = values.SessionTimeRemain - this.lastSessionTimeRemain;
+            // If time goes UP by more than 1 second, it's an old packet
+            if (timeDiff > 1) {
+                debug(`⏭️ REJECTED old packet: time jumped from ${this.lastSessionTimeRemain}s to ${values.SessionTimeRemain}s (+${timeDiff}s)`);
+                return; // Discard this packet
+            }
+        }
+        
         // Update live stats - use manual timer if in manual mode, otherwise use telemetry
         if (this.timeMode === 'manual') {
             this.sessionTimeRemain = this.manualTimeRemaining;
         } else {
             this.sessionTimeRemain = values.SessionTimeRemain || 0;
+            this.lastSessionTimeRemain = values.SessionTimeRemain; // Track for next comparison
         }
         
         // Calculate stints on first telemetry update with actual session time

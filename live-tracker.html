@@ -48,7 +48,7 @@
 </head>
 <body class="bg-neutral-900 text-neutral-200">
     
-    <div class="max-w-7xl lg:max-w-full mx-auto p-6"> <!-- RESPONSIVE WIDTH: constrained on mobile, full width on lg+ screens -->
+    <div class="max-w-7xl mx-auto p-6">
         <!-- Header -->
         <div class="text-center mb-8">
             <img src="assets/g457912.png" alt="RadianPlanner Logo" class="mx-auto w-32 h-auto mb-4">
@@ -76,14 +76,8 @@
             </div>
         </div>
         
-        <!-- Main Content Grid (2 columns on large screens) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            <!-- LEFT COLUMN -->
-            <div class="space-y-6">
-        
         <!-- Session Info Display -->
-        <div class="bg-neutral-800 rounded-lg p-6">
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <h3 class="text-xl road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Current Session</h3>
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div>
@@ -310,63 +304,22 @@
             </div>
         </div>
         
-        <!-- Stint Table - moved to bottom of left column -->
-        <div class="bg-neutral-800 rounded-lg p-6">
-            <h2 class="text-xl road-rage-font mb-4">Stint Breakdown</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-neutral-900">
-                        <tr>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Stint</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Start Time</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">End Time</th>
-                            <th class="px-3 py-3 text-right text-xs font-medium uppercase">Start Lap</th>
-                            <th class="px-3 py-3 text-right text-xs font-medium uppercase">End Lap</th>
-                            <th class="px-3 py-3 text-right text-xs font-medium uppercase">Laps</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Driver</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stint-table-body" class="divide-y divide-neutral-700">
-                        <tr>
-                            <td colspan="8" class="px-3 py-8 text-center text-neutral-500">
-                                <i class="fas fa-chart-line text-4xl mb-2"></i>
-                                <p>No strategy loaded. Click "Load Strategy" to begin.</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-            </div> <!-- END LEFT COLUMN -->
-            
-            <!-- RIGHT COLUMN -->
-            <div class="space-y-6">
-        
-        <!-- Pedal Trace & Driver Inputs - moved to top of right column -->
-        <div class="bg-neutral-800 rounded-lg p-6">
+        <!-- Pedal Trace & Driver Inputs -->
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl road-rage-font">Pedal Trace & Driver Inputs</h2>
-                <div class="flex gap-2">
-                    <button id="toggle-pedal-trace" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                        Hide Trace ▲
-                    </button>
-                    <button id="toggle-pedal-inputs" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                        Show Inputs ▼
-                    </button>
-                </div>
+                <button id="toggle-pedal-inputs" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                    Show Inputs ▼
+                </button>
             </div>
             
-            <!-- Pedal Trace & Inputs Container (Collapsible) -->
-            <div id="pedal-trace-container">
-                <!-- Pedal Trace Canvas -->
-                <div class="mb-4">
-                    <canvas id="pedal-canvas" width="800" height="200" class="w-full bg-neutral-900 rounded"></canvas>
-                </div>
-                
-                <!-- Driver Inputs Grid -->
-                <div id="driver-inputs-details" class="hidden">
+            <!-- Pedal Trace Canvas -->
+            <div class="mb-4">
+                <canvas id="pedal-canvas" width="800" height="200" class="w-full bg-neutral-900 rounded"></canvas>
+            </div>
+            
+            <!-- Driver Inputs Grid (Collapsible) -->
+            <div id="driver-inputs-details" class="hidden">
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                     <div class="bg-neutral-700 rounded p-3">
                         <div class="text-xs text-neutral-400 uppercase mb-1">Throttle</div>
@@ -406,11 +359,10 @@
                     </div>
                 </div>
             </div>
-            </div> <!-- END pedal-trace-container -->
         </div>
         
         <!-- Lap Progress Bar with Sectors -->
-        <div class="bg-neutral-800 rounded-lg p-6">
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl road-rage-font">Lap Progress</h2>
                 <div class="flex items-center gap-4 text-xs text-neutral-400">
@@ -446,7 +398,7 @@
         </div>
         
         <!-- Track Map with Car Position -->
-        <div class="bg-neutral-800 rounded-lg p-6">
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl road-rage-font">Track Map</h2>
                 <button id="toggle-track-map" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
@@ -465,7 +417,7 @@
         </div>
         
         <!-- Sector Time Comparison -->
-        <div class="bg-neutral-800 rounded-lg p-6">
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <h2 class="text-xl road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Sector Comparison</h2>
             <div id="sector-comparison-container" class="space-y-1">
                 <div class="text-neutral-500 text-xs text-center py-4">Sector times will appear during session</div>
@@ -567,6 +519,35 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Stint Table -->
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+            <h2 class="text-xl road-rage-font mb-4">Stint Breakdown</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-neutral-900">
+                        <tr>
+                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Stint</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Start Time</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">End Time</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium uppercase">Start Lap</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium uppercase">End Lap</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium uppercase">Laps</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Driver</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stint-table-body" class="divide-y divide-neutral-700">
+                        <tr>
+                            <td colspan="8" class="px-3 py-8 text-center text-neutral-500">
+                                <i class="fas fa-chart-line text-4xl mb-2"></i>
+                                <p>No strategy loaded. Click "Load Strategy" to begin.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     
     <!-- Strategy Load Modal -->
@@ -600,9 +581,6 @@
                 </div>
             </div>
         </div>
-        
-            </div> <!-- END RIGHT COLUMN -->
-        </div> <!-- END MAIN GRID -->
     </div>
     
     <!-- Track Map Modules -->
