@@ -709,13 +709,43 @@ class LiveStrategyTracker {
     }
     
     updateCarListPositions() {
-        // Update positions without re-rendering entire list (prevents flashing)
+        // Update all card header data without re-rendering entire list (prevents flashing)
         document.querySelectorAll('.car-card').forEach(card => {
             const carIdx = parseInt(card.dataset.carIdx);
-            const position = this.carAnalysisData[carIdx]?.classPosition || '--';
+            const carData = this.carAnalysisData[carIdx] || {};
+            
+            // Update position
+            const position = carData.classPosition || '--';
             const positionEl = card.querySelector('.car-position');
             if (positionEl) {
                 positionEl.textContent = position;
+            }
+            
+            // Update off-track incidents count
+            const offTrackCount = this.carPositionTracker?.getOffTrackCount(carIdx) || 0;
+            const incElement = card.querySelector('[data-stat="inc"]');
+            if (incElement) {
+                incElement.textContent = offTrackCount;
+            }
+            
+            // Update last lap time
+            const lastLapTime = carData.lastLapTime || 0;
+            const formatLapTime = (seconds) => {
+                if (!seconds || seconds <= 0) return '--';
+                const mins = Math.floor(seconds / 60);
+                const secs = (seconds % 60).toFixed(3);
+                return `${mins}:${secs.padStart(6, '0')}`;
+            };
+            const lastElement = card.querySelector('[data-stat="last"]');
+            if (lastElement) {
+                lastElement.textContent = formatLapTime(lastLapTime);
+            }
+            
+            // Update stint laps
+            const stintLaps = carData.stintLaps || 0;
+            const stintElement = card.querySelector('[data-stat="stint"]');
+            if (stintElement) {
+                stintElement.textContent = `${stintLaps}L`;
             }
         });
     }
@@ -1042,15 +1072,15 @@ class LiveStrategyTracker {
                     <div class="grid grid-cols-3 gap-2 text-xs border-t border-neutral-600 pt-2">
                         <div>
                             <span class="text-neutral-500">Inc:</span>
-                            <span class="text-red-400 font-mono ml-1">${offTrackCount}</span>
+                            <span data-stat="inc" class="text-red-400 font-mono ml-1">${offTrackCount}</span>
                         </div>
                         <div>
                             <span class="text-neutral-500">Last:</span>
-                            <span class="text-cyan-400 font-mono ml-1">${formatLapTime(lastLapTime)}</span>
+                            <span data-stat="last" class="text-cyan-400 font-mono ml-1">${formatLapTime(lastLapTime)}</span>
                         </div>
                         <div>
                             <span class="text-neutral-500">Stint:</span>
-                            <span class="text-green-400 font-mono ml-1">${stintLaps}L</span>
+                            <span data-stat="stint" class="text-green-400 font-mono ml-1">${stintLaps}L</span>
                         </div>
                     </div>
                 </div>
