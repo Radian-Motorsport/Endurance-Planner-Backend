@@ -195,6 +195,7 @@ class LiveStrategyTracker {
         
         // Sector time tracking for class comparison
         this.carSectorTimes = new Map(); // carIdx -> Map(sectorNum -> lastSectorTime)
+        this.carSectorStartTimes = new Map(); // carIdx -> Map(sectorNum -> estTime when sector started)
         this.previousCarSectors = new Map(); // carIdx -> last completed sector number
         
         // Lap progress multi-car display
@@ -1248,18 +1249,37 @@ class LiveStrategyTracker {
             if (!this.carSectorTimes.has(carIdx)) {
                 this.carSectorTimes.set(carIdx, new Map());
             }
+            if (!this.carSectorStartTimes) {
+                this.carSectorStartTimes = new Map();
+            }
+            if (!this.carSectorStartTimes.has(carIdx)) {
+                this.carSectorStartTimes.set(carIdx, new Map());
+            }
             
             const previousSector = this.previousCarSectors.get(carIdx);
+            const sectorStartTimes = this.carSectorStartTimes.get(carIdx);
             
             // Detect sector boundary crossing (sector changed)
             if (previousSector !== undefined && previousSector !== currentSectorNum) {
                 // Car just completed previousSector, now in currentSectorNum
-                // Record the time for the completed sector
-                const sectorTimes = this.carSectorTimes.get(carIdx);
+                const startTime = sectorStartTimes.get(previousSector);
                 
-                // Store EstTime as the completion time for this sector
-                // (This is cumulative time, so delta between sectors = sector time)
-                sectorTimes.set(previousSector, estTime);
+                if (startTime !== undefined) {
+                    // Calculate sector time as delta
+                    const sectorTime = estTime - startTime;
+                    
+                    // Store the sector time (not cumulative time)
+                    const sectorTimes = this.carSectorTimes.get(carIdx);
+                    sectorTimes.set(previousSector, sectorTime);
+                    
+                    console.log(`🏁 Car ${carIdx} completed sector ${previousSector}: ${sectorTime.toFixed(3)}s`);
+                }
+                
+                // Record start time for the new sector
+                sectorStartTimes.set(currentSectorNum, estTime);
+            } else if (previousSector === undefined) {
+                // First time tracking this car - record start time for current sector
+                sectorStartTimes.set(currentSectorNum, estTime);
             }
             
             // Update previous sector
