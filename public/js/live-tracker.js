@@ -704,23 +704,33 @@ class LiveStrategyTracker {
             const percentage = lapDistPct * 100;
             dot.style.left = `${percentage}%`;
             
-            // Color by class - check CarClassShortName
-            const carClass = driver.CarClassShortName;
-            let bgColor = 'bg-neutral-500'; // default
+            // Color by class using CarClassID (exact same logic as car-position-tracker.js)
+            const classId = driver.CarClassID;
             
-            // Match exact class names from iRacing
-            if (carClass === 'GT3' || carClass === 'GT3 Cup') {
-                bgColor = 'bg-green-500';
-            } else if (carClass === 'GTE' || carClass === 'GTLM') {
-                bgColor = 'bg-blue-500';
-            } else if (carClass === 'LMP2' || carClass === 'P2') {
-                bgColor = 'bg-red-500';
-            } else if (carClass === 'LMP' || carClass === 'P' || carClass === 'DPi' || carClass === 'GTP') {
-                bgColor = 'bg-purple-500';
-            }
+            // Fixed class color mapping (same as track map)
+            const classColorMap = {
+                // GTP
+                4029: '#fff265ff',
+                4074: '#fff265ff',
+                // LMP
+                2523: '#598afcea',
+                // GT3
+                4046: '#fa59e7ff',
+                4091: '#fa59e7ff',
+                4090: '#fa59e7ff',
+                4083: '#fa59e7ff',
+                4072: '#fa59e7ff',
+                4011: '#fa59e7ff',
+                // GT4
+                4088: '#35ff12ff',
+                4084: '#35ff12ff'
+            };
             
-            // Apply color class
-            dot.className = `absolute w-3 h-3 rounded-full transition-all duration-100 ${bgColor}`;
+            const color = classColorMap[classId] || '#9ca3af'; // Default gray for unknown
+            
+            // Apply styles
+            dot.className = 'absolute w-3 h-3 rounded-full transition-all duration-100';
+            dot.style.backgroundColor = color;
             dot.style.top = '50%';
             dot.style.transform = 'translate(-50%, -50%)';
         });
@@ -1119,7 +1129,7 @@ class LiveStrategyTracker {
             container.appendChild(marker);
             container.appendChild(label);
             
-            // Create sector info card
+            // Create sector info card with width matching sector length
             const nextSector = this.sectors[index + 1];
             const sectorEndPct = nextSector ? nextSector.startPct : 1.0;
             const sectorLength = (sectorEndPct - sector.startPct) * 100;
@@ -1131,6 +1141,7 @@ class LiveStrategyTracker {
             sectorCard.className = hadIncident 
                 ? 'bg-yellow-500 incident-active rounded px-2 py-1 text-center transition-colors'
                 : 'bg-neutral-700 rounded px-2 py-1 text-center transition-colors';
+            sectorCard.style.width = `${sectorLength}%`;
             sectorCard.innerHTML = `
                 <div class="font-bold text-xs">S${sector.number}</div>
                 <div class="text-[10px] text-neutral-400">${sectorLength.toFixed(1)}%</div>
