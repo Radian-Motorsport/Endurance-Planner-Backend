@@ -1732,18 +1732,37 @@ class LiveStrategyTracker {
     }
     
     populateStintTable() {
-        if (!this.strategy) return;
+        console.log('🔧 populateStintTable() called');
+        console.log('  this.strategy:', this.strategy);
+        console.log('  this.strategy.stints:', this.strategy?.stints);
+        console.log('  this.elements.stintTableBody:', this.elements.stintTableBody);
+        
+        if (!this.strategy) {
+            console.warn('⚠️ No strategy object');
+            return;
+        }
         
         const stints = this.strategy.stints;
         
         if (!stints || !Array.isArray(stints) || stints.length === 0) {
+            console.warn('⚠️ No stints array or empty:', stints);
             const tbody = this.elements.stintTableBody;
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-neutral-500 py-4">No stints loaded</td></tr>';
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-neutral-500 py-4">No stints loaded</td></tr>';
+            } else {
+                console.error('❌ stint-table-body element not found!');
+            }
             return;
         }
         
         const tbody = this.elements.stintTableBody;
+        if (!tbody) {
+            console.error('❌ stint-table-body element not found!');
+            return;
+        }
+        
         tbody.innerHTML = '';
+        console.log(`✅ Populating ${stints.length} stints`);
         
         // Get pit stop time from strategy
         const pitStopTime = this.strategy.strategyState?.pitStopTime || 90;
