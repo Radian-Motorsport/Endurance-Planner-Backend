@@ -180,6 +180,11 @@ class LiveStrategyTracker {
             'LMP': [2523]
         };
         
+        // Sector tracking
+        this.sectors = [];
+        this.currentSector = null;
+        this.trackLength = null;
+        
         this.elements = {};
         this.initializeElements();
         this.setupEventListeners();
@@ -609,13 +614,16 @@ class LiveStrategyTracker {
                     const percentage = lapDistPct * 100;
                     lapProgressDot.style.left = `${percentage}%`;
                     
+                    // Update current sector
+                    this.updateCurrentSector(lapDistPct);
+                    
                     // Change color when in pits
                     if (values.OnPitRoad) {
-                        lapProgressDot.classList.remove('bg-cyan-400');
-                        lapProgressDot.classList.add('bg-orange-400');
+                        lapProgressDot.classList.remove('bg-cyan-400', 'ring-cyan-300');
+                        lapProgressDot.classList.add('bg-orange-400', 'ring-orange-300');
                     } else {
-                        lapProgressDot.classList.remove('bg-orange-400');
-                        lapProgressDot.classList.add('bg-cyan-400');
+                        lapProgressDot.classList.remove('bg-orange-400', 'ring-orange-300');
+                        lapProgressDot.classList.add('bg-cyan-400', 'ring-cyan-300');
                     }
                 }
             }
@@ -939,8 +947,142 @@ class LiveStrategyTracker {
             series: seriesId
         });
         
+        // Initialize sectors from session data
+        this.initializeSectors(sessionData);
+        
         // Initialize car analysis with driver data
         this.initializeCarAnalysis(sessionData);
+    }
+    
+    /**
+     * Initialize sector markers from session data
+     */
+    initializeSectors(sessionData) {
+        // Get track length
+        this.trackLength = sessionData?.WeekendInfo?.TrackLength;
+        
+        // Get sector data
+        const splitTimeInfo = sessionData?.SplitTimeInfo;
+        if (!splitTimeInfo || !splitTimeInfo.Sectors) {
+            console.warn('⚠️ No sector data available');
+            return;
+        }
+        
+        this.sectors = splitTimeInfo.Sectors.map(sector => ({
+            number: sector.SectorNum,
+            startPct: sector.SectorStartPct
+        }));
+        
+        console.log('🏁 Sectors initialized:', {
+            trackLength: this.trackLength,
+            sectors: this.sectors
+        });
+        
+        // Draw sector markers on the lap progress bar
+        this.drawSectorMarkers();
+    }
+    
+    /**
+     * Draw visual sector markers on the lap progress bar
+     */
+    drawSectorMarkers() {
+        const container = document.getElementById('sector-markers-container');
+        const sectorInfoDisplay = document.getElementById('sector-info-display');
+        
+        if (!container || !this.sectors.length) return;
+        
+        container.innerHTML = '';
+        sectorInfoDisplay.innerHTML = '';
+        
+        this.sectors.forEach((sector, index) => {
+            // Create vertical marker line
+            const marker = document.createElement('div');
+            marker.className = 'absolute h-full border-l-2 border-dashed border-neutral-500';
+            marker.style.left = `${sector.startPct * 100}%`;
+            marker.style.transform = 'translateX(-50%)';
+            
+            // Create sector label
+            const label = document.createElement('div');
+            label.className = 'absolute text-[10px] text-neutral-400 font-mono';
+            label.style.left = `${sector.startPct * 100}%`;
+            label.style.top = '-18px';
+            label.style.transform = 'translateX(-50%)';
+            label.textContent = `S${sector.number}`;
+            
+            container.appendChild(marker);
+            container.appendChild(label);
+            
+            // Create sector info card
+            const nextSector = this.sectors[index + 1];
+            const sectorEndPct = nextSector ? nextSector.startPct : 1.0;
+            const sectorLength = (sectorEndPct - sector.startPct) * 100;
+            
+            const sectorCard = document.createElement('div');
+            sectorCard.id = `sector-card-${sector.number}`;
+            sectorCard.className = 'bg-neutral-700 rounded px-2 py-1 text-center transition-colors';
+            sectorCard.innerHTML = `
+                <div class="font-bold text-xs">S${sector.number}</div>
+                <div class="text-[10px] text-neutral-400">${sectorLength.toFixed(1)}%</div>
+            `;
+            
+            sectorInfoDisplay.appendChild(sectorCard);
+        });
+        
+        console.log('✅ Sector markers drawn');
+    }
+    
+    /**
+     * Update current sector based on lap distance
+     */
+    updateCurrentSector(lapDistPct) {
+        if (!this.sectors.length) return;
+        
+        // Find which sector we're in
+        let currentSectorNum = this.sectors[this.sectors.length - 1].number; // Default to last sector
+        
+        for (let i = 0; i < this.sectors.length; i++) {
+            const sector = this.sectors[i];
+            const nextSector = this.sectors[i + 1];
+            
+            if (nextSector) {
+                // Check if we're between this sector and the next
+                if (lapDistPct >= sector.startPct && lapDistPct < nextSector.startPct) {
+                    currentSectorNum = sector.number;
+                    break;
+                }
+            } else {
+                // Last sector wraps around to 0
+                if (lapDistPct >= sector.startPct || lapDistPct < this.sectors[0].startPct) {
+                    currentSectorNum = sector.number;
+                    break;
+                }
+            }
+        }
+        
+        // Update display if sector changed
+        if (this.currentSector !== currentSectorNum) {
+            this.currentSector = currentSectorNum;
+            
+            // Update sector display
+            const sectorDisplay = document.getElementById('current-sector-display');
+            if (sectorDisplay) {
+                sectorDisplay.textContent = `Sector ${currentSectorNum}`;
+            }
+            
+            // Highlight current sector card
+            this.sectors.forEach(sector => {
+                const card = document.getElementById(`sector-card-${sector.number}`);
+                if (card) {
+                    if (sector.number === currentSectorNum) {
+                        card.classList.remove('bg-neutral-700');
+                        card.classList.add('bg-cyan-600');
+                    } else {
+                        card.classList.remove('bg-cyan-600');
+                        card.classList.add('bg-neutral-700');
+                    }
+                }
+            });
+        }
     }
     
     initializeCarAnalysis(sessionData) {

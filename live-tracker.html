@@ -476,16 +476,31 @@
             </div>
         </div>
         
-        <!-- Lap Progress Bar -->
-        <!-- COMMENTED OUT - To be hidden for now
+        <!-- Lap Progress Bar with Sectors -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <h2 class="text-xl road-rage-font mb-4">Lap Progress</h2>
-            <div class="relative w-full h-12 flex items-center">
-                Progress line: <div class="absolute w-full h-0.5 bg-white"></div>
-                Car position dot: <div id="lap-progress-dot" class="absolute w-4 h-4 bg-cyan-400 rounded-full shadow-lg transition-all duration-100" style="left: 0%; transform: translateX(-50%);"></div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl road-rage-font">Lap Progress</h2>
+                <div class="text-sm text-neutral-400">
+                    <span id="current-sector-display">Sector --</span>
+                </div>
+            </div>
+            <div class="relative w-full h-16 flex items-center">
+                <!-- Base progress line -->
+                <div class="absolute w-full h-1 bg-neutral-700 rounded"></div>
+                
+                <!-- Sector markers container -->
+                <div id="sector-markers-container" class="absolute w-full h-full"></div>
+                
+                <!-- Car position dot -->
+                <div id="lap-progress-dot" class="absolute w-5 h-5 bg-cyan-400 rounded-full shadow-lg transition-all duration-100 z-10 ring-2 ring-cyan-300" 
+                     style="left: 0%; transform: translateX(-50%);"></div>
+            </div>
+            
+            <!-- Sector info display -->
+            <div id="sector-info-display" class="mt-4 grid grid-cols-5 gap-2 text-xs">
+                <!-- Sector info will be populated here -->
             </div>
         </div>
-        -->
         
         <!-- Stint Table -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
