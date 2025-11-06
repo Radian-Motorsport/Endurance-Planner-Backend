@@ -18,25 +18,34 @@ export class CarPositionTracker {
             ...options
         };
         
-        // Dynamic class color palette - vibrant, distinct colors for multiclass racing
-        this.classColorPalette = [
-            '#fff265ff', // Green
-            '#598afcea', // Amber
-            '#fc6aebff', // Purple
-            '#ec4899', // Pink
-            '#3b82f6', // Blue
-            '#ef4444', // Red
-            '#14b8a6', // Teal
-            '#f97316', // Orange
-            '#06b6d4', // Cyan (alternate)
-            '#a855f7', // Violet
-            '#84cc16', // Lime
-            '#f43f5e', // Rose2
-        ];
+        // Fixed class color mapping for multiclass racing
+        // GTP classes: 4029, 4074 → Yellow
+        // LMP class: 2523 → Blue
+        // GT3 classes: 4046, 4091, 4090, 4083, 4072, 4011 → Pink/Magenta
+        // GT4 classes: 4088, 4084 → Green
+        this.classColorMap = {
+            // GTP
+            4029: '#fff265ff',
+            4074: '#fff265ff',
+            // LMP
+            2523: '#598afcea',
+            // GT3
+            4046: '#fc26e3ff',
+            4091: '#fc26e3ff',
+            4090: '#fc26e3ff',
+            4083: '#fc26e3ff',
+            4072: '#fc26e3ff',
+            4011: '#fc26e3ff',
+            // GT4
+            4088: '#35ff12ff',
+            4084: '#35ff12ff'
+        };
+        
+        this.defaultClassColor = '#9ca3af'; // Gray for unknown classes
         
         this.svg = null;
         this.carMarkers = new Map();  // Map of carIdx -> SVG circle element
-        this.classColors = new Map();  // Map of classId -> assigned color
+        this.classColors = new Map();  // Map of classId -> assigned color (now just for tracking)
         this.discoveredClasses = new Set();  // Set of all discovered class IDs
         this.isInitialized = false;
         this.playerCarIdx = null;
@@ -48,34 +57,40 @@ export class CarPositionTracker {
     }
     
     /**
-     * Get color for a specific class, assigning one if not yet discovered
+     * Get color for a specific class using fixed class mapping
      * @param {number} classId - The class ID
      * @param {boolean} isPlayerClass - Whether this is the player's class
      * @returns {string} The color for this class
      */
     getClassColor(classId, isPlayerClass) {
-        // Player's class always uses player color
-        if (isPlayerClass) {
-            return this.options.playerCarColor;
+        // Player's car always uses cyan (not the whole class, just player's specific car)
+        // This is handled in getOrCreateCarMarker, not here
+        
+        // Check fixed class color map
+        if (this.classColorMap.hasOwnProperty(classId)) {
+            const color = this.classColorMap[classId];
+            
+            // Track this class (for info/debugging)
+            if (!this.classColors.has(classId)) {
+                this.classColors.set(classId, color);
+                this.discoveredClasses.add(classId);
+                
+                if (this.options.showDebugInfo) {
+                    console.log(`🎨 Class ${classId} assigned color ${color} (fixed mapping)`);
+                }
+            }
+            
+            return color;
         }
         
-        // Check if we've already assigned a color to this class
-        if (this.classColors.has(classId)) {
-            return this.classColors.get(classId);
+        // Unknown class - use default gray
+        if (!this.classColors.has(classId)) {
+            this.classColors.set(classId, this.defaultClassColor);
+            this.discoveredClasses.add(classId);
+            console.warn(`⚠️ Unknown class ${classId} - using default color ${this.defaultClassColor}`);
         }
         
-        // Assign next available color from palette
-        const colorIndex = this.discoveredClasses.size % this.classColorPalette.length;
-        const assignedColor = this.classColorPalette[colorIndex];
-        
-        this.classColors.set(classId, assignedColor);
-        this.discoveredClasses.add(classId);
-        
-        if (this.options.showDebugInfo) {
-            console.log(`🎨 Assigned color ${assignedColor} to class ${classId} (${this.discoveredClasses.size} classes total)`);
-        }
-        
-        return assignedColor;
+        return this.defaultClassColor;
     }
     
     /**
