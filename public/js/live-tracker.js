@@ -185,6 +185,12 @@ class LiveStrategyTracker {
         this.currentSector = null;
         this.trackLength = null;
         
+        // Sector incident tracking
+        this.sectorIncidents = new Map(); // carIdx -> { sectorNum, startTime, active }
+        this.activeSectorIncidents = new Set(); // Set of sector numbers with active incidents
+        this.incidentTimeout = 15000; // Clear incident markers after 15 seconds
+        this.incidentMinDuration = 1000; // Off-track must last 1+ seconds to trigger incident
+        
         this.elements = {};
         this.initializeElements();
         this.setupEventListeners();
@@ -702,6 +708,9 @@ class LiveStrategyTracker {
             carData.trackSurface = this.getTrackSurfaceName(currentTrackSurface);
             carData.surfaceMaterial = this.getSurfaceMaterialName(values.CarIdxTrackSurfaceMaterial?.[carIdx]);
             
+            // Track off-track incidents per sector
+            this.trackSectorIncident(carIdx, currentTrackSurface, values.CarIdxLapDistPct?.[carIdx]);
+            
             // Store previous states for next comparison
             carData.previousOnPitRoad = currentOnPitRoad;
             carData.previousLapCompleted = currentLapCompleted;
@@ -1073,15 +1082,117 @@ class LiveStrategyTracker {
             this.sectors.forEach(sector => {
                 const card = document.getElementById(`sector-card-${sector.number}`);
                 if (card) {
+                    // Don't override incident warnings
+                    const hasIncident = card.classList.contains('bg-yellow-500');
+                    
                     if (sector.number === currentSectorNum) {
-                        card.classList.remove('bg-neutral-700');
-                        card.classList.add('bg-cyan-600');
+                        if (!hasIncident) {
+                            card.classList.remove('bg-neutral-700');
+                            card.classList.add('bg-cyan-600');
+                        }
                     } else {
-                        card.classList.remove('bg-cyan-600');
-                        card.classList.add('bg-neutral-700');
+                        if (!hasIncident) {
+                            card.classList.remove('bg-cyan-600');
+                            card.classList.add('bg-neutral-700');
+                        }
                     }
                 }
             });
+        }
+    }
+    
+    /**
+     * Track off-track incidents per sector
+     * If a car is off-track for >1 second, mark that sector with incident warning
+     */
+    trackSectorIncident(carIdx, trackSurface, lapDistPct) {
+        if (!this.sectors.length || lapDistPct === undefined) return;
+        
+        const isOffTrack = trackSurface === 'OffTrack';
+        const now = Date.now();
+        
+        // Determine which sector the car is in
+        let carSectorNum = null;
+        for (let i = 0; i < this.sectors.length; i++) {
+            const sector = this.sectors[i];
+            const nextSector = this.sectors[i + 1];
+            
+            if (nextSector) {
+                if (lapDistPct >= sector.startPct && lapDistPct < nextSector.startPct) {
+                    carSectorNum = sector.number;
+                    break;
+                }
+            } else {
+                // Last sector wraps to start
+                if (lapDistPct >= sector.startPct || lapDistPct < this.sectors[0].startPct) {
+                    carSectorNum = sector.number;
+                    break;
+                }
+            }
+        }
+        
+        if (carSectorNum === null) return;
+        
+        // Get or create incident tracking for this car
+        let incident = this.sectorIncidents.get(carIdx);
+        
+        if (isOffTrack) {
+            if (!incident || !incident.active) {
+                // Start new off-track tracking
+                this.sectorIncidents.set(carIdx, {
+                    sectorNum: carSectorNum,
+                    startTime: now,
+                    active: true
+                });
+            } else {
+                // Continue tracking - check if duration threshold met
+                const duration = now - incident.startTime;
+                
+                if (duration >= this.incidentMinDuration) {
+                    // Incident confirmed - mark sector
+                    if (!this.activeSectorIncidents.has(carSectorNum)) {
+                        this.activeSectorIncidents.add(carSectorNum);
+                        this.updateSectorIncidentDisplay(carSectorNum, true);
+                        
+                        // Auto-clear after timeout
+                        setTimeout(() => {
+                            this.activeSectorIncidents.delete(carSectorNum);
+                            this.updateSectorIncidentDisplay(carSectorNum, false);
+                        }, this.incidentTimeout);
+                    }
+                }
+            }
+        } else {
+            // Car back on track - clear tracking
+            if (incident && incident.active) {
+                this.sectorIncidents.set(carIdx, { ...incident, active: false });
+            }
+        }
+    }
+    
+    /**
+     * Update visual indicator for sector incident
+     */
+    updateSectorIncidentDisplay(sectorNum, hasIncident) {
+        const card = document.getElementById(`sector-card-${sectorNum}`);
+        if (!card) return;
+        
+        if (hasIncident) {
+            // Yellow warning for incident
+            card.classList.remove('bg-neutral-700', 'bg-cyan-600');
+            card.classList.add('bg-yellow-500');
+            card.title = 'Incident detected in this sector';
+        } else {
+            // Clear incident - restore normal color
+            card.classList.remove('bg-yellow-500');
+            card.classList.add('bg-neutral-700');
+            card.title = '';
+            
+            // Re-apply cyan if this is the current sector
+            if (this.currentSector === sectorNum) {
+                card.classList.remove('bg-neutral-700');
+                card.classList.add('bg-cyan-600');
+            }
         }
     }
     
