@@ -159,6 +159,13 @@ class LiveStrategyTracker {
         this.trackMapComponent = null;
         this.carPositionTracker = null;
         
+        // Car Analysis
+        this.driversList = [];
+        this.playerCarIdx = null;
+        this.playerCarClass = null;
+        this.selectedCarIdx = null;
+        this.carAnalysisData = {};
+        
         this.elements = {};
         this.initializeElements();
         this.setupEventListeners();
@@ -304,6 +311,21 @@ class LiveStrategyTracker {
             });
         }
         
+        // Car Analysis toggle
+        const toggleCarAnalysisBtn = document.getElementById('toggle-car-analysis');
+        const carAnalysisDetails = document.getElementById('car-analysis-details');
+        if (toggleCarAnalysisBtn && carAnalysisDetails) {
+            toggleCarAnalysisBtn.addEventListener('click', () => {
+                if (carAnalysisDetails.classList.contains('hidden')) {
+                    carAnalysisDetails.classList.remove('hidden');
+                    toggleCarAnalysisBtn.textContent = 'Hide Analysis ▲';
+                } else {
+                    carAnalysisDetails.classList.add('hidden');
+                    toggleCarAnalysisBtn.textContent = 'Show Analysis ▼';
+                }
+            });
+        }
+        
         // Time mode toggle
         this.elements.timeAutoBtn?.addEventListener('click', () => this.setTimeMode('auto'));
         this.elements.timeManualBtn?.addEventListener('click', () => this.setTimeMode('manual'));
@@ -442,7 +464,7 @@ class LiveStrategyTracker {
             if (!this.trackMapComponent) {
                 this.trackMapComponent = new window.TrackMapComponent('track-map-container-live', {
                     showControls: true,
-                    defaultLayers: ['background', 'active', 'start-finish'],
+                    defaultLayers: ['background', 'active'],
                     maxHeight: '400px'
                 });
             }
@@ -573,6 +595,52 @@ class LiveStrategyTracker {
         
         // Pass full telemetry data to update all cars
         this.carPositionTracker.updateAllPositions(values);
+        
+        // Update car analysis data
+        this.updateCarAnalysisData(values);
+    }
+    
+    updateCarAnalysisData(values) {
+        if (!this.playerCarClass || !this.driversList.length) return;
+        
+        // Update car data for all drivers in player's class
+        this.driversList.forEach((driver, idx) => {
+            if (driver.CarClassID !== this.playerCarClass) return;
+            
+            const carIdx = driver.CarIdx;
+            if (carIdx === undefined) return;
+            
+            // Extract telemetry data for this car
+            this.carAnalysisData[carIdx] = {
+                bestLapTime: values.CarIdxBestLapTime?.[carIdx] || 0,
+                classPosition: values.CarIdxClassPosition?.[carIdx] || 0,
+                estTime: values.CarIdxEstTime?.[carIdx] || 0,
+                lap: values.CarIdxLap?.[carIdx] || 0,
+                lapCompleted: values.CarIdxLapCompleted?.[carIdx] || 0,
+                lastLapTime: values.CarIdxLastLapTime?.[carIdx] || 0,
+                onPitRoad: values.CarIdxOnPitRoad?.[carIdx] || false,
+                trackSurface: this.getTrackSurfaceName(values.CarIdxTrackSurface?.[carIdx]),
+                surfaceMaterial: this.getSurfaceMaterialName(values.CarIdxTrackSurfaceMaterial?.[carIdx])
+            };
+        });
+        
+        // Re-render car list to update positions
+        this.renderCarList();
+        
+        // Update selected car details if one is selected
+        if (this.selectedCarIdx !== null) {
+            this.updateCarDetails();
+        }
+    }
+    
+    getTrackSurfaceName(value) {
+        // Telemetry sends string values directly (e.g., "InPitStall", "OnTrack", "OffTrack")
+        return value || '--';
+    }
+    
+    getSurfaceMaterialName(value) {
+        // Telemetry sends string values directly (e.g., "Asphalt", "Concrete", "Grass")
+        return value || '--';
     }
     
     updateConnectionStatus(connected) {
@@ -740,6 +808,150 @@ class LiveStrategyTracker {
             event: eventType,
             series: seriesId
         });
+        
+        // Initialize car analysis with driver data
+        this.initializeCarAnalysis(sessionData);
+    }
+    
+    initializeCarAnalysis(sessionData) {
+        if (!sessionData?.DriverInfo?.Drivers) return;
+        
+        this.driversList = sessionData.DriverInfo.Drivers;
+        this.playerCarIdx = sessionData.DriverInfo.DriverCarIdx;
+        
+        // Find player's car class
+        const playerDriver = this.driversList[this.playerCarIdx];
+        if (playerDriver) {
+            this.playerCarClass = playerDriver.CarClassID;
+        }
+        
+        console.log('🏁 Car Analysis initialized:', {
+            totalDrivers: this.driversList.length,
+            playerCarIdx: this.playerCarIdx,
+            playerCarClass: this.playerCarClass
+        });
+        
+        // Render initial car list
+        this.renderCarList();
+    }
+    
+    renderCarList() {
+        const carListContainer = document.getElementById('car-list');
+        if (!carListContainer || !this.driversList.length) return;
+        
+        // Filter drivers in player's class
+        const classDrivers = this.driversList.filter(driver => 
+            driver.CarClassID === this.playerCarClass && driver.CarIdx !== undefined
+        );
+        
+        if (classDrivers.length === 0) {
+            carListContainer.innerHTML = `
+                <div class="text-neutral-500 text-sm text-center py-4">
+                    No other cars in your class
+                </div>
+            `;
+            return;
+        }
+        
+        // Sort by class position (will be updated via telemetry)
+        classDrivers.sort((a, b) => {
+            const posA = this.carAnalysisData[a.CarIdx]?.classPosition ?? 999;
+            const posB = this.carAnalysisData[b.CarIdx]?.classPosition ?? 999;
+            return posA - posB;
+        });
+        
+        // Render car cards
+        carListContainer.innerHTML = classDrivers.map(driver => {
+            const isPlayer = driver.CarIdx === this.playerCarIdx;
+            const position = this.carAnalysisData[driver.CarIdx]?.classPosition || '--';
+            
+            return `
+                <div class="car-card bg-neutral-700 hover:bg-neutral-600 rounded-lg p-3 cursor-pointer transition ${isPlayer ? 'border-2 border-cyan-400' : ''}"
+                     data-car-idx="${driver.CarIdx}">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg font-bold text-white">${position}</span>
+                            <span class="text-sm font-semibold text-neutral-200">${driver.TeamName || 'No Team'}</span>
+                            ${isPlayer ? '<span class="text-xs bg-cyan-500 text-black px-2 py-0.5 rounded">YOU</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="text-xs text-neutral-300 mb-1">${driver.CarScreenNameShort || driver.CarPath || 'Unknown Car'}</div>
+                    <div class="text-xs text-neutral-400">${driver.UserName || 'Unknown Driver'}</div>
+                    <div class="flex items-center space-x-3 mt-2 text-xs">
+                        <span class="text-neutral-500">Div ${driver.DivisionID || '--'}</span>
+                        <span class="text-yellow-400">iR: ${driver.IRating || '--'}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // Add click handlers to car cards
+        document.querySelectorAll('.car-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const carIdx = parseInt(card.dataset.carIdx);
+                this.selectCar(carIdx);
+            });
+        });
+    }
+    
+    selectCar(carIdx) {
+        this.selectedCarIdx = carIdx;
+        
+        // Update selected car details
+        this.updateCarDetails();
+        
+        // Show details container
+        const detailsContainer = document.getElementById('car-details-container');
+        if (detailsContainer) {
+            detailsContainer.classList.remove('hidden');
+        }
+        
+        // Update selected car name
+        const driver = this.driversList.find(d => d.CarIdx === carIdx);
+        const selectedCarName = document.getElementById('selected-car-name');
+        if (selectedCarName && driver) {
+            selectedCarName.textContent = `${driver.TeamName || 'No Team'} - ${driver.UserName || 'Unknown'}`;
+        }
+        
+        // Highlight selected card
+        document.querySelectorAll('.car-card').forEach(card => {
+            if (parseInt(card.dataset.carIdx) === carIdx) {
+                card.classList.add('ring-2', 'ring-blue-500');
+            } else {
+                card.classList.remove('ring-2', 'ring-blue-500');
+            }
+        });
+    }
+    
+    updateCarDetails() {
+        if (this.selectedCarIdx === null) return;
+        
+        const data = this.carAnalysisData[this.selectedCarIdx] || {};
+        
+        // Helper to format lap time
+        const formatLapTime = (seconds) => {
+            if (!seconds || seconds <= 0) return '--';
+            const mins = Math.floor(seconds / 60);
+            const secs = (seconds % 60).toFixed(3);
+            return `${mins}:${secs.padStart(6, '0')}`;
+        };
+        
+        // Helper to format est time
+        const formatEstTime = (seconds) => {
+            if (!seconds || seconds <= 0) return '--';
+            return seconds.toFixed(1) + 's';
+        };
+        
+        // Update detail fields
+        document.getElementById('detail-best-lap').textContent = formatLapTime(data.bestLapTime);
+        document.getElementById('detail-class-pos').textContent = data.classPosition || '--';
+        document.getElementById('detail-est-time').textContent = formatEstTime(data.estTime);
+        document.getElementById('detail-lap').textContent = data.lap || '--';
+        document.getElementById('detail-lap-completed').textContent = data.lapCompleted || '--';
+        document.getElementById('detail-last-lap').textContent = formatLapTime(data.lastLapTime);
+        document.getElementById('detail-pit-road').textContent = data.onPitRoad ? 'YES' : 'NO';
+        document.getElementById('detail-track-surface').textContent = data.trackSurface || '--';
+        document.getElementById('detail-surface-material').textContent = data.surfaceMaterial || '--';
     }
     
     handleTelemetryUpdate(data) {

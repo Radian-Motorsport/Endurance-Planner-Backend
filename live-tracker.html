@@ -377,7 +377,76 @@
             </div>
         </div>
         
+        <!-- Car Analysis -->
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl road-rage-font">Car Analysis</h2>
+                <button id="toggle-car-analysis" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                    Show Analysis ▼
+                </button>
+            </div>
+            
+            <div id="car-analysis-details" class="hidden">
+                <!-- Car List (Player's Class) -->
+                <div class="mb-4">
+                    <h3 class="text-sm font-semibold text-neutral-400 uppercase mb-3">Class Competitors</h3>
+                    <div id="car-list" class="space-y-2">
+                        <div class="text-neutral-500 text-sm text-center py-4">
+                            <i class="fas fa-car text-2xl mb-2"></i>
+                            <p>Waiting for session data...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Selected Car Details -->
+                <div id="car-details-container" class="hidden mt-6 pt-6 border-t border-neutral-700">
+                    <h3 class="text-sm font-semibold text-neutral-400 uppercase mb-3">
+                        Selected Car: <span id="selected-car-name" class="text-white">--</span>
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Best Lap Time</div>
+                            <div id="detail-best-lap" class="text-lg font-mono text-green-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Class Position</div>
+                            <div id="detail-class-pos" class="text-lg font-mono text-blue-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Est. Time</div>
+                            <div id="detail-est-time" class="text-lg font-mono text-purple-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Current Lap</div>
+                            <div id="detail-lap" class="text-lg font-mono text-cyan-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Laps Completed</div>
+                            <div id="detail-lap-completed" class="text-lg font-mono text-indigo-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Last Lap Time</div>
+                            <div id="detail-last-lap" class="text-lg font-mono text-pink-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">On Pit Road</div>
+                            <div id="detail-pit-road" class="text-lg font-mono text-orange-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Track Surface</div>
+                            <div id="detail-track-surface" class="text-lg font-mono text-yellow-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Surface Material</div>
+                            <div id="detail-surface-material" class="text-lg font-mono text-emerald-400">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Lap Progress Bar -->
+        <!-- COMMENTED OUT - To be hidden for now
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <h2 class="text-xl road-rage-font mb-4">Lap Progress</h2>
             <div class="relative w-full h-12 flex items-center">
@@ -387,6 +456,7 @@
                 <div id="lap-progress-dot" class="absolute w-4 h-4 bg-cyan-400 rounded-full shadow-lg transition-all duration-100" style="left: 0%; transform: translateX(-50%);"></div>
             </div>
         </div>
+        -->
         
         <!-- Stint Table -->
         <div class="bg-neutral-800 rounded-lg p-6">
