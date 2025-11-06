@@ -170,6 +170,7 @@ class LiveStrategyTracker {
         this.selectedClassFilter = 'player'; // 'player', 'GTP', 'GT3', 'GT4', 'LMP'
         this.carAnalysisData = {};
         this.lastCarAnalysisUpdate = 0; // Throttle position updates
+        this.carAnalysisInitialized = false; // Flag to prevent re-initialization
         
         // Class ID mapping
         this.classMapping = {
@@ -868,11 +869,20 @@ class LiveStrategyTracker {
         const eventType = sessionData?.WeekendInfo?.EventType || '--';
         const seriesId = sessionData?.WeekendInfo?.SeriesID || '--';
         
-        // Get driver's car info
+        // Get player's car info (not just first driver)
         let carName = '--';
-        if (sessionData?.DriverInfo?.Drivers && sessionData.DriverInfo.Drivers.length > 0) {
-            const driverCar = sessionData.DriverInfo.Drivers[0];
-            carName = driverCar.CarScreenName || driverCar.CarPath || '--';
+        const playerCarIdx = sessionData.DriverInfo?.DriverCarIdx;
+        if (sessionData?.DriverInfo?.Drivers && playerCarIdx != null) {
+            const playerCar = sessionData.DriverInfo.Drivers[playerCarIdx];
+            if (playerCar) {
+                carName = playerCar.CarScreenName || playerCar.CarPath || '--';
+            }
+        }
+        
+        // Fallback to first driver if no player car found
+        if (carName === '--' && sessionData?.DriverInfo?.Drivers && sessionData.DriverInfo.Drivers.length > 0) {
+            const fallbackCar = sessionData.DriverInfo.Drivers[0];
+            carName = fallbackCar.CarScreenName || fallbackCar.CarPath || '--';
         }
         
         // Update UI
@@ -893,6 +903,12 @@ class LiveStrategyTracker {
     }
     
     initializeCarAnalysis(sessionData) {
+        // Only initialize once per session
+        if (this.carAnalysisInitialized) {
+            console.log('🔄 Car analysis already initialized, skipping...');
+            return;
+        }
+        
         if (!sessionData?.DriverInfo?.Drivers) return;
         
         this.driversList = sessionData.DriverInfo.Drivers;
@@ -924,6 +940,9 @@ class LiveStrategyTracker {
         
         // Set initial filter to player's class tab (only called once at initialization)
         this.setClassFilter(initialClassTab);
+        
+        // Mark as initialized
+        this.carAnalysisInitialized = true;
     }
     
     setClassFilter(classFilter) {
