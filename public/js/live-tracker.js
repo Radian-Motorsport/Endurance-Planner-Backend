@@ -693,32 +693,36 @@ class LiveStrategyTracker {
             if (!dot) {
                 dot = document.createElement('div');
                 dot.dataset.carIdx = carIdx;
-                dot.className = 'absolute w-3 h-3 rounded-full transition-all duration-100 z-5';
+                dot.className = 'absolute w-3 h-3 rounded-full transition-all duration-100';
+                dot.style.top = '50%';
+                dot.style.transform = 'translate(-50%, -50%)';
                 dot.title = driver.UserName || `Car ${carIdx}`;
                 container.appendChild(dot);
             }
             
-            // Position the dot
+            // Position the dot horizontally
             const percentage = lapDistPct * 100;
             dot.style.left = `${percentage}%`;
-            dot.style.transform = 'translateX(-50%)';
             
-            // Color by class
+            // Color by class - check CarClassShortName
             const carClass = driver.CarClassShortName;
             let bgColor = 'bg-neutral-500'; // default
             
-            if (carClass === 'GT3') {
+            // Match exact class names from iRacing
+            if (carClass === 'GT3' || carClass === 'GT3 Cup') {
                 bgColor = 'bg-green-500';
-            } else if (carClass === 'GTE') {
+            } else if (carClass === 'GTE' || carClass === 'GTLM') {
                 bgColor = 'bg-blue-500';
-            } else if (carClass === 'LMP2') {
+            } else if (carClass === 'LMP2' || carClass === 'P2') {
                 bgColor = 'bg-red-500';
-            } else if (carClass === 'LMP') {
+            } else if (carClass === 'LMP' || carClass === 'P' || carClass === 'DPi' || carClass === 'GTP') {
                 bgColor = 'bg-purple-500';
             }
             
-            // Reset classes and apply new color
-            dot.className = `absolute w-3 h-3 rounded-full transition-all duration-100 z-5 ${bgColor}`;
+            // Apply color class
+            dot.className = `absolute w-3 h-3 rounded-full transition-all duration-100 ${bgColor}`;
+            dot.style.top = '50%';
+            dot.style.transform = 'translate(-50%, -50%)';
         });
     }
     
@@ -1201,42 +1205,58 @@ class LiveStrategyTracker {
                     active: true,
                     triggered: false
                 });
+                console.log(`🚨 Car ${carIdx} went off-track in sector ${carSectorNum}`);
             } else {
+                // Car is still off-track - update sector if changed
+                if (incident.sectorNum !== carSectorNum) {
+                    // Car moved to different sector while off-track - update tracking
+                    incident.sectorNum = carSectorNum;
+                    this.sectorIncidents.set(carIdx, incident);
+                    console.log(`🚨 Car ${carIdx} still off-track, now in sector ${carSectorNum}`);
+                }
+                
                 // Continue tracking - check if duration threshold met
                 const duration = now - incident.startTime;
                 
                 if (duration >= this.incidentMinDuration && !incident.triggered) {
                     // Incident confirmed - mark sector (only once)
                     incident.triggered = true;
+                    this.sectorIncidents.set(carIdx, incident);
                     
-                    if (!this.activeSectorIncidents.has(carSectorNum)) {
-                        this.activeSectorIncidents.add(carSectorNum);
-                        this.updateSectorIncidentDisplay(carSectorNum, true);
-                        
-                        console.log(`⚠️ Incident detected in sector ${carSectorNum} (car ${carIdx} off-track for ${duration}ms)`);
-                        
-                        // Clear any existing timeout for this sector
-                        if (this.sectorIncidentTimeouts.has(carSectorNum)) {
-                            clearTimeout(this.sectorIncidentTimeouts.get(carSectorNum));
-                        }
-                        
-                        // Auto-clear after timeout
-                        const timeoutId = setTimeout(() => {
-                            this.activeSectorIncidents.delete(carSectorNum);
-                            this.sectorIncidentTimeouts.delete(carSectorNum);
-                            this.updateSectorIncidentDisplay(carSectorNum, false);
-                            console.log(`✅ Incident cleared in sector ${carSectorNum} after ${this.incidentTimeout}ms`);
-                        }, this.incidentTimeout);
-                        
-                        this.sectorIncidentTimeouts.set(carSectorNum, timeoutId);
+                    console.log(`⚠️⚠️⚠️ TRIGGERING YELLOW: sector ${carSectorNum}, car ${carIdx}, duration ${duration}ms`);
+                    console.log(`   activeSectorIncidents before:`, Array.from(this.activeSectorIncidents));
+                    
+                    // Always mark sector - don't check if already there
+                    this.activeSectorIncidents.add(carSectorNum);
+                    this.updateSectorIncidentDisplay(carSectorNum, true);
+                    
+                    console.log(`   activeSectorIncidents after:`, Array.from(this.activeSectorIncidents));
+                    
+                    // Clear any existing timeout for this sector
+                    if (this.sectorIncidentTimeouts.has(carSectorNum)) {
+                        console.log(`   Clearing existing timeout for sector ${carSectorNum}`);
+                        clearTimeout(this.sectorIncidentTimeouts.get(carSectorNum));
                     }
+                    
+                    // Auto-clear after timeout
+                    const timeoutId = setTimeout(() => {
+                        console.log(`⏰ TIMEOUT EXECUTING: Clearing yellow for sector ${carSectorNum} after ${this.incidentTimeout}ms`);
+                        this.activeSectorIncidents.delete(carSectorNum);
+                        this.sectorIncidentTimeouts.delete(carSectorNum);
+                        this.updateSectorIncidentDisplay(carSectorNum, false);
+                    }, this.incidentTimeout);
+                    
+                    this.sectorIncidentTimeouts.set(carSectorNum, timeoutId);
+                    console.log(`   Timeout set with ID: ${timeoutId}, will fire in ${this.incidentTimeout}ms`);
                 }
             }
         } else {
-            // Car back on track - only clear active flag, don't reset triggered incidents
+            // Car back on track - clear incident tracking for this car
             if (incident && incident.active) {
-                this.sectorIncidents.set(carIdx, { ...incident, active: false });
-                console.log(`🏁 Car ${carIdx} back on track (was in sector ${incident.sectorNum}, triggered: ${incident.triggered})`);
+                const offTrackDuration = now - incident.startTime;
+                this.sectorIncidents.delete(carIdx);
+                console.log(`🏁 BACK ON TRACK: Car ${carIdx}, sector ${incident.sectorNum}, off-track ${offTrackDuration}ms, triggered: ${incident.triggered}`);
+                console.log(`   Yellow ${incident.triggered ? 'STAYS (timeout will clear)' : 'not shown (< 1s)'}`);
             }
         }
     }
@@ -1246,19 +1266,29 @@ class LiveStrategyTracker {
      */
     updateSectorIncidentDisplay(sectorNum, hasIncident) {
         const card = document.getElementById(`sector-card-${sectorNum}`);
-        if (!card) return;
+        if (!card) {
+            console.log(`❌ updateSectorIncidentDisplay: sector-card-${sectorNum} NOT FOUND`);
+            return;
+        }
+        
+        console.log(`🎨 updateSectorIncidentDisplay: sector ${sectorNum}, hasIncident=${hasIncident}`);
+        console.log(`   Card classes before:`, card.className);
         
         if (hasIncident) {
             // Yellow warning for incident
             card.classList.remove('bg-neutral-700');
             card.classList.add('bg-yellow-500', 'incident-active');
             card.title = 'Incident detected in this sector';
+            console.log(`   ✅ YELLOW APPLIED`);
         } else {
             // Clear incident - restore neutral color
             card.classList.remove('bg-yellow-500', 'incident-active');
             card.classList.add('bg-neutral-700');
             card.title = '';
+            console.log(`   ❌ YELLOW REMOVED`);
         }
+        
+        console.log(`   Card classes after:`, card.className);
     }
     
     initializeCarAnalysis(sessionData) {
