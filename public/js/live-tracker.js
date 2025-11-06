@@ -1,12 +1,9 @@
 // Live Strategy Tracker - Connects to RadianApp telemetry and displays race progress vs plan
 // Loads strategies the exact same way the planner does and calculates stint tables
 
-// 🚀 PRODUCTION MODE - Disable debug logs for performance
+// Debug flag - set to false to disable all debug logging
 const DEBUG = false;
-const log = (...args) => { if (DEBUG) log(...args); };
-const warn = (...args) => { if (DEBUG) warn(...args); };
-// Keep errors always enabled
-const error = (...args) => error(...args);
+const debug = (...args) => { if (DEBUG) console.log(...args); };
 
 /**
  * PedalTrace - A visualization component for racing pedal inputs
@@ -16,7 +13,7 @@ class PedalTrace {
         this.socket = socket;
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) {
-            warn('PedalTrace: Canvas element not found');
+            console.warn('PedalTrace: Canvas element not found');
             return;
         }
         this.ctx = this.canvas.getContext('2d');
@@ -71,18 +68,13 @@ class PedalTrace {
         
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Add padding to prevent trace from covering text labels
-        const topPadding = 40;  // Space for COASTING/OVERLAP text
-        const bottomPadding = 10; // Space at bottom
-        const drawHeight = this.canvas.height - topPadding - bottomPadding;
-        
         // Throttle line
         this.ctx.beginPath();
         this.ctx.strokeStyle = this.options.throttleColor;
         this.ctx.lineWidth = 2;
         this.buffer.forEach((point, i) => {
             const x = i * (this.canvas.width / this.options.maxPoints);
-            const y = topPadding + (drawHeight - point.throttle * (drawHeight / 100));
+            const y = this.canvas.height - point.throttle * (this.canvas.height / 100);
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();
@@ -93,7 +85,7 @@ class PedalTrace {
         this.ctx.lineWidth = 2;
         this.buffer.forEach((point, i) => {
             const x = i * (this.canvas.width / this.options.maxPoints);
-            const y = topPadding + (drawHeight - point.brake * (drawHeight / 100));
+            const y = this.canvas.height - point.brake * (this.canvas.height / 100);
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();
@@ -104,7 +96,7 @@ class PedalTrace {
         this.ctx.lineWidth = 1;
         this.buffer.forEach((point, i) => {
             const x = i * (this.canvas.width / this.options.maxPoints);
-            const y = topPadding + (drawHeight - point.gear * (drawHeight / 100));
+            const y = this.canvas.height - point.gear * (this.canvas.height / 100);
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();
@@ -209,6 +201,7 @@ class LiveStrategyTracker {
         this.carSectorTimes = new Map(); // carIdx -> Map(sectorNum -> lastSectorTime)
         this.carSectorStartTimes = new Map(); // carIdx -> Map(sectorNum -> estTime when sector started)
         this.previousCarSectors = new Map(); // carIdx -> last completed sector number
+        this.lastSectorComparisonUpdate = 0; // Throttle sector comparison updates
         
         // Lap progress multi-car display
         this.showAllCarsOnProgress = false;
@@ -330,32 +323,16 @@ class LiveStrategyTracker {
         });
         
         // Pedal trace toggle
-        // Toggle entire pedal trace section
-        const togglePedalTraceBtn = document.getElementById('toggle-pedal-trace');
-        const pedalTraceContainer = document.getElementById('pedal-trace-container');
-        if (togglePedalTraceBtn && pedalTraceContainer) {
-            togglePedalTraceBtn.addEventListener('click', () => {
-                if (pedalTraceContainer.classList.contains('hidden')) {
-                    pedalTraceContainer.classList.remove('hidden');
-                    togglePedalTraceBtn.textContent = 'Hide Trace ▲';
-                } else {
-                    pedalTraceContainer.classList.add('hidden');
-                    togglePedalTraceBtn.textContent = 'Show Trace ▼';
-                }
-            });
-        }
-        
-        // Toggle just the driver inputs grid
-        const togglePedalInputsBtn = document.getElementById('toggle-pedal-inputs');
+        const togglePedalBtn = document.getElementById('toggle-pedal-inputs');
         const pedalInputsDetails = document.getElementById('driver-inputs-details');
-        if (togglePedalInputsBtn && pedalInputsDetails) {
-            togglePedalInputsBtn.addEventListener('click', () => {
+        if (togglePedalBtn && pedalInputsDetails) {
+            togglePedalBtn.addEventListener('click', () => {
                 if (pedalInputsDetails.classList.contains('hidden')) {
                     pedalInputsDetails.classList.remove('hidden');
-                    togglePedalInputsBtn.textContent = 'Hide Inputs ▲';
+                    togglePedalBtn.textContent = 'Hide Inputs ▲';
                 } else {
                     pedalInputsDetails.classList.add('hidden');
-                    togglePedalInputsBtn.textContent = 'Show Inputs ▼';
+                    togglePedalBtn.textContent = 'Show Inputs ▼';
                 }
             });
         }
@@ -422,7 +399,7 @@ class LiveStrategyTracker {
         
         // Recalculate button
         this.elements.recalcStintsBtn?.addEventListener('click', () => {
-            log('🔄 Manual recalculation triggered');
+            console.log('🔄 Manual recalculation triggered');
             this.calculateStintsForRemainingTime();
         });
         
@@ -434,13 +411,13 @@ class LiveStrategyTracker {
     }
     
     connectToTelemetry() {
-        log('🔌 Connecting to RadianApp telemetry...');
+        console.log('🔌 Connecting to RadianApp telemetry...');
         
         // Connect to RadianApp production server
         this.socket = io('https://radianapp.onrender.com');
         
         this.socket.on('connect', () => {
-            log('✅ Connected to telemetry server');
+            console.log('✅ Connected to telemetry server');
             this.isConnected = true;
             this.updateConnectionStatus(true);
             
@@ -449,13 +426,13 @@ class LiveStrategyTracker {
         });
         
         this.socket.on('disconnect', () => {
-            log('❌ Disconnected from telemetry server');
+            console.log('❌ Disconnected from telemetry server');
             this.isConnected = false;
             this.updateConnectionStatus(false);
         });
         
         this.socket.on('connect_error', (error) => {
-            error('❌ Connection error:', error);
+            console.error('❌ Connection error:', error);
             this.updateConnectionStatus(false);
         });
         
@@ -474,17 +451,17 @@ class LiveStrategyTracker {
         
         // Listen for session info
         this.socket.on('sessionInfo', (data) => {
-            log('📊 Received sessionInfo:', data);
+            console.log('📊 Received sessionInfo:', data);
             this.handleSessionInfo(data);
         });
         
         // Listen for strategy updates from the planner
         this.socket.on('strategyUpdated', (data) => {
-            log('🔄 Strategy updated from planner:', data);
+            console.log('🔄 Strategy updated from planner:', data);
             if (this.currentStrategyId && data.strategyId === this.currentStrategyId) {
                 // This is an update to our current strategy
                 this.loadStrategy(data.strategy);
-                log('✅ Live tracker strategy refreshed');
+                console.log('✅ Live tracker strategy refreshed');
             }
         });
     }
@@ -496,9 +473,9 @@ class LiveStrategyTracker {
                     maxPoints: 300,
                     maxGear: 8
                 });
-                log('✅ Pedal trace initialized');
+                console.log('✅ Pedal trace initialized');
             } catch (error) {
-                error('❌ Failed to initialize pedal trace:', error);
+                console.error('❌ Failed to initialize pedal trace:', error);
             }
         }
     }
@@ -549,12 +526,12 @@ class LiveStrategyTracker {
     
     async loadTrackMap(sessionDetails) {
         if (!window.TrackMapComponent || !window.CarPositionTracker) {
-            warn('⚠️ Track map components not loaded');
+            console.warn('⚠️ Track map components not loaded');
             return;
         }
         
         try {
-            log('🗺️ Loading track map for:', sessionDetails.track_name);
+            console.log('🗺️ Loading track map for:', sessionDetails.track_name);
             
             // Initialize track map component if not already done
             if (!this.trackMapComponent) {
@@ -598,32 +575,32 @@ class LiveStrategyTracker {
                 showOnlyPlayerClass: false,  // Don't filter by class
                 showAllCars: true,  // Show all cars from all classes
                 onCarClick: (carIdx) => {
-                    log(`🖱️ Car marker clicked: ${carIdx}`);
+                    console.log(`🖱️ Car marker clicked: ${carIdx}`);
                     this.selectCar(carIdx);
                 }
             });
             
             // If racing line data is available, use it
             if (trackAssets && trackAssets.racing_line) {
-                log('🏁 Racing line data available, using racing line mode');
+                console.log('🏁 Racing line data available, using racing line mode');
                 this.carPositionTracker.setRacingLineData(trackAssets.racing_line);
             } else {
-                log('⚠️ No racing line data, using SVG path fallback');
+                console.log('⚠️ No racing line data, using SVG path fallback');
             }
             
             // Wait a bit for SVG to be fully rendered
             setTimeout(() => {
                 if (this.carPositionTracker.initialize()) {
-                    log('✅ Car position tracker ready');
+                    console.log('✅ Car position tracker ready');
                 } else {
-                    warn('⚠️ Car position tracker failed to initialize');
+                    console.warn('⚠️ Car position tracker failed to initialize');
                 }
             }, 500);
             
-            log('✅ Track map loaded successfully');
+            console.log('✅ Track map loaded successfully');
             
         } catch (error) {
-            warn('❌ Failed to load track map:', error);
+            console.warn('❌ Failed to load track map:', error);
         }
     }
     
@@ -648,7 +625,7 @@ class LiveStrategyTracker {
                 throw new Error('Track map data not available');
             }
             
-            log('✅ Track assets loaded:', {
+            console.log('✅ Track assets loaded:', {
                 track_map: trackAssets.track_map ? 'yes' : 'no',
                 racing_line: trackAssets.racing_line ? `yes (${trackAssets.racing_line.points?.length || 0} points)` : 'no'
             });
@@ -656,7 +633,7 @@ class LiveStrategyTracker {
             return trackAssets;
             
         } catch (error) {
-            warn('❌ Failed to load track assets:', error.message);
+            console.warn('❌ Failed to load track assets:', error.message);
             return null;
         }
     }
@@ -940,7 +917,7 @@ class LiveStrategyTracker {
     
     setTimeMode(mode) {
         this.timeMode = mode;
-        log(`⏱️ Time mode set to: ${mode}`);
+        console.log(`⏱️ Time mode set to: ${mode}`);
         
         // Update button states
         if (this.elements.timeAutoBtn && this.elements.timeManualBtn) {
@@ -974,7 +951,7 @@ class LiveStrategyTracker {
         const seconds = parseInt(this.elements.manualSeconds?.value || '0');
         
         this.manualTimeRemaining = (hours * 3600) + (minutes * 60) + seconds;
-        log(`⏱️ Manual timer started: ${this.formatTime(this.manualTimeRemaining)}`);
+        console.log(`⏱️ Manual timer started: ${this.formatTime(this.manualTimeRemaining)}`);
         
         this.manualTimerInterval = setInterval(() => {
             if (this.manualTimeRemaining > 0) {
@@ -983,7 +960,7 @@ class LiveStrategyTracker {
                 this.updateSessionTimeDisplay();
             } else {
                 this.stopManualTimer();
-                log('⏱️ Manual timer finished');
+                console.log('⏱️ Manual timer finished');
             }
         }, 1000);
     }
@@ -992,7 +969,7 @@ class LiveStrategyTracker {
         if (this.manualTimerInterval) {
             clearInterval(this.manualTimerInterval);
             this.manualTimerInterval = null;
-            log('⏱️ Manual timer stopped');
+            console.log('⏱️ Manual timer stopped');
         }
     }
     
@@ -1004,7 +981,7 @@ class LiveStrategyTracker {
         this.manualTimeRemaining = (hours * 3600) + (minutes * 60) + seconds;
         // Only update the session time display
         this.updateSessionTimeDisplay();
-        log(`⏱️ Manual timer reset to: ${this.formatTime(this.manualTimeRemaining)}`);
+        console.log(`⏱️ Manual timer reset to: ${this.formatTime(this.manualTimeRemaining)}`);
     }
     
     startPitTimer() {
@@ -1041,7 +1018,7 @@ class LiveStrategyTracker {
     handleSessionInfo(sessionData) {
         this.sessionInfo = sessionData;
         
-        log('🏁 Processing session info:', {
+        console.log('🏁 Processing session info:', {
             track: sessionData?.WeekendInfo?.TrackDisplayName,
             trackId: sessionData?.WeekendInfo?.TrackID,
             eventType: sessionData?.WeekendInfo?.EventType,
@@ -1075,7 +1052,7 @@ class LiveStrategyTracker {
         this.elements.sessionType.textContent = eventType;
         this.elements.sessionSeries.textContent = `Series ${seriesId}`;
         
-        log('✅ Session info displayed:', {
+        console.log('✅ Session info displayed:', {
             track: trackName,
             car: carName,
             event: eventType,
@@ -1095,7 +1072,7 @@ class LiveStrategyTracker {
     initializeSectors(sessionData) {
         // Only initialize once - prevent repeated calls from destroying sector cards
         if (this.sectorsInitialized) {
-            log('⏭️ Sectors already initialized, skipping to prevent yellow flash');
+            console.log('⏭️ Sectors already initialized, skipping to prevent yellow flash');
             return;
         }
         
@@ -1105,7 +1082,7 @@ class LiveStrategyTracker {
         // Get sector data
         const splitTimeInfo = sessionData?.SplitTimeInfo;
         if (!splitTimeInfo || !splitTimeInfo.Sectors) {
-            warn('⚠️ No sector data available');
+            console.warn('⚠️ No sector data available');
             return;
         }
         
@@ -1114,7 +1091,7 @@ class LiveStrategyTracker {
             startPct: sector.SectorStartPct
         }));
         
-        log('🏁 Sectors initialized:', {
+        console.log('🏁 Sectors initialized:', {
             trackLength: this.trackLength,
             sectors: this.sectors
         });
@@ -1130,7 +1107,7 @@ class LiveStrategyTracker {
      * Draw visual sector markers on the lap progress bar
      */
     drawSectorMarkers() {
-        log('🔨🔨🔨 drawSectorMarkers() CALLED - THIS DESTROYS AND RECREATES SECTOR CARDS');
+        console.log('🔨🔨🔨 drawSectorMarkers() CALLED - THIS DESTROYS AND RECREATES SECTOR CARDS');
         const container = document.getElementById('sector-markers-container');
         const sectorInfoDisplay = document.getElementById('sector-info-display');
         
@@ -1184,7 +1161,7 @@ class LiveStrategyTracker {
             sectorInfoDisplay.appendChild(sectorCard);
         });
         
-        log('✅ Sector markers drawn (preserved incident states:', Array.from(incidentStates.keys()), ')');
+        console.log('✅ Sector markers drawn (preserved incident states:', Array.from(incidentStates.keys()), ')');
     }
     
     /**
@@ -1300,7 +1277,7 @@ class LiveStrategyTracker {
                     const sectorTimes = this.carSectorTimes.get(carIdx);
                     sectorTimes.set(previousSector, sectorTime);
                     
-                    log(`🏁 Car ${carIdx} completed sector ${previousSector}: ${sectorTime.toFixed(3)}s`);
+                    debug(`🏁 Car ${carIdx} completed sector ${previousSector}: ${sectorTime.toFixed(3)}s`);
                 }
                 
                 // Record start time for the new sector
@@ -1515,14 +1492,14 @@ class LiveStrategyTracker {
                     active: true,
                     triggered: false
                 });
-                log(`🚨 Car ${carIdx} went off-track in sector ${carSectorNum}`);
+                debug(`🚨 Car ${carIdx} went off-track in sector ${carSectorNum}`);
             } else {
                 // Car is still off-track - update sector if changed
                 if (incident.sectorNum !== carSectorNum) {
                     // Car moved to different sector while off-track - update tracking
                     incident.sectorNum = carSectorNum;
                     this.sectorIncidents.set(carIdx, incident);
-                    log(`🚨 Car ${carIdx} still off-track, now in sector ${carSectorNum}`);
+                    debug(`🚨 Car ${carIdx} still off-track, now in sector ${carSectorNum}`);
                 }
                 
                 // Continue tracking - check if duration threshold met
@@ -1533,30 +1510,30 @@ class LiveStrategyTracker {
                     incident.triggered = true;
                     this.sectorIncidents.set(carIdx, incident);
                     
-                    log(`⚠️⚠️⚠️ TRIGGERING YELLOW: sector ${carSectorNum}, car ${carIdx}, duration ${duration}ms`);
-                    log(`   activeSectorIncidents before:`, Array.from(this.activeSectorIncidents));
+                    debug(`⚠️⚠️⚠️ TRIGGERING YELLOW: sector ${carSectorNum}, car ${carIdx}, duration ${duration}ms`);
+                    debug(`   activeSectorIncidents before:`, Array.from(this.activeSectorIncidents));
                     
                     // Always mark sector - don't check if already there
                     this.activeSectorIncidents.add(carSectorNum);
                     this.updateSectorIncidentDisplay(carSectorNum, true);
                     
-                    log(`   activeSectorIncidents after:`, Array.from(this.activeSectorIncidents));
+                    debug(`   activeSectorIncidents after:`, Array.from(this.activeSectorIncidents));
                     
                     // Only set timeout if one doesn't already exist for this sector
                     // This prevents resetting the timer on every telemetry frame
                     if (!this.sectorIncidentTimeouts.has(carSectorNum)) {
                         // Auto-clear after timeout
                         const timeoutId = setTimeout(() => {
-                            log(`⏰ TIMEOUT EXECUTING: Clearing yellow for sector ${carSectorNum} after ${this.incidentTimeout}ms`);
+                            debug(`⏰ TIMEOUT EXECUTING: Clearing yellow for sector ${carSectorNum} after ${this.incidentTimeout}ms`);
                             this.activeSectorIncidents.delete(carSectorNum);
                             this.sectorIncidentTimeouts.delete(carSectorNum);
                             this.updateSectorIncidentDisplay(carSectorNum, false);
                         }, this.incidentTimeout);
                         
                         this.sectorIncidentTimeouts.set(carSectorNum, timeoutId);
-                        log(`   NEW timeout set with ID: ${timeoutId}, will fire in ${this.incidentTimeout}ms`);
+                        debug(`   NEW timeout set with ID: ${timeoutId}, will fire in ${this.incidentTimeout}ms`);
                     } else {
-                        log(`   ⏱️ Timeout already running for sector ${carSectorNum}, NOT resetting`);
+                        debug(`   ⏱️ Timeout already running for sector ${carSectorNum}, NOT resetting`);
                     }
                 }
             }
@@ -1565,8 +1542,8 @@ class LiveStrategyTracker {
             if (incident && incident.active) {
                 const offTrackDuration = now - incident.startTime;
                 this.sectorIncidents.delete(carIdx);
-                log(`🏁 BACK ON TRACK: Car ${carIdx}, sector ${incident.sectorNum}, off-track ${offTrackDuration}ms, triggered: ${incident.triggered}`);
-                log(`   Yellow ${incident.triggered ? 'STAYS (timeout will clear)' : 'not shown (< 1s)'}`);
+                debug(`🏁 BACK ON TRACK: Car ${carIdx}, sector ${incident.sectorNum}, off-track ${offTrackDuration}ms, triggered: ${incident.triggered}`);
+                debug(`   Yellow ${incident.triggered ? 'STAYS (timeout will clear)' : 'not shown (< 1s)'}`);
             }
         }
     }
@@ -1577,34 +1554,34 @@ class LiveStrategyTracker {
     updateSectorIncidentDisplay(sectorNum, hasIncident) {
         const card = document.getElementById(`sector-card-${sectorNum}`);
         if (!card) {
-            log(`❌ updateSectorIncidentDisplay: sector-card-${sectorNum} NOT FOUND`);
+            debug(`❌ updateSectorIncidentDisplay: sector-card-${sectorNum} NOT FOUND`);
             return;
         }
         
-        log(`🎨 updateSectorIncidentDisplay: sector ${sectorNum}, hasIncident=${hasIncident}`);
-        log(`   Card classes before:`, card.className);
+        debug(`🎨 updateSectorIncidentDisplay: sector ${sectorNum}, hasIncident=${hasIncident}`);
+        debug(`   Card classes before:`, card.className);
         
         if (hasIncident) {
             // Yellow warning for incident
             card.classList.remove('bg-neutral-700');
             card.classList.add('bg-yellow-500', 'incident-active');
             card.title = 'Incident detected in this sector';
-            log(`   ✅ YELLOW APPLIED`);
+            debug(`   ✅ YELLOW APPLIED`);
         } else {
             // Clear incident - restore neutral color
             card.classList.remove('bg-yellow-500', 'incident-active');
             card.classList.add('bg-neutral-700');
             card.title = '';
-            log(`   ❌ YELLOW REMOVED`);
+            debug(`   ❌ YELLOW REMOVED`);
         }
         
-        log(`   Card classes after:`, card.className);
+        debug(`   Card classes after:`, card.className);
     }
     
     initializeCarAnalysis(sessionData) {
         // Only initialize once per session
         if (this.carAnalysisInitialized) {
-            log('🔄 Car analysis already initialized, skipping...');
+            console.log('🔄 Car analysis already initialized, skipping...');
             return;
         }
         
@@ -1619,7 +1596,7 @@ class LiveStrategyTracker {
             this.playerCarClass = playerDriver.CarClassID;
         }
         
-        log('🏁 Car Analysis initialized:', {
+        console.log('🏁 Car Analysis initialized:', {
             totalDrivers: this.driversList.length,
             playerCarIdx: this.playerCarIdx,
             playerCarClass: this.playerCarClass
@@ -1635,7 +1612,7 @@ class LiveStrategyTracker {
             }
         }
         
-        log(`🎯 Setting initial class tab to: ${initialClassTab} (player class: ${this.playerCarClass})`);
+        console.log(`🎯 Setting initial class tab to: ${initialClassTab} (player class: ${this.playerCarClass})`);
         
         // Set initial filter to player's class tab (only called once at initialization)
         this.setClassFilter(initialClassTab);
@@ -1769,7 +1746,7 @@ class LiveStrategyTracker {
                 if (classIds.includes(driver.CarClassID)) {
                     // Switch to this class tab if not already selected
                     if (this.selectedClassFilter !== className) {
-                        log(`🔄 Switching to ${className} tab for selected car`);
+                        console.log(`🔄 Switching to ${className} tab for selected car`);
                         this.setClassFilter(className);
                     }
                     break;
@@ -1855,11 +1832,6 @@ class LiveStrategyTracker {
         
         const values = data.values;
         
-        // Log CarIdxLapDistPct to console for debugging
-        if (values.CarIdxLapDistPct) {
-            log('🏁 CarIdxLapDistPct:', values.CarIdxLapDistPct);
-        }
-        
         // Update live stats - use manual timer if in manual mode, otherwise use telemetry
         if (this.timeMode === 'manual') {
             this.sessionTimeRemain = this.manualTimeRemaining;
@@ -1869,7 +1841,7 @@ class LiveStrategyTracker {
         
         // Calculate stints on first telemetry update with actual session time
         if (!this.hasCalculatedStints && this.strategy && this.sessionTimeRemain > 0) {
-            log(`🔄 First telemetry update - recalculating stints for ${this.formatTime(this.sessionTimeRemain)} remaining`);
+            console.log(`🔄 First telemetry update - recalculating stints for ${this.formatTime(this.sessionTimeRemain)} remaining`);
             this.calculateStintsForRemainingTime();
             this.hasCalculatedStints = true;
         }
@@ -1885,7 +1857,7 @@ class LiveStrategyTracker {
         // When entering pit road
         if (this.wasOnPitRoad === false && isOnPitRoad === true) {
             this.pitStopStartTime = Date.now();
-            log('🛠️  Pit stop started');
+            console.log('🛠️  Pit stop started');
             
             // Start live pit timer
             this.startPitTimer();
@@ -1897,7 +1869,7 @@ class LiveStrategyTracker {
             if (this.pitStopStartTime) {
                 this.actualPitStopTime = Math.round((Date.now() - this.pitStopStartTime) / 1000);
                 this.pitStopDuration = this.actualPitStopTime;
-                log(`🛠️  Pit stop ended - Duration: ${this.actualPitStopTime}s`);
+                console.log(`🛠️  Pit stop ended - Duration: ${this.actualPitStopTime}s`);
                 
                 // Stop live pit timer
                 this.stopPitTimer();
@@ -1908,7 +1880,7 @@ class LiveStrategyTracker {
             
             this.finishCurrentStint();  // Save current stint data
             this.startNewStint();       // Initialize new stint
-            log(`🏁 NEW STINT #${this.currentStintNumber} started!`);
+            console.log(`🏁 NEW STINT #${this.currentStintNumber} started!`);
         }
         
         this.wasOnPitRoad = isOnPitRoad;
@@ -1940,7 +1912,7 @@ class LiveStrategyTracker {
                     // Increment stint lap count (completed laps)
                     this.currentStintLap++;
                     
-                    log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${fuelUsedInLap.toFixed(2)}L, ${this.formatLapTime(this.lastLapTime)}`);
+                    console.log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${fuelUsedInLap.toFixed(2)}L, ${this.formatLapTime(this.lastLapTime)}`);
                 }
             }
             
@@ -1957,8 +1929,12 @@ class LiveStrategyTracker {
             this.updateStrategyComparison();
         }
         
-        // Update sector comparison display
-        this.updateSectorComparison(values);
+        // Update sector comparison display (throttled to 100ms = 10 times per second)
+        const now = Date.now();
+        if (now - this.lastSectorComparisonUpdate > 100) {
+            this.updateSectorComparison(values);
+            this.lastSectorComparisonUpdate = now;
+        }
     }
     
     startNewStint() {
@@ -1983,7 +1959,7 @@ class LiveStrategyTracker {
             
             // Only save if we actually have valid lap time data
             if (totalLapTime === 0) {
-                log(`⏭️ Skipping stint #${this.currentStintNumber} - no valid lap times recorded`);
+                console.log(`⏭️ Skipping stint #${this.currentStintNumber} - no valid lap times recorded`);
                 return;
             }
             
@@ -1999,9 +1975,9 @@ class LiveStrategyTracker {
                 totalStintTime: totalStintTime || 0
             };
             this.stintHistory.push(stintData);
-            log(`✅ Stint #${this.currentStintNumber} completed:`, stintData);
-            log(`   Lap times: ${JSON.stringify(this.currentStintLapTimes)}`);
-            log(`   Total lap time: ${totalLapTime}s, Pit time: ${this.actualPitStopTime}s`);
+            console.log(`✅ Stint #${this.currentStintNumber} completed:`, stintData);
+            console.log(`   Lap times: ${JSON.stringify(this.currentStintLapTimes)}`);
+            console.log(`   Total lap time: ${totalLapTime}s, Pit time: ${this.actualPitStopTime}s`);
             
             // Update display immediately
             this.updateStintDataDisplay();
@@ -2030,7 +2006,7 @@ class LiveStrategyTracker {
             if (cells[5]) {
                 cells[5].textContent = `${this.actualPitStopTime}s`;
                 cells[5].classList.add('text-green-400');  // Highlight with actual time
-                log(`✅ Updated pit row ${pitRowIndex} with actual pit time: ${this.actualPitStopTime}s`);
+                console.log(`✅ Updated pit row ${pitRowIndex} with actual pit time: ${this.actualPitStopTime}s`);
             }
         }
     }
@@ -2271,7 +2247,7 @@ class LiveStrategyTracker {
         const plannedAvgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
         
         if (plannedAvgLapTime === 0) {
-            warn('⚠️ Planned lap time is 0, cannot calculate delta');
+            console.warn('⚠️ Planned lap time is 0, cannot calculate delta');
             return this.currentLap; // Fallback if invalid lap time
         }
         
@@ -2279,7 +2255,7 @@ class LiveStrategyTracker {
         const totalRaceDuration = this.strategy.strategyState.raceDurationSeconds || 0;
         const elapsedTime = totalRaceDuration - sessionTimeRemain;
         
-        log(`⏱️ Planned Lap Calc: totalRaceDuration=${totalRaceDuration}s, sessionTimeRemain=${sessionTimeRemain}s, elapsedTime=${elapsedTime}s, avgLapTime=${plannedAvgLapTime}s`);
+        console.log(`⏱️ Planned Lap Calc: totalRaceDuration=${totalRaceDuration}s, sessionTimeRemain=${sessionTimeRemain}s, elapsedTime=${elapsedTime}s, avgLapTime=${plannedAvgLapTime}s`);
         
         // Calculate what lap we should be on based on elapsed time and planned lap time
         const plannedLap = Math.floor(elapsedTime / plannedAvgLapTime);
@@ -2327,7 +2303,7 @@ class LiveStrategyTracker {
             return;
         }
         
-        log('📥 Loading strategy input...');
+        console.log('📥 Loading strategy input...');
         
         // Extract strategy ID from input
         let strategyId = input;
@@ -2339,15 +2315,15 @@ class LiveStrategyTracker {
         }
         
         try {
-            log('🔍 Fetching strategy ID:', strategyId);
+            console.log('🔍 Fetching strategy ID:', strategyId);
             const response = await fetch(`/api/strategies/${strategyId}`);
             
             if (response.ok) {
                 const strategy = await response.json();
-                log('✅ Strategy loaded from server');
-                log('📊 FULL STRATEGY OBJECT:', strategy);
-                log('📊 Has stints?', 'stints' in strategy);
-                log('📊 stints value:', strategy.stints);
+                console.log('✅ Strategy loaded from server');
+                console.log('📊 FULL STRATEGY OBJECT:', strategy);
+                console.log('📊 Has stints?', 'stints' in strategy);
+                console.log('📊 stints value:', strategy.stints);
                 
                 // Store strategy ID BEFORE calling loadStrategy so URL update works
                 this.currentStrategyId = strategyId;
@@ -2366,7 +2342,7 @@ class LiveStrategyTracker {
                 alert('Strategy not found. Check the share link or ID.');
             }
         } catch (error) {
-            error('❌ Failed to load strategy:', error);
+            console.error('❌ Failed to load strategy:', error);
             alert('Failed to load strategy. Paste a valid share link or strategy ID.');
         }
     }
@@ -2388,7 +2364,7 @@ class LiveStrategyTracker {
         }
         
         if (strategyId) {
-            log('📥 Strategy ID found:', strategyId);
+            console.log('📥 Strategy ID found:', strategyId);
             this.currentStrategyId = strategyId;
             sessionStorage.setItem('currentStrategyId', strategyId);
             this.updateStrategyHeader();
@@ -2398,23 +2374,23 @@ class LiveStrategyTracker {
     }
     
     loadStrategy(strategy) {
-        log('✅ Strategy loaded:', strategy);
-        log('STINTS:', strategy.stints);
-        log('📥 Strategy stints present?', strategy.stints ? 'YES' : 'NO');
+        console.log('✅ Strategy loaded:', strategy);
+        console.log('STINTS:', strategy.stints);
+        console.log('📥 Strategy stints present?', strategy.stints ? 'YES' : 'NO');
         this.strategy = strategy;
         
         // Update URL to reflect currently loaded strategy
         if (this.currentStrategyId) {
             const newUrl = `${window.location.pathname}?strategy=${this.currentStrategyId}`;
             window.history.replaceState({ strategyId: this.currentStrategyId }, '', newUrl);
-            log('🔗 URL updated:', newUrl);
+            console.log('🔗 URL updated:', newUrl);
         }
         
         // Initialize sessionTimeRemain with full race duration from strategy
         // This will be overwritten by telemetry data when it arrives
         if (strategy.strategyState && strategy.strategyState.raceDurationSeconds) {
             this.sessionTimeRemain = strategy.strategyState.raceDurationSeconds;
-            log(`⏱️ Race duration initialized: ${this.formatTime(this.sessionTimeRemain)}`);
+            console.log(`⏱️ Race duration initialized: ${this.formatTime(this.sessionTimeRemain)}`);
         }
         
         // Display setup data from strategy
@@ -2422,20 +2398,20 @@ class LiveStrategyTracker {
         
         // Load track map if track info is available (pass entire selectedEvent like planner does)
         if (strategy.selectedEvent) {
-            log('🗺️ Loading track map for:', strategy.selectedEvent.track_name);
+            console.log('🗺️ Loading track map for:', strategy.selectedEvent.track_name);
             this.loadTrackMap(strategy.selectedEvent);
         } else {
-            warn('⚠️ No selectedEvent found in strategy:', strategy);
+            console.warn('⚠️ No selectedEvent found in strategy:', strategy);
         }
         
         // Don't populate stint table yet - wait for telemetry to get actual session time
         // The table will be populated when handleTelemetryUpdate receives SessionTimeRemain
-        log('⏳ Waiting for telemetry data to calculate stints based on actual session time...');
+        console.log('⏳ Waiting for telemetry data to calculate stints based on actual session time...');
     }
     
     calculateStintsForRemainingTime() {
         if (!this.strategy || !this.strategy.strategyState || !this.strategy.formData) {
-            warn('⚠️ Cannot calculate stints - missing strategy data');
+            console.warn('⚠️ Cannot calculate stints - missing strategy data');
             return;
         }
         
@@ -2449,7 +2425,7 @@ class LiveStrategyTracker {
         
         if (avgLapTime === 0) {
             avgLapTime = 120; // 2 minute default
-            warn(`⚠️ No lap time, using default: ${avgLapTime}s`);
+            console.warn(`⚠️ No lap time, using default: ${avgLapTime}s`);
         }
         
         // Get fuel parameters from formData (where planner stores them)
@@ -2466,7 +2442,7 @@ class LiveStrategyTracker {
         // Calculate number of stints needed
         const totalStints = Math.ceil(totalLapsRemaining / lapsPerStint);
         
-        log(`🔧 Calculating stints for remaining time:
+        console.log(`🔧 Calculating stints for remaining time:
   Session time remaining: ${this.formatTime(this.sessionTimeRemain)}
   Avg lap time: ${avgLapTime}s
   Total laps remaining: ${totalLapsRemaining}
@@ -2504,7 +2480,7 @@ class LiveStrategyTracker {
         }
         
         this.strategy.stints = stints;
-        log(`✅ Calculated ${stints.length} stints for remaining session time`);
+        console.log(`✅ Calculated ${stints.length} stints for remaining session time`);
         this.populateStintTable();
     }
     
@@ -2519,18 +2495,18 @@ class LiveStrategyTracker {
         const avgLapTimeSeconds = parseInt(formData.avgLapTimeSeconds) || 0;
         let avgLapTime = (avgLapTimeMinutes * 60) + avgLapTimeSeconds;
         
-        log(`🔍 formData.avgLapTimeMinutes=${formData.avgLapTimeMinutes}, avgLapTimeSeconds=${formData.avgLapTimeSeconds}, calculated=${avgLapTime}`);
+        console.log(`🔍 formData.avgLapTimeMinutes=${formData.avgLapTimeMinutes}, avgLapTimeSeconds=${formData.avgLapTimeSeconds}, calculated=${avgLapTime}`);
         
         // If both are zero, check if formData has race duration to estimate
         if (avgLapTime === 0 && state.raceDurationSeconds && state.totalStints) {
             avgLapTime = Math.floor(state.raceDurationSeconds / (state.totalStints * state.lapsPerStint));
-            log(`⚠️ No lap time in formData, estimated from race duration: ${avgLapTime}s`);
+            console.log(`⚠️ No lap time in formData, estimated from race duration: ${avgLapTime}s`);
         }
         
         // Last resort default
         if (avgLapTime === 0) {
             avgLapTime = 300;
-            log(`⚠️ Using default lap time: 300s`);
+            console.log(`⚠️ Using default lap time: 300s`);
         }
         
         // Calculate basic stint parameters
@@ -2538,7 +2514,7 @@ class LiveStrategyTracker {
         const lapsPerStint = state.lapsPerStint;
         const pitStopTime = state.pitStopTime || 90;
         
-        log(`🔧 Calculating stints: totalStints=${totalStints}, lapsPerStint=${lapsPerStint}, avgLapTime=${avgLapTime}s`);
+        console.log(`🔧 Calculating stints: totalStints=${totalStints}, lapsPerStint=${lapsPerStint}, avgLapTime=${avgLapTime}s`);
         
         const stints = [];
         let currentLap = 1;
@@ -2579,44 +2555,44 @@ class LiveStrategyTracker {
     }
     
     populateStintTable() {
-        log('🔧 populateStintTable() called');
-        log('  this.strategy:', this.strategy);
-        log('  this.strategy.stints:', this.strategy?.stints);
-        log('  this.elements.stintTableBody:', this.elements.stintTableBody);
+        console.log('🔧 populateStintTable() called');
+        console.log('  this.strategy:', this.strategy);
+        console.log('  this.strategy.stints:', this.strategy?.stints);
+        console.log('  this.elements.stintTableBody:', this.elements.stintTableBody);
         
         if (!this.strategy) {
-            warn('⚠️ No strategy object');
+            console.warn('⚠️ No strategy object');
             return;
         }
         
         const stints = this.strategy.stints;
         
         if (!stints || !Array.isArray(stints) || stints.length === 0) {
-            warn('⚠️ No stints array or empty:', stints);
+            console.warn('⚠️ No stints array or empty:', stints);
             const tbody = this.elements.stintTableBody;
             if (tbody) {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center text-neutral-500 py-4">No stints loaded</td></tr>';
             } else {
-                error('❌ stint-table-body element not found!');
+                console.error('❌ stint-table-body element not found!');
             }
             return;
         }
         
         const tbody = this.elements.stintTableBody;
         if (!tbody) {
-            error('❌ stint-table-body element not found!');
+            console.error('❌ stint-table-body element not found!');
             return;
         }
         
         tbody.innerHTML = '';
-        log(`✅ Populating ${stints.length} stints`);
+        console.log(`✅ Populating ${stints.length} stints`);
         
         // Get pit stop time from strategy
         const pitStopTime = this.strategy.strategyState?.pitStopTime || 90;
         this.pitStopDuration = pitStopTime;
         
         stints.forEach((stint, index) => {
-            log(`  Creating row for stint ${stint.stintNumber}:`, stint);
+            console.log(`  Creating row for stint ${stint.stintNumber}:`, stint);
             
             // Create stint row
             const stintRow = document.createElement('tr');
@@ -2637,7 +2613,7 @@ class LiveStrategyTracker {
             `;
             
             tbody.appendChild(stintRow);
-            log(`  ✅ Stint row appended to tbody`);
+            console.log(`  ✅ Stint row appended to tbody`);
             
             // Create pit stop row (except after last stint)
             if (index < stints.length - 1) {
@@ -2661,8 +2637,8 @@ class LiveStrategyTracker {
             }
         });
         
-        log(`✅ Stint table populated with ${stints.length} stints`);
-        log(`  Total rows in tbody:`, tbody.children.length);
+        console.log(`✅ Stint table populated with ${stints.length} stints`);
+        console.log(`  Total rows in tbody:`, tbody.children.length);
     }
     
     /**
@@ -2694,12 +2670,12 @@ class LiveStrategyTracker {
         const validPitTimes = pitTimes.filter(time => time <= minPitTime * 3);
         
         if (validPitTimes.length === 0) {
-            log(`⚠️ No valid pit stops, using baseline: ${baseline}s`);
+            console.log(`⚠️ No valid pit stops, using baseline: ${baseline}s`);
             return baseline;
         }
         
         const avg = validPitTimes.reduce((a, b) => a + b, 0) / validPitTimes.length;
-        log(`📊 Pit stop average: ${avg.toFixed(1)}s (min: ${minPitTime}s, valid samples: ${validPitTimes.length}/${pitTimes.length})`);
+        console.log(`📊 Pit stop average: ${avg.toFixed(1)}s (min: ${minPitTime}s, valid samples: ${validPitTimes.length}/${pitTimes.length})`);
         return avg;
     }
     
@@ -2773,7 +2749,7 @@ class LiveStrategyTracker {
             
             return runningAvg;
         } catch (error) {
-            error('❌ Error in getRunningAvgLapTime:', error, this.stintHistory);
+            console.error('❌ Error in getRunningAvgLapTime:', error, this.stintHistory);
             return plannedAvgLapTime;
         }
     }
@@ -2784,7 +2760,7 @@ class LiveStrategyTracker {
      */
     recalculateRemainingStints() {
         if (!this.strategy || !this.strategy.stints) {
-            warn('⚠️ No strategy loaded');
+            console.warn('⚠️ No strategy loaded');
             return;
         }
         
@@ -2809,7 +2785,7 @@ class LiveStrategyTracker {
             dataSource = 'ACTUAL';
         }
         
-        log(`🔄 Recalculating stints with ${dataSource} data:`, {
+        console.log(`🔄 Recalculating stints with ${dataSource} data:`, {
             avgLapTime: actualAvgLapTime.toFixed(2),
             avgFuelPerLap: actualAvgFuelPerLap.toFixed(2),
             avgPitStopTime: avgPitStopTime.toFixed(1)
@@ -2832,7 +2808,7 @@ class LiveStrategyTracker {
         const tankCapacity = this.strategy.formData?.tankCapacity || 100;
         const remainingSessionTime = this.sessionTimeRemain;
         
-        log(`🔍 Tank and time data:`, {
+        console.log(`🔍 Tank and time data:`, {
             tankCapacity: tankCapacity,
             remainingSessionTime: remainingSessionTime,
             sessionTimeRemainFormatted: this.formatTime(remainingSessionTime)
@@ -2850,7 +2826,7 @@ class LiveStrategyTracker {
         const timeForPitStops = estimatedPitStops * avgPitStopTime;
         const actualRacingTime = Math.max(0, remainingSessionTime - timeForPitStops);
         
-        log(`⏱️ Pit stop adjustment:`, {
+        console.log(`⏱️ Pit stop adjustment:`, {
             estimatedStints: estimatedStints,
             estimatedPitStops: estimatedPitStops,
             timeForPitStops: `${timeForPitStops}s`,
@@ -2867,7 +2843,7 @@ class LiveStrategyTracker {
         const completedStints = this.stintHistory.length;
         const totalNewStints = completedStints + newStintCount;
         
-        log(`📊 Time analysis:`, {
+        console.log(`📊 Time analysis:`, {
             remainingTime: `${(remainingSessionTime / 60).toFixed(1)} min`,
             lapsPerTank: lapsPerTank,
             tankCapacity: tankCapacity,
@@ -2879,7 +2855,7 @@ class LiveStrategyTracker {
         });
         
         if (newStintCount <= 0) {
-            log('✅ All time remaining stints completed');
+            console.log('✅ All time remaining stints completed');
             return;
         }
         
@@ -2887,7 +2863,7 @@ class LiveStrategyTracker {
         const lastEndLap = completedStints > 0 ? this.strategy.stints[completedStints - 1].endLap : 0;
         let newCurrentLap = lastEndLap + 1;
         
-        log(`📍 Recalculating from lap ${newCurrentLap}, need ${newStintCount} stints`);
+        console.log(`📍 Recalculating from lap ${newCurrentLap}, need ${newStintCount} stints`);
         
         // Remove old remaining stints
         this.strategy.stints = this.strategy.stints.slice(0, completedStints);
@@ -2916,7 +2892,7 @@ class LiveStrategyTracker {
             
             this.strategy.stints.push(newStint);
             
-            log(`✏️  Stint #${stintIndex + 1} created: laps ${startLap}-${endLap} (${endLap - startLap + 1} laps)`);
+            console.log(`✏️  Stint #${stintIndex + 1} created: laps ${startLap}-${endLap} (${endLap - startLap + 1} laps)`);
             
             newCurrentLap = endLap + 1;
         }
@@ -3014,7 +2990,7 @@ class LiveStrategyTracker {
             pitTimeEl.textContent = `${parseFloat(state.pitStopTime).toFixed(1)}s`;
         }
         
-        log('📊 Setup data displayed from strategy');
+        console.log('📊 Setup data displayed from strategy');
     }
     
     /**
@@ -3070,13 +3046,12 @@ document.addEventListener('DOMContentLoaded', () => {
     window.toggleRacingLine = function(visible) {
         if (window.liveTracker && window.liveTracker.carPositionTracker) {
             window.liveTracker.carPositionTracker.toggleRacingLineVisibility(visible);
-            log(`🎨 Racing line ${visible ? 'shown' : 'hidden'} for alignment testing`);
+            console.log(`🎨 Racing line ${visible ? 'shown' : 'hidden'} for alignment testing`);
         } else {
-            warn('⚠️ Car position tracker not initialized');
+            console.warn('⚠️ Car position tracker not initialized');
         }
     };
     
-    log('💡 Test alignment: toggleRacingLine(true) to show, toggleRacingLine(false) to hide');
+    console.log('💡 Test alignment: toggleRacingLine(true) to show, toggleRacingLine(false) to hide');
 });
-
 
