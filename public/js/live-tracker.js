@@ -188,7 +188,8 @@ class LiveStrategyTracker {
         // Sector incident tracking
         this.sectorIncidents = new Map(); // carIdx -> { sectorNum, startTime, active, triggered }
         this.activeSectorIncidents = new Set(); // Set of sector numbers with active incidents
-        this.incidentTimeout = 15000; // Clear incident markers after 15 seconds
+        this.sectorIncidentTimeouts = new Map(); // sectorNum -> timeoutId for clearing
+        this.incidentTimeout = 10000; // Clear incident markers after 10 seconds
         this.incidentMinDuration = 1000; // Off-track must last 1+ seconds to trigger incident
         
         // Lap progress multi-car display
@@ -1152,26 +1153,7 @@ class LiveStrategyTracker {
                 sectorDisplay.textContent = `Sector ${currentSectorNum}`;
             }
             
-            // Highlight current sector card
-            this.sectors.forEach(sector => {
-                const card = document.getElementById(`sector-card-${sector.number}`);
-                if (card) {
-                    // Don't override incident warnings (yellow always takes priority)
-                    const hasIncident = card.classList.contains('incident-active');
-                    
-                    if (sector.number === currentSectorNum) {
-                        if (!hasIncident) {
-                            card.classList.remove('bg-neutral-700');
-                            card.classList.add('bg-cyan-600');
-                        }
-                    } else {
-                        if (!hasIncident) {
-                            card.classList.remove('bg-cyan-600');
-                            card.classList.add('bg-neutral-700');
-                        }
-                    }
-                }
-            });
+            // No visual highlighting - position is already clear from lap progress bar
         }
     }
     
@@ -1233,12 +1215,20 @@ class LiveStrategyTracker {
                         
                         console.log(`⚠️ Incident detected in sector ${carSectorNum} (car ${carIdx} off-track for ${duration}ms)`);
                         
+                        // Clear any existing timeout for this sector
+                        if (this.sectorIncidentTimeouts.has(carSectorNum)) {
+                            clearTimeout(this.sectorIncidentTimeouts.get(carSectorNum));
+                        }
+                        
                         // Auto-clear after timeout
-                        setTimeout(() => {
+                        const timeoutId = setTimeout(() => {
                             this.activeSectorIncidents.delete(carSectorNum);
+                            this.sectorIncidentTimeouts.delete(carSectorNum);
                             this.updateSectorIncidentDisplay(carSectorNum, false);
                             console.log(`✅ Incident cleared in sector ${carSectorNum} after ${this.incidentTimeout}ms`);
                         }, this.incidentTimeout);
+                        
+                        this.sectorIncidentTimeouts.set(carSectorNum, timeoutId);
                     }
                 }
             }
@@ -1259,23 +1249,15 @@ class LiveStrategyTracker {
         if (!card) return;
         
         if (hasIncident) {
-            // Yellow warning for incident - overrides everything
-            card.classList.remove('bg-neutral-700', 'bg-cyan-600');
+            // Yellow warning for incident
+            card.classList.remove('bg-neutral-700');
             card.classList.add('bg-yellow-500', 'incident-active');
             card.title = 'Incident detected in this sector';
         } else {
-            // Clear incident - restore appropriate color
+            // Clear incident - restore neutral color
             card.classList.remove('bg-yellow-500', 'incident-active');
+            card.classList.add('bg-neutral-700');
             card.title = '';
-            
-            // Re-apply cyan if this is the current sector, otherwise neutral
-            if (this.currentSector === sectorNum) {
-                card.classList.remove('bg-neutral-700');
-                card.classList.add('bg-cyan-600');
-            } else {
-                card.classList.remove('bg-cyan-600');
-                card.classList.add('bg-neutral-700');
-            }
         }
     }
     
