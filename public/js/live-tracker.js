@@ -242,6 +242,7 @@ class LiveStrategyTracker {
         // Time mode controls
         this.elements.timeAutoBtn = document.getElementById('time-mode-auto');
         this.elements.timeManualBtn = document.getElementById('time-mode-manual');
+        this.elements.recalcStintsBtn = document.getElementById('recalc-stints-btn');
         this.elements.manualControls = document.getElementById('manual-mode-controls');
         this.elements.manualHours = document.getElementById('manual-hours');
         this.elements.manualMinutes = document.getElementById('manual-minutes');
@@ -351,6 +352,12 @@ class LiveStrategyTracker {
         // Time mode toggle
         this.elements.timeAutoBtn?.addEventListener('click', () => this.setTimeMode('auto'));
         this.elements.timeManualBtn?.addEventListener('click', () => this.setTimeMode('manual'));
+        
+        // Recalculate button
+        this.elements.recalcStintsBtn?.addEventListener('click', () => {
+            console.log('🔄 Manual recalculation triggered');
+            this.calculateStintsForRemainingTime();
+        });
         
         // Manual timer controls
         this.elements.manualStartBtn?.addEventListener('click', () => this.startManualTimer());
