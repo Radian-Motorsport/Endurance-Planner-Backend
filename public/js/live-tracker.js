@@ -1046,6 +1046,12 @@ class LiveStrategyTracker {
      * Initialize sector markers from session data
      */
     initializeSectors(sessionData) {
+        // Only initialize once - prevent repeated calls from destroying sector cards
+        if (this.sectorsInitialized) {
+            console.log('⏭️ Sectors already initialized, skipping to prevent yellow flash');
+            return;
+        }
+        
         // Get track length
         this.trackLength = sessionData?.WeekendInfo?.TrackLength;
         
@@ -1068,12 +1074,16 @@ class LiveStrategyTracker {
         
         // Draw sector markers on the lap progress bar
         this.drawSectorMarkers();
+        
+        // Mark as initialized to prevent repeated destruction of sector cards
+        this.sectorsInitialized = true;
     }
     
     /**
      * Draw visual sector markers on the lap progress bar
      */
     drawSectorMarkers() {
+        console.log('🔨🔨🔨 drawSectorMarkers() CALLED - THIS DESTROYS AND RECREATES SECTOR CARDS');
         const container = document.getElementById('sector-markers-container');
         const sectorInfoDisplay = document.getElementById('sector-info-display');
         
