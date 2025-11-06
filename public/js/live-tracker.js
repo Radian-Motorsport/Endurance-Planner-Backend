@@ -323,16 +323,32 @@ class LiveStrategyTracker {
         });
         
         // Pedal trace toggle
-        const togglePedalBtn = document.getElementById('toggle-pedal-inputs');
+        // Toggle entire pedal trace section
+        const togglePedalTraceBtn = document.getElementById('toggle-pedal-trace');
         const pedalTraceContainer = document.getElementById('pedal-trace-container');
-        if (togglePedalBtn && pedalTraceContainer) {
-            togglePedalBtn.addEventListener('click', () => {
+        if (togglePedalTraceBtn && pedalTraceContainer) {
+            togglePedalTraceBtn.addEventListener('click', () => {
                 if (pedalTraceContainer.classList.contains('hidden')) {
                     pedalTraceContainer.classList.remove('hidden');
-                    togglePedalBtn.textContent = 'Hide Trace ▲';
+                    togglePedalTraceBtn.textContent = 'Hide Trace ▲';
                 } else {
                     pedalTraceContainer.classList.add('hidden');
-                    togglePedalBtn.textContent = 'Show Trace ▼';
+                    togglePedalTraceBtn.textContent = 'Show Trace ▼';
+                }
+            });
+        }
+        
+        // Toggle just the driver inputs grid
+        const togglePedalInputsBtn = document.getElementById('toggle-pedal-inputs');
+        const pedalInputsDetails = document.getElementById('driver-inputs-details');
+        if (togglePedalInputsBtn && pedalInputsDetails) {
+            togglePedalInputsBtn.addEventListener('click', () => {
+                if (pedalInputsDetails.classList.contains('hidden')) {
+                    pedalInputsDetails.classList.remove('hidden');
+                    togglePedalInputsBtn.textContent = 'Hide Inputs ▲';
+                } else {
+                    pedalInputsDetails.classList.add('hidden');
+                    togglePedalInputsBtn.textContent = 'Show Inputs ▼';
                 }
             });
         }

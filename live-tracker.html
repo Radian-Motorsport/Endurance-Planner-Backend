@@ -348,9 +348,14 @@
         <div class="bg-neutral-800 rounded-lg p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl road-rage-font">Pedal Trace & Driver Inputs</h2>
-                <button id="toggle-pedal-inputs" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                    Hide Trace ▲
-                </button>
+                <div class="flex gap-2">
+                    <button id="toggle-pedal-trace" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                        Hide Trace ▲
+                    </button>
+                    <button id="toggle-pedal-inputs" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                        Show Inputs ▼
+                    </button>
+                </div>
             </div>
             
             <!-- Pedal Trace & Inputs Container (Collapsible) -->
