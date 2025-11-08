@@ -3529,69 +3529,9 @@ class LiveStrategyTracker {
         const completedStints = this.stintHistory.length;
         const totalNewStints = completedStints + newStintCount;
         
-        debug(`📊 Time analysis:`, {
-            remainingTime: `${(remainingSessionTime / 60).toFixed(1)} min`,
-            lapsPerTank: lapsPerTank,
-            tankCapacity: tankCapacity,
-            actualAvgFuelPerLap: actualAvgFuelPerLap,
-            timePerStint: `${(timePerStint / 60).toFixed(1)} min`,
-            remainingLaps: remainingLapsNeeded,
-            newStintCount: newStintCount,
-            totalNewStints: totalNewStints
-        });
+        debug(`📊 Recalculate complete - refreshing table display`);
         
-        if (newStintCount <= 0) {
-            debug('✅ All time remaining stints completed');
-            return;
-        }
-        
-        // Rebuild remaining stints array (trim or add stints as needed)
-        const lastEndLap = completedStints > 0 ? this.strategy.stints[completedStints - 1].endLap : 0;
-        let newCurrentLap = lastEndLap + 1;
-        
-        debug(`📍 Recalculating from lap ${newCurrentLap}, need ${newStintCount} stints`);
-        
-        // Remove old remaining stints
-        this.strategy.stints = this.strategy.stints.slice(0, completedStints);
-        
-        // Create new remaining stints
-        for (let i = 0; i < newStintCount; i++) {
-            const stintIndex = completedStints + i;
-            const originalStint = this.strategy.stints[stintIndex - 1] || {}; // Get previous stint as template
-            
-            const startLap = Math.floor(newCurrentLap);
-            const endLap = Math.floor(startLap + lapsPerTank - 1);
-            
-            const startTimeSeconds = (startLap - 1) * actualAvgLapTime;
-            const endTimeSeconds = endLap * actualAvgLapTime;
-            const startTime = this.formatTimeSeconds(startTimeSeconds);
-            const endTime = this.formatTimeSeconds(endTimeSeconds);
-            
-            // Parse time strings to get seconds since midnight (for SessionTimeOfDay comparison)
-            const timeOfDayStart = this.parseTimeToSeconds(startTime);
-            const timeOfDayEnd = this.parseTimeToSeconds(endTime);
-            
-            const newStint = {
-                stintNumber: stintIndex + 1,
-                driver: originalStint.driver || 'Unassigned',
-                backup: originalStint.backup || null,
-                startLap: startLap,
-                endLap: endLap,
-                laps: endLap - startLap + 1,
-                startTime: startTime,
-                endTime: endTime,
-                timeOfDayStart: timeOfDayStart,
-                timeOfDayEnd: timeOfDayEnd
-            };
-            
-            this.strategy.stints.push(newStint);
-            
-            debug(`✏️  Stint #${stintIndex + 1} created: laps ${startLap}-${endLap} (${endLap - startLap + 1} laps)`);
-            
-            newCurrentLap = endLap + 1;
-        }
-        
-        // Refresh table display
+        // Just refresh the table with the trimmed stints (don't rebuild them)
         this.populateStintTable();
     }
 
