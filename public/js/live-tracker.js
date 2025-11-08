@@ -2091,8 +2091,8 @@ class LiveStrategyTracker {
             this.hasCalculatedStints = true;
         }
         
-        // Update remaining stats
-        this.currentLap = values.Lap || 0;
+        // Update remaining stats - use CarIdx arrays for player data
+        this.currentLap = values.CarIdxLap?.[this.playerCarIdx] || 0;
         this.fuelLevel = values.FuelLevel || 0;
         // Use CarIdx array for player's last lap time
         this.lastLapTime = values.CarIdxLastLapTime?.[this.playerCarIdx] || 0;
