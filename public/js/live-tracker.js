@@ -2925,20 +2925,22 @@ class LiveStrategyTracker {
             return;
         }
         
-        // If we have original stints from planner with time-of-day data, use those to determine current stint
+        // If we have original stints from planner with time-of-day data, use those
         if (this.strategy.stints && this.strategy.stints.length > 0 && 
-            this.strategy.stints[0].timeOfDayStart != null && this.sessionTimeOfDay != null) {
+            this.strategy.stints[0].timeOfDayStart != null) {
             debug('✅ Using original planner stints with time-of-day data');
             
-            const currentTimeOfDay = this.sessionTimeOfDay;
-            const hours = Math.floor(currentTimeOfDay / 3600);
-            const minutes = Math.floor((currentTimeOfDay % 3600) / 60);
-            debug(`  Current time of day: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} (${currentTimeOfDay}s)`);
-            
-            // Find which stint we're currently in based on time of day
+            // Only determine current stint if we have current time-of-day from telemetry
             let currentStintIndex = -1;
-            for (let i = 0; i < this.strategy.stints.length; i++) {
-                const stint = this.strategy.stints[i];
+            if (this.sessionTimeOfDay != null) {
+                const currentTimeOfDay = this.sessionTimeOfDay;
+                const hours = Math.floor(currentTimeOfDay / 3600);
+                const minutes = Math.floor((currentTimeOfDay % 3600) / 60);
+                debug(`  Current time of day: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} (${currentTimeOfDay}s)`);
+                
+                // Find which stint we're currently in based on time of day
+                for (let i = 0; i < this.strategy.stints.length; i++) {
+                    const stint = this.strategy.stints[i];
                 if (stint.timeOfDayStart != null && stint.timeOfDayEnd != null) {
                     // Handle day wraparound (e.g., stint from 23:00 to 01:00)
                     let inStint = false;
@@ -2957,11 +2959,11 @@ class LiveStrategyTracker {
                         break;
                     }
                 }
-            }
-            
-            // If we couldn't find current stint, find the next upcoming one
-            if (currentStintIndex === -1) {
-                for (let i = 0; i < this.strategy.stints.length; i++) {
+                }
+                
+                // If we couldn't find current stint, find the next upcoming one
+                if (currentStintIndex === -1) {
+                    for (let i = 0; i < this.strategy.stints.length; i++) {
                     const stint = this.strategy.stints[i];
                     if (stint.timeOfDayStart != null && currentTimeOfDay < stint.timeOfDayStart) {
                         currentStintIndex = i;
@@ -2969,10 +2971,11 @@ class LiveStrategyTracker {
                         debug(`  ⏭️ Next stint is #${stint.stintNumber} (${stint.driver})`);
                         break;
                     }
+                    }
                 }
             }
             
-            // Keep only current and future stints
+            // Keep only current and future stints if we determined the current stint
             if (currentStintIndex > 0) {
                 this.strategy.stints = this.strategy.stints.slice(currentStintIndex);
                 debug(`  ✂️ Trimmed ${currentStintIndex} completed stints, showing from stint #${this.strategy.stints[0].stintNumber}`);
