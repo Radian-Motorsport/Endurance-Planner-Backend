@@ -270,6 +270,8 @@ export class WeatherComponent {
         
         // Calculate current time index based on race time
         let currentTimeIndex = -1;
+        console.log('🔴 Checking race time - currentRaceTime:', this.currentRaceTime, 'raceStartIndex:', raceStartIndex);
+        
         if (this.currentRaceTime !== null && raceStartIndex >= 0) {
             // Each forecast item represents 10 minutes (600 seconds)
             const indexOffset = Math.floor(this.currentRaceTime / 600);
