@@ -2297,6 +2297,12 @@ class LiveStrategyTracker {
             // Sync currentStintLap with calculated value
             this.currentStintLap = Math.max(0, this.currentLap - this.stintStartLap);
             
+            // Always record lap time (even when spotting)
+            if (this.lastLapTime > 0) {
+                this.currentStintLapTimes.push(this.lastLapTime);
+            }
+            
+            // Process fuel data if available (only when driving)
             if (this.fuelAtLapStart !== null && this.fuelAtLapStart > 0) {
                 // Calculate fuel used in the lap that just completed
                 const fuelUsedInLap = this.fuelAtLapStart - this.fuelLevel;
@@ -2313,14 +2319,20 @@ class LiveStrategyTracker {
                     
                     // Store in current stint data
                     this.currentStintFuelUse.push(fuelUsedInLap);
-                    this.currentStintLapTimes.push(this.lastLapTime);
-                    
-                    // Increment stint lap count (completed laps)
-                    this.currentStintLap++;
                     
                     console.log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${fuelUsedInLap.toFixed(2)}L, ${this.formatLapTime(this.lastLapTime)}`);
                 }
+            } else {
+                // When spotting (no fuel data), use planned fuel per lap from strategy
+                if (this.strategy && this.strategy.formData && this.strategy.formData.fuelPerLap) {
+                    const plannedFuelPerLap = parseFloat(this.strategy.formData.fuelPerLap);
+                    this.currentStintFuelUse.push(plannedFuelPerLap);
+                    console.log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${this.formatLapTime(this.lastLapTime)} [Est. fuel: ${plannedFuelPerLap.toFixed(2)}L]`);
+                }
             }
+            
+            // Increment stint lap count (completed laps)
+            this.currentStintLap++;
             
             // Record fuel at start of new lap
             this.fuelAtLapStart = this.fuelLevel;
