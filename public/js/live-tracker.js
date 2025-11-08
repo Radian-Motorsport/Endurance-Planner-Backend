@@ -1967,14 +1967,11 @@ class LiveStrategyTracker {
     }
     
     initializeCarAnalysis(sessionData) {
-        // Only initialize once per session
-        if (this.carAnalysisInitialized) {
-            console.log('🔄 Car analysis already initialized, skipping...');
-            return;
-        }
-        
         if (!sessionData?.DriverInfo?.Drivers) return;
         
+        const isFirstInit = !this.carAnalysisInitialized;
+        
+        // Update driver list (allows refreshing driver names when drivers change)
         this.driversList = sessionData.DriverInfo.Drivers;
         this.playerCarIdx = sessionData.DriverInfo.DriverCarIdx;
         
@@ -1984,29 +1981,36 @@ class LiveStrategyTracker {
             this.playerCarClass = playerDriver.CarClassID;
         }
         
-        console.log('🏁 Car Analysis initialized:', {
-            totalDrivers: this.driversList.length,
-            playerCarIdx: this.playerCarIdx,
-            playerCarClass: this.playerCarClass
-        });
-        
-        // Determine which class tab to select based on player's class
-        let initialClassTab = 'GTP'; // Default
-        
-        for (const [className, classIds] of Object.entries(this.classMapping)) {
-            if (classIds.includes(this.playerCarClass)) {
-                initialClassTab = className;
-                break;
+        if (isFirstInit) {
+            console.log('🏁 Car Analysis initialized:', {
+                totalDrivers: this.driversList.length,
+                playerCarIdx: this.playerCarIdx,
+                playerCarClass: this.playerCarClass
+            });
+            
+            // Determine which class tab to select based on player's class
+            let initialClassTab = 'GTP'; // Default
+            
+            for (const [className, classIds] of Object.entries(this.classMapping)) {
+                if (classIds.includes(this.playerCarClass)) {
+                    initialClassTab = className;
+                    break;
+                }
             }
+            
+            console.log(`🎯 Setting initial class tab to: ${initialClassTab} (player class: ${this.playerCarClass})`);
+            
+            // Set initial filter to player's class tab (only called once at initialization)
+            this.setClassFilter(initialClassTab);
+            
+            // Mark as initialized
+            this.carAnalysisInitialized = true;
+        } else {
+            console.log('🔄 Driver list refreshed:', {
+                totalDrivers: this.driversList.length,
+                playerCarIdx: this.playerCarIdx
+            });
         }
-        
-        console.log(`🎯 Setting initial class tab to: ${initialClassTab} (player class: ${this.playerCarClass})`);
-        
-        // Set initial filter to player's class tab (only called once at initialization)
-        this.setClassFilter(initialClassTab);
-        
-        // Mark as initialized
-        this.carAnalysisInitialized = true;
     }
     
     setClassFilter(classFilter) {
