@@ -167,6 +167,9 @@ class LiveStrategyTracker {
         this.trackMapComponent = null;
         this.carPositionTracker = null;
         
+        // Weather & Environment
+        this.enviroTrace = null;
+        
         // Car Analysis
         this.driversList = [];
         this.playerCarIdx = null;
@@ -390,6 +393,21 @@ class LiveStrategyTracker {
             });
         }
         
+        // Weather toggle
+        const toggleWeatherBtn = document.getElementById('toggle-weather');
+        const weatherDetails = document.getElementById('weather-details');
+        if (toggleWeatherBtn && weatherDetails) {
+            toggleWeatherBtn.addEventListener('click', () => {
+                if (weatherDetails.classList.contains('hidden')) {
+                    weatherDetails.classList.remove('hidden');
+                    toggleWeatherBtn.textContent = 'Hide Weather ▲';
+                } else {
+                    weatherDetails.classList.add('hidden');
+                    toggleWeatherBtn.textContent = 'Show Weather ▼';
+                }
+            });
+        }
+        
         // Class filter tabs
         document.querySelectorAll('.class-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
@@ -428,6 +446,9 @@ class LiveStrategyTracker {
             
             // Initialize pedal trace visualization
             this.initializePedalTrace();
+            
+            // Initialize weather trace visualization
+            this.initializeWeatherTrace();
         });
         
         this.socket.on('disconnect', () => {
@@ -446,6 +467,7 @@ class LiveStrategyTracker {
             this.lastTelemetryTime = Date.now();  // Track last telemetry received
             this.handleTelemetryUpdate(data);
             this.updateDriverInputs(data);  // Update driver inputs display
+            this.updateWeatherData(data?.values);  // Update weather display
         });
         
         // Listen for driver info
@@ -483,6 +505,71 @@ class LiveStrategyTracker {
                 console.error('❌ Failed to initialize pedal trace:', error);
             }
         }
+    }
+    
+    initializeWeatherTrace() {
+        if (!this.enviroTrace && this.socket) {
+            try {
+                this.enviroTrace = new EnviroTrace(this.socket, 'env-canvas', {
+                    maxPoints: 3600, // 1 hour at 1 point per second
+                    sampleInterval: 1000
+                });
+                console.log('✅ Weather trace initialized');
+            } catch (error) {
+                console.error('❌ Failed to initialize weather trace:', error);
+            }
+        }
+    }
+    
+    updateWeatherData(values) {
+        if (!values) return;
+        
+        // Lookup tables
+        const skiesMap = {0: 'Clear', 1: 'Partly Cloudy', 2: 'Mostly Cloudy', 3: 'Overcast'};
+        const wetnessMap = {
+            0: 'Dry', 1: 'Mostly Dry', 2: 'Very Lightly Wet', 3: 'Lightly Wet', 
+            4: 'Moderately Wet', 5: 'Very Wet', 6: 'Extremely Wet'
+        };
+        
+        // Helper function to format values
+        const formatValue = (value, type) => {
+            if (value === null || value === undefined) return '--';
+            switch (type) {
+                case 'temperature':
+                    return `${value.toFixed(1)}°C`;
+                case 'pressure':
+                    return `${(value / 100).toFixed(1)} mbar`;
+                case 'percentage':
+                    return `${(value * 100).toFixed(1)}%`;
+                case 'velocity':
+                    return `${(value * 3.6).toFixed(1)} kph`;
+                case 'direction':
+                    return `${value.toFixed(0)}°`;
+                case 'density':
+                    return `${value.toFixed(3)} kg/m³`;
+                case 'skies':
+                    return skiesMap[value] || '--';
+                case 'wetness':
+                    return typeof value === 'string' ? value : (wetnessMap[value] || '--');
+                default:
+                    return typeof value === 'number' ? value.toFixed(2) : value;
+            }
+        };
+        
+        // Update all weather elements
+        const el = (id) => document.getElementById(id);
+        
+        if (el('weather-track-temp')) el('weather-track-temp').textContent = formatValue(values.TrackTemp, 'temperature');
+        if (el('weather-air-temp')) el('weather-air-temp').textContent = formatValue(values.AirTemp, 'temperature');
+        if (el('weather-air-density')) el('weather-air-density').textContent = formatValue(values.AirDensity, 'density');
+        if (el('weather-air-pressure')) el('weather-air-pressure').textContent = formatValue(values.AirPressure, 'pressure');
+        if (el('weather-wind-vel')) el('weather-wind-vel').textContent = formatValue(values.WindVel, 'velocity');
+        if (el('weather-wind-dir')) el('weather-wind-dir').textContent = formatValue(values.WindDir, 'direction');
+        if (el('weather-skies')) el('weather-skies').textContent = formatValue(values.Skies, 'skies');
+        if (el('weather-humidity')) el('weather-humidity').textContent = formatValue(values.RelativeHumidity, 'percentage');
+        if (el('weather-precipitation')) el('weather-precipitation').textContent = formatValue(values.Precipitation, 'percentage');
+        if (el('weather-track-wetness')) el('weather-track-wetness').textContent = formatValue(values.TrackWetness, 'wetness');
+        if (el('weather-fog-level')) el('weather-fog-level').textContent = formatValue(values.FogLevel, 'percentage');
     }
     
     updateDriverInputs(data) {

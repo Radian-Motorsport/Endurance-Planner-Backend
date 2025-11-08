@@ -524,6 +524,112 @@
             </div>
         </div>
         
+        <!-- Weather & Environment -->
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl road-rage-font">Weather & Environment</h2>
+                <button id="toggle-weather" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                    Show Weather ▼
+                </button>
+            </div>
+            
+            <!-- Weather Details (Collapsible) -->
+            <div id="weather-details" class="hidden">
+                <!-- Environment Trace Canvas -->
+                <div class="mb-4">
+                    <canvas id="env-canvas" width="800" height="200" class="w-full bg-neutral-900 rounded"></canvas>
+                </div>
+                
+                <!-- Legend -->
+                <div class="flex items-center justify-center gap-4 text-xs text-neutral-400 mb-4">
+                    <div class="flex items-center gap-1">
+                        <div class="w-8 h-0.5" style="background: orange;"></div>
+                        <span>Track Temp</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <div class="w-8 h-0.5" style="background: purple;"></div>
+                        <span>Humidity</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <div class="w-8 h-0.5" style="background: #87CEEB;"></div>
+                        <span>Precipitation</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <div class="w-8 h-0.5" style="background: hotpink;"></div>
+                        <span>Air Pressure</span>
+                    </div>
+                </div>
+                
+                <!-- Weather Data Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <!-- Temp & Pressure Column -->
+                    <div class="bg-neutral-700 rounded p-3">
+                        <h3 class="text-sm font-bold text-yellow-400 uppercase mb-2">Temp & Pressure</h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-cyan-400">Track Temp:</span>
+                                <span id="weather-track-temp" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-cyan-400">Air Temp:</span>
+                                <span id="weather-air-temp" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-cyan-400">Air Density:</span>
+                                <span id="weather-air-density" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-cyan-400">Air Pressure:</span>
+                                <span id="weather-air-pressure" class="text-white">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Weather Column -->
+                    <div class="bg-neutral-700 rounded p-3">
+                        <h3 class="text-sm font-bold text-yellow-400 uppercase mb-2">Weather</h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-cyan-400">Wind Velocity:</span>
+                                <span id="weather-wind-vel" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-cyan-400">Wind Direction:</span>
+                                <span id="weather-wind-dir" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-cyan-400">Skies:</span>
+                                <span id="weather-skies" class="text-white">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Track Conditions Column -->
+                    <div class="bg-neutral-700 rounded p-3">
+                        <h3 class="text-sm font-bold text-yellow-400 uppercase mb-2">Track Conditions</h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-cyan-400">Humidity:</span>
+                                <span id="weather-humidity" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-cyan-400">Precipitation:</span>
+                                <span id="weather-precipitation" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-cyan-400">Track Wetness:</span>
+                                <span id="weather-track-wetness" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-cyan-400">Fog Level:</span>
+                                <span id="weather-fog-level" class="text-white">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Stint Table -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <h2 class="text-xl road-rage-font mb-4">Stint Breakdown</h2>
@@ -597,6 +703,7 @@
         window.CarPositionTracker = CarPositionTracker;
     </script>
     
+    <script src="/public/js/envirotrace.js"></script>
     <script src="/public/js/live-tracker.js"></script>
 </body>
 </html>
