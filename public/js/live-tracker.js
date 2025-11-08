@@ -3405,6 +3405,51 @@ class LiveStrategyTracker {
             return;
         }
         
+        // First, trim past stints based on current SessionTimeOfDay
+        if (this.sessionTimeOfDay != null && this.strategy.stints[0].timeOfDayStart != null) {
+            const currentTimeOfDay = this.sessionTimeOfDay;
+            let currentStintIndex = -1;
+            
+            // Find which stint we're currently in
+            for (let i = 0; i < this.strategy.stints.length; i++) {
+                const stint = this.strategy.stints[i];
+                if (stint.timeOfDayStart != null && stint.timeOfDayEnd != null) {
+                    let inStint = false;
+                    if (stint.timeOfDayEnd < stint.timeOfDayStart) {
+                        // Crosses midnight
+                        inStint = (currentTimeOfDay >= stint.timeOfDayStart || currentTimeOfDay <= stint.timeOfDayEnd);
+                    } else {
+                        // Normal same-day stint
+                        inStint = (currentTimeOfDay >= stint.timeOfDayStart && currentTimeOfDay <= stint.timeOfDayEnd);
+                    }
+                    
+                    if (inStint) {
+                        currentStintIndex = i;
+                        debug(`📍 Currently in stint #${stint.stintNumber}`);
+                        break;
+                    }
+                }
+            }
+            
+            // If not in any stint, find next upcoming stint
+            if (currentStintIndex === -1) {
+                for (let i = 0; i < this.strategy.stints.length; i++) {
+                    const stint = this.strategy.stints[i];
+                    if (stint.timeOfDayStart != null && currentTimeOfDay < stint.timeOfDayStart) {
+                        currentStintIndex = i;
+                        debug(`⏭️ Next stint is #${stint.stintNumber}`);
+                        break;
+                    }
+                }
+            }
+            
+            // Trim past stints
+            if (currentStintIndex > 0) {
+                this.strategy.stints = this.strategy.stints.slice(currentStintIndex);
+                debug(`✂️ Trimmed ${currentStintIndex} completed stints`);
+            }
+        }
+        
         // Don't reset manual timer - it should only be controlled by user buttons
         // Manual mode uses this.manualTimeRemaining which is managed separately
         
@@ -3517,8 +3562,14 @@ class LiveStrategyTracker {
             const startLap = Math.floor(newCurrentLap);
             const endLap = Math.floor(startLap + lapsPerTank - 1);
             
-            const startTime = this.formatTimeSeconds((startLap - 1) * actualAvgLapTime);
-            const endTime = this.formatTimeSeconds(endLap * actualAvgLapTime);
+            const startTimeSeconds = (startLap - 1) * actualAvgLapTime;
+            const endTimeSeconds = endLap * actualAvgLapTime;
+            const startTime = this.formatTimeSeconds(startTimeSeconds);
+            const endTime = this.formatTimeSeconds(endTimeSeconds);
+            
+            // Parse time strings to get seconds since midnight (for SessionTimeOfDay comparison)
+            const timeOfDayStart = this.parseTimeToSeconds(startTime);
+            const timeOfDayEnd = this.parseTimeToSeconds(endTime);
             
             const newStint = {
                 stintNumber: stintIndex + 1,
@@ -3528,7 +3579,9 @@ class LiveStrategyTracker {
                 endLap: endLap,
                 laps: endLap - startLap + 1,
                 startTime: startTime,
-                endTime: endTime
+                endTime: endTime,
+                timeOfDayStart: timeOfDayStart,
+                timeOfDayEnd: timeOfDayEnd
             };
             
             this.strategy.stints.push(newStint);
