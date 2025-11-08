@@ -673,6 +673,12 @@ class LiveStrategyTracker {
         }
         
         // Update all cars on progress bar if enabled
+        console.log('🔍 Progress cars check:', {
+            showAllCarsOnProgress: this.showAllCarsOnProgress,
+            hasCarIdxLapDistPct: !!values.CarIdxLapDistPct,
+            willRender: this.showAllCarsOnProgress && values.CarIdxLapDistPct
+        });
+        
         if (this.showAllCarsOnProgress && values.CarIdxLapDistPct) {
             this.renderProgressCars(values);
         }
