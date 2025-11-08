@@ -413,85 +413,95 @@
             </div>
             
             <div id="weather-details" class="hidden">
-                <!-- Weather Line Chart -->
-                <div class="mb-6">
+                <!-- Environment Trace Canvas -->
+                <div class="mb-4">
                     <canvas id="env-canvas" width="800" height="200" class="w-full bg-neutral-900 rounded"></canvas>
                 </div>
                 
                 <!-- Legend -->
-                <div class="flex justify-center gap-6 mb-6 text-xs">
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-0.5 bg-red-500"></div>
-                        <span class="text-neutral-300">Track Temp (°C)</span>
+                <div class="flex items-center justify-center gap-4 text-xs text-neutral-400 mb-4">
+                    <div class="flex items-center gap-1">
+                        <div class="w-8 h-0.5" style="background: orange;"></div>
+                        <span>Track Temp</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-0.5 bg-blue-500"></div>
-                        <span class="text-neutral-300">Humidity (%)</span>
+                    <div class="flex items-center gap-1">
+                        <div class="w-8 h-0.5" style="background: purple;"></div>
+                        <span>Humidity</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-0.5 bg-cyan-400"></div>
-                        <span class="text-neutral-300">Precipitation (%)</span>
+                    <div class="flex items-center gap-1">
+                        <div class="w-8 h-0.5" style="background: #87CEEB;"></div>
+                        <span>Precipitation</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-0.5 bg-yellow-500"></div>
-                        <span class="text-neutral-300">Air Pressure (hPa)</span>
+                    <div class="flex items-center gap-1">
+                        <div class="w-8 h-0.5" style="background: hotpink;"></div>
+                        <span>Air Pressure</span>
                     </div>
                 </div>
                 
                 <!-- Weather Data Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Temperature & Pressure Column -->
-                    <div class="bg-neutral-700 rounded p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-3">Temp & Pressure</h3>
-                        <div class="flex justify-between items-center border-b border-neutral-600 pb-2">
-                            <span class="text-xs text-neutral-400">Track Temp</span>
-                            <span id="weather-track-temp" class="text-sm font-mono text-red-400">--°C</span>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-neutral-600 pb-2">
-                            <span class="text-xs text-neutral-400">Air Temp</span>
-                            <span id="weather-air-temp" class="text-sm font-mono text-orange-400">--°C</span>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-neutral-600 pb-2">
-                            <span class="text-xs text-neutral-400">Air Pressure</span>
-                            <span id="weather-air-pressure" class="text-sm font-mono text-yellow-400">-- hPa</span>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <!-- Temp & Pressure Column -->
+                    <div class="bg-neutral-700 rounded p-3">
+                        <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-2">Temp & Pressure</h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-neutral-400">Track Temp:</span>
+                                <span id="weather-track-temp" class="text-white" style="color: orange;">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-neutral-400">Air Temp:</span>
+                                <span id="weather-air-temp" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-neutral-400">Air Density:</span>
+                                <span id="weather-air-density" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-neutral-400">Air Pressure:</span>
+                                <span id="weather-air-pressure" class="text-white" style="color: hotpink;">--</span>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- Weather Column -->
-                    <div class="bg-neutral-700 rounded p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-3">Weather</h3>
-                        <div class="flex justify-between items-center border-b border-neutral-600 pb-2">
-                            <span class="text-xs text-neutral-400">Humidity</span>
-                            <span id="weather-humidity" class="text-sm font-mono text-blue-400">--%</span>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-neutral-600 pb-2">
-                            <span class="text-xs text-neutral-400">Fog</span>
-                            <span id="weather-fog" class="text-sm font-mono text-neutral-300">--%</span>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-neutral-600 pb-2">
-                            <span class="text-xs text-neutral-400">Precipitation</span>
-                            <span id="weather-precipitation" class="text-sm font-mono text-cyan-400">--%</span>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-neutral-600 pb-2">
-                            <span class="text-xs text-neutral-400">Skies</span>
-                            <span id="weather-skies" class="text-sm font-mono text-neutral-300">--</span>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-2">Weather</h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-neutral-400">Wind Velocity:</span>
+                                <span id="weather-wind-vel" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-neutral-400">Wind Direction:</span>
+                                <span id="weather-wind-dir" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-neutral-400">Skies:</span>
+                                <span id="weather-skies" class="text-white">--</span>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- Track Conditions Column -->
-                    <div class="bg-neutral-700 rounded p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-3">Track Conditions</h3>
-                        <div class="flex justify-between items-center border-b border-neutral-600 pb-2">
-                            <span class="text-xs text-neutral-400">Wind Speed</span>
-                            <span id="weather-wind-speed" class="text-sm font-mono text-green-400">-- m/s</span>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-neutral-600 pb-2">
-                            <span class="text-xs text-neutral-400">Wind Dir</span>
-                            <span id="weather-wind-dir" class="text-sm font-mono text-green-400">--°</span>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-neutral-600 pb-2">
-                            <span class="text-xs text-neutral-400">Track Usage</span>
-                            <span id="weather-track-usage" class="text-sm font-mono text-purple-400">--</span>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-2">Track Conditions</h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-neutral-400">Humidity:</span>
+                                <span id="weather-humidity" class="text-white" style="color: purple;">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-neutral-400">Precipitation:</span>
+                                <span id="weather-precipitation" class="text-white" style="color: #87CEEB;">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-neutral-400">Track Wetness:</span>
+                                <span id="weather-track-wetness" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-neutral-400">Fog Level:</span>
+                                <span id="weather-fog-level" class="text-white">--</span>
+                            </div>
                         </div>
                     </div>
                 </div>
