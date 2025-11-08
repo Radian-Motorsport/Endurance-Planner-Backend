@@ -9,6 +9,7 @@ export class CarPositionTracker {
         this.svgContainerId = svgContainerId;
         this.options = {
             carRadius: options.carRadius || 14,
+            playerCarRadius: options.playerCarRadius || 20,  // Larger radius for player car
             playerCarColor: options.playerCarColor || '#00d9ffff',  // Cyan for player
             carStroke: options.carStroke || 'transparent',  // Transparent by default (on track)
             carStrokeWidth: options.carStrokeWidth || 3,
@@ -229,7 +230,9 @@ export class CarPositionTracker {
         // Create new car marker as a circle
         const marker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         marker.setAttribute('id', `car-marker-${carIdx}`);
-        marker.setAttribute('r', this.options.carRadius);
+        // Use larger radius for player car
+        const radius = isPlayer ? this.options.playerCarRadius : this.options.carRadius;
+        marker.setAttribute('r', radius);
         marker.setAttribute('stroke-width', this.options.carStrokeWidth);
         marker.setAttribute('opacity', '0.9');
         marker.style.transition = 'cx 0.1s linear, cy 0.1s linear';
