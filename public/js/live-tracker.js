@@ -660,7 +660,8 @@ class LiveStrategyTracker {
             
             // Initialize car position tracker after map loads
             this.carPositionTracker = new window.CarPositionTracker('track-map-container-live', {
-                carRadius: 22, // was 12
+                carRadius: 22, // Standard car size
+                playerCarRadius: 30, // Player car is larger
                 carColor: '#06b6d4',  // Cyan
                 carStroke: 'transparent',  // Start transparent - will change dynamically based on track surface
                 carStrokeWidth: 6,
