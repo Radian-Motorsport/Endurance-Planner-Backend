@@ -1547,13 +1547,15 @@ class LiveStrategyTracker {
         // Build comparison grid
         let html = '<div class="grid grid-cols-1 gap-1">';
         
-        // Header row
-        html += '<div class="grid gap-1" style="grid-template-columns: 150px repeat(' + this.sectors.length + ', 1fr) 90px;">';
-        html += '<div class="bg-neutral-900 px-3 py-2 text-xs font-bold text-neutral-400 rounded">Driver</div>';
+        // Header row - equal width columns
+        const numCols = this.sectors.length + 3; // sectors + driver + lap time + time diff
+        html += '<div class="grid gap-1" style="grid-template-columns: repeat(' + numCols + ', 1fr);">';
+        html += '<div class="bg-neutral-900 px-2 py-2 text-xs font-bold text-center text-neutral-400 rounded">Driver</div>';
         this.sectors.forEach(sector => {
             html += `<div class="bg-neutral-900 px-2 py-2 text-xs font-bold text-center text-neutral-400 rounded">S${sector.number + 1}</div>`;
         });
         html += '<div class="bg-neutral-900 px-2 py-2 text-xs font-bold text-center text-neutral-400 rounded">Lap Time</div>';
+        html += '<div class="bg-neutral-900 px-2 py-2 text-xs font-bold text-center text-neutral-400 rounded">Gap</div>';
         html += '</div>';
         
         // Car ahead row
@@ -1587,11 +1589,16 @@ class LiveStrategyTracker {
         const lapTime = values.CarIdxLastLapTime?.[carIdx] || 0;
         const playerLapTime = values.CarIdxLastLapTime?.[playerCarIdx] || 0;
         
-        let html = '<div class="grid gap-1" style="grid-template-columns: 150px repeat(' + this.sectors.length + ', 1fr) 90px;">';
+        // Get F2Time (time behind leader/fastest lap)
+        const f2Time = values.CarIdxF2Time?.[carIdx] || 0;
+        const playerF2Time = values.CarIdxF2Time?.[playerCarIdx] || 0;
+        
+        const numCols = this.sectors.length + 3;
+        let html = '<div class="grid gap-1" style="grid-template-columns: repeat(' + numCols + ', 1fr);">';
         
         // Driver name cell with class position
         const positionLabel = position === 'ahead' ? '↑ ' : position === 'behind' ? '↓ ' : '';
-        html += `<div class="${bgClass} px-3 py-2 text-sm rounded truncate ${isPlayer ? 'font-bold text-cyan-400' : 'text-neutral-300'}">`;
+        html += `<div class="${bgClass} px-2 py-2 text-xs rounded truncate ${isPlayer ? 'font-bold text-cyan-400' : 'text-neutral-300'} text-center">`;
         html += `<span class="text-[10px] text-neutral-500 mr-1">P${classPosition}</span>`;
         html += `${positionLabel}${driver.UserName || 'Unknown'}`;
         html += '</div>';
@@ -1671,6 +1678,41 @@ class LiveStrategyTracker {
         }
         
         html += `<div class="${lapBg} px-2 py-2 text-xs font-mono text-center ${lapColor} rounded">${lapDisplay}</div>`;
+        
+        // Gap/F2Time cell
+        let gapBg = bgClass;
+        let gapColor = 'text-neutral-400';
+        let gapDisplay = '--';
+        
+        if (isPlayer) {
+            // Show player's F2Time (time behind leader or fastest lap)
+            if (f2Time > 0) {
+                gapDisplay = `${f2Time.toFixed(3)}s`;
+                gapColor = 'text-cyan-400';
+            }
+        } else {
+            // Show gap delta between competitor and player
+            if (f2Time > 0 && playerF2Time > 0) {
+                const gapDelta = f2Time - playerF2Time;
+                const prefix = gapDelta > 0 ? '+' : '';
+                gapDisplay = `${prefix}${gapDelta.toFixed(3)}s`;
+                
+                if (gapDelta < 0) {
+                    // Competitor is closer to leader/faster (ahead of player)
+                    gapBg = 'bg-red-900/40';
+                    gapColor = 'text-red-300';
+                } else if (gapDelta > 0) {
+                    // Competitor is further behind (behind player)
+                    gapBg = 'bg-green-900/40';
+                    gapColor = 'text-green-300';
+                } else {
+                    gapBg = 'bg-yellow-900/40';
+                    gapColor = 'text-yellow-300';
+                }
+            }
+        }
+        
+        html += `<div class="${gapBg} px-2 py-2 text-xs font-mono text-center ${gapColor} rounded">${gapDisplay}</div>`;
         
         html += '</div>';
         return html;
@@ -2268,9 +2310,9 @@ class LiveStrategyTracker {
             this.updateStrategyComparison();
         }
         
-        // Update sector comparison display (throttled to 100ms = 10 times per second)
+        // Update sector comparison display (throttled to 2000ms = 2 seconds to reduce jumping)
         const now = Date.now();
-        if (now - this.lastSectorComparisonUpdate > 100) {
+        if (now - this.lastSectorComparisonUpdate > 2000) {
             this.updateSectorComparison(values);
             this.lastSectorComparisonUpdate = now;
         }
