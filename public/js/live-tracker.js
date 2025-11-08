@@ -2,7 +2,7 @@
 // Loads strategies the exact same way the planner does and calculates stint tables
 
 // Debug flag - set to false to disable all debug logging
-const DEBUG = false;
+const DEBUG = true; // TEMPORARY - enabled to diagnose yellow flag issue
 const debug = (...args) => { if (DEBUG) console.log(...args); };
 
 /**
