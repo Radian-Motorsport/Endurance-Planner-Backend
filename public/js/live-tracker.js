@@ -2247,6 +2247,7 @@ class LiveStrategyTracker {
         // Update SessionTimeOfDay from telemetry (seconds since midnight) - updates live
         if (values.SessionTimeOfDay != null) {
             this.sessionTimeOfDay = values.SessionTimeOfDay;
+            this.updateSessionTimeDisplay(); // Update time-of-day display immediately
         }
         
         // Capture total session time if not set
