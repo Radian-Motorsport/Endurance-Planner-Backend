@@ -1185,17 +1185,19 @@ class LiveStrategyTracker {
     handleSessionInfo(sessionData) {
         this.sessionInfo = sessionData;
         
-        // Capture SessionTimeOfDay (seconds since midnight) for time of day calculations
+        // Capture SessionTimeOfDay (seconds since midnight) - it's at the top level
+        if (sessionData?.SessionTimeOfDay != null) {
+            this.sessionTimeOfDay = sessionData.SessionTimeOfDay;
+            
+            const hours = Math.floor(this.sessionTimeOfDay / 3600);
+            const minutes = Math.floor((this.sessionTimeOfDay % 3600) / 60);
+            console.log(`🕐 Session starts at ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} (${this.sessionTimeOfDay}s since midnight)`);
+        }
+        
+        // Get total session time from the current session
         if (sessionData?.SessionInfo?.Sessions && sessionData.SessionInfo.Sessions.length > 0) {
             const currentSession = sessionData.SessionInfo.Sessions[sessionData.SessionInfo.Sessions.length - 1];
-            this.sessionTimeOfDay = currentSession.SessionTimeOfDay != null ? currentSession.SessionTimeOfDay : null;
             this.sessionTotalTime = currentSession.SessionTime != null ? currentSession.SessionTime : null;
-            
-            if (this.sessionTimeOfDay != null) {
-                const hours = Math.floor(this.sessionTimeOfDay / 3600);
-                const minutes = Math.floor((this.sessionTimeOfDay % 3600) / 60);
-                console.log(`🕐 Session starts at ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} (${this.sessionTimeOfDay}s since midnight)`);
-            }
         }
         
         console.log('🏁 Processing session info:', {
@@ -2240,6 +2242,20 @@ class LiveStrategyTracker {
         
         const values = data.values;
         
+        // Capture SessionTimeOfDay from telemetry (seconds since midnight)
+        if (this.sessionTimeOfDay === null && values.SessionTimeOfDay != null) {
+            this.sessionTimeOfDay = values.SessionTimeOfDay;
+            const hours = Math.floor(this.sessionTimeOfDay / 3600);
+            const minutes = Math.floor((this.sessionTimeOfDay % 3600) / 60);
+            console.log(`🕐 Session time of day: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} (${this.sessionTimeOfDay}s since midnight)`);
+        }
+        
+        // Capture total session time if not set
+        if (this.sessionTotalTime === null && values.SessionTime != null) {
+            this.sessionTotalTime = values.SessionTime;
+            console.log(`⏱️ Total session time: ${this.formatTime(this.sessionTotalTime)}`);
+        }
+        
         // Reject out-of-order packets - time should only decrease (counting down)
         if (this.lastSessionTimeRemain !== null && values.SessionTimeRemain != null) {
             const timeDiff = values.SessionTimeRemain - this.lastSessionTimeRemain;
@@ -2470,7 +2486,14 @@ class LiveStrategyTracker {
             const timeOfDayStr = this.formatTimeOfDay(currentTimeOfDay);
             timeOfDayEl.textContent = `Time of Day: ${timeOfDayStr}`;
         } else if (timeOfDayEl) {
-            timeOfDayEl.textContent = '--:--';
+            // Debug why it's not showing
+            if (this.sessionTimeOfDay == null) {
+                timeOfDayEl.textContent = 'No start time';
+            } else if (this.sessionTotalTime == null) {
+                timeOfDayEl.textContent = 'No session duration';
+            } else {
+                timeOfDayEl.textContent = '--:--';
+            }
         }
     }
     
