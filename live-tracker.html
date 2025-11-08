@@ -315,7 +315,7 @@
             
             <!-- Pedal Trace Canvas -->
             <div class="mb-4">
-                <canvas id="pedal-canvas" width="800" height="200" class="w-full bg-neutral-900 rounded"></canvas>
+                <canvas id="pedal-canvas" width="800" height="200" class="w-full bg-neutral-900 rounded hidden"></canvas>
             </div>
             
             <!-- Driver Inputs Grid (Collapsible) -->
@@ -376,6 +376,10 @@
                     <span id="current-sector-display" class="ml-2">Sector --</span>
                 </div>
             </div>
+            
+            <!-- Incident Cars Info Display -->
+            <div id="incident-cars-display" class="mb-3 space-y-1 hidden"></div>
+            
             <div class="relative w-full h-16 flex items-center overflow-hidden">
                 <!-- Base progress line -->
                 <div class="absolute w-full h-1 bg-neutral-700 rounded"></div>

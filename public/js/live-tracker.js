@@ -327,13 +327,16 @@ class LiveStrategyTracker {
         // Pedal trace toggle
         const togglePedalBtn = document.getElementById('toggle-pedal-inputs');
         const pedalInputsDetails = document.getElementById('driver-inputs-details');
+        const pedalCanvas = document.getElementById('pedal-canvas');
         if (togglePedalBtn && pedalInputsDetails) {
             togglePedalBtn.addEventListener('click', () => {
                 if (pedalInputsDetails.classList.contains('hidden')) {
                     pedalInputsDetails.classList.remove('hidden');
+                    if (pedalCanvas) pedalCanvas.classList.remove('hidden');
                     togglePedalBtn.textContent = 'Hide Inputs ▲';
                 } else {
                     pedalInputsDetails.classList.add('hidden');
+                    if (pedalCanvas) pedalCanvas.classList.add('hidden');
                     togglePedalBtn.textContent = 'Show Inputs ▼';
                 }
             });
@@ -684,6 +687,9 @@ class LiveStrategyTracker {
             this.renderProgressCars(values);
         }
         
+        // Update incident cars display (always check for off-track cars)
+        this.updateIncidentCarsDisplay(values);
+        
         // Update car positions on track map (now supports multiple cars filtered by class)
         if (!this.carPositionTracker || !this.carPositionTracker.isInitialized) {
             return;
@@ -758,6 +764,15 @@ class LiveStrategyTracker {
                 dot.style.left = `${percentage}%`;
             }
             
+            // Check if car is currently off-track (in any sector)
+            let isCarOffTrack = false;
+            for (const [sectorNum, carSet] of this.sectorOffTrackCars) {
+                if (carSet.has(carIdx)) {
+                    isCarOffTrack = true;
+                    break;
+                }
+            }
+            
             // Color by class using CarClassID (exact same logic as car-position-tracker.js)
             const classId = driver.CarClassID;
             
@@ -782,8 +797,13 @@ class LiveStrategyTracker {
             
             const color = classColorMap[classId] || '#9ca3af'; // Default gray for unknown
             
-            // Only update color (don't reset position/transform to prevent flicker)
+            // Apply color - if off-track, add pulsing animation with red border
             dot.style.backgroundColor = color;
+            if (isCarOffTrack) {
+                dot.classList.add('ring-2', 'ring-red-500', 'animate-pulse');
+            } else {
+                dot.classList.remove('ring-2', 'ring-red-500', 'animate-pulse');
+            }
         });
         
         console.log('✅ Progress cars rendered:', { dotsCreated, dotsSkipped });
@@ -872,6 +892,22 @@ class LiveStrategyTracker {
     }
     
     updateCarListPositions() {
+        const carListContainer = document.getElementById('car-list');
+        if (!carListContainer) return;
+        
+        // Get all cards and sort them by class position
+        const cards = Array.from(document.querySelectorAll('.car-card'));
+        cards.sort((a, b) => {
+            const carIdxA = parseInt(a.dataset.carIdx);
+            const carIdxB = parseInt(b.dataset.carIdx);
+            const posA = this.carAnalysisData[carIdxA]?.classPosition ?? 999;
+            const posB = this.carAnalysisData[carIdxB]?.classPosition ?? 999;
+            return posA - posB;
+        });
+        
+        // Re-append cards in sorted order (triggers reflow but maintains sort)
+        cards.forEach(card => carListContainer.appendChild(card));
+        
         // Update all card header data without re-rendering entire list (prevents flashing)
         document.querySelectorAll('.car-card').forEach(card => {
             const carIdx = parseInt(card.dataset.carIdx);
@@ -1709,6 +1745,71 @@ class LiveStrategyTracker {
         }
         
         debug(`   Card classes after:`, card.className);
+    }
+    
+    /**
+     * Update incident cars info display at top of progress container
+     */
+    updateIncidentCarsDisplay(values) {
+        const displayContainer = document.getElementById('incident-cars-display');
+        if (!displayContainer) return;
+        
+        // Collect all cars currently off-track
+        const offTrackCars = new Set();
+        for (const [sectorNum, carSet] of this.sectorOffTrackCars) {
+            for (const carIdx of carSet) {
+                offTrackCars.add(carIdx);
+            }
+        }
+        
+        // If no cars off-track, hide display
+        if (offTrackCars.size === 0) {
+            displayContainer.classList.add('hidden');
+            displayContainer.innerHTML = '';
+            return;
+        }
+        
+        // Show display and build rows
+        displayContainer.classList.remove('hidden');
+        
+        const rows = [];
+        for (const carIdx of offTrackCars) {
+            // Find driver info
+            const driver = this.driversList.find(d => d.CarIdx === carIdx);
+            if (!driver) continue;
+            
+            // Get class name and position
+            const classPosition = values.CarIdxClassPosition?.[carIdx] || '--';
+            const className = this.getCarClassName(driver.CarClassID);
+            
+            rows.push(`
+                <div class="bg-red-900/30 border-l-4 border-red-500 px-3 py-2 rounded text-sm flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1">
+                            <span class="text-xs text-red-400 font-bold">${className}</span>
+                            <span class="text-xs text-neutral-400">P${classPosition}</span>
+                        </div>
+                        <span class="text-white font-semibold">${driver.UserName || 'Unknown'}</span>
+                        <span class="text-neutral-400 text-xs">${driver.TeamName || 'No Team'}</span>
+                    </div>
+                    <span class="text-xs text-red-400">OFF TRACK</span>
+                </div>
+            `);
+        }
+        
+        displayContainer.innerHTML = rows.join('');
+    }
+    
+    /**
+     * Get class name from class ID
+     */
+    getCarClassName(classId) {
+        for (const [className, classIds] of Object.entries(this.classMapping)) {
+            if (classIds.includes(classId)) {
+                return className;
+            }
+        }
+        return 'Unknown';
     }
     
     initializeCarAnalysis(sessionData) {
