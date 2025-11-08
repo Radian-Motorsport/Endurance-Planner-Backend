@@ -127,6 +127,8 @@ class LiveStrategyTracker {
         this.currentDriver = '--';  // Driver name from broadcaster
         this.sessionTimeRemain = 0;
         this.lastSessionTimeRemain = null;  // Track last valid time to detect out-of-order packets
+        this.sessionTimeOfDay = null;  // Time of day at session start (seconds since midnight)
+        this.sessionTotalTime = null;  // Total session duration in seconds
         this.fuelLevel = 0;
         this.lastLapTime = 0;
         this.isConnected = false;
@@ -1182,6 +1184,19 @@ class LiveStrategyTracker {
 
     handleSessionInfo(sessionData) {
         this.sessionInfo = sessionData;
+        
+        // Capture SessionTimeOfDay (seconds since midnight) for time of day calculations
+        if (sessionData?.SessionInfo?.Sessions && sessionData.SessionInfo.Sessions.length > 0) {
+            const currentSession = sessionData.SessionInfo.Sessions[sessionData.SessionInfo.Sessions.length - 1];
+            this.sessionTimeOfDay = currentSession.SessionTime != null ? currentSession.SessionTime : null;
+            this.sessionTotalTime = currentSession.SessionLaps === 'unlimited' ? null : (currentSession.SessionTime || null);
+            
+            if (this.sessionTimeOfDay != null) {
+                const hours = Math.floor(this.sessionTimeOfDay / 3600);
+                const minutes = Math.floor((this.sessionTimeOfDay % 3600) / 60);
+                console.log(`🕐 Session starts at ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} (${this.sessionTimeOfDay}s since midnight)`);
+            }
+        }
         
         console.log('🏁 Processing session info:', {
             track: sessionData?.WeekendInfo?.TrackDisplayName,
@@ -2445,7 +2460,28 @@ class LiveStrategyTracker {
     
     updateSessionTimeDisplay() {
         // Only update the session time display (used by manual timer)
-        this.elements.sessionTime.textContent = this.formatTime(this.sessionTimeRemain);
+        let displayText = this.formatTime(this.sessionTimeRemain);
+        
+        // Add time of day if available
+        if (this.sessionTimeOfDay != null && this.sessionTotalTime != null) {
+            const elapsedTime = this.sessionTotalTime - this.sessionTimeRemain;
+            const currentTimeOfDay = this.sessionTimeOfDay + elapsedTime;
+            const timeOfDayStr = this.formatTimeOfDay(currentTimeOfDay);
+            displayText += ` (${timeOfDayStr})`;
+        }
+        
+        this.elements.sessionTime.textContent = displayText;
+    }
+    
+    /**
+     * Format seconds since midnight to HH:MM format
+     * @param {number} secondsSinceMidnight - Seconds since midnight
+     * @returns {string} Time in HH:MM format
+     */
+    formatTimeOfDay(secondsSinceMidnight) {
+        const hours = Math.floor(secondsSinceMidnight / 3600) % 24;
+        const minutes = Math.floor((secondsSinceMidnight % 3600) / 60);
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
     
     updateLiveStats() {
@@ -3022,6 +3058,18 @@ class LiveStrategyTracker {
         stints.forEach((stint, index) => {
             console.log(`  Creating row for stint ${stint.stintNumber}:`, stint);
             
+            // Calculate time of day for start/end times if SessionTimeOfDay available
+            let startTimeDisplay = stint.startTime;
+            let endTimeDisplay = stint.endTime;
+            
+            if (this.sessionTimeOfDay != null && stint.elapsedStart != null && stint.elapsedEnd != null) {
+                // stint.elapsedStart/End are seconds from session start
+                const startTimeOfDay = this.sessionTimeOfDay + stint.elapsedStart;
+                const endTimeOfDay = this.sessionTimeOfDay + stint.elapsedEnd;
+                startTimeDisplay = this.formatTimeOfDay(startTimeOfDay);
+                endTimeDisplay = this.formatTimeOfDay(endTimeOfDay);
+            }
+            
             // Create stint row
             const stintRow = document.createElement('tr');
             stintRow.setAttribute('data-role', 'stint');
@@ -3031,8 +3079,8 @@ class LiveStrategyTracker {
             
             stintRow.innerHTML = `
                 <td class="px-3 py-2 font-bold text-sm">#${stint.stintNumber}</td>
-                <td class="px-3 py-2 font-mono text-xs">${stint.startTime}</td>
-                <td class="px-3 py-2 font-mono text-xs">${stint.endTime}</td>
+                <td class="px-3 py-2 font-mono text-xs">${startTimeDisplay}</td>
+                <td class="px-3 py-2 font-mono text-xs">${endTimeDisplay}</td>
                 <td class="px-3 py-2 text-right font-mono text-sm">${stint.startLap}</td>
                 <td class="px-3 py-2 text-right font-mono text-sm">${stint.endLap}</td>
                 <td class="px-3 py-2 text-right font-mono text-blue-400 text-sm">${Math.floor(stint.laps)}</td>

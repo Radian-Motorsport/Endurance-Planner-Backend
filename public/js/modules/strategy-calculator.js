@@ -310,6 +310,15 @@ export class StrategyCalculator {
             const stintStartTime = new Date(currentTime);
             const stintEndTime = new Date(currentTime.getTime() + stintDuration);
 
+            // Calculate elapsed seconds from race start for SessionTimeOfDay calculations
+            const raceStartTime = this.isLocalTimeMode ? this.getEventStartTime() : this.getRaceStartTime();
+            const elapsedStart = Math.floor((stintStartTime.getTime() - raceStartTime.getTime()) / 1000);
+            const elapsedEnd = Math.floor((stintEndTime.getTime() - raceStartTime.getTime()) / 1000);
+
+            // Store elapsed times as data attributes for live tracker
+            row.setAttribute('data-elapsed-start', elapsedStart);
+            row.setAttribute('data-elapsed-end', elapsedEnd);
+
             // Update time cells
             const cells = row.querySelectorAll('td');
             if (cells.length >= 9) {
