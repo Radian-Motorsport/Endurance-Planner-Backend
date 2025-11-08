@@ -691,17 +691,40 @@ class LiveStrategyTracker {
     
     renderProgressCars(values) {
         const container = document.getElementById('progress-car-dots-container');
+        console.log('🔍 renderProgressCars called:', {
+            hasContainer: !!container,
+            driversListLength: this.driversList.length,
+            containerClassList: container?.classList.toString()
+        });
+        
         if (!container || !this.driversList.length) return;
         
         const playerCarIdx = values.PlayerCarIdx;
         const carIdxLapDistPct = values.CarIdxLapDistPct;
         
+        console.log('🔍 Progress cars data:', {
+            playerCarIdx,
+            totalDrivers: this.driversList.length,
+            hasLapDistData: !!carIdxLapDistPct
+        });
+        
+        let dotsCreated = 0;
+        let dotsSkipped = 0;
+        
         this.driversList.forEach(driver => {
             const carIdx = driver.CarIdx;
-            if (carIdx === undefined || carIdx === playerCarIdx) return; // Skip player (shown separately)
+            if (carIdx === undefined || carIdx === playerCarIdx) {
+                dotsSkipped++;
+                return; // Skip player (shown separately)
+            }
             
             const lapDistPct = carIdxLapDistPct[carIdx];
-            if (lapDistPct == null || isNaN(lapDistPct)) return;
+            if (lapDistPct == null || isNaN(lapDistPct)) {
+                dotsSkipped++;
+                return;
+            }
+            
+            dotsCreated++;
             
             // Create or get existing dot
             let dot = container.querySelector(`[data-car-idx="${carIdx}"]`);
@@ -749,6 +772,8 @@ class LiveStrategyTracker {
             dot.style.top = '50%';
             dot.style.transform = 'translate(-50%, -50%)';
         });
+        
+        console.log('✅ Progress cars rendered:', { dotsCreated, dotsSkipped });
     }
     
     updateCarAnalysisData(values) {
