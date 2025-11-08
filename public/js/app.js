@@ -2888,6 +2888,13 @@ class RadianPlannerApp {
      */
     async generateShareLink() {
         try {
+            // Force toggle to race time mode before saving
+            const toggleSwitch = document.querySelector('.toggle-switch');
+            if (toggleSwitch && toggleSwitch.classList.contains('active')) {
+                toggleSwitch.click(); // Switch to race time mode
+                console.log('⏰ Forced to race time mode for saving');
+            }
+            
             // Collect stint driver and backup driver assignments from the table
             const stintDrivers = {};
             const stintBackupDrivers = {};
