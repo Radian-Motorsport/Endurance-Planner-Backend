@@ -1,11 +1,11 @@
 // Live Strategy Tracker - Connects to RadianApp telemetry and displays race progress vs plan
 // Loads strategies the exact same way the planner does and calculates stint tables
 
-// Debug flag - set to false to disable all debug logging
+// Debug flag - set to false to disable debug/info logging (errors/warnings always show)
 const DEBUG = false;
 const debug = (...args) => { if (DEBUG) console.log(...args); };
-const debugWarn = (...args) => { if (DEBUG) console.warn(...args); };
-const debugError = (...args) => { if (DEBUG) console.error(...args); };
+const debugWarn = (...args) => { console.warn(...args); }; // Always show warnings
+const debugError = (...args) => { console.error(...args); }; // Always show errors
 
 /**
  * PedalTrace - A visualization component for racing pedal inputs

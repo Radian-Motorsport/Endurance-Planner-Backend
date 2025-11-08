@@ -1,12 +1,12 @@
 // ============================================================================
-// DEBUG SYSTEM - Set to false to disable all debug console output
+// DEBUG SYSTEM - Set to false to disable debug/info logging (errors/warnings always show)
 // ============================================================================
 const DEBUG = false;
 
 // Debug helper functions
 const debug = (...args) => { if (DEBUG) console.log(...args); };
-const debugWarn = (...args) => { if (DEBUG) console.warn(...args); };
-const debugError = (...args) => { if (DEBUG) console.error(...args); };
+const debugWarn = (...args) => { console.warn(...args); }; // Always show warnings
+const debugError = (...args) => { console.error(...args); }; // Always show errors
 
 /**
  * Track Map Module
