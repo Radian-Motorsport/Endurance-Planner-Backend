@@ -2884,9 +2884,20 @@ class LiveStrategyTracker {
     }
     
     loadStrategy(strategy) {
-        debug('✅ Strategy loaded:', strategy);
-        debug('STINTS:', strategy.stints);
-        debug('📥 Strategy stints present?', strategy.stints ? 'YES' : 'NO');
+        console.log('✅ Strategy loaded:', strategy);
+        console.log('STINTS:', strategy.stints);
+        console.log('📥 Strategy stints present?', strategy.stints ? 'YES' : 'NO');
+        if (strategy.stints && strategy.stints.length > 0) {
+            console.log('📊 First stint data:', strategy.stints[0]);
+            console.log('  - stintNumber:', strategy.stints[0].stintNumber);
+            console.log('  - driver:', strategy.stints[0].driver);
+            console.log('  - startTime:', strategy.stints[0].startTime);
+            console.log('  - endTime:', strategy.stints[0].endTime);
+            console.log('  - timeOfDayStart:', strategy.stints[0].timeOfDayStart);
+            console.log('  - timeOfDayEnd:', strategy.stints[0].timeOfDayEnd);
+            console.log('  - elapsedStart:', strategy.stints[0].elapsedStart);
+            console.log('  - elapsedEnd:', strategy.stints[0].elapsedEnd);
+        }
         this.strategy = strategy;
         
         // Update URL to reflect currently loaded strategy
@@ -2928,7 +2939,19 @@ class LiveStrategyTracker {
         // If we have original stints from planner with time-of-day data, use those
         if (this.strategy.stints && this.strategy.stints.length > 0 && 
             this.strategy.stints[0].timeOfDayStart != null) {
-            debug('✅ Using original planner stints with time-of-day data');
+            console.log('✅ Using original planner stints with time-of-day data');
+            console.log('📊 Total stints in strategy:', this.strategy.stints.length);
+            console.log('📊 Stint data check:');
+            this.strategy.stints.forEach((stint, i) => {
+                console.log(`  Stint ${i+1}:`, {
+                    stintNumber: stint.stintNumber,
+                    driver: stint.driver,
+                    startTime: stint.startTime,
+                    endTime: stint.endTime,
+                    timeOfDayStart: stint.timeOfDayStart,
+                    timeOfDayEnd: stint.timeOfDayEnd
+                });
+            });
             
             // Only determine current stint if we have current time-of-day from telemetry
             let currentStintIndex = -1;
@@ -2981,12 +3004,18 @@ class LiveStrategyTracker {
                 debug(`  ✂️ Trimmed ${currentStintIndex} completed stints, showing from stint #${this.strategy.stints[0].stintNumber}`);
             }
             
+            console.log('📋 Calling populateStintTable() with planner stints');
             this.populateStintTable();
             return;
         }
         
         // Fallback: Calculate stints from scratch if no elapsed time data
-        debug('⚠️ No elapsed time data, calculating stints from scratch');
+        console.warn('⚠️ No time-of-day data in stints, calculating stints from scratch');
+        console.log('Strategy stints check:', {
+            hasStints: !!this.strategy.stints,
+            stintsLength: this.strategy.stints?.length,
+            firstStintTimeOfDay: this.strategy.stints?.[0]?.timeOfDayStart
+        });
         
         const state = this.strategy.strategyState;
         const formData = this.strategy.formData;
@@ -3128,10 +3157,11 @@ class LiveStrategyTracker {
     }
     
     populateStintTable() {
-        debug('🔧 populateStintTable() called');
-        debug('  this.strategy:', this.strategy);
-        debug('  this.strategy.stints:', this.strategy?.stints);
-        debug('  this.elements.stintTableBody:', this.elements.stintTableBody);
+        console.log('🔧 populateStintTable() called');
+        console.log('  this.strategy:', this.strategy);
+        console.log('  this.strategy.stints:', this.strategy?.stints);
+        console.log('  Stints count:', this.strategy?.stints?.length);
+        console.log('  this.elements.stintTableBody:', this.elements.stintTableBody);
         
         if (!this.strategy) {
             debugWarn('⚠️ No strategy object');
@@ -3165,16 +3195,24 @@ class LiveStrategyTracker {
         this.pitStopDuration = pitStopTime;
         
         stints.forEach((stint, index) => {
-            debug(`  Creating row for stint ${stint.stintNumber}:`, stint);
+            console.log(`  Creating row for stint ${stint.stintNumber}:`, stint);
             
             // Use actual time-of-day values from stint if available (these are correct)
             let startTimeDisplay = stint.startTime || '--:--';
             let endTimeDisplay = stint.endTime || '--:--';
             
+            console.log(`  Stint ${stint.stintNumber} time data:`, {
+                timeOfDayStart: stint.timeOfDayStart,
+                timeOfDayEnd: stint.timeOfDayEnd,
+                startTime: stint.startTime,
+                endTime: stint.endTime
+            });
+            
             if (stint.timeOfDayStart != null && stint.timeOfDayEnd != null) {
                 // Use the actual time-of-day values from the strategy (already correct)
                 startTimeDisplay = this.formatTimeOfDay(stint.timeOfDayStart);
                 endTimeDisplay = this.formatTimeOfDay(stint.timeOfDayEnd);
+                console.log(`  Formatted to: ${startTimeDisplay} - ${endTimeDisplay}`);
             }
             
             // Create stint row
