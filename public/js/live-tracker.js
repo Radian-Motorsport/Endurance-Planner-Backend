@@ -2301,42 +2301,51 @@ class LiveStrategyTracker {
             // Sync currentStintLap with calculated value
             this.currentStintLap = Math.max(0, this.currentLap - this.stintStartLap);
             
-            // Always record lap time (even when spotting)
+            // Only process completed lap if we have valid lap time data
+            // This ensures lap times and fuel data stay synchronized
             if (this.lastLapTime > 0) {
+                // Record lap time (always, even when spotting)
                 this.currentStintLapTimes.push(this.lastLapTime);
-            }
-            
-            // Process fuel data if available (only when driving)
-            if (this.fuelAtLapStart !== null && this.fuelAtLapStart > 0) {
-                // Calculate fuel used in the lap that just completed
-                const fuelUsedInLap = this.fuelAtLapStart - this.fuelLevel;
                 
-                // Only record if fuel was actually consumed (not pit stop or refuel)
-                if (fuelUsedInLap > 0 && fuelUsedInLap < 10) {
-                    this.fuelUsageHistory.push(fuelUsedInLap);
-                    // Keep rolling buffer of last 10 laps for trend
-                    if (this.fuelUsageHistory.length > 10) {
-                        this.fuelUsageHistory.shift();
+                // Process fuel data if available (only when driving)
+                if (this.fuelAtLapStart !== null && this.fuelAtLapStart > 0) {
+                    // Calculate fuel used in the lap that just completed
+                    const fuelUsedInLap = this.fuelAtLapStart - this.fuelLevel;
+                    
+                    // Only record if fuel was actually consumed (not pit stop or refuel)
+                    if (fuelUsedInLap > 0 && fuelUsedInLap < 10) {
+                        this.fuelUsageHistory.push(fuelUsedInLap);
+                        // Keep rolling buffer of last 10 laps for trend
+                        if (this.fuelUsageHistory.length > 10) {
+                            this.fuelUsageHistory.shift();
+                        }
+                        // Use latest lap fuel consumption
+                        this.fuelPerLap = fuelUsedInLap;
+                        
+                        // Store in current stint data
+                        this.currentStintFuelUse.push(fuelUsedInLap);
+                        
+                        console.log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${fuelUsedInLap.toFixed(2)}L, ${this.formatLapTime(this.lastLapTime)}`);
+                    } else {
+                        // Invalid fuel data - use planned fuel per lap from strategy
+                        if (this.strategy && this.strategy.formData && this.strategy.formData.fuelPerLap) {
+                            const plannedFuelPerLap = parseFloat(this.strategy.formData.fuelPerLap);
+                            this.currentStintFuelUse.push(plannedFuelPerLap);
+                            console.log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${this.formatLapTime(this.lastLapTime)} [Invalid fuel, using planned: ${plannedFuelPerLap.toFixed(2)}L]`);
+                        }
                     }
-                    // Use latest lap fuel consumption
-                    this.fuelPerLap = fuelUsedInLap;
-                    
-                    // Store in current stint data
-                    this.currentStintFuelUse.push(fuelUsedInLap);
-                    
-                    console.log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${fuelUsedInLap.toFixed(2)}L, ${this.formatLapTime(this.lastLapTime)}`);
+                } else {
+                    // When spotting (no fuel data), use planned fuel per lap from strategy
+                    if (this.strategy && this.strategy.formData && this.strategy.formData.fuelPerLap) {
+                        const plannedFuelPerLap = parseFloat(this.strategy.formData.fuelPerLap);
+                        this.currentStintFuelUse.push(plannedFuelPerLap);
+                        console.log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${this.formatLapTime(this.lastLapTime)} [Est. fuel: ${plannedFuelPerLap.toFixed(2)}L]`);
+                    }
                 }
-            } else {
-                // When spotting (no fuel data), use planned fuel per lap from strategy
-                if (this.strategy && this.strategy.formData && this.strategy.formData.fuelPerLap) {
-                    const plannedFuelPerLap = parseFloat(this.strategy.formData.fuelPerLap);
-                    this.currentStintFuelUse.push(plannedFuelPerLap);
-                    console.log(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${this.formatLapTime(this.lastLapTime)} [Est. fuel: ${plannedFuelPerLap.toFixed(2)}L]`);
-                }
+                
+                // Increment stint lap count (completed laps with valid lap time)
+                this.currentStintLap++;
             }
-            
-            // Increment stint lap count (completed laps)
-            this.currentStintLap++;
             
             // Record fuel at start of new lap
             this.fuelAtLapStart = this.fuelLevel;
