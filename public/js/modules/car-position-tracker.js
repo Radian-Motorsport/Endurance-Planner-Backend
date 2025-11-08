@@ -9,7 +9,7 @@ export class CarPositionTracker {
         this.svgContainerId = svgContainerId;
         this.options = {
             carRadius: options.carRadius || 14,
-            playerCarColor: options.playerCarColor || '#06b6d4',  // Cyan for player
+            playerCarColor: options.playerCarColor || '#00d9ffff',  // Cyan for player
             carStroke: options.carStroke || 'transparent',  // Transparent by default (on track)
             carStrokeWidth: options.carStrokeWidth || 3,
             showDebugInfo: options.showDebugInfo || false,
