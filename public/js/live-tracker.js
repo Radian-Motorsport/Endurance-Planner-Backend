@@ -2482,7 +2482,7 @@ class LiveStrategyTracker {
         const timeOfDayEl = document.getElementById('time-of-day');
         if (timeOfDayEl && this.sessionTimeOfDay != null) {
             const timeOfDayStr = this.formatTimeOfDay(this.sessionTimeOfDay);
-            timeOfDayEl.textContent = `Time of Day: ${timeOfDayStr}`;
+            timeOfDayEl.textContent = `Race Time: ${timeOfDayStr}`;
         } else if (timeOfDayEl) {
             timeOfDayEl.textContent = '--:--';
         }
