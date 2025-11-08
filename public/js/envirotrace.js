@@ -1,12 +1,8 @@
-// ============================================================================
-// DEBUG SYSTEM - Set to false to disable debug/info logging (errors/warnings always show)
-// ============================================================================
-const DEBUG = false;
-
-// Debug helper functions
-const debug = (...args) => { if (DEBUG) console.log(...args); };
-const debugWarn = (...args) => { console.warn(...args); }; // Always show warnings
-const debugError = (...args) => { console.error(...args); }; // Always show errors
+// Debug system - Scoped to EnviroTrace
+const ENVIROTRACE_DEBUG = false;
+const enviroDebug = (...args) => { if (ENVIROTRACE_DEBUG) console.log(...args); };
+const enviroDebugWarn = (...args) => { console.warn(...args); };
+const enviroDebugError = (...args) => { console.error(...args); };
 
 /**
  * EnviroTrace - A visualization component for environmental conditions
@@ -24,7 +20,7 @@ class EnviroTrace {
     
     // Check if canvas exists
     if (!this.canvas) {
-      debugError(`EnviroTrace: Canvas element with ID '${canvasId}' not found`);
+      enviroDebugError(`EnviroTrace: Canvas element with ID '${canvasId}' not found`);
       return;
     }
     
@@ -232,7 +228,7 @@ class EnviroTrace {
    */
   loadFromStorage() {
     if (!window.storageManager) {
-      debugWarn('EnviroTrace: StorageManager not available');
+      enviroDebugWarn('EnviroTrace: StorageManager not available');
       return;
     }
     
@@ -240,10 +236,10 @@ class EnviroTrace {
       const savedData = window.storageManager.loadVisualizationData('enviroTrace');
       if (savedData && Array.isArray(savedData)) {
         this.buffer = savedData;
-        // debug(`EnviroTrace: Loaded ${this.buffer.length} data points from storage`);
+        // enviroDebug(`EnviroTrace: Loaded ${this.buffer.length} data points from storage`);
       }
     } catch (error) {
-      debugWarn('EnviroTrace: Failed to load data from storage:', error);
+      enviroDebugWarn('EnviroTrace: Failed to load data from storage:', error);
       this.buffer = [];
     }
   }
@@ -253,14 +249,14 @@ class EnviroTrace {
    */
   saveToStorage() {
     if (!window.storageManager) {
-      debugWarn('EnviroTrace: StorageManager not available');
+      enviroDebugWarn('EnviroTrace: StorageManager not available');
       return;
     }
     
     try {
       window.storageManager.saveVisualizationData('enviroTrace', this.buffer);
     } catch (error) {
-      debugWarn('EnviroTrace: Failed to save data to storage:', error);
+      enviroDebugWarn('EnviroTrace: Failed to save data to storage:', error);
     }
   }
   
