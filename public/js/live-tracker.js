@@ -2094,7 +2094,8 @@ class LiveStrategyTracker {
         // Update remaining stats
         this.currentLap = values.Lap || 0;
         this.fuelLevel = values.FuelLevel || 0;
-        this.lastLapTime = values.LapLastLapTime || 0;
+        // Use CarIdx array for player's last lap time
+        this.lastLapTime = values.CarIdxLastLapTime?.[this.playerCarIdx] || 0;
         
         // Detect pit road transitions
         const isOnPitRoad = values.OnPitRoad || false;
