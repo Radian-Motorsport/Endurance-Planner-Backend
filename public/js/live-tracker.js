@@ -2903,6 +2903,54 @@ class LiveStrategyTracker {
             return;
         }
         
+        // If we have original stints from planner with elapsed times, use those to determine current stint
+        if (this.strategy.stints && this.strategy.stints.length > 0 && this.strategy.stints[0].elapsedStart != null) {
+            console.log('✅ Using original planner stints with elapsed time data');
+            
+            // Calculate elapsed time from session start
+            const totalSessionTime = this.strategy.strategyState.raceDurationSeconds;
+            const elapsedTime = totalSessionTime - this.sessionTimeRemain;
+            
+            console.log(`  Elapsed time: ${this.formatTime(elapsedTime)} (${elapsedTime}s)`);
+            
+            // Find which stint we're currently in based on elapsed time
+            let currentStintIndex = -1;
+            for (let i = 0; i < this.strategy.stints.length; i++) {
+                const stint = this.strategy.stints[i];
+                if (stint.elapsedStart != null && stint.elapsedEnd != null) {
+                    if (elapsedTime >= stint.elapsedStart && elapsedTime <= stint.elapsedEnd) {
+                        currentStintIndex = i;
+                        console.log(`  📍 Currently in stint #${stint.stintNumber} (${stint.driver})`);
+                        break;
+                    }
+                }
+            }
+            
+            // If we couldn't find current stint, find the next upcoming one
+            if (currentStintIndex === -1) {
+                for (let i = 0; i < this.strategy.stints.length; i++) {
+                    const stint = this.strategy.stints[i];
+                    if (stint.elapsedStart != null && elapsedTime < stint.elapsedStart) {
+                        currentStintIndex = i;
+                        console.log(`  ⏭️ Next stint is #${stint.stintNumber} (${stint.driver})`);
+                        break;
+                    }
+                }
+            }
+            
+            // Keep only current and future stints
+            if (currentStintIndex > 0) {
+                this.strategy.stints = this.strategy.stints.slice(currentStintIndex);
+                console.log(`  ✂️ Trimmed ${currentStintIndex} completed stints, showing from stint #${this.strategy.stints[0].stintNumber}`);
+            }
+            
+            this.populateStintTable();
+            return;
+        }
+        
+        // Fallback: Calculate stints from scratch if no elapsed time data
+        console.log('⚠️ No elapsed time data, calculating stints from scratch');
+        
         const state = this.strategy.strategyState;
         const formData = this.strategy.formData;
         
