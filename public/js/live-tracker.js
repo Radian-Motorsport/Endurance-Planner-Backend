@@ -1192,7 +1192,7 @@ class LiveStrategyTracker {
             const hadIncident = incidentStates.get(sector.number);
             sectorCard.className = hadIncident 
                 ? 'absolute h-full bg-yellow-500 incident-active rounded transition-colors'
-                : 'absolute h-full bg-neutral-600 rounded transition-colors';
+                : 'absolute h-full bg-neutral-700 rounded transition-colors';
             sectorCard.style.left = `${sector.startPct * 100}%`;
             sectorCard.style.width = `${sectorLength}%`;
             
