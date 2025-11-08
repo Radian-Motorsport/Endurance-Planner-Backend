@@ -1460,11 +1460,6 @@ class LiveStrategyTracker {
             const previousSector = this.previousCarSectors.get(carIdx);
             const sectorStartTimes = this.carSectorStartTimes.get(carIdx);
             
-            // Log player car sector tracking
-            if (carIdx === this.playerCarIdx) {
-                console.log(`🚗 Player car: lapDistPct=${lapDistPct.toFixed(4)}, estTime=${estTime.toFixed(3)}s, currentSector=${currentSectorNum}, previousSector=${previousSector}`);
-            }
-            
             // Detect sector boundary crossing (sector changed)
             if (previousSector !== undefined && previousSector !== currentSectorNum) {
                 // Car just completed previousSector, now in currentSectorNum
@@ -1472,15 +1467,18 @@ class LiveStrategyTracker {
                 
                 if (startTime !== undefined) {
                     // Calculate sector time as delta
-                    const sectorTime = estTime - startTime;
+                    let sectorTime = estTime - startTime;
+                    
+                    // Handle estTime reset at lap completion (sector 5 wraps to sector 1)
+                    // If endTime < startTime, estTime has wrapped around - add last lap time
+                    if (sectorTime < 0 && this.lastLapTime) {
+                        sectorTime = (this.lastLapTime + estTime) - startTime;
+                    }
                     
                     // Store the sector time (not cumulative time)
                     const sectorTimes = this.carSectorTimes.get(carIdx);
                     sectorTimes.set(previousSector, sectorTime);
                     
-                    if (carIdx === this.playerCarIdx) {
-                        console.log(`✅ Player completed sector ${previousSector}: ${sectorTime.toFixed(3)}s (startTime: ${startTime.toFixed(3)}s, endTime: ${estTime.toFixed(3)}s)`);
-                    }
                     debug(`🏁 Car ${carIdx} completed sector ${previousSector}: ${sectorTime.toFixed(3)}s`);
                 }
                 
