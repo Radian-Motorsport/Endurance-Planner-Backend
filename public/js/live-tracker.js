@@ -1460,6 +1460,11 @@ class LiveStrategyTracker {
             const previousSector = this.previousCarSectors.get(carIdx);
             const sectorStartTimes = this.carSectorStartTimes.get(carIdx);
             
+            // Log player car sector tracking
+            if (carIdx === this.playerCarIdx) {
+                console.log(`🚗 Player car: lapDistPct=${lapDistPct.toFixed(4)}, estTime=${estTime.toFixed(3)}s, currentSector=${currentSectorNum}, previousSector=${previousSector}`);
+            }
+            
             // Detect sector boundary crossing (sector changed)
             if (previousSector !== undefined && previousSector !== currentSectorNum) {
                 // Car just completed previousSector, now in currentSectorNum
@@ -1473,6 +1478,9 @@ class LiveStrategyTracker {
                     const sectorTimes = this.carSectorTimes.get(carIdx);
                     sectorTimes.set(previousSector, sectorTime);
                     
+                    if (carIdx === this.playerCarIdx) {
+                        console.log(`✅ Player completed sector ${previousSector}: ${sectorTime.toFixed(3)}s (startTime: ${startTime.toFixed(3)}s, endTime: ${estTime.toFixed(3)}s)`);
+                    }
                     debug(`🏁 Car ${carIdx} completed sector ${previousSector}: ${sectorTime.toFixed(3)}s`);
                 }
                 

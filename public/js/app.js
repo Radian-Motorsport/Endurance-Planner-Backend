@@ -2998,6 +2998,7 @@ class RadianPlannerApp {
             };
 
             console.log('📤 Saving strategy data with driver assignments:', strategyData);
+            console.log('📤 First stint being saved:', strategyData.stints?.[0]);
 
             // Save to server
             const response = await fetch('/api/strategies', {
