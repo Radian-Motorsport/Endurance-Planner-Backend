@@ -1186,6 +1186,10 @@ class LiveStrategyTracker {
             const sectorEndPct = nextSector ? nextSector.startPct : 1.0;
             const sectorLength = (sectorEndPct - sector.startPct) * 100;
             
+            // Reduce bar width slightly to add gap between sectors
+            const gapPercent = 0.3; // 0.3% gap on each side
+            const barWidth = Math.max(0, sectorLength - (gapPercent * 2));
+            
             const sectorCard = document.createElement('div');
             sectorCard.id = `sector-card-${sector.number}`;
             // RESTORE incident state if it existed
@@ -1193,10 +1197,19 @@ class LiveStrategyTracker {
             sectorCard.className = hadIncident 
                 ? 'absolute h-full bg-yellow-500 incident-active rounded transition-colors'
                 : 'absolute h-full bg-neutral-700 rounded transition-colors';
-            sectorCard.style.left = `${sector.startPct * 100}%`;
-            sectorCard.style.width = `${sectorLength}%`;
+            sectorCard.style.left = `calc(${sector.startPct * 100}% + ${gapPercent}%)`;
+            sectorCard.style.width = `calc(${barWidth}%)`;
+            
+            // Add small sector label above the bar
+            const barLabel = document.createElement('div');
+            barLabel.className = 'absolute text-[9px] text-neutral-500 font-mono';
+            barLabel.style.left = `${sector.startPct * 100 + sectorLength / 2}%`;
+            barLabel.style.top = '-14px';
+            barLabel.style.transform = 'translateX(-50%)';
+            barLabel.textContent = `S${sector.number + 1}`;
             
             sectorInfoDisplay.appendChild(sectorCard);
+            sectorInfoDisplay.appendChild(barLabel);
         });
         
         console.log('✅ Sector markers drawn (preserved incident states:', Array.from(incidentStates.keys()), ')');
