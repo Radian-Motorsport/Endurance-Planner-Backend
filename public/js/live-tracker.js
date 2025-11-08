@@ -2479,13 +2479,9 @@ class LiveStrategyTracker {
         // Pit stop time - only update if NOT currently in pit (let live timer show)
         const pitStopEl = document.getElementById('pit-stop-time');
         if (pitStopEl && !this.pitTimerInterval) {
-            // Not in pits - show average or default
-            if (this.stintHistory.length > 0) {
-                const avgPitTime = this.getAveragePitStopTime();
-                pitStopEl.textContent = `${avgPitTime.toFixed(1)}s`;
-            } else {
-                pitStopEl.textContent = '--';
-            }
+            // Not in pits - show average or planned value
+            const avgPitTime = this.getAveragePitStopTime();
+            pitStopEl.textContent = `${avgPitTime.toFixed(1)}s`;
         }
         
         // Latest lap fuel per lap
@@ -3408,8 +3404,19 @@ class LiveStrategyTracker {
         
         // Pit Stop Time (baseline from planner)
         const pitTimeEl = document.getElementById('setup-pit-time');
-        if (pitTimeEl && state.pitStopTime) {
-            pitTimeEl.textContent = `${parseFloat(state.pitStopTime).toFixed(1)}s`;
+        const pitStopTime = state?.pitStopTime || 0;
+        if (pitTimeEl) {
+            if (pitStopTime > 0) {
+                const minutes = Math.floor(pitStopTime / 60);
+                const seconds = pitStopTime % 60;
+                if (minutes > 0) {
+                    pitTimeEl.textContent = `${minutes}:${seconds.toFixed(0).padStart(2, '0')}`;
+                } else {
+                    pitTimeEl.textContent = `${seconds.toFixed(0)}s`;
+                }
+            } else {
+                pitTimeEl.textContent = '--';
+            }
         }
         
         console.log('📊 Setup data displayed from strategy');
