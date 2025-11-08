@@ -122,8 +122,9 @@ class EnviroTrace {
       const oldestPoint = dataToDisplay.length > 0 ? dataToDisplay[0] : null;
       const newestPoint = dataToDisplay.length > 0 ? dataToDisplay[dataToDisplay.length - 1] : null;
       const timeSpan = newestPoint && oldestPoint ? (newestPoint.timestamp - oldestPoint.timestamp) / 1000 : 0;
-      console.log(`Drawing ${dataToDisplay.length} of ${this.buffer.length} total points`);
-      console.log(`Time span: ${timeSpan.toFixed(1)}s (window: ${timeWindow/1000}s)`);
+      // Debugging disabled - enable in live-tracker.js DEBUG flag if needed
+      // console.log(`Drawing ${dataToDisplay.length} of ${this.buffer.length} total points`);
+      // console.log(`Time span: ${timeSpan.toFixed(1)}s (window: ${timeWindow/1000}s)`);
     }
     
     // Track Temperature (scale from typical range 10-60°C to full canvas height)
@@ -178,7 +179,7 @@ class EnviroTrace {
       
       // Debug air pressure values
       if (i === 0 || i === dataToDisplay.length - 1) {
-        console.log(`Air pressure debug - Raw: ${point.airPressure}, Unit check: ${typeof point.airPressure}`);
+        // console.log(`Air pressure debug - Raw: ${point.airPressure}, Unit check: ${typeof point.airPressure}`);
       }
       
       // Convert Pa to mbar: 1 Pa = 0.01 mbar
@@ -194,7 +195,7 @@ class EnviroTrace {
       
       // Debug converted value and Y position
       if (i === 0 || i === dataToDisplay.length - 1) {
-        console.log(`Air pressure: ${pressureMbar.toFixed(2)} mbar`);
+        // console.log(`Air pressure: ${pressureMbar.toFixed(2)} mbar`);
       }
       
       // Scale 900-1100 mbar range (200 mbar total range) to canvas height
@@ -203,7 +204,7 @@ class EnviroTrace {
       
       // Debug Y position
       if (i === 0 || i === dataToDisplay.length - 1) {
-        console.log(`Y position: ${y.toFixed(1)} (canvas height: ${canvasHeight}) - Range: 900-1100 mbar`);
+        // console.log(`Y position: ${y.toFixed(1)} (canvas height: ${canvasHeight}) - Range: 900-1100 mbar`);
       }
       
       // Clamp Y to canvas bounds to make it visible even if out of expected range
@@ -229,7 +230,7 @@ class EnviroTrace {
       const savedData = window.storageManager.loadVisualizationData('enviroTrace');
       if (savedData && Array.isArray(savedData)) {
         this.buffer = savedData;
-        console.log(`EnviroTrace: Loaded ${this.buffer.length} data points from storage`);
+        // console.log(`EnviroTrace: Loaded ${this.buffer.length} data points from storage`);
       }
     } catch (error) {
       console.warn('EnviroTrace: Failed to load data from storage:', error);
@@ -265,8 +266,8 @@ class EnviroTrace {
     const cutoffTime = Date.now() - maxAge;
     this.buffer = this.buffer.filter(point => point.timestamp > cutoffTime);
     
-    console.log(`EnviroTrace: Updated time range to ${newMaxPoints} points (${maxAge/1000}s window)`);
-    console.log(`EnviroTrace: Buffer now has ${this.buffer.length} points`);
+    // console.log(`EnviroTrace: Updated time range to ${newMaxPoints} points (${maxAge/1000}s window)`);
+    // console.log(`EnviroTrace: Buffer now has ${this.buffer.length} points`);
   }
   
   /**
