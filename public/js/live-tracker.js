@@ -3054,10 +3054,21 @@ class LiveStrategyTracker {
     }
     
     updateWeatherComponentRaceTime() {
-        if (!this.weatherComponent || !this.sessionTotalTime) return;
+        if (!this.weatherComponent) return;
+        
+        // Use sessionTotalTime if available, otherwise calculate from strategy
+        let totalDuration = this.sessionTotalTime;
+        if (!totalDuration && this.strategy && this.strategy.strategyState) {
+            totalDuration = this.strategy.strategyState.raceDurationSeconds;
+        }
+        
+        if (!totalDuration) {
+            debug('⚠️ Cannot update weather - no total race duration available');
+            return;
+        }
         
         // Calculate elapsed race time: Total Duration - Time Remaining
-        const elapsedTime = this.sessionTotalTime - this.sessionTimeRemain;
+        const elapsedTime = totalDuration - this.sessionTimeRemain;
         
         if (elapsedTime >= 0) {
             this.weatherComponent.setCurrentRaceTime(elapsedTime);
