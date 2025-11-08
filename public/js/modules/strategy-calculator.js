@@ -315,9 +315,15 @@ export class StrategyCalculator {
             const elapsedStart = Math.floor((stintStartTime.getTime() - raceStartTime.getTime()) / 1000);
             const elapsedEnd = Math.floor((stintEndTime.getTime() - raceStartTime.getTime()) / 1000);
 
-            // Store elapsed times as data attributes for live tracker
+            // Calculate time of day in seconds since midnight (for race time mode)
+            const startTimeOfDay = (stintStartTime.getHours() * 3600) + (stintStartTime.getMinutes() * 60) + stintStartTime.getSeconds();
+            const endTimeOfDay = (stintEndTime.getHours() * 3600) + (stintEndTime.getMinutes() * 60) + stintEndTime.getSeconds();
+
+            // Store all timing data as data attributes for live tracker
             row.setAttribute('data-elapsed-start', elapsedStart);
             row.setAttribute('data-elapsed-end', elapsedEnd);
+            row.setAttribute('data-timeofday-start', startTimeOfDay);
+            row.setAttribute('data-timeofday-end', endTimeOfDay);
 
             // Update time cells
             const cells = row.querySelectorAll('td');

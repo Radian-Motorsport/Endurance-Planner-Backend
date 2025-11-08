@@ -2242,12 +2242,9 @@ class LiveStrategyTracker {
         
         const values = data.values;
         
-        // Capture SessionTimeOfDay from telemetry (seconds since midnight)
-        if (this.sessionTimeOfDay === null && values.SessionTimeOfDay != null) {
+        // Update SessionTimeOfDay from telemetry (seconds since midnight) - updates live
+        if (values.SessionTimeOfDay != null) {
             this.sessionTimeOfDay = values.SessionTimeOfDay;
-            const hours = Math.floor(this.sessionTimeOfDay / 3600);
-            const minutes = Math.floor((this.sessionTimeOfDay % 3600) / 60);
-            console.log(`🕐 Session time of day: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} (${this.sessionTimeOfDay}s since midnight)`);
         }
         
         // Capture total session time if not set
@@ -2480,20 +2477,11 @@ class LiveStrategyTracker {
         
         // Update time of day display if available
         const timeOfDayEl = document.getElementById('time-of-day');
-        if (timeOfDayEl && this.sessionTimeOfDay != null && this.sessionTotalTime != null) {
-            const elapsedTime = this.sessionTotalTime - this.sessionTimeRemain;
-            const currentTimeOfDay = this.sessionTimeOfDay + elapsedTime;
-            const timeOfDayStr = this.formatTimeOfDay(currentTimeOfDay);
+        if (timeOfDayEl && this.sessionTimeOfDay != null) {
+            const timeOfDayStr = this.formatTimeOfDay(this.sessionTimeOfDay);
             timeOfDayEl.textContent = `Time of Day: ${timeOfDayStr}`;
         } else if (timeOfDayEl) {
-            // Debug why it's not showing
-            if (this.sessionTimeOfDay == null) {
-                timeOfDayEl.textContent = 'No start time';
-            } else if (this.sessionTotalTime == null) {
-                timeOfDayEl.textContent = 'No session duration';
-            } else {
-                timeOfDayEl.textContent = '--:--';
-            }
+            timeOfDayEl.textContent = '--:--';
         }
     }
     
@@ -2903,22 +2891,32 @@ class LiveStrategyTracker {
             return;
         }
         
-        // If we have original stints from planner with elapsed times, use those to determine current stint
-        if (this.strategy.stints && this.strategy.stints.length > 0 && this.strategy.stints[0].elapsedStart != null) {
-            console.log('✅ Using original planner stints with elapsed time data');
+        // If we have original stints from planner with time-of-day data, use those to determine current stint
+        if (this.strategy.stints && this.strategy.stints.length > 0 && 
+            this.strategy.stints[0].timeOfDayStart != null && this.sessionTimeOfDay != null) {
+            console.log('✅ Using original planner stints with time-of-day data');
             
-            // Calculate elapsed time from session start
-            const totalSessionTime = this.strategy.strategyState.raceDurationSeconds;
-            const elapsedTime = totalSessionTime - this.sessionTimeRemain;
+            const currentTimeOfDay = this.sessionTimeOfDay;
+            const hours = Math.floor(currentTimeOfDay / 3600);
+            const minutes = Math.floor((currentTimeOfDay % 3600) / 60);
+            console.log(`  Current time of day: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} (${currentTimeOfDay}s)`);
             
-            console.log(`  Elapsed time: ${this.formatTime(elapsedTime)} (${elapsedTime}s)`);
-            
-            // Find which stint we're currently in based on elapsed time
+            // Find which stint we're currently in based on time of day
             let currentStintIndex = -1;
             for (let i = 0; i < this.strategy.stints.length; i++) {
                 const stint = this.strategy.stints[i];
-                if (stint.elapsedStart != null && stint.elapsedEnd != null) {
-                    if (elapsedTime >= stint.elapsedStart && elapsedTime <= stint.elapsedEnd) {
+                if (stint.timeOfDayStart != null && stint.timeOfDayEnd != null) {
+                    // Handle day wraparound (e.g., stint from 23:00 to 01:00)
+                    let inStint = false;
+                    if (stint.timeOfDayEnd < stint.timeOfDayStart) {
+                        // Crosses midnight
+                        inStint = (currentTimeOfDay >= stint.timeOfDayStart || currentTimeOfDay <= stint.timeOfDayEnd);
+                    } else {
+                        // Normal same-day stint
+                        inStint = (currentTimeOfDay >= stint.timeOfDayStart && currentTimeOfDay <= stint.timeOfDayEnd);
+                    }
+                    
+                    if (inStint) {
                         currentStintIndex = i;
                         console.log(`  📍 Currently in stint #${stint.stintNumber} (${stint.driver})`);
                         break;
@@ -2930,7 +2928,7 @@ class LiveStrategyTracker {
             if (currentStintIndex === -1) {
                 for (let i = 0; i < this.strategy.stints.length; i++) {
                     const stint = this.strategy.stints[i];
-                    if (stint.elapsedStart != null && elapsedTime < stint.elapsedStart) {
+                    if (stint.timeOfDayStart != null && currentTimeOfDay < stint.timeOfDayStart) {
                         currentStintIndex = i;
                         console.log(`  ⏭️ Next stint is #${stint.stintNumber} (${stint.driver})`);
                         break;

@@ -2922,7 +2922,9 @@ class RadianPlannerApp {
                             endLap: parseInt(cells[4].textContent.trim()),
                             laps: parseFloat(cells[5].textContent.trim()),
                             elapsedStart: parseInt(row.getAttribute('data-elapsed-start')) || null,
-                            elapsedEnd: parseInt(row.getAttribute('data-elapsed-end')) || null
+                            elapsedEnd: parseInt(row.getAttribute('data-elapsed-end')) || null,
+                            timeOfDayStart: parseInt(row.getAttribute('data-timeofday-start')) || null,
+                            timeOfDayEnd: parseInt(row.getAttribute('data-timeofday-end')) || null
                         });
                     }
                 });
