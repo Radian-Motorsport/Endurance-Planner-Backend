@@ -1188,8 +1188,8 @@ class LiveStrategyTracker {
         // Capture SessionTimeOfDay (seconds since midnight) for time of day calculations
         if (sessionData?.SessionInfo?.Sessions && sessionData.SessionInfo.Sessions.length > 0) {
             const currentSession = sessionData.SessionInfo.Sessions[sessionData.SessionInfo.Sessions.length - 1];
-            this.sessionTimeOfDay = currentSession.SessionTime != null ? currentSession.SessionTime : null;
-            this.sessionTotalTime = currentSession.SessionLaps === 'unlimited' ? null : (currentSession.SessionTime || null);
+            this.sessionTimeOfDay = currentSession.SessionTimeOfDay != null ? currentSession.SessionTimeOfDay : null;
+            this.sessionTotalTime = currentSession.SessionTime != null ? currentSession.SessionTime : null;
             
             if (this.sessionTimeOfDay != null) {
                 const hours = Math.floor(this.sessionTimeOfDay / 3600);
@@ -2459,18 +2459,19 @@ class LiveStrategyTracker {
     }
     
     updateSessionTimeDisplay() {
-        // Only update the session time display (used by manual timer)
-        let displayText = this.formatTime(this.sessionTimeRemain);
+        // Update session time display
+        this.elements.sessionTime.textContent = this.formatTime(this.sessionTimeRemain);
         
-        // Add time of day if available
-        if (this.sessionTimeOfDay != null && this.sessionTotalTime != null) {
+        // Update time of day display if available
+        const timeOfDayEl = document.getElementById('time-of-day');
+        if (timeOfDayEl && this.sessionTimeOfDay != null && this.sessionTotalTime != null) {
             const elapsedTime = this.sessionTotalTime - this.sessionTimeRemain;
             const currentTimeOfDay = this.sessionTimeOfDay + elapsedTime;
             const timeOfDayStr = this.formatTimeOfDay(currentTimeOfDay);
-            displayText += ` (${timeOfDayStr})`;
+            timeOfDayEl.textContent = `Time of Day: ${timeOfDayStr}`;
+        } else if (timeOfDayEl) {
+            timeOfDayEl.textContent = '--:--';
         }
-        
-        this.elements.sessionTime.textContent = displayText;
     }
     
     /**
