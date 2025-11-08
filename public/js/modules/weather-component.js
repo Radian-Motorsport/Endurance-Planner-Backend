@@ -279,6 +279,11 @@ export class WeatherComponent {
             if (currentTimeIndex >= forecast.length) {
                 currentTimeIndex = forecast.length - 1;
             }
+            
+            console.log('🔴 Temperature Chart - Race time:', this.currentRaceTime, 
+                       'Start index:', raceStartIndex, 
+                       'Offset:', indexOffset, 
+                       'Current index:', currentTimeIndex);
         }
 
         const option = {
@@ -977,6 +982,7 @@ export class WeatherComponent {
     
     setCurrentRaceTime(raceTimeSeconds) {
         this.currentRaceTime = raceTimeSeconds;
+        console.log('🔴 WeatherComponent: Setting race time to:', raceTimeSeconds, 'seconds');
         
         // Re-render charts to update the current time marker
         if (this.weatherData && typeof echarts !== 'undefined') {
