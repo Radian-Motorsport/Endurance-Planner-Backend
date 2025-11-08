@@ -703,6 +703,9 @@ class LiveStrategyTracker {
             const lapDistPct = carIdxLapDistPct[carIdx];
             if (lapDistPct == null || isNaN(lapDistPct)) return;
             
+            // Calculate position first
+            const percentage = lapDistPct * 100;
+            
             // Create or get existing dot
             let dot = container.querySelector(`[data-car-idx="${carIdx}"]`);
             if (!dot) {
@@ -710,14 +713,14 @@ class LiveStrategyTracker {
                 dot.dataset.carIdx = carIdx;
                 dot.className = 'absolute w-3 h-3 rounded-full transition-all duration-100';
                 dot.style.top = '50%';
+                dot.style.left = `${percentage}%`; // Set initial position BEFORE appending
                 dot.style.transform = 'translate(-50%, -50%)';
                 dot.title = driver.UserName || `Car ${carIdx}`;
                 container.appendChild(dot);
+            } else {
+                // Update existing dot position
+                dot.style.left = `${percentage}%`;
             }
-            
-            // Position the dot horizontally
-            const percentage = lapDistPct * 100;
-            dot.style.left = `${percentage}%`;
             
             // Color by class using CarClassID (exact same logic as car-position-tracker.js)
             const classId = driver.CarClassID;
@@ -743,11 +746,8 @@ class LiveStrategyTracker {
             
             const color = classColorMap[classId] || '#9ca3af'; // Default gray for unknown
             
-            // Apply styles
-            dot.className = 'absolute w-3 h-3 rounded-full transition-all duration-100';
+            // Apply color (don't reset position/transform properties)
             dot.style.backgroundColor = color;
-            dot.style.top = '50%';
-            dot.style.transform = 'translate(-50%, -50%)';
         });
     }
     
