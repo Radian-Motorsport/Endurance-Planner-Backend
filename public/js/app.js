@@ -3116,11 +3116,19 @@ class RadianPlannerApp {
         }
 
         try {
+            // Force toggle to race time mode before saving
+            const toggleSwitch = document.querySelector('.toggle-switch');
+            if (toggleSwitch && toggleSwitch.classList.contains('active')) {
+                toggleSwitch.click(); // Switch to race time mode
+                console.log('⏰ Forced to race time mode for saving');
+            }
+            
             // IDENTICAL DATA COLLECTION AS generateShareLink()
             // Collect stint driver and backup driver assignments from the table
             const stintDrivers = {};
             const stintBackupDrivers = {};
             const tbody = document.getElementById('stint-table-body');
+            const stints = [];
             
             if (tbody) {
                 const rows = tbody.querySelectorAll('tr[data-role="stint"]');
@@ -3135,6 +3143,38 @@ class RadianPlannerApp {
                     const backupSelect = row.querySelector('.backup-select-stint');
                     if (backupSelect && backupSelect.value) {
                         stintBackupDrivers[index] = backupSelect.value;
+                    }
+                    
+                    // Extract stint data from row cells
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 8) {
+                        const startTimeText = cells[1].textContent.trim();
+                        const endTimeText = cells[2].textContent.trim();
+                        
+                        // Parse time strings (HH:MM or HH:MM:SS) to seconds
+                        const parseTimeToSeconds = (timeStr) => {
+                            const parts = timeStr.split(':');
+                            const hours = parseInt(parts[0]) || 0;
+                            const minutes = parseInt(parts[1]) || 0;
+                            const seconds = parseInt(parts[2]) || 0;
+                            return (hours * 3600) + (minutes * 60) + seconds;
+                        };
+                        
+                        const timeOfDayStart = parseTimeToSeconds(startTimeText);
+                        const timeOfDayEnd = parseTimeToSeconds(endTimeText);
+                        
+                        stints.push({
+                            stintNumber: index + 1,
+                            driver: driverSelect?.value || 'Unassigned',
+                            backup: backupSelect?.value || null,
+                            startTime: startTimeText,
+                            endTime: endTimeText,
+                            startLap: parseInt(cells[3].textContent.trim()),
+                            endLap: parseInt(cells[4].textContent.trim()),
+                            laps: parseFloat(cells[5].textContent.trim()),
+                            timeOfDayStart: timeOfDayStart,
+                            timeOfDayEnd: timeOfDayEnd
+                        });
                     }
                 });
             }
@@ -3156,6 +3196,9 @@ class RadianPlannerApp {
                 selectedCar: this.selectedCar,
                 selectedDrivers: this.selectedDrivers,
 
+                // Calculated stints (for Live Tracker display)
+                stints: stints,
+
                 // Page 2 form data
                 formData: this.collectPage2FormData(),
 
@@ -3165,8 +3208,6 @@ class RadianPlannerApp {
                     raceDurationSeconds: this.strategyCalculator.raceDurationSeconds,
                     lapsPerStint: this.strategyCalculator.lapsPerStint,
                     pitStopTime: this.strategyCalculator.pitStopTime,
-                    isLocalTimeMode: this.strategyCalculator.isLocalTimeMode,
-                    selectedDriverForLocalTime: this.strategyCalculator.selectedDriverForLocalTime,
                     driverColorMap: this.strategyCalculator.driverColorMap
                 } : null,
 
