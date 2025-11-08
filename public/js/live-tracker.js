@@ -2556,27 +2556,37 @@ class LiveStrategyTracker {
     
     updateLiveStats() {
         // Session time - just display remaining time directly
-        this.elements.sessionTime.textContent = this.formatTime(this.sessionTimeRemain);
+        if (this.elements.sessionTime) {
+            this.elements.sessionTime.textContent = this.formatTime(this.sessionTimeRemain);
+        }
         
         // Total laps in session
-        this.elements.totalLaps.textContent = this.currentLap || '--';
+        if (this.elements.totalLaps) {
+            this.elements.totalLaps.textContent = this.currentLap || '--';
+        }
         
         // Current stint number - match the active stint in the table
         const currentStintFromTable = this.findCurrentStint(this.currentLap);
-        if (currentStintFromTable) {
-            this.elements.stintNumber.textContent = currentStintFromTable.stintNumber;
-        } else {
-            this.elements.stintNumber.textContent = this.currentStintNumber || '--';
+        if (this.elements.stintNumber) {
+            if (currentStintFromTable) {
+                this.elements.stintNumber.textContent = currentStintFromTable.stintNumber;
+            } else {
+                this.elements.stintNumber.textContent = this.currentStintNumber || '--';
+            }
         }
         
         // Stint laps completed
         // Calculate from the difference between current lap and stint start lap
         // This updates immediately without waiting for fuel calculation logic
         const calculatedStintLap = this.stintStartLap !== undefined ? Math.max(0, this.currentLap - this.stintStartLap) : this.currentStintLap;
-        this.elements.stintLap.textContent = calculatedStintLap > 0 ? calculatedStintLap : '--';
+        if (this.elements.stintLap) {
+            this.elements.stintLap.textContent = calculatedStintLap > 0 ? calculatedStintLap : '--';
+        }
         
         // Fuel - 2 decimals
-        this.elements.fuelRemaining.textContent = this.fuelLevel ? `${this.fuelLevel.toFixed(2)} L` : '-- L';
+        if (this.elements.fuelRemaining) {
+            this.elements.fuelRemaining.textContent = this.fuelLevel ? `${this.fuelLevel.toFixed(2)} L` : '-- L';
+        }
         
         // Laps remaining (calculated from fuel remaining / running avg fuel per lap) - 1 decimal
         if (this.elements.lapsRemaining) {
@@ -2590,7 +2600,9 @@ class LiveStrategyTracker {
         }
         
         // Last lap time
-        this.elements.lastLapTime.textContent = this.lastLapTime ? this.formatLapTime(this.lastLapTime) : '--:--';
+        if (this.elements.lastLapTime) {
+            this.elements.lastLapTime.textContent = this.lastLapTime ? this.formatLapTime(this.lastLapTime) : '--:--';
+        }
         
         // Pit stop time - only update if NOT currently in pit (let live timer show)
         const pitStopEl = document.getElementById('pit-stop-time');
@@ -3014,16 +3026,27 @@ class LiveStrategyTracker {
             // Initialize weather component
             this.weatherComponent = new window.WeatherComponent('weather-content');
             
-            // Load weather data from event
-            const weatherUrl = this.strategy.selectedEvent.weather_url;
-            if (weatherUrl) {
-                await this.weatherComponent.loadWeatherData(weatherUrl);
+            // Fetch weather URL from API like the planner does
+            const weatherUrl = `/api/events/${this.strategy.selectedEvent.event_id}/weather`;
+            debug('🌦️ Fetching weather from:', weatherUrl);
+            
+            const response = await fetch(weatherUrl);
+            
+            if (!response.ok) {
+                debug('ℹ️ No weather data available for this event');
+                return;
+            }
+            
+            const eventWeather = await response.json();
+            
+            if (eventWeather && eventWeather.weather_url) {
+                await this.weatherComponent.loadWeatherData(eventWeather.weather_url);
                 debug('✅ Weather component loaded successfully');
                 
                 // Update with current race time if available
                 this.updateWeatherComponentRaceTime();
             } else {
-                debugWarn('⚠️ No weather URL found for this event');
+                debug('ℹ️ Event does not have weather URL');
             }
         } catch (error) {
             debugError('❌ Failed to load weather component:', error);
