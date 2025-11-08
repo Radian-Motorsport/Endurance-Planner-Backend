@@ -2742,6 +2742,37 @@ class LiveStrategyTracker {
         return plannedLap;
     }
     
+    updateCurrentStintFromTimeOfDay() {
+        // Only check if we have time-of-day data and stints with time-of-day info
+        if (!this.sessionTimeOfDay || !this.strategy?.stints?.length) return;
+        if (!this.strategy.stints[0].timeOfDayStart) return;
+        
+        const currentTimeOfDay = this.sessionTimeOfDay;
+        
+        // Find which stint we're currently in
+        for (let i = 0; i < this.strategy.stints.length; i++) {
+            const stint = this.strategy.stints[i];
+            if (stint.timeOfDayStart != null && stint.timeOfDayEnd != null) {
+                let inStint = false;
+                if (stint.timeOfDayEnd < stint.timeOfDayStart) {
+                    // Crosses midnight
+                    inStint = (currentTimeOfDay >= stint.timeOfDayStart || currentTimeOfDay <= stint.timeOfDayEnd);
+                } else {
+                    // Normal same-day stint
+                    inStint = (currentTimeOfDay >= stint.timeOfDayStart && currentTimeOfDay <= stint.timeOfDayEnd);
+                }
+                
+                if (inStint && this.currentStintNumber !== stint.stintNumber) {
+                    // We've moved to a new stint
+                    this.currentStintNumber = stint.stintNumber;
+                    debugWarn(`🔄 Stint changed to #${stint.stintNumber} (${stint.driver}) based on time-of-day`);
+                    this.updateStintTableStatus(); // Update table highlighting
+                    break;
+                }
+            }
+        }
+    }
+    
     updateStintTableStatus() {
         const tbody = this.elements.stintTableBody;
         const stintRows = tbody.querySelectorAll('tr[data-role="stint"]');
@@ -3133,16 +3164,14 @@ class LiveStrategyTracker {
         stints.forEach((stint, index) => {
             debug(`  Creating row for stint ${stint.stintNumber}:`, stint);
             
-            // Calculate time of day for start/end times if SessionTimeOfDay available
-            let startTimeDisplay = stint.startTime;
-            let endTimeDisplay = stint.endTime;
+            // Use actual time-of-day values from stint if available (these are correct)
+            let startTimeDisplay = stint.startTime || '--:--';
+            let endTimeDisplay = stint.endTime || '--:--';
             
-            if (this.sessionTimeOfDay != null && stint.elapsedStart != null && stint.elapsedEnd != null) {
-                // stint.elapsedStart/End are seconds from session start
-                const startTimeOfDay = this.sessionTimeOfDay + stint.elapsedStart;
-                const endTimeOfDay = this.sessionTimeOfDay + stint.elapsedEnd;
-                startTimeDisplay = this.formatTimeOfDay(startTimeOfDay);
-                endTimeDisplay = this.formatTimeOfDay(endTimeOfDay);
+            if (stint.timeOfDayStart != null && stint.timeOfDayEnd != null) {
+                // Use the actual time-of-day values from the strategy (already correct)
+                startTimeDisplay = this.formatTimeOfDay(stint.timeOfDayStart);
+                endTimeDisplay = this.formatTimeOfDay(stint.timeOfDayEnd);
             }
             
             // Create stint row
