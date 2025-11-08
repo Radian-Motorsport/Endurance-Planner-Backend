@@ -201,6 +201,8 @@ class LiveStrategyTracker {
         this.incidentClearDelay = 2000; // Clear yellow 2 seconds after last car returns to track
         this.incidentMinDuration = 1000; // Off-track must last 1+ seconds to trigger incident
         this.sectorOffTrackCars = new Map(); // sectorNum -> Set(carIdx) - tracks which cars are off-track in each sector
+        this.recentIncidentCars = new Map(); // carIdx -> timestamp when they returned to track
+        this.incidentDisplayDelay = 5000; // Keep incident display visible for 5 seconds after car returns
         
         // Sector time tracking for class comparison
         this.carSectorTimes = new Map(); // carIdx -> Map(sectorNum -> lastSectorTime)
@@ -1816,6 +1818,9 @@ class LiveStrategyTracker {
                 this.sectorIncidents.delete(carIdx);
                 
                 if (wasTriggered) {
+                    // Mark car as recently returned to track for incident display
+                    this.recentIncidentCars.set(carIdx, now);
+                    
                     // Remove car from sector's off-track list
                     const sectorCars = this.sectorOffTrackCars.get(sectorNum);
                     if (sectorCars) {
@@ -1883,6 +1888,8 @@ class LiveStrategyTracker {
         const displayContainer = document.getElementById('incident-cars-display');
         if (!displayContainer) return;
         
+        const now = Date.now();
+        
         // Collect all cars currently off-track
         const offTrackCars = new Set();
         for (const [sectorNum, carSet] of this.sectorOffTrackCars) {
@@ -1891,7 +1898,25 @@ class LiveStrategyTracker {
             }
         }
         
-        // If no cars off-track, hide display
+        // Add cars that returned to track within the display delay window
+        const carsToRemove = [];
+        for (const [carIdx, returnTimestamp] of this.recentIncidentCars) {
+            const timeSinceReturn = now - returnTimestamp;
+            if (timeSinceReturn < this.incidentDisplayDelay) {
+                // Still within display window, show the car
+                offTrackCars.add(carIdx);
+            } else {
+                // Beyond display window, mark for removal
+                carsToRemove.push(carIdx);
+            }
+        }
+        
+        // Clean up expired entries from recentIncidentCars
+        for (const carIdx of carsToRemove) {
+            this.recentIncidentCars.delete(carIdx);
+        }
+        
+        // If no cars to display (neither active nor recent), hide display
         if (offTrackCars.size === 0) {
             displayContainer.classList.add('hidden');
             displayContainer.innerHTML = '';
