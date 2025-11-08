@@ -2506,8 +2506,10 @@ class LiveStrategyTracker {
     }
     
     updateSessionTimeDisplay() {
-        // Update session time display (main in Current Session box)
-        this.elements.sessionTime.textContent = this.formatTime(this.sessionTimeRemain);
+        // Update session time display (main in Current Session box) - if it exists
+        if (this.elements.sessionTime) {
+            this.elements.sessionTime.textContent = this.formatTime(this.sessionTimeRemain);
+        }
         
         // Update header session time display (top bar)
         const headerSessionTime = document.getElementById('header-session-time');
