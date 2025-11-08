@@ -1170,13 +1170,13 @@ class LiveStrategyTracker {
             marker.style.left = `${sector.startPct * 100}%`;
             marker.style.transform = 'translateX(-50%)';
             
-            // Create sector label
+            // Create sector label (display as 1-indexed)
             const label = document.createElement('div');
             label.className = 'absolute text-[10px] text-neutral-400 font-mono';
             label.style.left = `${sector.startPct * 100}%`;
             label.style.top = '-18px';
             label.style.transform = 'translateX(-50%)';
-            label.textContent = `S${sector.number}`;
+            label.textContent = `S${sector.number + 1}`;
             
             container.appendChild(marker);
             container.appendChild(label);
@@ -1234,10 +1234,10 @@ class LiveStrategyTracker {
         if (this.currentSector !== currentSectorNum) {
             this.currentSector = currentSectorNum;
             
-            // Update sector display
+            // Update sector display (display as 1-indexed)
             const sectorDisplay = document.getElementById('current-sector-display');
             if (sectorDisplay) {
-                sectorDisplay.textContent = `Sector ${currentSectorNum}`;
+                sectorDisplay.textContent = `Sector ${currentSectorNum + 1}`;
             }
             
             // No visual highlighting - position is already clear from lap progress bar
@@ -1415,7 +1415,7 @@ class LiveStrategyTracker {
         html += '<div class="grid gap-1" style="grid-template-columns: 150px repeat(' + this.sectors.length + ', 1fr);">';
         html += '<div class="bg-neutral-900 px-3 py-2 text-xs font-bold text-neutral-400 rounded">Driver</div>';
         this.sectors.forEach(sector => {
-            html += `<div class="bg-neutral-900 px-2 py-2 text-xs font-bold text-center text-neutral-400 rounded">S${sector.number}</div>`;
+            html += `<div class="bg-neutral-900 px-2 py-2 text-xs font-bold text-center text-neutral-400 rounded">S${sector.number + 1}</div>`;
         });
         html += '</div>';
         
@@ -1443,11 +1443,15 @@ class LiveStrategyTracker {
         const isPlayer = carIdx === playerCarIdx;
         const bgClass = isPlayer ? 'bg-blue-900/30' : 'bg-neutral-900/50';
         
+        // Get class position for this car
+        const classPosition = values.CarIdxClassPosition?.[carIdx] || '--';
+        
         let html = '<div class="grid gap-1" style="grid-template-columns: 150px repeat(' + this.sectors.length + ', 1fr);">';
         
-        // Driver name cell
+        // Driver name cell with class position
         const positionLabel = position === 'ahead' ? '↑ ' : position === 'behind' ? '↓ ' : '';
         html += `<div class="${bgClass} px-3 py-2 text-sm rounded truncate ${isPlayer ? 'font-bold text-cyan-400' : 'text-neutral-300'}">`;
+        html += `<span class="text-[10px] text-neutral-500 mr-1">P${classPosition}</span>`;
         html += `${positionLabel}${driver.UserName || 'Unknown'}`;
         html += '</div>';
         
