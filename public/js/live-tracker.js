@@ -1425,11 +1425,12 @@ class LiveStrategyTracker {
         let html = '<div class="grid grid-cols-1 gap-1">';
         
         // Header row
-        html += '<div class="grid gap-1" style="grid-template-columns: 150px repeat(' + this.sectors.length + ', 1fr);">';
+        html += '<div class="grid gap-1" style="grid-template-columns: 150px repeat(' + this.sectors.length + ', 1fr) 90px;">';
         html += '<div class="bg-neutral-900 px-3 py-2 text-xs font-bold text-neutral-400 rounded">Driver</div>';
         this.sectors.forEach(sector => {
             html += `<div class="bg-neutral-900 px-2 py-2 text-xs font-bold text-center text-neutral-400 rounded">S${sector.number + 1}</div>`;
         });
+        html += '<div class="bg-neutral-900 px-2 py-2 text-xs font-bold text-center text-neutral-400 rounded">Lap Time</div>';
         html += '</div>';
         
         // Car ahead row
@@ -1459,7 +1460,11 @@ class LiveStrategyTracker {
         // Get class position for this car
         const classPosition = values.CarIdxClassPosition?.[carIdx] || '--';
         
-        let html = '<div class="grid gap-1" style="grid-template-columns: 150px repeat(' + this.sectors.length + ', 1fr);">';
+        // Get lap time for this car and player
+        const lapTime = values.CarIdxLastLapTime?.[carIdx] || 0;
+        const playerLapTime = values.CarIdxLastLapTime?.[playerCarIdx] || 0;
+        
+        let html = '<div class="grid gap-1" style="grid-template-columns: 150px repeat(' + this.sectors.length + ', 1fr) 90px;">';
         
         // Driver name cell with class position
         const positionLabel = position === 'ahead' ? '↑ ' : position === 'behind' ? '↓ ' : '';
@@ -1468,36 +1473,81 @@ class LiveStrategyTracker {
         html += `${positionLabel}${driver.UserName || 'Unknown'}`;
         html += '</div>';
         
-        // Sector time cells
+        // Sector time delta cells
         this.sectors.forEach(sector => {
             const sectorTime = this.getCarSectorTime(carIdx, sector.number);
             const playerSectorTime = this.getCarSectorTime(playerCarIdx, sector.number);
             
             let cellBg = bgClass;
             let textColor = 'text-neutral-400';
+            let timeDisplay = '--';
             
-            // Color coding for non-player cars
-            if (!isPlayer && sectorTime !== null && playerSectorTime !== null) {
-                if (sectorTime < playerSectorTime) {
-                    // Competitor is faster - BAD for player (red)
-                    cellBg = 'bg-red-900/40';
-                    textColor = 'text-red-300';
-                } else if (sectorTime > playerSectorTime) {
-                    // Competitor is slower - GOOD for player (green)
-                    cellBg = 'bg-green-900/40';
-                    textColor = 'text-green-300';
-                } else {
-                    // Same time (yellow)
-                    cellBg = 'bg-yellow-900/40';
-                    textColor = 'text-yellow-300';
-                }
-            } else if (isPlayer && sectorTime !== null) {
+            if (isPlayer) {
+                // Show actual time for player
+                timeDisplay = sectorTime !== null ? sectorTime.toFixed(3) : '--';
                 textColor = 'text-cyan-400';
+            } else {
+                // Show delta for competitors
+                if (sectorTime !== null && playerSectorTime !== null) {
+                    const delta = sectorTime - playerSectorTime;
+                    const prefix = delta > 0 ? '+' : '';
+                    timeDisplay = `${prefix}${delta.toFixed(3)}`;
+                    
+                    if (delta < 0) {
+                        // Competitor is faster - BAD for player (red)
+                        cellBg = 'bg-red-900/40';
+                        textColor = 'text-red-300';
+                    } else if (delta > 0) {
+                        // Competitor is slower - GOOD for player (green)
+                        cellBg = 'bg-green-900/40';
+                        textColor = 'text-green-300';
+                    } else {
+                        // Same time (yellow)
+                        cellBg = 'bg-yellow-900/40';
+                        textColor = 'text-yellow-300';
+                    }
+                }
             }
             
-            const timeDisplay = sectorTime !== null ? sectorTime.toFixed(3) : '--';
             html += `<div class="${cellBg} px-2 py-2 text-xs font-mono text-center ${textColor} rounded">${timeDisplay}</div>`;
         });
+        
+        // Lap time cell
+        let lapBg = bgClass;
+        let lapColor = 'text-neutral-400';
+        let lapDisplay = '--';
+        
+        if (isPlayer) {
+            // Show actual lap time for player
+            if (lapTime > 0) {
+                const mins = Math.floor(lapTime / 60);
+                const secs = (lapTime % 60).toFixed(3);
+                lapDisplay = `${mins}:${secs.padStart(6, '0')}`;
+                lapColor = 'text-cyan-400';
+            }
+        } else {
+            // Show delta for competitors
+            if (lapTime > 0 && playerLapTime > 0) {
+                const delta = lapTime - playerLapTime;
+                const prefix = delta > 0 ? '+' : '';
+                lapDisplay = `${prefix}${delta.toFixed(3)}`;
+                
+                if (delta < 0) {
+                    // Competitor faster
+                    lapBg = 'bg-red-900/40';
+                    lapColor = 'text-red-300';
+                } else if (delta > 0) {
+                    // Competitor slower
+                    lapBg = 'bg-green-900/40';
+                    lapColor = 'text-green-300';
+                } else {
+                    lapBg = 'bg-yellow-900/40';
+                    lapColor = 'text-yellow-300';
+                }
+            }
+        }
+        
+        html += `<div class="${lapBg} px-2 py-2 text-xs font-mono text-center ${lapColor} rounded">${lapDisplay}</div>`;
         
         html += '</div>';
         return html;
