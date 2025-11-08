@@ -2921,6 +2921,7 @@ class LiveStrategyTracker {
                     
                     if (inStint) {
                         currentStintIndex = i;
+                        this.currentStintNumber = stint.stintNumber; // Update current stint number
                         debug(`  📍 Currently in stint #${stint.stintNumber} (${stint.driver})`);
                         break;
                     }
@@ -2933,6 +2934,7 @@ class LiveStrategyTracker {
                     const stint = this.strategy.stints[i];
                     if (stint.timeOfDayStart != null && currentTimeOfDay < stint.timeOfDayStart) {
                         currentStintIndex = i;
+                        this.currentStintNumber = stint.stintNumber; // Update to next stint number
                         debug(`  ⏭️ Next stint is #${stint.stintNumber} (${stint.driver})`);
                         break;
                     }
