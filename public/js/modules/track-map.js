@@ -1,3 +1,13 @@
+// ============================================================================
+// DEBUG SYSTEM - Set to false to disable all debug console output
+// ============================================================================
+const DEBUG = false;
+
+// Debug helper functions
+const debug = (...args) => { if (DEBUG) console.log(...args); };
+const debugWarn = (...args) => { if (DEBUG) console.warn(...args); };
+const debugError = (...args) => { if (DEBUG) console.error(...args); };
+
 /**
  * Track Map Module
  * Standalone component for displaying interactive SVG track maps with selectable layers
@@ -146,7 +156,7 @@ export class TrackMapComponent {
     }
     
     async loadTrackMap(trackMapData) {
-        console.log('🗺️ Loading track map:', trackMapData);
+        debug('🗺️ Loading track map:', trackMapData);
         
         // Show loading state
         this.svgContainer.classList.add('hidden');
@@ -168,10 +178,10 @@ export class TrackMapComponent {
             // Re-attach event listeners after map loads
             this.setupEventListeners();
             
-            console.log('✅ Track map loaded successfully');
+            debug('✅ Track map loaded successfully');
             
         } catch (error) {
-            console.warn('❌ Failed to load track map:', error);
+            debugWarn('❌ Failed to load track map:', error);
             
             // Show error state
             this.loadingElement.classList.add('hidden');
@@ -185,7 +195,7 @@ export class TrackMapComponent {
             ? JSON.parse(trackMapData.track_map_layers) 
             : trackMapData.track_map_layers;
         
-        console.log('📋 Available track map layers:', Object.keys(layers));
+        debug('📋 Available track map layers:', Object.keys(layers));
         
         // Clear existing map content
         this.svgContainer.innerHTML = '';
@@ -208,7 +218,7 @@ export class TrackMapComponent {
                 try {
                     await this.loadLayer(svgElement, baseUrl, layerName, layers[layerName]);
                 } catch (error) {
-                    console.warn(`⚠️ Failed to load layer ${layerName}:`, error);
+                    debugWarn(`⚠️ Failed to load layer ${layerName}:`, error);
                 }
             }
         }
@@ -259,10 +269,10 @@ export class TrackMapComponent {
             // Store layer reference
             this.layers[layerName] = layerGroup;
             
-            console.log(`✅ Loaded track map layer: ${layerName}`);
+            debug(`✅ Loaded track map layer: ${layerName}`);
             
         } catch (error) {
-            console.warn(`❌ Failed to load track map layer ${layerName}:`, error);
+            debugWarn(`❌ Failed to load track map layer ${layerName}:`, error);
         }
     }
     
@@ -397,7 +407,7 @@ export class TrackMapComponent {
         const layerGroup = this.layers[layerName];
         if (layerGroup) {
             layerGroup.style.display = visible ? 'block' : 'none';
-            console.log(`🎚️ Layer ${layerName}: ${visible ? 'visible' : 'hidden'}`);
+            debug(`🎚️ Layer ${layerName}: ${visible ? 'visible' : 'hidden'}`);
         }
     }
     
@@ -433,7 +443,7 @@ export class TrackMapComponent {
     }
 
     async loadTrackFromAPI(trackId) {
-        console.log('🗺️ Loading track map from API for track:', trackId);
+        debug('🗺️ Loading track map from API for track:', trackId);
         
         try {
             // Fetch track assets data via API endpoint
@@ -456,10 +466,10 @@ export class TrackMapComponent {
             // Load the track map
             await this.loadTrackMap(trackAssets);
             
-            console.log('✅ Track map loaded successfully from API');
+            debug('✅ Track map loaded successfully from API');
             
         } catch (error) {
-            console.warn('❌ Failed to load track map from API:', error.message);
+            debugWarn('❌ Failed to load track map from API:', error.message);
             throw error;
         }
     }

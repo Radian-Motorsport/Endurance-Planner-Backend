@@ -1,3 +1,13 @@
+// ============================================================================
+// DEBUG SYSTEM - Set to false to disable all debug console output
+// ============================================================================
+const DEBUG = false;
+
+// Debug helper functions
+const debug = (...args) => { if (DEBUG) console.log(...args); };
+const debugWarn = (...args) => { if (DEBUG) console.warn(...args); };
+const debugError = (...args) => { if (DEBUG) console.error(...args); };
+
 /**
  * EnviroTrace - A visualization component for environmental conditions
  */
@@ -14,7 +24,7 @@ class EnviroTrace {
     
     // Check if canvas exists
     if (!this.canvas) {
-      console.error(`EnviroTrace: Canvas element with ID '${canvasId}' not found`);
+      debugError(`EnviroTrace: Canvas element with ID '${canvasId}' not found`);
       return;
     }
     
@@ -222,7 +232,7 @@ class EnviroTrace {
    */
   loadFromStorage() {
     if (!window.storageManager) {
-      console.warn('EnviroTrace: StorageManager not available');
+      debugWarn('EnviroTrace: StorageManager not available');
       return;
     }
     
@@ -230,10 +240,10 @@ class EnviroTrace {
       const savedData = window.storageManager.loadVisualizationData('enviroTrace');
       if (savedData && Array.isArray(savedData)) {
         this.buffer = savedData;
-        // console.log(`EnviroTrace: Loaded ${this.buffer.length} data points from storage`);
+        // debug(`EnviroTrace: Loaded ${this.buffer.length} data points from storage`);
       }
     } catch (error) {
-      console.warn('EnviroTrace: Failed to load data from storage:', error);
+      debugWarn('EnviroTrace: Failed to load data from storage:', error);
       this.buffer = [];
     }
   }
@@ -243,14 +253,14 @@ class EnviroTrace {
    */
   saveToStorage() {
     if (!window.storageManager) {
-      console.warn('EnviroTrace: StorageManager not available');
+      debugWarn('EnviroTrace: StorageManager not available');
       return;
     }
     
     try {
       window.storageManager.saveVisualizationData('enviroTrace', this.buffer);
     } catch (error) {
-      console.warn('EnviroTrace: Failed to save data to storage:', error);
+      debugWarn('EnviroTrace: Failed to save data to storage:', error);
     }
   }
   

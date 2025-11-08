@@ -1,3 +1,13 @@
+// ============================================================================
+// DEBUG SYSTEM - Set to false to disable all debug console output
+// ============================================================================
+const DEBUG = false;
+
+// Debug helper functions
+const debug = (...args) => { if (DEBUG) console.log(...args); };
+const debugWarn = (...args) => { if (DEBUG) console.warn(...args); };
+const debugError = (...args) => { if (DEBUG) console.error(...args); };
+
 /**
  * Car Position Tracker Module
  * Displays real-time car positions on SVG track map based on lap distance percentage
@@ -93,7 +103,7 @@ export class CarPositionTracker {
                 this.discoveredClasses.add(classId);
                 
                 if (this.options.showDebugInfo) {
-                    console.log(`🎨 Class ${classId} assigned color ${color} (fixed mapping)`);
+                    debug(`🎨 Class ${classId} assigned color ${color} (fixed mapping)`);
                 }
             }
             
@@ -104,7 +114,7 @@ export class CarPositionTracker {
         if (!this.classColors.has(classId)) {
             this.classColors.set(classId, this.defaultClassColor);
             this.discoveredClasses.add(classId);
-            console.warn(`⚠️ Unknown class ${classId} - using default color ${this.defaultClassColor}`);
+            debugWarn(`⚠️ Unknown class ${classId} - using default color ${this.defaultClassColor}`);
         }
         
         return this.defaultClassColor;
@@ -116,13 +126,13 @@ export class CarPositionTracker {
      */
     setRacingLineData(racingLineData) {
         if (!racingLineData || !racingLineData.points || racingLineData.points.length === 0) {
-            console.warn('⚠️ Invalid racing line data provided');
+            debugWarn('⚠️ Invalid racing line data provided');
             return false;
         }
         
         this.racingLinePoints = racingLineData.points;
         
-        console.log(`✅ Racing line data loaded: ${this.racingLinePoints.length} points`);
+        debug(`✅ Racing line data loaded: ${this.racingLinePoints.length} points`);
         
         return true;
     }
@@ -150,11 +160,11 @@ export class CarPositionTracker {
                 throw new Error('Racing line data not loaded. Call setRacingLineData() first.');
             }
             
-            console.log('🏁 Initializing car tracker with racing line data');
-            console.log('  SVG container:', this.svgContainerId);
-            console.log('  Racing line points:', this.racingLinePoints.length);
-            console.log('  Show only player class:', this.options.showOnlyPlayerClass);
-            console.log('  Show all cars:', this.options.showAllCars);
+            debug('🏁 Initializing car tracker with racing line data');
+            debug('  SVG container:', this.svgContainerId);
+            debug('  Racing line points:', this.racingLinePoints.length);
+            debug('  Show only player class:', this.options.showOnlyPlayerClass);
+            debug('  Show all cars:', this.options.showAllCars);
             
             // Create racing line visualization layer (invisible initially)
             this.createRacingLineLayer();
@@ -163,12 +173,12 @@ export class CarPositionTracker {
             
             this.isInitialized = true;
             this.hasLoggedFirstUpdate = false;  // Reset logging flag
-            console.log('✅ Car position tracker initialized (multi-car mode)');
-            console.log('  Waiting for telemetry data to create car markers...');
+            debug('✅ Car position tracker initialized (multi-car mode)');
+            debug('  Waiting for telemetry data to create car markers...');
             return true;
             
         } catch (error) {
-            console.error('❌ Failed to initialize car position tracker:', error);
+            debugError('❌ Failed to initialize car position tracker:', error);
             this.isInitialized = false;
             return false;
         }
@@ -200,7 +210,7 @@ export class CarPositionTracker {
         // Add to SVG (below car marker layer)
         this.svg.appendChild(this.racingLineLayer);
         
-        console.log('✅ Racing line layer created (invisible)');
+        debug('✅ Racing line layer created (invisible)');
     }
     
     /**
@@ -210,7 +220,7 @@ export class CarPositionTracker {
     toggleRacingLineVisibility(visible) {
         if (this.racingLineLayer) {
             this.racingLineLayer.setAttribute('opacity', visible ? '0.8' : '0');
-            console.log(`🎨 Racing line ${visible ? 'visible' : 'hidden'}`);
+            debug(`🎨 Racing line ${visible ? 'visible' : 'hidden'}`);
         }
     }
     
@@ -289,7 +299,7 @@ export class CarPositionTracker {
         this.svg.appendChild(centerDot);
         this.carCenterDots.set(carIdx, centerDot);
         
-        console.log(`✅ Created car marker: idx=${carIdx}, class=${classId}, color=${fillColor}, isPlayer=${isPlayer}, position=(${startPoint.x.toFixed(1)}, ${startPoint.y.toFixed(1)})`);
+        debug(`✅ Created car marker: idx=${carIdx}, class=${classId}, color=${fillColor}, isPlayer=${isPlayer}, position=(${startPoint.x.toFixed(1)}, ${startPoint.y.toFixed(1)})`);
         
         return marker;
     }
@@ -318,7 +328,7 @@ export class CarPositionTracker {
      */
     updateAllPositions(telemetryData) {
         if (!this.isInitialized) {
-            console.warn('⚠️ Car position tracker not initialized');
+            debugWarn('⚠️ Car position tracker not initialized');
             return;
         }
         
@@ -332,23 +342,23 @@ export class CarPositionTracker {
         
         // Debug logging for first call
         if (!this.hasLoggedFirstUpdate) {
-            console.log('🔍 First car position update:');
-            console.log('  PlayerCarIdx:', PlayerCarIdx);
-            console.log('  PlayerCarClass:', PlayerCarClass);
-            console.log('  CarIdxLapDistPct length:', CarIdxLapDistPct?.length);
-            console.log('  CarIdxClass length:', CarIdxClass?.length);
-            console.log('  CarIdxTrackSurface:', CarIdxTrackSurface);
-            console.log('  CarIdxTrackSurface length:', CarIdxTrackSurface?.length);
+            debug('🔍 First car position update:');
+            debug('  PlayerCarIdx:', PlayerCarIdx);
+            debug('  PlayerCarClass:', PlayerCarClass);
+            debug('  CarIdxLapDistPct length:', CarIdxLapDistPct?.length);
+            debug('  CarIdxClass length:', CarIdxClass?.length);
+            debug('  CarIdxTrackSurface:', CarIdxTrackSurface);
+            debug('  CarIdxTrackSurface length:', CarIdxTrackSurface?.length);
             if (CarIdxTrackSurface && PlayerCarIdx != null) {
-                console.log('  Player track surface value:', CarIdxTrackSurface[PlayerCarIdx]);
+                debug('  Player track surface value:', CarIdxTrackSurface[PlayerCarIdx]);
             }
-            console.log('  showOnlyPlayerClass:', this.options.showOnlyPlayerClass);
-            console.log('  showAllCars:', this.options.showAllCars);
+            debug('  showOnlyPlayerClass:', this.options.showOnlyPlayerClass);
+            debug('  showAllCars:', this.options.showAllCars);
             this.hasLoggedFirstUpdate = true;
         }
         
         if (PlayerCarIdx == null || !CarIdxLapDistPct || !CarIdxClass) {
-            console.warn('⚠️ Missing required telemetry data:', {
+            debugWarn('⚠️ Missing required telemetry data:', {
                 hasPlayerCarIdx: PlayerCarIdx != null,
                 hasCarIdxLapDistPct: !!CarIdxLapDistPct,
                 hasCarIdxClass: !!CarIdxClass
@@ -434,7 +444,7 @@ export class CarPositionTracker {
                     
                     // Debug log occasionally for player car
                     if (isPlayer && Math.random() < 0.05) {
-                        console.log(`🎨 Player car (${carIdx}) track surface: ${surfaceValue}`);
+                        debug(`🎨 Player car (${carIdx}) track surface: ${surfaceValue}`);
                     }
                 }
             }
@@ -447,7 +457,7 @@ export class CarPositionTracker {
             }
             
             if (this.options.showDebugInfo || (carsProcessed === 0 && Math.random() < 0.1)) {
-                console.log(`🚗 Car tracking: ${carsProcessed} visible, ${carsSkippedWrongClass} wrong class, ${carsSkippedNoPosition} no position (Player class: ${PlayerCarClass})`);
+                debug(`🚗 Car tracking: ${carsProcessed} visible, ${carsSkippedWrongClass} wrong class, ${carsSkippedNoPosition} no position (Player class: ${PlayerCarClass})`);
             }
             
             // Remove markers for cars that are no longer active
@@ -458,11 +468,11 @@ export class CarPositionTracker {
             }
             
             if (this.options.showDebugInfo || (carsProcessed === 0 && Math.random() < 0.1)) {
-                console.log(`🚗 Car tracking: ${carsProcessed} visible, ${carsSkippedWrongClass} wrong class, ${carsSkippedNoPosition} no position (Player class: ${PlayerCarClass})`);
+                debug(`🚗 Car tracking: ${carsProcessed} visible, ${carsSkippedWrongClass} wrong class, ${carsSkippedNoPosition} no position (Player class: ${PlayerCarClass})`);
             }
             
         } catch (error) {
-            console.error('❌ Failed to update car positions:', error);
+            debugError('❌ Failed to update car positions:', error);
         }
     }
     
@@ -536,7 +546,7 @@ export class CarPositionTracker {
             this.offTrackCounts.set(carIdx, newCount);
             
             if (this.options.showDebugInfo) {
-                console.log(`🚨 Car ${carIdx} went off-track (incident #${newCount})`);
+                debug(`🚨 Car ${carIdx} went off-track (incident #${newCount})`);
             }
         }
         
@@ -667,7 +677,7 @@ export class CarPositionTracker {
         this.discoveredClasses.clear();
         this.isInitialized = false;
         
-        console.log('🗑️ Car position tracker destroyed');
+        debug('🗑️ Car position tracker destroyed');
     }
     
     /**
@@ -721,7 +731,7 @@ export class CarPositionTracker {
                 newDot.setAttribute('opacity', '1');
                 
                 if (this.options.showDebugInfo) {
-                    console.log(`🎯 Selected car ${carIdx} on track map`);
+                    debug(`🎯 Selected car ${carIdx} on track map`);
                 }
             }
         }
