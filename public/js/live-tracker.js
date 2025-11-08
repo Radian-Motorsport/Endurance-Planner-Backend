@@ -3405,49 +3405,65 @@ class LiveStrategyTracker {
             return;
         }
         
-        // First, trim past stints based on current SessionTimeOfDay
-        if (this.sessionTimeOfDay != null && this.strategy.stints[0].timeOfDayStart != null) {
-            const currentTimeOfDay = this.sessionTimeOfDay;
+        // Use the same logic as calculateStintsForRemainingTime()
+        if (this.strategy.stints && this.strategy.stints.length > 0 && 
+            this.strategy.stints[0].timeOfDayStart != null) {
+            console.log('✅ Using original planner stints with time-of-day data');
+            
+            // Only determine current stint if we have current time-of-day from telemetry
             let currentStintIndex = -1;
-            
-            // Find which stint we're currently in
-            for (let i = 0; i < this.strategy.stints.length; i++) {
-                const stint = this.strategy.stints[i];
-                if (stint.timeOfDayStart != null && stint.timeOfDayEnd != null) {
-                    let inStint = false;
-                    if (stint.timeOfDayEnd < stint.timeOfDayStart) {
-                        // Crosses midnight
-                        inStint = (currentTimeOfDay >= stint.timeOfDayStart || currentTimeOfDay <= stint.timeOfDayEnd);
-                    } else {
-                        // Normal same-day stint
-                        inStint = (currentTimeOfDay >= stint.timeOfDayStart && currentTimeOfDay <= stint.timeOfDayEnd);
-                    }
-                    
-                    if (inStint) {
-                        currentStintIndex = i;
-                        debug(`📍 Currently in stint #${stint.stintNumber}`);
-                        break;
-                    }
-                }
-            }
-            
-            // If not in any stint, find next upcoming stint
-            if (currentStintIndex === -1) {
+            if (this.sessionTimeOfDay != null) {
+                const currentTimeOfDay = this.sessionTimeOfDay;
+                const hours = Math.floor(currentTimeOfDay / 3600);
+                const minutes = Math.floor((currentTimeOfDay % 3600) / 60);
+                debug(`  Current time of day: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} (${currentTimeOfDay}s)`);
+                
+                // Find which stint we're currently in based on time of day
                 for (let i = 0; i < this.strategy.stints.length; i++) {
                     const stint = this.strategy.stints[i];
-                    if (stint.timeOfDayStart != null && currentTimeOfDay < stint.timeOfDayStart) {
-                        currentStintIndex = i;
-                        debug(`⏭️ Next stint is #${stint.stintNumber}`);
-                        break;
+                    if (stint.timeOfDayStart != null && stint.timeOfDayEnd != null) {
+                        // Handle day wraparound (e.g., stint from 23:00 to 01:00)
+                        let inStint = false;
+                        if (stint.timeOfDayEnd < stint.timeOfDayStart) {
+                            // Crosses midnight
+                            inStint = (currentTimeOfDay >= stint.timeOfDayStart || currentTimeOfDay <= stint.timeOfDayEnd);
+                        } else {
+                            // Normal same-day stint
+                            inStint = (currentTimeOfDay >= stint.timeOfDayStart && currentTimeOfDay <= stint.timeOfDayEnd);
+                        }
+                        
+                        if (inStint) {
+                            currentStintIndex = i;
+                            this.currentStintNumber = stint.stintNumber;
+                            debug(`  📍 Currently in stint #${stint.stintNumber} (${stint.driver})`);
+                            break;
+                        }
+                    }
+                }
+                
+                // If we couldn't find current stint, find the next upcoming one
+                if (currentStintIndex === -1) {
+                    for (let i = 0; i < this.strategy.stints.length; i++) {
+                        const stint = this.strategy.stints[i];
+                        if (stint.timeOfDayStart != null && currentTimeOfDay < stint.timeOfDayStart) {
+                            currentStintIndex = i;
+                            this.currentStintNumber = stint.stintNumber;
+                            debug(`  ⏭️ Next stint is #${stint.stintNumber} (${stint.driver})`);
+                            break;
+                        }
                     }
                 }
             }
             
-            // Trim past stints
+            // Keep only current and future stints if we determined the current stint
             if (currentStintIndex > 0) {
                 this.strategy.stints = this.strategy.stints.slice(currentStintIndex);
-                debug(`✂️ Trimmed ${currentStintIndex} completed stints`);
+                debug(`  ✂️ Trimmed ${currentStintIndex} completed stints, showing from stint #${this.strategy.stints[0].stintNumber}`);
             }
+            
+            console.log('📋 Calling populateStintTable() after recalculate');
+            this.populateStintTable();
+            return;
         }
         
         // Don't reset manual timer - it should only be controlled by user buttons
