@@ -2912,6 +2912,16 @@ class RadianPlannerApp {
                     // Extract stint data from row cells
                     const cells = row.querySelectorAll('td');
                     if (cells.length >= 8) {
+                        const timeOfDayStartAttr = row.getAttribute('data-timeofday-start');
+                        const timeOfDayEndAttr = row.getAttribute('data-timeofday-end');
+                        
+                        console.log(`Stint ${index + 1} attributes:`, {
+                            timeOfDayStartAttr,
+                            timeOfDayEndAttr,
+                            timeOfDayStartParsed: parseInt(timeOfDayStartAttr),
+                            timeOfDayEndParsed: parseInt(timeOfDayEndAttr)
+                        });
+                        
                         stints.push({
                             stintNumber: index + 1,
                             driver: driverSelect?.value || 'Unassigned',
@@ -2923,8 +2933,8 @@ class RadianPlannerApp {
                             laps: parseFloat(cells[5].textContent.trim()),
                             elapsedStart: parseInt(row.getAttribute('data-elapsed-start')) || null,
                             elapsedEnd: parseInt(row.getAttribute('data-elapsed-end')) || null,
-                            timeOfDayStart: parseInt(row.getAttribute('data-timeofday-start')) || null,
-                            timeOfDayEnd: parseInt(row.getAttribute('data-timeofday-end')) || null
+                            timeOfDayStart: parseInt(timeOfDayStartAttr) || null,
+                            timeOfDayEnd: parseInt(timeOfDayEndAttr) || null
                         });
                     }
                 });
