@@ -1111,8 +1111,7 @@ class LiveStrategyTracker {
     initializeSectors(sessionData) {
         // Only initialize once - prevent repeated calls from destroying sector cards
         if (this.sectorsInitialized) {
-            console.log('⏭️ Sectors already initialized, skipping to prevent yellow flash');
-            return;
+            return; // Silent skip - sectors already set up
         }
         
         // Get track length
