@@ -195,8 +195,9 @@ class LiveStrategyTracker {
         this.sectorIncidents = new Map(); // carIdx -> { sectorNum, startTime, active, triggered }
         this.activeSectorIncidents = new Set(); // Set of sector numbers with active incidents
         this.sectorIncidentTimeouts = new Map(); // sectorNum -> timeoutId for clearing
-        this.incidentTimeout = 10000; // Clear incident markers after 10 seconds
+        this.incidentClearDelay = 2000; // Clear yellow 2 seconds after last car returns to track
         this.incidentMinDuration = 1000; // Off-track must last 1+ seconds to trigger incident
+        this.sectorOffTrackCars = new Map(); // sectorNum -> Set(carIdx) - tracks which cars are off-track in each sector
         
         // Sector time tracking for class comparison
         this.carSectorTimes = new Map(); // carIdx -> Map(sectorNum -> lastSectorTime)
@@ -1534,54 +1535,82 @@ class LiveStrategyTracker {
             } else {
                 // Car is still off-track - update sector if changed
                 if (incident.sectorNum !== carSectorNum) {
-                    // Car moved to different sector while off-track - update tracking
+                    // Remove from old sector tracking
+                    const oldSectorCars = this.sectorOffTrackCars.get(incident.sectorNum);
+                    if (oldSectorCars) {
+                        oldSectorCars.delete(carIdx);
+                    }
+                    
+                    // Update to new sector
                     incident.sectorNum = carSectorNum;
                     this.sectorIncidents.set(carIdx, incident);
-                    debug(`🚨 Car ${carIdx} still off-track, now in sector ${carSectorNum}`);
+                    debug(`🚨 Car ${carIdx} still off-track, moved to sector ${carSectorNum}`);
                 }
                 
                 // Continue tracking - check if duration threshold met
                 const duration = now - incident.startTime;
                 
                 if (duration >= this.incidentMinDuration && !incident.triggered) {
-                    // Incident confirmed - mark sector (only once)
+                    // Incident confirmed - trigger yellow flag for sector
                     incident.triggered = true;
                     this.sectorIncidents.set(carIdx, incident);
                     
-                    debug(`⚠️⚠️⚠️ TRIGGERING YELLOW: sector ${carSectorNum}, car ${carIdx}, duration ${duration}ms`);
-                    debug(`   activeSectorIncidents before:`, Array.from(this.activeSectorIncidents));
+                    // Add car to sector's off-track list
+                    if (!this.sectorOffTrackCars.has(carSectorNum)) {
+                        this.sectorOffTrackCars.set(carSectorNum, new Set());
+                    }
+                    this.sectorOffTrackCars.get(carSectorNum).add(carIdx);
                     
-                    // Always mark sector - don't check if already there
+                    // Mark sector yellow
                     this.activeSectorIncidents.add(carSectorNum);
                     this.updateSectorIncidentDisplay(carSectorNum, true);
                     
-                    debug(`   activeSectorIncidents after:`, Array.from(this.activeSectorIncidents));
-                    
-                    // Only set timeout if one doesn't already exist for this sector
-                    // This prevents resetting the timer on every telemetry frame
-                    if (!this.sectorIncidentTimeouts.has(carSectorNum)) {
-                        // Auto-clear after timeout
-                        const timeoutId = setTimeout(() => {
-                            debug(`⏰ TIMEOUT EXECUTING: Clearing yellow for sector ${carSectorNum} after ${this.incidentTimeout}ms`);
-                            this.activeSectorIncidents.delete(carSectorNum);
-                            this.sectorIncidentTimeouts.delete(carSectorNum);
-                            this.updateSectorIncidentDisplay(carSectorNum, false);
-                        }, this.incidentTimeout);
-                        
-                        this.sectorIncidentTimeouts.set(carSectorNum, timeoutId);
-                        debug(`   NEW timeout set with ID: ${timeoutId}, will fire in ${this.incidentTimeout}ms`);
-                    } else {
-                        debug(`   ⏱️ Timeout already running for sector ${carSectorNum}, NOT resetting`);
+                    // Cancel any pending clear timeout for this sector
+                    if (this.sectorIncidentTimeouts.has(carSectorNum)) {
+                        clearTimeout(this.sectorIncidentTimeouts.get(carSectorNum));
+                        this.sectorIncidentTimeouts.delete(carSectorNum);
                     }
+                    
+                    debug(`⚠️ YELLOW FLAG: Sector ${carSectorNum}, car ${carIdx} off-track ${duration}ms`);
                 }
             }
         } else {
-            // Car back on track - clear incident tracking for this car
+            // Car back on track
             if (incident && incident.active) {
                 const offTrackDuration = now - incident.startTime;
+                const sectorNum = incident.sectorNum;
+                const wasTriggered = incident.triggered;
+                
+                // Clear car's incident tracking
                 this.sectorIncidents.delete(carIdx);
-                debug(`🏁 BACK ON TRACK: Car ${carIdx}, sector ${incident.sectorNum}, off-track ${offTrackDuration}ms, triggered: ${incident.triggered}`);
-                debug(`   Yellow ${incident.triggered ? 'STAYS (timeout will clear)' : 'not shown (< 1s)'}`);
+                
+                if (wasTriggered) {
+                    // Remove car from sector's off-track list
+                    const sectorCars = this.sectorOffTrackCars.get(sectorNum);
+                    if (sectorCars) {
+                        sectorCars.delete(carIdx);
+                        
+                        // If no more cars off-track in this sector, start clear timer
+                        if (sectorCars.size === 0) {
+                            this.sectorOffTrackCars.delete(sectorNum);
+                            
+                            // Set timer to clear yellow flag after delay
+                            const timeoutId = setTimeout(() => {
+                                this.activeSectorIncidents.delete(sectorNum);
+                                this.sectorIncidentTimeouts.delete(sectorNum);
+                                this.updateSectorIncidentDisplay(sectorNum, false);
+                                debug(`✅ YELLOW CLEARED: Sector ${sectorNum} after ${this.incidentClearDelay}ms delay`);
+                            }, this.incidentClearDelay);
+                            
+                            this.sectorIncidentTimeouts.set(sectorNum, timeoutId);
+                            debug(`🏁 Car ${carIdx} back on track, sector ${sectorNum} clear in ${this.incidentClearDelay}ms`);
+                        } else {
+                            debug(`🏁 Car ${carIdx} back on track, ${sectorCars.size} car(s) still off in sector ${sectorNum}`);
+                        }
+                    }
+                } else {
+                    debug(`🏁 Car ${carIdx} back on track after ${offTrackDuration}ms (< 1s, no yellow shown)`);
+                }
             }
         }
     }
