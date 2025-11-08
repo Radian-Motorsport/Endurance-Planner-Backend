@@ -56,7 +56,7 @@
             <p class="text-neutral-400"></p>
         </div>
         
-        <!-- Connection Status Bar -->
+        <!-- Connection Status Bar - SPANS FULL WIDTH -->
         <div class="bg-neutral-800 rounded-lg p-4 mb-6">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-3">
@@ -75,6 +75,12 @@
                 </div>
             </div>
         </div>
+        
+        <!-- TWO COLUMN LAYOUT: Left side and Right side -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            
+            <!-- LEFT COLUMN -->
+            <div class="space-y-6">
         
         <!-- Session Info Display -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
@@ -304,226 +310,6 @@
             </div>
         </div>
         
-        <!-- Pedal Trace & Driver Inputs -->
-        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl road-rage-font">Pedal Trace & Driver Inputs</h2>
-                <button id="toggle-pedal-inputs" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                    Show Inputs ▼
-                </button>
-            </div>
-            
-            <!-- Pedal Trace Canvas -->
-            <div class="mb-4">
-                <canvas id="pedal-canvas" width="800" height="200" class="w-full bg-neutral-900 rounded hidden"></canvas>
-            </div>
-            
-            <!-- Driver Inputs Grid (Collapsible) -->
-            <div id="driver-inputs-details" class="hidden">
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Throttle</div>
-                        <div id="input-throttle" class="text-lg font-mono text-green-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Brake</div>
-                        <div id="input-brake" class="text-lg font-mono text-red-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Clutch</div>
-                        <div id="input-clutch" class="text-lg font-mono text-blue-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Gear</div>
-                        <div id="input-gear" class="text-lg font-mono text-cyan-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">RPM</div>
-                        <div id="input-rpm" class="text-lg font-mono text-yellow-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Speed</div>
-                        <div id="input-speed" class="text-lg font-mono text-purple-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Steering</div>
-                        <div id="input-steering" class="text-lg font-mono text-pink-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Coasting</div>
-                        <div id="input-coasting" class="text-lg font-mono text-orange-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Overlap</div>
-                        <div id="input-overlap" class="text-lg font-mono text-amber-400">--</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Lap Progress Bar with Sectors -->
-        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl road-rage-font">Lap Progress</h2>
-                <div class="flex items-center gap-4 text-xs text-neutral-400">
-                    <div class="flex items-center gap-1">
-                        <div class="w-3 h-3 bg-yellow-500 rounded"></div>
-                        <span>Incident</span>
-                    </div>
-                    <button id="toggle-progress-cars" class="ml-4 px-2 py-1 bg-neutral-700 hover:bg-neutral-600 rounded text-xs transition">
-                        Show All Cars
-                    </button>
-                    <span id="current-sector-display" class="ml-2">Sector --</span>
-                </div>
-            </div>
-            
-            <!-- Incident Cars Info Display -->
-            <div id="incident-cars-display" class="mb-3 space-y-1 hidden"></div>
-            
-            <div class="relative w-full h-16 flex items-center overflow-hidden">
-                <!-- Base progress line -->
-                <div class="absolute w-full h-1 bg-neutral-700 rounded"></div>
-                
-                <!-- Sector markers container -->
-                <div id="sector-markers-container" class="absolute w-full h-full"></div>
-                
-                <!-- All car dots container -->
-                <div id="progress-car-dots-container" class="absolute w-full h-full hidden"></div>
-                
-                <!-- Player car position dot (always visible) -->
-                <div id="lap-progress-dot" class="absolute w-5 h-5 bg-cyan-400 rounded-full shadow-lg transition-all duration-100 z-10 ring-2 ring-cyan-300" 
-                     style="left: 0%; transform: translateX(-50%);"></div>
-            </div>
-            
-            <!-- Sector info display -->
-            <div id="sector-info-display" class="relative w-full h-2 mt-4">
-                <!-- Sector indicator bars will be positioned absolutely here -->
-            </div>
-        </div>
-        
-        <!-- Track Map with Car Position -->
-        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl road-rage-font">Track Map</h2>
-                <button id="toggle-track-map" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                    Show Map ▼
-                </button>
-            </div>
-            
-            <div id="track-map-details" class="hidden">
-                <div id="track-map-container-live">
-                    <div class="flex items-center justify-center py-8 text-neutral-400">
-                        <i class="fas fa-map-marked-alt text-3xl mr-3"></i>
-                        <span>Track map will load when strategy is loaded</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Sector Time Comparison -->
-        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <h2 class="text-xl road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Sector Comparison</h2>
-            <div id="sector-comparison-container" class="space-y-1">
-                <div class="text-neutral-500 text-xs text-center py-4">Sector times will appear during session</div>
-            </div>
-        </div>
-        
-        <!-- Car Analysis -->
-        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl road-rage-font">Car Analysis</h2>
-                <button id="toggle-car-analysis" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                    Show Analysis ▼
-                </button>
-            </div>
-            
-            <div id="car-analysis-details" class="hidden">
-                <!-- Class Selector Tabs -->
-                <div class="flex gap-2 mb-4 border-b border-neutral-700">
-                    <button class="class-tab px-4 py-2 text-sm font-semibold transition border-b-2 border-transparent hover:text-white text-neutral-400" data-class="GTP">
-                        GTP
-                    </button>
-                    <button class="class-tab px-4 py-2 text-sm font-semibold transition border-b-2 border-transparent hover:text-white text-neutral-400" data-class="GT3">
-                        GT3
-                    </button>
-                    <button class="class-tab px-4 py-2 text-sm font-semibold transition border-b-2 border-transparent hover:text-white text-neutral-400" data-class="GT4">
-                        GT4
-                    </button>
-                    <button class="class-tab px-4 py-2 text-sm font-semibold transition border-b-2 border-transparent hover:text-white text-neutral-400" data-class="LMP">
-                        LMP
-                    </button>
-                </div>
-                
-                <!-- Car List (Player's Class) -->
-                <div class="mb-4">
-                    <h3 class="text-sm font-semibold text-neutral-400 uppercase mb-3">Class Competitors</h3>
-                    <div id="car-list" class="space-y-2">
-                        <div class="text-neutral-500 text-sm text-center py-4">
-                            <i class="fas fa-car text-2xl mb-2"></i>
-                            <p>Waiting for session data...</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Selected Car Details -->
-                <div id="car-details-container" class="hidden mt-6 pt-6 border-t border-neutral-700">
-                    <h3 class="text-sm font-semibold text-neutral-400 uppercase mb-3">
-                        Selected Car: <span id="selected-car-name" class="text-white">--</span>
-                    </h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">Best Lap Time</div>
-                            <div id="detail-best-lap" class="text-lg font-mono text-green-400">--</div>
-                        </div>
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">Class Position</div>
-                            <div id="detail-class-pos" class="text-lg font-mono text-blue-400">--</div>
-                        </div>
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">Est. Time</div>
-                            <div id="detail-est-time" class="text-lg font-mono text-purple-400">--</div>
-                        </div>
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">Current Lap</div>
-                            <div id="detail-lap" class="text-lg font-mono text-cyan-400">--</div>
-                        </div>
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">Laps Completed</div>
-                            <div id="detail-lap-completed" class="text-lg font-mono text-indigo-400">--</div>
-                        </div>
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">Last Lap Time</div>
-                            <div id="detail-last-lap" class="text-lg font-mono text-pink-400">--</div>
-                        </div>
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">On Pit Road</div>
-                            <div id="detail-pit-road" class="text-lg font-mono text-orange-400">--</div>
-                        </div>
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">Track Surface</div>
-                            <div id="detail-track-surface" class="text-lg font-mono text-yellow-400">--</div>
-                        </div>
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">Surface Material</div>
-                            <div id="detail-surface-material" class="text-lg font-mono text-emerald-400">--</div>
-                        </div>
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">Off-Track Incidents</div>
-                            <div id="detail-off-track" class="text-lg font-mono text-red-400">--</div>
-                        </div>
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">Laps This Stint</div>
-                            <div id="detail-stint-laps" class="text-lg font-mono text-cyan-400">--</div>
-                        </div>
-                        <div class="bg-neutral-700 rounded p-3">
-                            <div class="text-xs text-neutral-400 uppercase mb-1">Last Pit Duration</div>
-                            <div id="detail-pit-duration" class="text-lg font-mono text-orange-400">--</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
         <!-- Weather & Environment -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
@@ -658,6 +444,267 @@
                 </table>
             </div>
         </div>
+        
+            </div>
+            <!-- END LEFT COLUMN -->
+            
+            <!-- RIGHT COLUMN -->
+            <div class="space-y-6">
+        
+        <!-- Pedal Trace & Driver Inputs -->
+        <div class="bg-neutral-800 rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl road-rage-font">Pedal Trace & Driver Inputs</h2>
+                <button id="toggle-pedal-inputs" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                    Show Inputs ▼
+                </button>
+            </div>
+            
+            <!-- Pedal Trace Canvas -->
+            <div class="mb-4">
+                <canvas id="pedal-canvas" width="800" height="200" class="w-full bg-neutral-900 rounded hidden"></canvas>
+            </div>
+            
+            <!-- Driver Inputs Grid (Collapsible) -->
+            <div id="driver-inputs-details" class="hidden">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Throttle</div>
+                        <div id="input-throttle" class="text-lg font-mono text-green-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Brake</div>
+                        <div id="input-brake" class="text-lg font-mono text-red-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Clutch</div>
+                        <div id="input-clutch" class="text-lg font-mono text-blue-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Gear</div>
+                        <div id="input-gear" class="text-lg font-mono text-cyan-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">RPM</div>
+                        <div id="input-rpm" class="text-lg font-mono text-yellow-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Speed</div>
+                        <div id="input-speed" class="text-lg font-mono text-purple-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Steering</div>
+                        <div id="input-steering" class="text-lg font-mono text-pink-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Coasting</div>
+                        <div id="input-coasting" class="text-lg font-mono text-orange-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Overlap</div>
+                        <div id="input-overlap" class="text-lg font-mono text-amber-400">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stint Breakdown Table -->
+        <div class="bg-neutral-800 rounded-lg p-6">
+            <h2 class="text-xl road-rage-font mb-4">Stint Breakdown</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-neutral-900">
+                        <tr>
+                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Stint</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Start Time</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">End Time</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium uppercase">Start Lap</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium uppercase">End Lap</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium uppercase">Laps</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Driver</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stint-table-body" class="divide-y divide-neutral-700">
+                        <tr>
+                            <td colspan="8" class="px-3 py-8 text-center text-neutral-500">
+                                <i class="fas fa-chart-line text-4xl mb-2"></i>
+                                <p>No strategy loaded. Click "Load Strategy" to begin.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Lap Progress Bar with Sectors -->
+        <div class="bg-neutral-800 rounded-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl road-rage-font">Lap Progress</h2>
+                <div class="flex items-center gap-4 text-xs text-neutral-400">
+                    <div class="flex items-center gap-1">
+                        <div class="w-3 h-3 bg-yellow-500 rounded"></div>
+                        <span>Incident</span>
+                    </div>
+                    <button id="toggle-progress-cars" class="ml-4 px-2 py-1 bg-neutral-700 hover:bg-neutral-600 rounded text-xs transition">
+                        Show All Cars
+                    </button>
+                    <span id="current-sector-display" class="ml-2">Sector --</span>
+                </div>
+            </div>
+            
+            <!-- Incident Cars Info Display -->
+            <div id="incident-cars-display" class="mb-3 space-y-1 hidden"></div>
+            
+            <div class="relative w-full h-16 flex items-center overflow-hidden">
+                <!-- Base progress line -->
+                <div class="absolute w-full h-1 bg-neutral-700 rounded"></div>
+                
+                <!-- Sector markers container -->
+                <div id="sector-markers-container" class="absolute w-full h-full"></div>
+                
+                <!-- All car dots container -->
+                <div id="progress-car-dots-container" class="absolute w-full h-full hidden"></div>
+                
+                <!-- Player car position dot (always visible) -->
+                <div id="lap-progress-dot" class="absolute w-5 h-5 bg-cyan-400 rounded-full shadow-lg transition-all duration-100 z-10 ring-2 ring-cyan-300" 
+                     style="left: 0%; transform: translateX(-50%);"></div>
+            </div>
+            
+            <!-- Sector info display -->
+            <div id="sector-info-display" class="relative w-full h-2 mt-4">
+                <!-- Sector indicator bars will be positioned absolutely here -->
+            </div>
+        </div>
+        
+        <!-- Track Map with Car Position -->
+        <div class="bg-neutral-800 rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl road-rage-font">Track Map</h2>
+                <button id="toggle-track-map" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                    Show Map ▼
+                </button>
+            </div>
+            
+            <div id="track-map-details" class="hidden">
+                <div id="track-map-container-live">
+                    <div class="flex items-center justify-center py-8 text-neutral-400">
+                        <i class="fas fa-map-marked-alt text-3xl mr-3"></i>
+                        <span>Track map will load when strategy is loaded</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sector Time Comparison -->
+        <div class="bg-neutral-800 rounded-lg p-6">
+            <h2 class="text-xl road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Sector Comparison</h2>
+            <div id="sector-comparison-container" class="space-y-1">
+                <div class="text-neutral-500 text-xs text-center py-4">Sector times will appear during session</div>
+            </div>
+        </div>
+        
+        <!-- Car Analysis -->
+        <div class="bg-neutral-800 rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl road-rage-font">Car Analysis</h2>
+                <button id="toggle-car-analysis" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                    Show Analysis ▼
+                </button>
+            </div>
+            
+            <div id="car-analysis-details" class="hidden">
+                <!-- Class Selector Tabs -->
+                <div class="flex gap-2 mb-4 border-b border-neutral-700">
+                    <button class="class-tab px-4 py-2 text-sm font-semibold transition border-b-2 border-transparent hover:text-white text-neutral-400" data-class="GTP">
+                        GTP
+                    </button>
+                    <button class="class-tab px-4 py-2 text-sm font-semibold transition border-b-2 border-transparent hover:text-white text-neutral-400" data-class="GT3">
+                        GT3
+                    </button>
+                    <button class="class-tab px-4 py-2 text-sm font-semibold transition border-b-2 border-transparent hover:text-white text-neutral-400" data-class="GT4">
+                        GT4
+                    </button>
+                    <button class="class-tab px-4 py-2 text-sm font-semibold transition border-b-2 border-transparent hover:text-white text-neutral-400" data-class="LMP">
+                        LMP
+                    </button>
+                </div>
+                
+                <!-- Car List (Player's Class) -->
+                <div class="mb-4">
+                    <h3 class="text-sm font-semibold text-neutral-400 uppercase mb-3">Class Competitors</h3>
+                    <div id="car-list" class="space-y-2">
+                        <div class="text-neutral-500 text-sm text-center py-4">
+                            <i class="fas fa-car text-2xl mb-2"></i>
+                            <p>Waiting for session data...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Selected Car Details -->
+                <div id="car-details-container" class="hidden mt-6 pt-6 border-t border-neutral-700">
+                    <h3 class="text-sm font-semibold text-neutral-400 uppercase mb-3">
+                        Selected Car: <span id="selected-car-name" class="text-white">--</span>
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Best Lap Time</div>
+                            <div id="detail-best-lap" class="text-lg font-mono text-green-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Class Position</div>
+                            <div id="detail-class-pos" class="text-lg font-mono text-blue-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Est. Time</div>
+                            <div id="detail-est-time" class="text-lg font-mono text-purple-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Current Lap</div>
+                            <div id="detail-lap" class="text-lg font-mono text-cyan-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Laps Completed</div>
+                            <div id="detail-lap-completed" class="text-lg font-mono text-indigo-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Last Lap Time</div>
+                            <div id="detail-last-lap" class="text-lg font-mono text-pink-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">On Pit Road</div>
+                            <div id="detail-pit-road" class="text-lg font-mono text-orange-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Track Surface</div>
+                            <div id="detail-track-surface" class="text-lg font-mono text-yellow-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Surface Material</div>
+                            <div id="detail-surface-material" class="text-lg font-mono text-emerald-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Off-Track Incidents</div>
+                            <div id="detail-off-track" class="text-lg font-mono text-red-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Laps This Stint</div>
+                            <div id="detail-stint-laps" class="text-lg font-mono text-cyan-400">--</div>
+                        </div>
+                        <div class="bg-neutral-700 rounded p-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Last Pit Duration</div>
+                            <div id="detail-pit-duration" class="text-lg font-mono text-orange-400">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+            </div>
+            <!-- END RIGHT COLUMN -->
+            
+        </div>
+        <!-- END TWO COLUMN LAYOUT -->
     </div>
     
     <!-- Strategy Load Modal -->
