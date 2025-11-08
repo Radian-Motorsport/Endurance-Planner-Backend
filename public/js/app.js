@@ -2912,29 +2912,32 @@ class RadianPlannerApp {
                     // Extract stint data from row cells
                     const cells = row.querySelectorAll('td');
                     if (cells.length >= 8) {
-                        const timeOfDayStartAttr = row.getAttribute('data-timeofday-start');
-                        const timeOfDayEndAttr = row.getAttribute('data-timeofday-end');
+                        const startTimeText = cells[1].textContent.trim();
+                        const endTimeText = cells[2].textContent.trim();
                         
-                        console.log(`Stint ${index + 1} attributes:`, {
-                            timeOfDayStartAttr,
-                            timeOfDayEndAttr,
-                            timeOfDayStartParsed: parseInt(timeOfDayStartAttr),
-                            timeOfDayEndParsed: parseInt(timeOfDayEndAttr)
-                        });
+                        // Parse time strings (HH:MM or HH:MM:SS) to seconds
+                        const parseTimeToSeconds = (timeStr) => {
+                            const parts = timeStr.split(':');
+                            const hours = parseInt(parts[0]) || 0;
+                            const minutes = parseInt(parts[1]) || 0;
+                            const seconds = parseInt(parts[2]) || 0;
+                            return (hours * 3600) + (minutes * 60) + seconds;
+                        };
+                        
+                        const timeOfDayStart = parseTimeToSeconds(startTimeText);
+                        const timeOfDayEnd = parseTimeToSeconds(endTimeText);
                         
                         stints.push({
                             stintNumber: index + 1,
                             driver: driverSelect?.value || 'Unassigned',
                             backup: backupSelect?.value || null,
-                            startTime: cells[1].textContent.trim(),
-                            endTime: cells[2].textContent.trim(),
+                            startTime: startTimeText,
+                            endTime: endTimeText,
                             startLap: parseInt(cells[3].textContent.trim()),
                             endLap: parseInt(cells[4].textContent.trim()),
                             laps: parseFloat(cells[5].textContent.trim()),
-                            elapsedStart: parseInt(row.getAttribute('data-elapsed-start')) || null,
-                            elapsedEnd: parseInt(row.getAttribute('data-elapsed-end')) || null,
-                            timeOfDayStart: parseInt(timeOfDayStartAttr) || null,
-                            timeOfDayEnd: parseInt(timeOfDayEndAttr) || null
+                            timeOfDayStart: timeOfDayStart,
+                            timeOfDayEnd: timeOfDayEnd
                         });
                     }
                 });
@@ -2969,8 +2972,6 @@ class RadianPlannerApp {
                     raceDurationSeconds: this.strategyCalculator.raceDurationSeconds,
                     lapsPerStint: this.strategyCalculator.lapsPerStint,
                     pitStopTime: this.strategyCalculator.pitStopTime,
-                    isLocalTimeMode: this.strategyCalculator.isLocalTimeMode,
-                    selectedDriverForLocalTime: this.strategyCalculator.selectedDriverForLocalTime,
                     driverColorMap: this.strategyCalculator.driverColorMap
                 } : null,
 
@@ -3502,23 +3503,7 @@ class RadianPlannerApp {
                 });
             }
 
-            // Restore time mode toggle state
-            if (strategyData.strategyState && strategyData.strategyState.isLocalTimeMode) {
-                const toggleSwitch = document.querySelector('.toggle-switch');
-                if (toggleSwitch && !toggleSwitch.classList.contains('active')) {
-                    toggleSwitch.click(); // Toggle to local time mode
-                    console.log('✅ Restored local time mode');
-                }
 
-                // Restore selected driver for local time if present
-                if (strategyData.strategyState.selectedDriverForLocalTime) {
-                    const dropdown = document.getElementById('driver-timezone-dropdown');
-                    if (dropdown) {
-                        dropdown.value = strategyData.strategyState.selectedDriverForLocalTime.name;
-                        console.log(`✅ Restored driver timezone selection: ${strategyData.strategyState.selectedDriverForLocalTime.name}`);
-                    }
-                }
-            }
 
             // ✅ CRITICAL FIX: Update weather component drivers chart after restoring assignments
             if (this.strategyCalculator && this.strategyCalculator.weatherComponent) {

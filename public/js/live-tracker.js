@@ -2499,6 +2499,15 @@ class LiveStrategyTracker {
         return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
     
+    parseTimeToSeconds(timeString) {
+        // Parse "HH:MM" or "HH:MM:SS" to seconds since midnight
+        const parts = timeString.split(':');
+        const hours = parseInt(parts[0]) || 0;
+        const minutes = parseInt(parts[1]) || 0;
+        const seconds = parseInt(parts[2]) || 0;
+        return (hours * 3600) + (minutes * 60) + seconds;
+    }
+    
     updateLiveStats() {
         // Session time - just display remaining time directly
         this.elements.sessionTime.textContent = this.formatTime(this.sessionTimeRemain);
@@ -2887,7 +2896,18 @@ class LiveStrategyTracker {
         console.log('✅ Strategy loaded:', strategy);
         console.log('STINTS:', strategy.stints);
         console.log('📥 Strategy stints present?', strategy.stints ? 'YES' : 'NO');
+        
+        // Parse time strings to seconds for stint comparison
         if (strategy.stints && strategy.stints.length > 0) {
+            strategy.stints.forEach(stint => {
+                if (stint.startTime && !stint.timeOfDayStart) {
+                    stint.timeOfDayStart = this.parseTimeToSeconds(stint.startTime);
+                }
+                if (stint.endTime && !stint.timeOfDayEnd) {
+                    stint.timeOfDayEnd = this.parseTimeToSeconds(stint.endTime);
+                }
+            });
+            
             console.log('📊 First stint data:', strategy.stints[0]);
             console.log('  - stintNumber:', strategy.stints[0].stintNumber);
             console.log('  - driver:', strategy.stints[0].driver);
