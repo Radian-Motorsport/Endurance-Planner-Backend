@@ -2097,6 +2097,12 @@ class LiveStrategyTracker {
         // Use CarIdx array for player's last lap time
         this.lastLapTime = values.CarIdxLastLapTime?.[this.playerCarIdx] || 0;
         
+        // Initialize stintStartLap on first telemetry update (if still at default 0)
+        if (this.stintStartLap === 0 && this.currentLap > 0) {
+            this.stintStartLap = this.currentLap;
+            console.log(`🏁 Initialized stintStartLap to ${this.currentLap}`);
+        }
+        
         // Detect pit road transitions
         const isOnPitRoad = values.OnPitRoad || false;
         
