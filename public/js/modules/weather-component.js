@@ -20,6 +20,7 @@ export class WeatherComponent {
         this.container = null;
         this.weatherData = null;
         this.stintData = null;
+        this.currentRaceTime = null; // Seconds since race start
         
         this.init();
     }
@@ -266,6 +267,19 @@ export class WeatherComponent {
         const raceStartIndex = forecast.findIndex((item, index) => 
             item.affects_session && (index === 0 || !forecast[index-1].affects_session)
         );
+        
+        // Calculate current time index based on race time
+        let currentTimeIndex = -1;
+        if (this.currentRaceTime !== null && raceStartIndex >= 0) {
+            // Each forecast item represents 10 minutes (600 seconds)
+            const indexOffset = Math.floor(this.currentRaceTime / 600);
+            currentTimeIndex = raceStartIndex + indexOffset;
+            
+            // Ensure index is within bounds
+            if (currentTimeIndex >= forecast.length) {
+                currentTimeIndex = forecast.length - 1;
+            }
+        }
 
         const option = {
             grid: { left: '60px', right: '60px', top: '60px', bottom: '60px' },
@@ -308,16 +322,27 @@ export class WeatherComponent {
                     itemStyle: { color: '#fbbf24' },
                     smooth: true,
                     symbol: 'none',
-                    markLine: raceStartIndex >= 0 ? {
+                    markLine: {
                         silent: true,
                         symbol: 'none',
-                        data: [{
-                            xAxis: raceStartIndex,
-                            lineStyle: { color: '#22c55e', width: 2, type: 'solid' },
-                            label: { show: false },
-                            symbol: 'none'
-                        }]
-                    } : undefined
+                        animation: true,
+                        animationDuration: 1000,
+                        animationEasing: 'cubicOut',
+                        data: [
+                            ...(raceStartIndex >= 0 ? [{
+                                xAxis: raceStartIndex,
+                                lineStyle: { color: '#22c55e', width: 2, type: 'solid' },
+                                label: { show: false },
+                                symbol: 'none'
+                            }] : []),
+                            ...(currentTimeIndex >= 0 ? [{
+                                xAxis: currentTimeIndex,
+                                lineStyle: { color: '#ef4444', width: 2, type: 'solid' },
+                                label: { show: false },
+                                symbol: 'none'
+                            }] : [])
+                        ]
+                    }
                 },
                 {
                     name: 'Humidity (%)',
@@ -379,6 +404,16 @@ export class WeatherComponent {
         const raceStartIndex = forecast.findIndex((item, index) => 
             item.affects_session && (index === 0 || !forecast[index-1].affects_session)
         );
+        
+        // Calculate current time index based on race time
+        let currentTimeIndex = -1;
+        if (this.currentRaceTime !== null && raceStartIndex >= 0) {
+            const indexOffset = Math.floor(this.currentRaceTime / 600);
+            currentTimeIndex = raceStartIndex + indexOffset;
+            if (currentTimeIndex >= forecast.length) {
+                currentTimeIndex = forecast.length - 1;
+            }
+        }
 
         const option = {
             grid: { left: '60px', right: '60px', top: '60px', bottom: '60px' },
@@ -423,16 +458,27 @@ export class WeatherComponent {
                     itemStyle: { color: '#1c76fcff' },
                     smooth: true, 
                     symbol: 'none',
-                    markLine: raceStartIndex >= 0 ? {
+                    markLine: {
                         silent: true,
                         symbol: 'none',
-                        data: [{
-                            xAxis: raceStartIndex,
-                            lineStyle: { color: '#22c55e', width: 2, type: 'solid' },
-                            label: { show: false },
-                            symbol: 'none'
-                        }]
-                    } : undefined
+                        animation: true,
+                        animationDuration: 1000,
+                        animationEasing: 'cubicOut',
+                        data: [
+                            ...(raceStartIndex >= 0 ? [{
+                                xAxis: raceStartIndex,
+                                lineStyle: { color: '#22c55e', width: 2, type: 'solid' },
+                                label: { show: false },
+                                symbol: 'none'
+                            }] : []),
+                            ...(currentTimeIndex >= 0 ? [{
+                                xAxis: currentTimeIndex,
+                                lineStyle: { color: '#ef4444', width: 2, type: 'solid' },
+                                label: { show: false },
+                                symbol: 'none'
+                            }] : [])
+                        ]
+                    }
                 },
                 {
                     name: 'Precipitation Chance (%)', 
@@ -926,6 +972,16 @@ export class WeatherComponent {
                 hasWeatherData: !!this.weatherData,
                 hasEcharts: typeof echarts !== 'undefined'
             });
+        }
+    }
+    
+    setCurrentRaceTime(raceTimeSeconds) {
+        this.currentRaceTime = raceTimeSeconds;
+        
+        // Re-render charts to update the current time marker
+        if (this.weatherData && typeof echarts !== 'undefined') {
+            this.renderTemperatureChart();
+            this.renderCloudsChart();
         }
     }
     

@@ -158,6 +158,9 @@ class LiveStrategyTracker {
         // Stint calculation flag
         this.hasCalculatedStints = false; // Track if stints have been calculated with live session time
         
+        // Weather component
+        this.weatherComponent = null;
+        
         // Time mode (Auto = live telemetry, Manual = user countdown)
         this.timeMode = 'auto';  // 'auto' or 'manual'
         this.manualTimerInterval = null;
@@ -410,6 +413,25 @@ class LiveStrategyTracker {
                 } else {
                     weatherDetails.classList.add('hidden');
                     toggleWeatherBtn.textContent = 'Show Weather ▼';
+                }
+            });
+        }
+        
+        // Predicted Weather toggle
+        const togglePredictedWeatherBtn = document.getElementById('toggle-predicted-weather');
+        const predictedWeatherDetails = document.getElementById('predicted-weather-details');
+        if (togglePredictedWeatherBtn && predictedWeatherDetails) {
+            togglePredictedWeatherBtn.addEventListener('click', () => {
+                if (predictedWeatherDetails.classList.contains('hidden')) {
+                    predictedWeatherDetails.classList.remove('hidden');
+                    togglePredictedWeatherBtn.textContent = 'Hide Prediction ▲';
+                    // Load weather component if not already loaded
+                    if (!this.weatherComponent && this.strategy) {
+                        this.loadWeatherComponent();
+                    }
+                } else {
+                    predictedWeatherDetails.classList.add('hidden');
+                    togglePredictedWeatherBtn.textContent = 'Show Prediction ▼';
                 }
             });
         }
@@ -2287,6 +2309,9 @@ class LiveStrategyTracker {
             this.hasCalculatedStints = true;
         }
         
+        // Update weather component with current race time
+        this.updateWeatherComponentRaceTime();
+        
         // Update remaining stats - use CarIdx arrays for player data
         this.currentLap = values.CarIdxLap?.[this.playerCarIdx] || 0;
         this.fuelLevel = values.FuelLevel || 0;
@@ -2481,16 +2506,29 @@ class LiveStrategyTracker {
     }
     
     updateSessionTimeDisplay() {
-        // Update session time display
+        // Update session time display (main in Current Session box)
         this.elements.sessionTime.textContent = this.formatTime(this.sessionTimeRemain);
         
-        // Update time of day display if available
+        // Update header session time display (top bar)
+        const headerSessionTime = document.getElementById('header-session-time');
+        if (headerSessionTime) {
+            headerSessionTime.textContent = this.formatTime(this.sessionTimeRemain);
+        }
+        
+        // Update time of day display if available (both locations)
         const timeOfDayEl = document.getElementById('time-of-day');
-        if (timeOfDayEl && this.sessionTimeOfDay != null) {
+        const headerTimeOfDay = document.getElementById('header-time-of-day');
+        
+        if (this.sessionTimeOfDay != null) {
             const timeOfDayStr = this.formatTimeOfDay(this.sessionTimeOfDay);
-            timeOfDayEl.textContent = `Race Time: ${timeOfDayStr}`;
-        } else if (timeOfDayEl) {
-            timeOfDayEl.textContent = '--:--';
+            const displayText = `Race Time: ${timeOfDayStr}`;
+            const headerDisplayText = `(${timeOfDayStr})`;
+            
+            if (timeOfDayEl) timeOfDayEl.textContent = displayText;
+            if (headerTimeOfDay) headerTimeOfDay.textContent = headerDisplayText;
+        } else {
+            if (timeOfDayEl) timeOfDayEl.textContent = '--:--';
+            if (headerTimeOfDay) headerTimeOfDay.textContent = '(--:--)';
         }
     }
     
@@ -2954,6 +2992,51 @@ class LiveStrategyTracker {
         // Don't populate stint table yet - wait for telemetry to get actual session time
         // The table will be populated when handleTelemetryUpdate receives SessionTimeRemain
         debug('⏳ Waiting for telemetry data to calculate stints based on actual session time...');
+    }
+    
+    async loadWeatherComponent() {
+        if (!this.strategy || !this.strategy.selectedEvent) {
+            debugWarn('⚠️ Cannot load weather - no event data');
+            return;
+        }
+        
+        try {
+            // Check if WeatherComponent is available
+            if (typeof window.WeatherComponent === 'undefined') {
+                debugError('❌ WeatherComponent not loaded');
+                return;
+            }
+            
+            debug('🌦️ Loading weather component...');
+            
+            // Initialize weather component
+            this.weatherComponent = new window.WeatherComponent('weather-content');
+            
+            // Load weather data from event
+            const weatherUrl = this.strategy.selectedEvent.weather_url;
+            if (weatherUrl) {
+                await this.weatherComponent.loadWeatherData(weatherUrl);
+                debug('✅ Weather component loaded successfully');
+                
+                // Update with current race time if available
+                this.updateWeatherComponentRaceTime();
+            } else {
+                debugWarn('⚠️ No weather URL found for this event');
+            }
+        } catch (error) {
+            debugError('❌ Failed to load weather component:', error);
+        }
+    }
+    
+    updateWeatherComponentRaceTime() {
+        if (!this.weatherComponent || !this.sessionTotalTime) return;
+        
+        // Calculate elapsed race time: Total Duration - Time Remaining
+        const elapsedTime = this.sessionTotalTime - this.sessionTimeRemain;
+        
+        if (elapsedTime >= 0) {
+            this.weatherComponent.setCurrentRaceTime(elapsedTime);
+        }
     }
     
     calculateStintsForRemainingTime() {
