@@ -270,8 +270,6 @@ export class WeatherComponent {
         
         // Calculate current time index based on race time
         let currentTimeIndex = -1;
-        console.log('🔴 Checking race time - currentRaceTime:', this.currentRaceTime, 'raceStartIndex:', raceStartIndex);
-        
         if (this.currentRaceTime !== null && raceStartIndex >= 0) {
             // Each forecast item represents 10 minutes (600 seconds)
             const indexOffset = Math.floor(this.currentRaceTime / 600);
@@ -281,11 +279,6 @@ export class WeatherComponent {
             if (currentTimeIndex >= forecast.length) {
                 currentTimeIndex = forecast.length - 1;
             }
-            
-            console.log('🔴 Temperature Chart - Race time:', this.currentRaceTime, 
-                       'Start index:', raceStartIndex, 
-                       'Offset:', indexOffset, 
-                       'Current index:', currentTimeIndex);
         }
 
         const option = {
@@ -983,19 +976,72 @@ export class WeatherComponent {
     }
     
     setCurrentRaceTime(raceTimeSeconds) {
-        console.log('🔴 WeatherComponent.setCurrentRaceTime() called with:', raceTimeSeconds);
-        console.log('🔴 Before: this.currentRaceTime =', this.currentRaceTime);
         this.currentRaceTime = raceTimeSeconds;
-        console.log('🔴 After: this.currentRaceTime =', this.currentRaceTime);
         
-        // Re-render charts to update the current time marker
-        if (this.weatherData && typeof echarts !== 'undefined') {
-            console.log('🔴 Re-rendering charts with new race time...');
-            this.renderTemperatureChart();
-            this.renderCloudsChart();
-        } else {
-            console.log('🔴 Cannot render - weatherData:', !!this.weatherData, 'echarts:', typeof echarts);
+        // Update just the red line without full re-render
+        if (this.temperatureChart && this.cloudsChart && this.weatherData) {
+            this.updateRedLine();
         }
+    }
+    
+    updateRedLine() {
+        const forecast = this.weatherData.weather_info.forecast_options;
+        
+        // Find race start index
+        const raceStartIndex = forecast.findIndex((item, index) => 
+            item.affects_session && (index === 0 || !forecast[index-1].affects_session)
+        );
+        
+        // Calculate current position
+        let currentTimeIndex = -1;
+        if (this.currentRaceTime !== null && raceStartIndex >= 0) {
+            const indexOffset = Math.floor(this.currentRaceTime / 600);
+            currentTimeIndex = raceStartIndex + indexOffset;
+            
+            if (currentTimeIndex >= forecast.length) {
+                currentTimeIndex = forecast.length - 1;
+            }
+        }
+        
+        // Update markLine data for both charts
+        const markLineData = [
+            ...(raceStartIndex >= 0 ? [{
+                xAxis: raceStartIndex,
+                lineStyle: { color: '#22c55e', width: 2, type: 'solid' },
+                label: { show: false },
+                symbol: 'none'
+            }] : []),
+            ...(currentTimeIndex >= 0 ? [{
+                xAxis: currentTimeIndex,
+                lineStyle: { color: '#ef4444', width: 2, type: 'solid' },
+                label: { show: false },
+                symbol: 'none'
+            }] : [])
+        ];
+        
+        // Update temperature chart
+        this.temperatureChart.setOption({
+            series: [{
+                markLine: {
+                    silent: true,
+                    symbol: 'none',
+                    animation: false,
+                    data: markLineData
+                }
+            }]
+        }, { replaceMerge: ['series'] });
+        
+        // Update clouds chart
+        this.cloudsChart.setOption({
+            series: [{
+                markLine: {
+                    silent: true,
+                    symbol: 'none',
+                    animation: false,
+                    data: markLineData
+                }
+            }]
+        }, { replaceMerge: ['series'] });
     }
     
     resize() {

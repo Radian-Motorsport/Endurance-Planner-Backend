@@ -131,6 +131,7 @@ class LiveStrategyTracker {
         this.lastSessionTimeRemain = null;  // Track last valid time to detect out-of-order packets
         this.sessionTimeOfDay = null;  // Time of day at session start (seconds since midnight)
         this.sessionTotalTime = null;  // Total session duration in seconds
+        this.lastWeatherUpdateTime = null;  // Track last weather update to avoid excessive redraws
         this.fuelLevel = 0;
         this.lastLapTime = 0;
         this.isConnected = false;
@@ -3073,8 +3074,12 @@ class LiveStrategyTracker {
         // Calculate elapsed time into the race (not into the 24h session)
         const elapsedTime = raceDuration - this.sessionTimeRemain;
         
-        if (elapsedTime >= 0 && elapsedTime <= raceDuration) {
-            this.weatherComponent.setCurrentRaceTime(elapsedTime);
+        // Only update if time changed significantly (avoid redrawing 50 times/sec)
+        if (!this.lastWeatherUpdateTime || Math.abs(elapsedTime - this.lastWeatherUpdateTime) > 1) {
+            this.lastWeatherUpdateTime = elapsedTime;
+            if (elapsedTime >= 0 && elapsedTime <= raceDuration) {
+                this.weatherComponent.setCurrentRaceTime(elapsedTime);
+            }
         }
     }
     
