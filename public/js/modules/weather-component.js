@@ -279,7 +279,7 @@ export class WeatherComponent {
         // Calculate current time index based on race time
         let currentTimeIndex = -1;
         if (this.currentRaceTime !== null && raceStartIndex >= 0) {
-            const indexOffset = Math.floor(this.currentRaceTime / intervalSeconds);
+            const indexOffset = Math.round(this.currentRaceTime / intervalSeconds);
             currentTimeIndex = raceStartIndex + indexOffset;
             
             // Ensure index is within bounds
@@ -423,7 +423,7 @@ export class WeatherComponent {
         // Calculate current time index based on race time
         let currentTimeIndex = -1;
         if (this.currentRaceTime !== null && raceStartIndex >= 0) {
-            const indexOffset = Math.floor(this.currentRaceTime / intervalSeconds);
+            const indexOffset = Math.round(this.currentRaceTime / intervalSeconds);
             currentTimeIndex = raceStartIndex + indexOffset;
             if (currentTimeIndex >= forecast.length) {
                 currentTimeIndex = forecast.length - 1;
@@ -1018,7 +1018,7 @@ export class WeatherComponent {
         // Calculate current position based on race time
         let currentTimeIndex = -1;
         if (this.currentRaceTime !== null && raceStartIndex >= 0) {
-            const indexOffset = Math.floor(this.currentRaceTime / intervalSeconds);
+            const indexOffset = Math.round(this.currentRaceTime / intervalSeconds);
             currentTimeIndex = raceStartIndex + indexOffset;
             
             if (currentTimeIndex >= forecast.length) {
