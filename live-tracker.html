@@ -120,6 +120,20 @@
             </div>
         </div>
         
+        <!-- Fuel Trace Recorder - SPANS FULL WIDTH -->
+        <div class="bg-neutral-800 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div id="fuel-recorder-status-indicator" class="w-3 h-3 rounded-full bg-neutral-500"></div>
+                    <span class="text-sm font-semibold">Ideal Fuel Lap Recorder</span>
+                    <span id="fuel-recorder-status-text" class="text-xs text-neutral-400">Ready to record</span>
+                </div>
+                <button id="fuel-recorder-button" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded text-sm transition">
+                    ⏺ Record Ideal Lap
+                </button>
+            </div>
+        </div>
+        
         <!-- Session Info Display - SPANS FULL WIDTH -->
         <div class="bg-neutral-800 rounded-lg p-4 mb-6">
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -719,11 +733,13 @@
         import { TrackMapComponent } from '/public/js/modules/track-map.js';
         import { CarPositionTracker } from '/public/js/modules/car-position-tracker.js';
         import { WeatherComponent } from '/public/js/modules/weather-component.js';
+        import { FuelTraceRecorder } from '/public/js/modules/fuel-trace-recorder.js';
         
         // Make available globally for live-tracker.js
         window.TrackMapComponent = TrackMapComponent;
         window.CarPositionTracker = CarPositionTracker;
         window.WeatherComponent = WeatherComponent;
+        window.FuelTraceRecorder = FuelTraceRecorder;
     </script>
     
     <script src="/public/js/envirotrace.js"></script>

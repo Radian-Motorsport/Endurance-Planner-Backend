@@ -221,6 +221,9 @@ class LiveStrategyTracker {
         // Lap progress multi-car display
         this.showAllCarsOnProgress = false;
         
+        // Fuel trace recorder
+        this.fuelRecorder = null;
+        
         this.elements = {};
         this.initializeElements();
         this.setupEventListeners();
@@ -484,6 +487,9 @@ class LiveStrategyTracker {
             
             // Initialize weather trace visualization
             this.initializeWeatherTrace();
+            
+            // Initialize fuel trace recorder
+            this.initializeFuelRecorder();
         });
         
         this.socket.on('disconnect', () => {
@@ -552,6 +558,22 @@ class LiveStrategyTracker {
                 debug('✅ Weather trace initialized');
             } catch (error) {
                 debugError('❌ Failed to initialize weather trace:', error);
+            }
+        }
+    }
+    
+    initializeFuelRecorder() {
+        if (!this.fuelRecorder && this.socket && window.FuelTraceRecorder) {
+            try {
+                this.fuelRecorder = new window.FuelTraceRecorder(this.socket, this.sessionInfo);
+                this.fuelRecorder.initUI(
+                    'fuel-recorder-button',
+                    'fuel-recorder-status-indicator',
+                    'fuel-recorder-status-text'
+                );
+                debug('✅ Fuel recorder initialized');
+            } catch (error) {
+                debugError('❌ Failed to initialize fuel recorder:', error);
             }
         }
     }
@@ -1215,6 +1237,11 @@ class LiveStrategyTracker {
 
     handleSessionInfo(sessionData) {
         this.sessionInfo = sessionData;
+        
+        // Update fuel recorder with session info
+        if (this.fuelRecorder) {
+            this.fuelRecorder.updateSessionInfo(sessionData);
+        }
         
         // Capture SessionTimeOfDay (seconds since midnight) - it's at the top level
         if (sessionData?.SessionTimeOfDay != null) {

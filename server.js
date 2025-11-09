@@ -182,6 +182,30 @@ async function createTables() {
             );
         `;
         
+        const createIdealFuelLapsTable = `
+            CREATE TABLE IF NOT EXISTS ideal_fuel_laps (
+                id SERIAL PRIMARY KEY,
+                track_id INTEGER NOT NULL,
+                car_name VARCHAR(255) NOT NULL,
+                fuel_level JSONB NOT NULL,
+                fuel_use_per_hour JSONB,
+                speed JSONB,
+                throttle JSONB,
+                lap_time FLOAT,
+                fuel_kg_per_ltr FLOAT,
+                tank_capacity FLOAT,
+                track_temp FLOAT,
+                air_temp FLOAT,
+                wind_velocity FLOAT,
+                wind_direction FLOAT,
+                humidity FLOAT,
+                skies INTEGER,
+                recorded_at TIMESTAMP DEFAULT NOW(),
+                notes TEXT,
+                UNIQUE(track_id, car_name)
+            );
+        `;
+        
         await pool.query(createDriversTable);
         await pool.query(createCarsTable);
         await pool.query(createCarClassesTable);
@@ -190,6 +214,7 @@ async function createTables() {
         await pool.query(createSeriesTable);
         await pool.query(createEventsTable);
         await pool.query(createSessionsTable);
+        await pool.query(createIdealFuelLapsTable);
         console.log('Database tables created/verified successfully.');
     } catch (err) {
         console.error('Error creating database tables:', err);
@@ -1454,6 +1479,173 @@ app.post('/api/drivers/add', async (req, res) => {
         console.error('Failed to add driver:', error.message);
         res.status(500).json({
             error: 'Failed to add driver',
+            message: error.message
+        });
+    }
+});
+
+// ========================================
+// IDEAL FUEL LAP API ENDPOINTS
+// ========================================
+
+// Save ideal fuel lap
+app.post('/api/ideal-fuel-lap', async (req, res) => {
+    try {
+        if (!pool) {
+            return res.status(500).json({ error: 'Database not available' });
+        }
+
+        const { trackId, carName, samples, metadata } = req.body;
+
+        // Validate input
+        if (!trackId || !carName || !samples || !Array.isArray(samples)) {
+            return res.status(400).json({ error: 'Missing required fields: trackId, carName, samples' });
+        }
+
+        if (samples.length < 50) {
+            return res.status(400).json({ error: 'Insufficient samples (need at least 50)' });
+        }
+
+        console.log(`💾 Saving ideal fuel lap: Track ${trackId}, Car ${carName}, ${samples.length} samples`);
+
+        // Extract separate arrays for each telemetry field
+        const fuelLevel = samples.map(s => s.fuelLevel);
+        const fuelUsePerHour = samples.map(s => s.fuelUsePerHour);
+        const speed = samples.map(s => s.speed);
+        const throttle = samples.map(s => s.throttle);
+
+        // UPSERT query (insert or update if track+car already exists)
+        const query = `
+            INSERT INTO ideal_fuel_laps (
+                track_id, car_name,
+                fuel_level, fuel_use_per_hour, speed, throttle,
+                lap_time, fuel_kg_per_ltr, tank_capacity,
+                track_temp, air_temp, wind_velocity, wind_direction,
+                humidity, skies
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+            )
+            ON CONFLICT (track_id, car_name)
+            DO UPDATE SET
+                fuel_level = EXCLUDED.fuel_level,
+                fuel_use_per_hour = EXCLUDED.fuel_use_per_hour,
+                speed = EXCLUDED.speed,
+                throttle = EXCLUDED.throttle,
+                lap_time = EXCLUDED.lap_time,
+                fuel_kg_per_ltr = EXCLUDED.fuel_kg_per_ltr,
+                tank_capacity = EXCLUDED.tank_capacity,
+                track_temp = EXCLUDED.track_temp,
+                air_temp = EXCLUDED.air_temp,
+                wind_velocity = EXCLUDED.wind_velocity,
+                wind_direction = EXCLUDED.wind_direction,
+                humidity = EXCLUDED.humidity,
+                skies = EXCLUDED.skies,
+                recorded_at = NOW()
+            RETURNING id;
+        `;
+
+        const result = await pool.query(query, [
+            trackId,
+            carName,
+            JSON.stringify(fuelLevel),
+            JSON.stringify(fuelUsePerHour),
+            JSON.stringify(speed),
+            JSON.stringify(throttle),
+            metadata?.lapTime || null,
+            metadata?.fuelKgPerLtr || null,
+            metadata?.tankCapacity || null,
+            metadata?.trackTemp || null,
+            metadata?.airTemp || null,
+            metadata?.windVel || null,
+            metadata?.windDir || null,
+            metadata?.humidity || null,
+            metadata?.skies || null
+        ]);
+
+        console.log(`✅ Ideal fuel lap saved with ID: ${result.rows[0].id}`);
+
+        res.json({
+            message: 'Ideal fuel lap saved successfully',
+            id: result.rows[0].id,
+            trackId,
+            carName,
+            sampleCount: samples.length
+        });
+
+    } catch (error) {
+        console.error('Failed to save ideal fuel lap:', error);
+        res.status(500).json({
+            error: 'Failed to save ideal fuel lap',
+            message: error.message
+        });
+    }
+});
+
+// Get ideal fuel lap
+app.get('/api/ideal-fuel-lap/:trackId/:carName', async (req, res) => {
+    try {
+        if (!pool) {
+            return res.status(500).json({ error: 'Database not available' });
+        }
+
+        const { trackId, carName } = req.params;
+
+        console.log(`🔍 Fetching ideal fuel lap: Track ${trackId}, Car ${carName}`);
+
+        const query = `
+            SELECT * FROM ideal_fuel_laps
+            WHERE track_id = $1 AND car_name = $2
+            LIMIT 1;
+        `;
+
+        const result = await pool.query(query, [parseInt(trackId), carName]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'No ideal lap found for this track/car combination' });
+        }
+
+        const row = result.rows[0];
+
+        // Reconstruct samples array from separate JSONB columns
+        const fuelLevel = row.fuel_level;
+        const fuelUsePerHour = row.fuel_use_per_hour;
+        const speed = row.speed;
+        const throttle = row.throttle;
+
+        const samples = fuelLevel.map((fuel, i) => ({
+            pct: i,
+            fuelLevel: fuel,
+            fuelUsePerHour: fuelUsePerHour[i],
+            speed: speed[i],
+            throttle: throttle[i]
+        }));
+
+        const response = {
+            id: row.id,
+            trackId: row.track_id,
+            carName: row.car_name,
+            samples,
+            metadata: {
+                lapTime: row.lap_time,
+                fuelKgPerLtr: row.fuel_kg_per_ltr,
+                tankCapacity: row.tank_capacity,
+                trackTemp: row.track_temp,
+                airTemp: row.air_temp,
+                windVel: row.wind_velocity,
+                windDir: row.wind_direction,
+                humidity: row.humidity,
+                skies: row.skies,
+                recordedAt: row.recorded_at
+            }
+        };
+
+        console.log(`✅ Found ideal lap with ${samples.length} samples`);
+        res.json(response);
+
+    } catch (error) {
+        console.error('Failed to fetch ideal fuel lap:', error);
+        res.status(500).json({
+            error: 'Failed to fetch ideal fuel lap',
             message: error.message
         });
     }
