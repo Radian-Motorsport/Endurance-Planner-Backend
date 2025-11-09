@@ -45,7 +45,125 @@ export class FuelTraceRecorder {
             this.recordButton.addEventListener('click', () => this.toggleRecording());
         }
         
+        // Add view button handler
+        const viewButton = document.getElementById('fuel-recorder-view-button');
+        if (viewButton) {
+            viewButton.addEventListener('click', () => this.toggleDataDisplay());
+        }
+        
         this.updateUI('idle');
+    }
+    
+    /**
+     * Toggle stored data display
+     */
+    async toggleDataDisplay() {
+        const dataDisplay = document.getElementById('fuel-recorder-data-display');
+        if (!dataDisplay) return;
+        
+        if (dataDisplay.classList.contains('hidden')) {
+            // Show and load data
+            dataDisplay.classList.remove('hidden');
+            await this.loadAndDisplayStoredData();
+        } else {
+            // Hide
+            dataDisplay.classList.add('hidden');
+        }
+    }
+    
+    /**
+     * Load and display stored data for current session
+     */
+    async loadAndDisplayStoredData() {
+        if (!this.trackId || !this.carName) {
+            this.showDataMessage('⚠️ No session loaded yet');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/ideal-fuel-lap/${this.trackId}/${encodeURIComponent(this.carName)}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                this.displayStoredData(data);
+            } else if (response.status === 404) {
+                this.showDataMessage('📭 No ideal lap recorded for this track/car combination');
+            } else {
+                this.showDataMessage('❌ Error loading data');
+            }
+        } catch (err) {
+            console.error('Failed to load stored data:', err);
+            this.showDataMessage('❌ Network error');
+        }
+    }
+    
+    /**
+     * Display stored data in UI
+     */
+    displayStoredData(data) {
+        const el = (id) => document.getElementById(id);
+        
+        // Calculate fuel used
+        const fuelStart = data.samples[0]?.fuelLevel ?? 0;
+        const fuelEnd = data.samples[data.samples.length - 1]?.fuelLevel ?? 0;
+        const fuelUsed = (fuelStart - fuelEnd).toFixed(2);
+        
+        // Format lap time
+        const lapTime = data.metadata.lapTime ? this.formatTime(data.metadata.lapTime) : '--';
+        
+        // Format recorded date
+        const recordedDate = data.metadata.recordedAt ? 
+            new Date(data.metadata.recordedAt).toLocaleString() : '--';
+        
+        // Primary stats
+        if (el('stored-track-name')) el('stored-track-name').textContent = `Track ${data.trackId}`;
+        if (el('stored-car-name')) el('stored-car-name').textContent = data.carName;
+        if (el('stored-lap-time')) el('stored-lap-time').textContent = lapTime;
+        if (el('stored-fuel-used')) el('stored-fuel-used').textContent = `${fuelUsed} L`;
+        if (el('stored-track-temp')) el('stored-track-temp').textContent = 
+            data.metadata.trackTemp ? `${data.metadata.trackTemp.toFixed(1)}°C` : '--';
+        if (el('stored-sample-count')) el('stored-sample-count').textContent = data.samples.length;
+        
+        // Secondary stats
+        if (el('stored-air-temp')) el('stored-air-temp').textContent = 
+            data.metadata.airTemp ? `${data.metadata.airTemp.toFixed(1)}°C` : '--';
+        if (el('stored-wind')) el('stored-wind').textContent = 
+            data.metadata.windVel ? `${(data.metadata.windVel * 3.6).toFixed(1)} km/h` : '--';
+        if (el('stored-humidity')) el('stored-humidity').textContent = 
+            data.metadata.humidity ? `${(data.metadata.humidity * 100).toFixed(0)}%` : '--';
+        if (el('stored-tank-capacity')) el('stored-tank-capacity').textContent = 
+            data.metadata.tankCapacity ? `${data.metadata.tankCapacity.toFixed(1)} L` : '--';
+        if (el('stored-recorded-at')) el('stored-recorded-at').textContent = recordedDate;
+        
+        console.log('📊 Displayed stored data:', {
+            trackId: data.trackId,
+            carName: data.carName,
+            samples: data.samples.length,
+            fuelUsed: fuelUsed
+        });
+    }
+    
+    /**
+     * Show message in data display area
+     */
+    showDataMessage(message) {
+        const el = (id) => document.getElementById(id);
+        
+        if (el('stored-track-name')) el('stored-track-name').textContent = message;
+        if (el('stored-car-name')) el('stored-car-name').textContent = '--';
+        if (el('stored-lap-time')) el('stored-lap-time').textContent = '--';
+        if (el('stored-fuel-used')) el('stored-fuel-used').textContent = '--';
+        if (el('stored-track-temp')) el('stored-track-temp').textContent = '--';
+        if (el('stored-sample-count')) el('stored-sample-count').textContent = '--';
+    }
+    
+    /**
+     * Format seconds to MM:SS.mmm
+     */
+    formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = (seconds % 60).toFixed(3);
+        return `${mins}:${secs.padStart(6, '0')}`;
     }
     
     /**
@@ -243,6 +361,10 @@ export class FuelTraceRecorder {
             if (response.ok) {
                 const result = await response.json();
                 console.log('✅ Ideal lap saved:', result);
+                
+                // Verify by fetching back
+                await this.verifyStoredData(this.trackId, this.carName);
+                
                 if (this.statusText) {
                     this.statusText.textContent = `✅ Ideal lap saved (${this.samples.length} samples)`;
                 }
@@ -264,6 +386,39 @@ export class FuelTraceRecorder {
         setTimeout(() => {
             this.updateUI('idle');
         }, 5000);
+    }
+    
+    /**
+     * Verify stored data by fetching it back
+     */
+    async verifyStoredData(trackId, carName) {
+        try {
+            console.log(`🔍 Verifying stored data for Track ${trackId}, Car ${carName}...`);
+            
+            const response = await fetch(`/api/ideal-fuel-lap/${trackId}/${encodeURIComponent(carName)}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Data verification successful:', {
+                    id: data.id,
+                    trackId: data.trackId,
+                    carName: data.carName,
+                    sampleCount: data.samples.length,
+                    lapTime: data.metadata.lapTime,
+                    trackTemp: data.metadata.trackTemp,
+                    fuelRange: {
+                        start: data.samples[0].fuelLevel,
+                        end: data.samples[data.samples.length - 1].fuelLevel,
+                        used: (data.samples[0].fuelLevel - data.samples[data.samples.length - 1].fuelLevel).toFixed(2)
+                    },
+                    recordedAt: data.metadata.recordedAt
+                });
+            } else {
+                console.warn('⚠️ Could not verify data:', response.status);
+            }
+        } catch (err) {
+            console.warn('⚠️ Verification failed:', err.message);
+        }
     }
     
     /**
