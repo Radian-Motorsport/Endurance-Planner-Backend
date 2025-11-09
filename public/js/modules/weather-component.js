@@ -1000,6 +1000,9 @@ export class WeatherComponent {
     }
     
     updateRedLine() {
+        if (!this.weatherData || !this.weatherData.weather_info || !this.weatherData.weather_info.forecast_options) {
+            return;
+        }
         const forecast = this.weatherData.weather_info.forecast_options;
         
         // Find race start index
