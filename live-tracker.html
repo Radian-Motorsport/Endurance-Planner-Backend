@@ -377,7 +377,39 @@
         <!-- Fuel Consumption Comparison Chart -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
             <h2 class="text-xl road-rage-font mb-4">Fuel Consumption vs Ideal</h2>
-            <canvas id="fuel-comparison-canvas" width="800" height="300" class="w-full bg-neutral-900 rounded"></canvas>
+            <canvas id="fuel-comparison-canvas" width="800" height="250" class="w-full bg-neutral-900 rounded mb-4"></canvas>
+            
+            <!-- Fuel Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                <div class="bg-neutral-700 rounded p-3">
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Remaining</div>
+                    <div id="fuel-ideal-remaining" class="text-lg font-mono text-green-400">--</div>
+                </div>
+                <div class="bg-neutral-700 rounded p-3">
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Actual Remaining</div>
+                    <div id="fuel-actual-remaining" class="text-lg font-mono text-cyan-400">--</div>
+                </div>
+                <div class="bg-neutral-700 rounded p-3">
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Delta</div>
+                    <div id="fuel-delta" class="text-lg font-mono text-white">--</div>
+                </div>
+                <div class="bg-neutral-700 rounded p-3">
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Level</div>
+                    <div id="fuel-live-level" class="text-lg font-mono text-yellow-400">--</div>
+                </div>
+                <div class="bg-neutral-700 rounded p-3">
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Rate</div>
+                    <div id="fuel-live-rate" class="text-lg font-mono text-orange-400">--</div>
+                </div>
+                <div class="bg-neutral-700 rounded p-3">
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Pressure</div>
+                    <div id="fuel-live-pressure" class="text-lg font-mono text-purple-400">--</div>
+                </div>
+                <div class="bg-neutral-700 rounded p-3">
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Lap Progress</div>
+                    <div id="fuel-lap-progress" class="text-lg font-mono text-pink-400">--</div>
+                </div>
+            </div>
         </div>
         
         <!-- Strategy vs Actual Comparison -->

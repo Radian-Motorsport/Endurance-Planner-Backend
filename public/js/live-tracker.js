@@ -690,6 +690,25 @@ class LiveStrategyTracker {
         this.updateCarPosition(values);
     }
     
+    updateLiveFuelStats(values) {
+        const el = (id) => document.getElementById(id);
+        
+        // Fuel level
+        if (el('fuel-live-level') && values.FuelLevel != null) {
+            el('fuel-live-level').textContent = values.FuelLevel.toFixed(2) + ' L';
+        }
+        
+        // Fuel use rate (kg/h)
+        if (el('fuel-live-rate') && values.FuelUsePerHour != null) {
+            el('fuel-live-rate').textContent = values.FuelUsePerHour.toFixed(1) + ' kg/h';
+        }
+        
+        // Fuel pressure
+        if (el('fuel-live-pressure') && values.FuelPress != null) {
+            el('fuel-live-pressure').textContent = values.FuelPress.toFixed(1) + ' bar';
+        }
+    }
+    
     async loadTrackMap(sessionDetails) {
         if (!window.TrackMapComponent || !window.CarPositionTracker) {
             debugWarn('⚠️ Track map components not loaded');
@@ -2374,6 +2393,9 @@ class LiveStrategyTracker {
                 this.fuelComparisonChart.updateLive(lapDistPct, fuelLevel);
             }
         }
+        
+        // Update live fuel stats display
+        this.updateLiveFuelStats(values);
         
         // Calculate stints on first telemetry update with actual session time
         if (!this.hasCalculatedStints && this.strategy && this.sessionTimeRemain > 0) {
