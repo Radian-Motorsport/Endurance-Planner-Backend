@@ -983,13 +983,18 @@ export class WeatherComponent {
     }
     
     setCurrentRaceTime(raceTimeSeconds) {
+        console.log('🔴 WeatherComponent.setCurrentRaceTime() called with:', raceTimeSeconds);
+        console.log('🔴 Before: this.currentRaceTime =', this.currentRaceTime);
         this.currentRaceTime = raceTimeSeconds;
-        console.log('🔴 WeatherComponent: Setting race time to:', raceTimeSeconds, 'seconds');
+        console.log('🔴 After: this.currentRaceTime =', this.currentRaceTime);
         
         // Re-render charts to update the current time marker
         if (this.weatherData && typeof echarts !== 'undefined') {
+            console.log('🔴 Re-rendering charts with new race time...');
             this.renderTemperatureChart();
             this.renderCloudsChart();
+        } else {
+            console.log('🔴 Cannot render - weatherData:', !!this.weatherData, 'echarts:', typeof echarts);
         }
     }
     

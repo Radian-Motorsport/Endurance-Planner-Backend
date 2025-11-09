@@ -3003,6 +3003,9 @@ class LiveStrategyTracker {
             debugWarn('⚠️ No selectedEvent found in strategy:', strategy);
         }
         
+        // Load weather component automatically
+        this.loadWeatherComponent();
+        
         // Don't populate stint table yet - wait for telemetry to get actual session time
         // The table will be populated when handleTelemetryUpdate receives SessionTimeRemain
         debug('⏳ Waiting for telemetry data to calculate stints based on actual session time...');
@@ -3054,28 +3057,17 @@ class LiveStrategyTracker {
     }
     
     updateWeatherComponentRaceTime() {
-        if (!this.weatherComponent) {
-            console.log('⚠️ No weather component loaded');
-            return;
-        }
+        if (!this.weatherComponent) return;
         
-        // Use sessionTotalTime if available, otherwise calculate from strategy
-        let totalDuration = this.sessionTotalTime;
-        if (!totalDuration && this.strategy && this.strategy.strategyState) {
-            totalDuration = this.strategy.strategyState.raceDurationSeconds;
-        }
+        // Get race duration from strategy
+        if (!this.strategy?.strategyState?.raceDurationSeconds) return;
         
-        if (!totalDuration) {
-            console.log('⚠️ Cannot update weather - no total race duration available');
-            return;
-        }
+        const raceDuration = this.strategy.strategyState.raceDurationSeconds;
         
-        // Calculate elapsed race time: Total Duration - Time Remaining
-        const elapsedTime = totalDuration - this.sessionTimeRemain;
+        // Calculate elapsed time into the race (not into the 24h session)
+        const elapsedTime = raceDuration - this.sessionTimeRemain;
         
-        console.log('🔴 Updating weather time - Total:', totalDuration, 'Remaining:', this.sessionTimeRemain, 'Elapsed:', elapsedTime);
-        
-        if (elapsedTime >= 0) {
+        if (elapsedTime >= 0 && elapsedTime <= raceDuration) {
             this.weatherComponent.setCurrentRaceTime(elapsedTime);
         }
     }
