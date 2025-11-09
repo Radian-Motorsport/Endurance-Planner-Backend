@@ -34,7 +34,10 @@ export class CarPositionTracker {
         // GTP classes: 4029, 4074 → Yellow
         // LMP class: 2523 → Blue
         // GT3 classes: 4046, 4091, 4090, 4083, 4072, 4011 → Pink/Magenta
-        // GT4 classes: 4088, 4084 → Green
+        // TCR classes: 4084, 4085 → Purple
+        // GT4 class: 4088 → Green
+        // M2 CS class: 4073 → Turquoise
+        // 992 Cup class: 3104 → Blue
         this.classColorMap = {
             // GTP
             4029: '#fff265ff',
@@ -48,9 +51,15 @@ export class CarPositionTracker {
             4083: '#fa59e7ff',
             4072: '#fa59e7ff',
             4011: '#fa59e7ff',
+            // TCR
+            4084: '#a855f7ff',
+            4085: '#a855f7ff',
             // GT4
             4088: '#35ff12ff',
-            4084: '#35ff12ff'
+            // M2 CS
+            4073: '#06b6d4ff',
+            // 992 Cup
+            3104: '#3b82f6ff'
         };
         
         this.defaultClassColor = '#9ca3af'; // Gray for unknown classes
