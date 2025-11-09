@@ -28,6 +28,16 @@ export class TrackMapComponent {
         this.svgContainer = null;
         this.controlsContainer = null;
         
+        // Zoom and pan state
+        this.zoom = 1;
+        this.panX = 0;
+        this.panY = 0;
+        this.isPanning = false;
+        this.startPanX = 0;
+        this.startPanY = 0;
+        this.svgElement = null;
+        this.viewBox = { x: 0, y: 0, width: 1000, height: 1000 };
+        
         this.init();
     }
     
@@ -207,6 +217,13 @@ export class TrackMapComponent {
         svgElement.setAttribute('height', '100%');
         svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
         svgElement.style.maxHeight = this.options.maxHeight;
+        svgElement.style.cursor = 'grab';
+        
+        this.svgElement = svgElement;
+        this.viewBox = { x: 0, y: 0, width: 1000, height: 1000 };
+        
+        // Add zoom and pan controls
+        this.setupZoomPanControls(svgElement);
         
         this.svgContainer.appendChild(svgElement);
         
@@ -474,6 +491,72 @@ export class TrackMapComponent {
         }
     }
     
+    setupZoomPanControls(svgElement) {
+        // Wheel zoom
+        svgElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            const newZoom = Math.max(1, Math.min(5, this.zoom * delta));
+            
+            if (newZoom !== this.zoom) {
+                this.zoom = newZoom;
+                this.updateViewBox();
+            }
+        });
+        
+        // Mouse pan
+        svgElement.addEventListener('mousedown', (e) => {
+            this.isPanning = true;
+            this.startPanX = e.clientX - this.panX;
+            this.startPanY = e.clientY - this.panY;
+            svgElement.style.cursor = 'grabbing';
+        });
+        
+        svgElement.addEventListener('mousemove', (e) => {
+            if (!this.isPanning) return;
+            
+            this.panX = e.clientX - this.startPanX;
+            this.panY = e.clientY - this.startPanY;
+            this.updateViewBox();
+        });
+        
+        svgElement.addEventListener('mouseup', () => {
+            this.isPanning = false;
+            svgElement.style.cursor = 'grab';
+        });
+        
+        svgElement.addEventListener('mouseleave', () => {
+            this.isPanning = false;
+            svgElement.style.cursor = 'grab';
+        });
+        
+        // Double-click to reset
+        svgElement.addEventListener('dblclick', () => {
+            this.zoom = 1;
+            this.panX = 0;
+            this.panY = 0;
+            this.updateViewBox();
+        });
+    }
+    
+    updateViewBox() {
+        if (!this.svgElement) return;
+        
+        const baseWidth = 1000;
+        const baseHeight = 1000;
+        
+        const width = baseWidth / this.zoom;
+        const height = baseHeight / this.zoom;
+        
+        // Convert pan from screen space to SVG space
+        const x = (baseWidth - width) / 2 - (this.panX / this.zoom);
+        const y = (baseHeight - height) / 2 - (this.panY / this.zoom);
+        
+        this.viewBox = { x, y, width, height };
+        this.svgElement.setAttribute('viewBox', `${x} ${y} ${width} ${height}`);
+    }
+    
     destroy() {
         const container = document.getElementById(this.containerId);
         if (container) {
@@ -482,6 +565,7 @@ export class TrackMapComponent {
         this.layers = {};
         this.svgContainer = null;
         this.controlsContainer = null;
+        this.svgElement = null;
     }
 }
 
