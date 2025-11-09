@@ -42,6 +42,13 @@ export class FuelComparisonChart {
         this.lapStartFuel = null;       // Fuel at lap start
         this.lastLapDistPct = 0;        // Track lap boundary
         
+        // Performance optimization
+        this.isVisible = false;         // Track visibility state
+        this.needsRedraw = false;       // Track if redraw is needed
+        this.animationFrameId = null;   // Store RAF ID for cancellation
+        this.lastRenderTime = 0;        // Timestamp of last render
+        this.renderInterval = 1000;     // Minimum ms between renders (1 second)
+        
         // Chart bounds
         this.chartArea = {
             x: this.options.paddingLeft,
@@ -50,8 +57,11 @@ export class FuelComparisonChart {
             height: this.canvas.height - this.options.paddingTop - this.options.paddingBottom
         };
         
-        // Start rendering
-        this.render();
+        // Setup visibility observer
+        this.setupVisibilityObserver();
+        
+        // Initial render
+        this.scheduleRender();
     }
     
     /**
@@ -70,12 +80,12 @@ export class FuelComparisonChart {
                 this.idealAdjustment = 0;
                 this.updateAdjustmentDisplay();
                 console.log(`✅ Ideal lap loaded: ${this.idealData.length} samples`);
-                this.render();
+                this.scheduleRender();
                 return true;
             } else if (response.status === 404) {
                 console.log('📭 No ideal lap found for this track/car');
                 this.idealData = null;
-                this.render();
+                this.scheduleRender();
                 return false;
             } else {
                 console.warn('⚠️ Failed to load ideal lap:', response.status);
@@ -118,6 +128,9 @@ export class FuelComparisonChart {
                 });
             }
         }
+        
+        // Trigger render only when visible
+        this.scheduleRender();
     }
     
     /**
@@ -141,10 +154,67 @@ export class FuelComparisonChart {
     }
     
     /**
+     * Setup visibility observer to pause rendering when hidden
+     */
+    setupVisibilityObserver() {
+        const container = document.getElementById('fuel-comparison-details');
+        if (!container) return;
+        
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    this.isVisible = !container.classList.contains('hidden');
+                    if (this.isVisible && this.needsRedraw) {
+                        this.scheduleRender();
+                    }
+                }
+            });
+        });
+        
+        observer.observe(container, { attributes: true });
+        this.isVisible = !container.classList.contains('hidden');
+    }
+    
+    /**
+     * Schedule a render (throttled to 1 per second)
+     */
+    scheduleRender() {
+        if (!this.isVisible) {
+            this.needsRedraw = true;
+            return;
+        }
+        
+        const now = Date.now();
+        const timeSinceLastRender = now - this.lastRenderTime;
+        
+        // If enough time has passed, render immediately
+        if (timeSinceLastRender >= this.renderInterval) {
+            this.needsRedraw = false;
+            this.render();
+            this.lastRenderTime = now;
+            return;
+        }
+        
+        // Otherwise, schedule for next available slot
+        this.needsRedraw = false;
+        
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+        }
+        
+        const delay = this.renderInterval - timeSinceLastRender;
+        this.animationFrameId = setTimeout(() => {
+            this.render();
+            this.lastRenderTime = Date.now();
+            this.animationFrameId = null;
+        }, delay);
+    }
+    
+    /**
      * Render chart
      */
     render() {
-        if (!this.ctx) return;
+        if (!this.ctx || !this.isVisible) return;
         
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -171,9 +241,6 @@ export class FuelComparisonChart {
         
         // Update stats display
         this.updateStatsDisplay();
-        
-        // Continue rendering
-        requestAnimationFrame(() => this.render());
     }
     
     /**
@@ -656,7 +723,7 @@ export class FuelComparisonChart {
         });
         
         this.updateAdjustmentDisplay();
-        this.render();
+        this.scheduleRender();
         this.updateStatsDisplay();
         
         console.log(`📊 Ideal adjusted by ${deltaLiters >= 0 ? '+' : ''}${deltaLiters.toFixed(2)}L (Total: ${this.idealAdjustment >= 0 ? '+' : ''}${this.idealAdjustment.toFixed(2)}L)`);
@@ -671,7 +738,7 @@ export class FuelComparisonChart {
         this.idealAdjustment = 0;
         this.idealData = JSON.parse(JSON.stringify(this.originalIdealData)); // Deep copy
         this.updateAdjustmentDisplay();
-        this.render();
+        this.scheduleRender();
         this.updateStatsDisplay();
         
         console.log('🔄 Ideal adjustment reset to original');

@@ -974,9 +974,15 @@ class LiveStrategyTracker {
                 4083: '#fa59e7ff',
                 4072: '#fa59e7ff',
                 4011: '#fa59e7ff',
+                // TCR
+                4084: '#a855f7ff',
+                4085: '#a855f7ff',
                 // GT4
                 4088: '#35ff12ff',
-                4084: '#35ff12ff'
+                // M2 CS
+                4073: '#06b6d4ff',
+                // 992 Cup
+                3104: '#3b82f6ff'
             };
             
             const color = classColorMap[classId] || '#9ca3af'; // Default gray for unknown
