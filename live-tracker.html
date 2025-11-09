@@ -303,6 +303,16 @@
             
             <!-- Collapsible Fuel Comparison Content -->
             <div id="fuel-comparison-details" class="hidden">
+                <!-- Ideal Adjustment Controls -->
+                <div class="flex items-center justify-center gap-3 mb-4 bg-neutral-900 rounded p-3">
+                    <span class="text-neutral-400 text-sm">Adjust Ideal:</span>
+                    <button id="ideal-adjust-minus-10" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-xs transition">-0.10L</button>
+                    <button id="ideal-adjust-minus-01" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-xs transition">-0.01L</button>
+                    <span id="ideal-adjustment-display" class="text-white font-mono text-sm min-w-20 text-center">0.00L</span>
+                    <button id="ideal-adjust-plus-01" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-xs transition">+0.01L</button>
+                    <button id="ideal-adjust-plus-10" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-xs transition">+0.10L</button>
+                    <button id="ideal-adjust-reset" class="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-xs transition ml-2">Reset</button>
+                </div>
                 <canvas id="fuel-comparison-canvas" width="800" height="250" class="w-full bg-neutral-900 rounded mb-4"></canvas>
                 
                 <!-- Fuel Stats Grid - Row 1 (Lap Consumption) -->
@@ -878,6 +888,23 @@
                     }
                 });
             }
+            
+            // Setup ideal adjustment buttons
+            document.getElementById('ideal-adjust-minus-10')?.addEventListener('click', () => {
+                window.fuelComparisonChart?.adjustIdeal(-0.10);
+            });
+            document.getElementById('ideal-adjust-minus-01')?.addEventListener('click', () => {
+                window.fuelComparisonChart?.adjustIdeal(-0.01);
+            });
+            document.getElementById('ideal-adjust-plus-01')?.addEventListener('click', () => {
+                window.fuelComparisonChart?.adjustIdeal(0.01);
+            });
+            document.getElementById('ideal-adjust-plus-10')?.addEventListener('click', () => {
+                window.fuelComparisonChart?.adjustIdeal(0.10);
+            });
+            document.getElementById('ideal-adjust-reset')?.addEventListener('click', () => {
+                window.fuelComparisonChart?.resetIdealAdjustment();
+            });
         });
     </script>
     

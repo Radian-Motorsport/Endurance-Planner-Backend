@@ -34,6 +34,8 @@ export class FuelComparisonChart {
         
         // Data
         this.idealData = null;          // Array of 101 samples from database
+        this.originalIdealData = null;  // Backup of original data
+        this.idealAdjustment = 0;       // Current adjustment in liters
         this.liveData = [];             // Current lap samples
         this.currentLapDistPct = 0;     // Current position (0-100)
         this.currentFuelLevel = 0;      // Current fuel level
@@ -63,7 +65,10 @@ export class FuelComparisonChart {
             
             if (response.ok) {
                 const data = await response.json();
+                this.originalIdealData = JSON.parse(JSON.stringify(data.samples)); // Deep copy
                 this.idealData = data.samples;
+                this.idealAdjustment = 0;
+                this.updateAdjustmentDisplay();
                 console.log(`✅ Ideal lap loaded: ${this.idealData.length} samples`);
                 this.render();
                 return true;
@@ -616,5 +621,79 @@ export class FuelComparisonChart {
         this.currentFuelLevel = 0;
         this.lastLapDistPct = 0;
         console.log('🔄 Fuel comparison chart reset');
+    }
+    
+    /**
+     * Adjust ideal fuel consumption by a fixed amount (liters)
+     * This scales the consumption proportionally across the lap
+     */
+    adjustIdeal(deltaLiters) {
+        if (!this.originalIdealData || this.originalIdealData.length === 0) return;
+        
+        this.idealAdjustment += deltaLiters;
+        
+        // Get original lap total consumption
+        const originalStartFuel = this.originalIdealData[0].fuelLevel;
+        const originalEndFuel = this.originalIdealData[this.originalIdealData.length - 1].fuelLevel;
+        const originalLapTotal = originalStartFuel - originalEndFuel;
+        
+        // Calculate new lap total
+        const newLapTotal = originalLapTotal + this.idealAdjustment;
+        
+        // Scale factor for all consumption values
+        const scaleFactor = newLapTotal / originalLapTotal;
+        
+        // Apply adjustment to all samples proportionally
+        this.idealData = this.originalIdealData.map((sample, index) => {
+            const originalConsumed = originalStartFuel - sample.fuelLevel;
+            const adjustedConsumed = originalConsumed * scaleFactor;
+            const adjustedFuelLevel = originalStartFuel - adjustedConsumed;
+            
+            return {
+                ...sample,
+                fuelLevel: adjustedFuelLevel
+            };
+        });
+        
+        this.updateAdjustmentDisplay();
+        this.render();
+        this.updateStatsDisplay();
+        
+        console.log(`📊 Ideal adjusted by ${deltaLiters >= 0 ? '+' : ''}${deltaLiters.toFixed(2)}L (Total: ${this.idealAdjustment >= 0 ? '+' : ''}${this.idealAdjustment.toFixed(2)}L)`);
+    }
+    
+    /**
+     * Reset ideal adjustment to original values
+     */
+    resetIdealAdjustment() {
+        if (!this.originalIdealData) return;
+        
+        this.idealAdjustment = 0;
+        this.idealData = JSON.parse(JSON.stringify(this.originalIdealData)); // Deep copy
+        this.updateAdjustmentDisplay();
+        this.render();
+        this.updateStatsDisplay();
+        
+        console.log('🔄 Ideal adjustment reset to original');
+    }
+    
+    /**
+     * Update the adjustment display element
+     */
+    updateAdjustmentDisplay() {
+        const displayEl = document.getElementById('ideal-adjustment-display');
+        if (displayEl) {
+            const sign = this.idealAdjustment >= 0 ? '+' : '';
+            displayEl.textContent = `${sign}${this.idealAdjustment.toFixed(2)}L`;
+            
+            // Color code: green = less fuel, red = more fuel
+            if (this.idealAdjustment > 0) {
+                displayEl.style.color = '#ef4444'; // Red (ideal is higher = you need more)
+            } else if (this.idealAdjustment < 0) {
+                displayEl.style.color = '#10b981'; // Green (ideal is lower = you need less)
+            } else {
+                displayEl.style.color = '#ffffff'; // White (neutral)
+            }
+        }
     }
 }
