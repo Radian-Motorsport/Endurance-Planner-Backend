@@ -224,6 +224,9 @@ class LiveStrategyTracker {
         // Fuel trace recorder
         this.fuelRecorder = null;
         
+        // Fuel comparison chart
+        this.fuelComparisonChart = null;
+        
         this.elements = {};
         this.initializeElements();
         this.setupEventListeners();
@@ -490,6 +493,9 @@ class LiveStrategyTracker {
             
             // Initialize fuel trace recorder
             this.initializeFuelRecorder();
+            
+            // Initialize fuel comparison chart
+            this.initializeFuelComparisonChart();
         });
         
         this.socket.on('disconnect', () => {
@@ -574,6 +580,17 @@ class LiveStrategyTracker {
                 debug('✅ Fuel recorder initialized');
             } catch (error) {
                 debugError('❌ Failed to initialize fuel recorder:', error);
+            }
+        }
+    }
+    
+    initializeFuelComparisonChart() {
+        if (!this.fuelComparisonChart && window.FuelComparisonChart) {
+            try {
+                this.fuelComparisonChart = new window.FuelComparisonChart('fuel-comparison-canvas');
+                debug('✅ Fuel comparison chart initialized');
+            } catch (error) {
+                debugError('❌ Failed to initialize fuel comparison chart:', error);
             }
         }
     }
@@ -1241,6 +1258,19 @@ class LiveStrategyTracker {
         // Update fuel recorder with session info
         if (this.fuelRecorder) {
             this.fuelRecorder.updateSessionInfo(sessionData);
+        }
+        
+        // Load ideal lap data for comparison chart
+        const trackId = sessionData?.WeekendInfo?.TrackID;
+        const chartPlayerCarIdx = sessionData?.DriverInfo?.DriverCarIdx;
+        if (trackId && chartPlayerCarIdx != null && sessionData?.DriverInfo?.Drivers) {
+            const chartPlayerCar = sessionData.DriverInfo.Drivers[chartPlayerCarIdx];
+            if (chartPlayerCar) {
+                const carName = chartPlayerCar.CarScreenName || chartPlayerCar.CarPath;
+                if (this.fuelComparisonChart && carName) {
+                    this.fuelComparisonChart.loadIdealLap(trackId, carName);
+                }
+            }
         }
         
         // Capture SessionTimeOfDay (seconds since midnight) - it's at the top level
@@ -2334,6 +2364,15 @@ class LiveStrategyTracker {
         } else {
             this.sessionTimeRemain = values.SessionTimeRemain || 0;
             this.lastSessionTimeRemain = values.SessionTimeRemain; // Track for next comparison
+        }
+        
+        // Update fuel comparison chart with live data
+        if (this.fuelComparisonChart && this.playerCarIdx != null) {
+            const lapDistPct = values.CarIdxLapDistPct?.[this.playerCarIdx];
+            const fuelLevel = values.FuelLevel;
+            if (lapDistPct != null && fuelLevel != null) {
+                this.fuelComparisonChart.updateLive(lapDistPct, fuelLevel);
+            }
         }
         
         // Calculate stints on first telemetry update with actual session time

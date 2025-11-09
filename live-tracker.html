@@ -374,7 +374,11 @@
             </div>
         </div>
         
-        
+        <!-- Fuel Consumption Comparison Chart -->
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+            <h2 class="text-xl road-rage-font mb-4">Fuel Consumption vs Ideal</h2>
+            <canvas id="fuel-comparison-canvas" width="800" height="300" class="w-full bg-neutral-900 rounded"></canvas>
+        </div>
         
         <!-- Strategy vs Actual Comparison -->
         <div class="bg-neutral-800 rounded-lg p-6 mb-6">
@@ -791,12 +795,14 @@
         import { CarPositionTracker } from '/public/js/modules/car-position-tracker.js';
         import { WeatherComponent } from '/public/js/modules/weather-component.js';
         import { FuelTraceRecorder } from '/public/js/modules/fuel-trace-recorder.js';
+        import { FuelComparisonChart } from '/public/js/modules/fuel-comparison-chart.js';
         
         // Make available globally for live-tracker.js
         window.TrackMapComponent = TrackMapComponent;
         window.CarPositionTracker = CarPositionTracker;
         window.WeatherComponent = WeatherComponent;
         window.FuelTraceRecorder = FuelTraceRecorder;
+        window.FuelComparisonChart = FuelComparisonChart;
     </script>
     
     <script src="/public/js/envirotrace.js"></script>
