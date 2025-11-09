@@ -3026,6 +3026,12 @@ class LiveStrategyTracker {
             
             debug('🌦️ Loading weather component...');
             
+            // Don't recreate if already exists
+            if (this.weatherComponent) {
+                debug('ℹ️ Weather component already loaded');
+                return;
+            }
+            
             // Initialize weather component
             this.weatherComponent = new window.WeatherComponent('weather-content');
             
