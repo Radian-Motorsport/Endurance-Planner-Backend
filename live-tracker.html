@@ -379,8 +379,28 @@
             <h2 class="text-xl road-rage-font mb-4">Fuel Consumption vs Ideal</h2>
             <canvas id="fuel-comparison-canvas" width="800" height="250" class="w-full bg-neutral-900 rounded mb-4"></canvas>
             
-            <!-- Fuel Stats Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <!-- Fuel Stats Grid - Row 1 (Lap Consumption) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                <div class="bg-neutral-700 rounded p-3">
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Lap Fuel</div>
+                    <div id="fuel-ideal-lap-total" class="text-lg font-mono text-green-400">--</div>
+                </div>
+                <div class="bg-neutral-700 rounded p-3">
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Current Lap Fuel</div>
+                    <div id="fuel-current-lap-total" class="text-lg font-mono text-cyan-400">--</div>
+                </div>
+                <div class="bg-neutral-700 rounded p-3">
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Lap Delta</div>
+                    <div id="fuel-lap-delta" class="text-lg font-mono text-white">--</div>
+                </div>
+                <div class="bg-neutral-700 rounded p-3">
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Lap Progress</div>
+                    <div id="fuel-lap-progress" class="text-lg font-mono text-pink-400">--</div>
+                </div>
+            </div>
+            
+            <!-- Fuel Stats Grid - Row 2 (Current State) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 <div class="bg-neutral-700 rounded p-3">
                     <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Remaining</div>
                     <div id="fuel-ideal-remaining" class="text-lg font-mono text-green-400">--</div>
@@ -390,7 +410,7 @@
                     <div id="fuel-actual-remaining" class="text-lg font-mono text-cyan-400">--</div>
                 </div>
                 <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Delta</div>
+                    <div class="text-xs text-neutral-400 uppercase mb-1">Position Delta</div>
                     <div id="fuel-delta" class="text-lg font-mono text-white">--</div>
                 </div>
                 <div class="bg-neutral-700 rounded p-3">
@@ -404,10 +424,6 @@
                 <div class="bg-neutral-700 rounded p-3">
                     <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Pressure</div>
                     <div id="fuel-live-pressure" class="text-lg font-mono text-purple-400">--</div>
-                </div>
-                <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Lap Progress</div>
-                    <div id="fuel-lap-progress" class="text-lg font-mono text-pink-400">--</div>
                 </div>
             </div>
         </div>

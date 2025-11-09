@@ -177,8 +177,9 @@ export class FuelComparisonChart {
     drawGrid() {
         const { x, y, width, height } = this.chartArea;
         
-        this.ctx.strokeStyle = this.options.gridColor;
-        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = '#6b7280';  // Grey for grid
+        this.ctx.lineWidth = 0.5;  // Thinner
+        this.ctx.setLineDash([5, 5]);  // Dashed
         
         // Vertical grid lines (every 10%)
         for (let i = 0; i <= 10; i++) {
@@ -189,15 +190,7 @@ export class FuelComparisonChart {
             this.ctx.stroke();
         }
         
-        // Horizontal grid lines (centered around zero)
-        const midY = y + height / 2;
-        for (let i = -2; i <= 2; i++) {
-            const yPos = midY - (height / 4) * i;
-            this.ctx.beginPath();
-            this.ctx.moveTo(x, yPos);
-            this.ctx.lineTo(x + width, yPos);
-            this.ctx.stroke();
-        }
+        this.ctx.setLineDash([]);  // Reset
         
         // Axes labels
         this.ctx.fillStyle = this.options.textColor;
@@ -211,16 +204,7 @@ export class FuelComparisonChart {
             this.ctx.fillText(label, xPos, this.canvas.height - 10);
         }
         
-        // Y-axis label (Deviation from Ideal)
-        this.ctx.save();
-        this.ctx.translate(15, this.canvas.height / 2);
-        this.ctx.rotate(-Math.PI / 2);
-        this.ctx.textAlign = 'center';
-        this.ctx.fillStyle = this.options.textColor;
-        this.ctx.fillText('Deviation (L)', 0, 0);
-        this.ctx.restore();
-        
-        // Y-axis tick labels (deviation range)
+        // Y-axis tick labels (deviation range) - add L suffix
         const range = this.options.deviationRange;
         this.ctx.fillStyle = this.options.textColor;
         this.ctx.font = '10px Inter, sans-serif';
@@ -228,7 +212,7 @@ export class FuelComparisonChart {
         
         for (let i = -2; i <= 2; i++) {
             const value = (range / 2 * i).toFixed(2);
-            const yPos = midY - (height / 4) * i;
+            const yPos = y + height / 2 - (height / 4) * i;
             
             // Color code the labels
             if (i > 0) {
@@ -239,7 +223,7 @@ export class FuelComparisonChart {
                 this.ctx.fillStyle = this.options.textColor;
             }
             
-            this.ctx.fillText(value, x - 5, yPos + 3);
+            this.ctx.fillText(value + 'L', x - 5, yPos + 3);
         }
     }
     
@@ -250,20 +234,14 @@ export class FuelComparisonChart {
         const { x, y, width, height } = this.chartArea;
         const midY = y + height / 2;
         
-        this.ctx.strokeStyle = this.options.idealLineColor;
-        this.ctx.lineWidth = 2;
-        this.ctx.setLineDash([10, 5]);
+        this.ctx.strokeStyle = '#6b7280';  // Grey
+        this.ctx.lineWidth = 0.5;  // Thinner
+        this.ctx.setLineDash([5, 5]);  // Dashed
         this.ctx.beginPath();
         this.ctx.moveTo(x, midY);
         this.ctx.lineTo(x + width, midY);
         this.ctx.stroke();
         this.ctx.setLineDash([]);
-        
-        // Label
-        this.ctx.fillStyle = this.options.idealLineColor;
-        this.ctx.font = '12px Inter, sans-serif';
-        this.ctx.textAlign = 'left';
-        this.ctx.fillText('Ideal', x + 10, midY - 5);
     }
     
     /**
@@ -277,7 +255,7 @@ export class FuelComparisonChart {
         const range = this.options.deviationRange;
         const idealStartFuel = this.idealData[0]?.fuelLevel || 0;
         
-        this.ctx.lineWidth = 3;
+        this.ctx.lineWidth = 1.5;  // Thinner
         this.ctx.beginPath();
         
         let started = false;
@@ -530,16 +508,56 @@ export class FuelComparisonChart {
         
         if (idealSample && idealSample.fuelLevel !== null) {
             const idealStartFuel = this.idealData[0]?.fuelLevel || 0;
-            const liveConsumed = this.lapStartFuel - this.currentFuelLevel;
-            const idealConsumed = idealStartFuel - idealSample.fuelLevel;
-            const deviation = idealConsumed - liveConsumed;
             
-            // Ideal remaining (what should be left at this point)
-            const idealRemaining = idealSample.fuelLevel;
+            // Calculate how much fuel SHOULD have been consumed at this point (from ideal lap)
+            const idealConsumedAtThisPoint = idealStartFuel - idealSample.fuelLevel;
+            
+            // Calculate how much fuel YOU'VE consumed so far
+            const liveConsumed = this.lapStartFuel - this.currentFuelLevel;
+            
+            // Deviation: positive = using less fuel (good)
+            const deviation = idealConsumedAtThisPoint - liveConsumed;
+            
+            // What you SHOULD have remaining (based on your lap start fuel and ideal consumption)
+            const idealRemaining = this.lapStartFuel - idealConsumedAtThisPoint;
+            
+            // Calculate lap totals
+            const idealLapTotal = this.idealData[0]?.fuelLevel - this.idealData[this.idealData.length - 1]?.fuelLevel;
+            const currentLapConsumed = this.lapStartFuel - this.currentFuelLevel;
+            
+            // Project current lap total based on progress
+            let projectedLapTotal = '--';
+            let lapDelta = '--';
+            if (this.currentLapDistPct > 5) { // Only project after 5% to avoid wild estimates
+                const consumptionRate = currentLapConsumed / (this.currentLapDistPct / 100);
+                projectedLapTotal = consumptionRate; // Full lap projection
+                lapDelta = projectedLapTotal - idealLapTotal;
+            }
             
             // Update DOM elements
             const el = (id) => document.getElementById(id);
             
+            // Row 1: Lap consumption stats
+            if (el('fuel-ideal-lap-total')) {
+                el('fuel-ideal-lap-total').textContent = idealLapTotal.toFixed(2) + ' L';
+            }
+            if (el('fuel-current-lap-total')) {
+                el('fuel-current-lap-total').textContent = 
+                    typeof projectedLapTotal === 'number' ? projectedLapTotal.toFixed(2) + ' L' : projectedLapTotal;
+            }
+            if (el('fuel-lap-delta')) {
+                const lapDeltaEl = el('fuel-lap-delta');
+                if (typeof lapDelta === 'number') {
+                    const sign = lapDelta >= 0 ? '+' : '';
+                    lapDeltaEl.textContent = sign + lapDelta.toFixed(2) + ' L';
+                    lapDeltaEl.style.color = lapDelta <= 0 ? '#10b981' : '#ef4444'; // Green if using less
+                } else {
+                    lapDeltaEl.textContent = lapDelta;
+                    lapDeltaEl.style.color = '#ffffff';
+                }
+            }
+            
+            // Row 2: Current position stats
             if (el('fuel-ideal-remaining')) {
                 el('fuel-ideal-remaining').textContent = idealRemaining.toFixed(2) + ' L';
             }
