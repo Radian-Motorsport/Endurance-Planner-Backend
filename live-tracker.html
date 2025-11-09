@@ -290,7 +290,70 @@
                     </div>
                 </div>
             </div>
-        </div>            
+        </div>
+        
+        <!-- Fuel Consumption Comparison Chart -->
+        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl road-rage-font">Fuel Consumption vs Ideal</h2>
+                <button id="toggle-fuel-comparison" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                    Show Fuel Comparison ▼
+                </button>
+            </div>
+            
+            <!-- Collapsible Fuel Comparison Content -->
+            <div id="fuel-comparison-details" class="hidden">
+                <canvas id="fuel-comparison-canvas" width="800" height="250" class="w-full bg-neutral-900 rounded mb-4"></canvas>
+                
+                <!-- Fuel Stats Grid - Row 1 (Lap Consumption) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Lap Fuel</div>
+                        <div id="fuel-ideal-lap-total" class="text-lg font-mono text-green-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Current Lap Fuel</div>
+                        <div id="fuel-current-lap-total" class="text-lg font-mono text-cyan-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Lap Delta</div>
+                        <div id="fuel-lap-delta" class="text-lg font-mono text-white">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Lap Progress</div>
+                        <div id="fuel-lap-progress" class="text-lg font-mono text-pink-400">--</div>
+                    </div>
+                </div>
+                
+                <!-- Fuel Stats Grid - Row 2 (Current State) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Remaining</div>
+                        <div id="fuel-ideal-remaining" class="text-lg font-mono text-green-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Actual Remaining</div>
+                        <div id="fuel-actual-remaining" class="text-lg font-mono text-cyan-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Position Delta</div>
+                        <div id="fuel-delta" class="text-lg font-mono text-white">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Level</div>
+                        <div id="fuel-live-level" class="text-lg font-mono text-yellow-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Rate</div>
+                        <div id="fuel-live-rate" class="text-lg font-mono text-orange-400">--</div>
+                    </div>
+                    <div class="bg-neutral-700 rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Pressure</div>
+                        <div id="fuel-live-pressure" class="text-lg font-mono text-purple-400">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Live Race Stats -->
         <div class="bg-neutral-800 rounded-lg p-4 mb-6">
@@ -370,60 +433,6 @@
                     <div id="stint-fuel-list" class="space-y-1 max-h-96 overflow-y-auto text-neutral-300">
                         <div class="text-neutral-500 text-xs">No data yet</div>
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Fuel Consumption Comparison Chart -->
-        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <h2 class="text-xl road-rage-font mb-4">Fuel Consumption vs Ideal</h2>
-            <canvas id="fuel-comparison-canvas" width="800" height="250" class="w-full bg-neutral-900 rounded mb-4"></canvas>
-            
-            <!-- Fuel Stats Grid - Row 1 (Lap Consumption) -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Lap Fuel</div>
-                    <div id="fuel-ideal-lap-total" class="text-lg font-mono text-green-400">--</div>
-                </div>
-                <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Current Lap Fuel</div>
-                    <div id="fuel-current-lap-total" class="text-lg font-mono text-cyan-400">--</div>
-                </div>
-                <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Lap Delta</div>
-                    <div id="fuel-lap-delta" class="text-lg font-mono text-white">--</div>
-                </div>
-                <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Lap Progress</div>
-                    <div id="fuel-lap-progress" class="text-lg font-mono text-pink-400">--</div>
-                </div>
-            </div>
-            
-            <!-- Fuel Stats Grid - Row 2 (Current State) -->
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Remaining</div>
-                    <div id="fuel-ideal-remaining" class="text-lg font-mono text-green-400">--</div>
-                </div>
-                <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Actual Remaining</div>
-                    <div id="fuel-actual-remaining" class="text-lg font-mono text-cyan-400">--</div>
-                </div>
-                <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Position Delta</div>
-                    <div id="fuel-delta" class="text-lg font-mono text-white">--</div>
-                </div>
-                <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Level</div>
-                    <div id="fuel-live-level" class="text-lg font-mono text-yellow-400">--</div>
-                </div>
-                <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Rate</div>
-                    <div id="fuel-live-rate" class="text-lg font-mono text-orange-400">--</div>
-                </div>
-                <div class="bg-neutral-700 rounded p-3">
-                    <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Pressure</div>
-                    <div id="fuel-live-pressure" class="text-lg font-mono text-purple-400">--</div>
                 </div>
             </div>
         </div>
@@ -851,6 +860,25 @@
         window.WeatherComponent = WeatherComponent;
         window.FuelTraceRecorder = FuelTraceRecorder;
         window.FuelComparisonChart = FuelComparisonChart;
+        
+        // Setup toggle for fuel comparison (start collapsed)
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('toggle-fuel-comparison');
+            const detailsDiv = document.getElementById('fuel-comparison-details');
+            
+            if (toggleBtn && detailsDiv) {
+                toggleBtn.addEventListener('click', () => {
+                    const isHidden = detailsDiv.classList.contains('hidden');
+                    if (isHidden) {
+                        detailsDiv.classList.remove('hidden');
+                        toggleBtn.textContent = 'Hide Fuel Comparison ▲';
+                    } else {
+                        detailsDiv.classList.add('hidden');
+                        toggleBtn.textContent = 'Show Fuel Comparison ▼';
+                    }
+                });
+            }
+        });
     </script>
     
     <script src="/public/js/envirotrace.js"></script>

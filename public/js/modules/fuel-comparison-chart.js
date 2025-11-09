@@ -179,9 +179,8 @@ export class FuelComparisonChart {
         
         this.ctx.strokeStyle = '#6b7280';  // Grey for grid
         this.ctx.lineWidth = 0.5;  // Thinner
-        this.ctx.setLineDash([5, 5]);  // Dashed
         
-        // Vertical grid lines (every 10%)
+        // Vertical grid lines (every 10%) - solid
         for (let i = 0; i <= 10; i++) {
             const xPos = x + (width * i / 10);
             this.ctx.beginPath();
@@ -189,8 +188,6 @@ export class FuelComparisonChart {
             this.ctx.lineTo(xPos, y + height);
             this.ctx.stroke();
         }
-        
-        this.ctx.setLineDash([]);  // Reset
         
         // Axes labels
         this.ctx.fillStyle = this.options.textColor;
@@ -236,12 +233,10 @@ export class FuelComparisonChart {
         
         this.ctx.strokeStyle = '#6b7280';  // Grey
         this.ctx.lineWidth = 0.5;  // Thinner
-        this.ctx.setLineDash([5, 5]);  // Dashed
         this.ctx.beginPath();
         this.ctx.moveTo(x, midY);
         this.ctx.lineTo(x + width, midY);
         this.ctx.stroke();
-        this.ctx.setLineDash([]);
     }
     
     /**
