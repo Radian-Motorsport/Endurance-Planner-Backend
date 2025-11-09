@@ -430,6 +430,12 @@ class LiveStrategyTracker {
                     if (!this.weatherComponent && this.strategy) {
                         this.loadWeatherComponent();
                     }
+                    // Resize charts after container is visible
+                    if (this.weatherComponent) {
+                        setTimeout(() => {
+                            this.weatherComponent.resize();
+                        }, 100);
+                    }
                 } else {
                     predictedWeatherDetails.classList.add('hidden');
                     togglePredictedWeatherBtn.textContent = 'Show Prediction ▼';
