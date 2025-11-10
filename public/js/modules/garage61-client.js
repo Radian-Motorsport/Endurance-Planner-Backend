@@ -260,6 +260,18 @@ export class Garage61Client {
         // Run initial safety application
         applySafety();
 
+        // Find fastest sector times across all laps
+        const fastestSectors = {};
+        bestLaps.forEach(lap => {
+            if (lap.sectors && lap.sectors.length > 0) {
+                lap.sectors.forEach((sector, i) => {
+                    if (!fastestSectors[i] || sector.sectorTime < fastestSectors[i]) {
+                        fastestSectors[i] = sector.sectorTime;
+                    }
+                });
+            }
+        });
+
         bestLaps.forEach((lap, index) => {
             const row = document.createElement('tr');
             row.className = 'hover:bg-neutral-600 transition-colors duration-200';
@@ -267,10 +279,14 @@ export class Garage61Client {
             // Use CORRECT variables from README-G61.md  
             const driverName = lap.driver ? `${lap.driver.firstName || ''} ${lap.driver.lastName || ''}`.trim() : 'Unknown Driver';
             
-            // Format lap time and add sector times below
+            // Format lap time and add sector times below with pink highlight for fastest
             const lapTime = lap.lapTime ? this.formatLapTime(lap.lapTime) : 'N/A';
             const sectorTimes = lap.sectors && lap.sectors.length > 0 ? 
-                lap.sectors.map((sector, i) => `S${i+1}: ${sector.sectorTime.toFixed(3)}`).join(' | ') : 
+                lap.sectors.map((sector, i) => {
+                    const isFastest = sector.sectorTime === fastestSectors[i];
+                    const color = isFastest ? 'text-pink-400 font-semibold' : '';
+                    return `<span class="${color}">S${i+1}: ${sector.sectorTime.toFixed(3)}</span>`;
+                }).join(' | ') : 
                 '';
             
             const fuelUsed = lap.fuelUsed ? parseFloat(lap.fuelUsed).toFixed(2) : 'N/A';
