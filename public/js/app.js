@@ -1892,9 +1892,9 @@ class RadianPlannerApp {
         }
 
         // Check max drivers limit (6 for endurance racing)
-        if (this.selectedDrivers.length >= 6) {
+        if (this.selectedDrivers.length >= 12) {
             console.log('⚠️ Max drivers limit reached');
-            this.uiManager.showNotification('Maximum 6 drivers allowed', 'warning');
+            this.uiManager.showNotification('Maximum 12 drivers allowed', 'warning');
             this._addingDriver = false;
             return;
         }

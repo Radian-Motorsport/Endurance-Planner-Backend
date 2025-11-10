@@ -591,6 +591,8 @@ class LiveStrategyTracker {
         if (!this.fuelComparisonChart && window.FuelComparisonChart) {
             try {
                 this.fuelComparisonChart = new window.FuelComparisonChart('fuel-comparison-canvas');
+                // Expose to window for adjustment buttons
+                window.fuelComparisonChart = this.fuelComparisonChart;
                 debug('✅ Fuel comparison chart initialized');
             } catch (error) {
                 debugError('❌ Failed to initialize fuel comparison chart:', error);
