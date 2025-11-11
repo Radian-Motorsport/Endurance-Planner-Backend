@@ -438,7 +438,22 @@ export class StrategyCalculator {
      */
     performCalculations(inputs) {
         const lapsPerTank = inputs.tankCapacity / inputs.fuelPerLap;
-        const totalLaps = Math.floor(inputs.raceDurationSeconds / inputs.avgLapTimeInSeconds);
+        
+        // Check race mode from app.js
+        const isLapMode = window.radianPlanner?.isLapMode || false;
+        const raceLapsLimit = parseInt(document.getElementById('race-laps-limit')?.value) || 0;
+        
+        let totalLaps;
+        if (isLapMode && raceLapsLimit > 0) {
+            // Lap mode: use exact lap limit from database
+            totalLaps = raceLapsLimit;
+            console.log(`🏁 LAP MODE: Using lap limit of ${totalLaps} laps`);
+        } else {
+            // Time mode: calculate laps from duration
+            totalLaps = Math.floor(inputs.raceDurationSeconds / inputs.avgLapTimeInSeconds);
+            console.log(`⏱️ TIME MODE: Calculated ${totalLaps} laps from duration`);
+        }
+        
         const stintDuration = lapsPerTank * inputs.avgLapTimeInSeconds;
         
         this.totalStints = Math.floor(totalLaps / lapsPerTank) + (totalLaps % Math.floor(lapsPerTank) > 0 ? 1 : 0);

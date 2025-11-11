@@ -206,6 +206,10 @@
                                                   data-session-minutes=""
                                                   data-session-hours="">-</span>
                                         </div>
+                                        <div id="session-laps-display" class="flex items-center gap-2 hidden">
+                                            <span class="text-sm text-neutral-400">Lap Limit:</span>
+                                            <span id="session-laps-value" class="text-neutral-200 text-sm">-</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -518,6 +522,19 @@
                 <!-- Race Inputs -->
                 <div id="race-inputs-container" class="p-6 bg-neutral-800 border-neutral-800 rounded-lg">
                     <h1 class="text-xl mb-4 road-rage-font">Race Inputs</h1>
+                    
+                    <!-- Race Mode Toggle: Time vs Laps -->
+                    <div id="race-mode-toggle-container" class="hidden flex items-center justify-between mb-4 p-3 bg-neutral-900 rounded-lg border border-neutral-700">
+                        <span class="text-sm font-medium text-neutral-300">Race Mode:</span>
+                        <div class="flex items-center space-x-2">
+                            <span id="time-mode-label" class="text-sm text-blue-400 font-semibold">Time Limit</span>
+                            <div class="relative inline-block w-12 h-6 transition duration-200 ease-in-out bg-neutral-600 rounded-full cursor-pointer" id="race-mode-toggle">
+                                <div id="race-mode-slider" class="absolute left-0 top-0 w-6 h-6 transition duration-200 ease-in-out transform bg-blue-500 rounded-full shadow"></div>
+                            </div>
+                            <span id="lap-mode-label" class="text-sm text-neutral-400">Lap Limit</span>
+                        </div>
+                    </div>
+                    
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-6 mb-6">
                         <div class="flex flex-col">
                             <label class="text-sm font-medium text-neutral-500 text-center mb-2">Race Duration (Minutes)</label>
@@ -526,6 +543,7 @@
                                 <div id="race-duration-minutes-display" class="p-2 border-neutral-800 rounded-lg text-neutral-200 bg-neutral-900 text-center min-w-[5rem]">-</div>
                                 <input type="hidden" id="race-duration-hours" value="0">
                                 <input type="hidden" id="race-duration-minutes" value="0">
+                                <input type="hidden" id="race-laps-limit" value="0">
                             </div>
                         </div>
                         <div class="flex flex-col">

@@ -383,9 +383,24 @@ class RadianPlannerApp {
                     sessionLengthElement.dataset.sessionLength = totalMinutes.toString();
                     sessionLengthElement.dataset.sessionMinutes = (totalMinutes % 60).toString();
                     sessionLengthElement.dataset.sessionHours = Math.floor(totalMinutes / 60).toString();
+                    
+                    // Store session_laps for toggle functionality
+                    if (sessionDetails.session_laps) {
+                        sessionLengthElement.dataset.sessionLaps = sessionDetails.session_laps.toString();
+                    }
                 } catch (e) {
                     // ignore dataset write failures
                 }
+            }
+            
+            // Populate lap limit if available
+            const sessionLapsDisplay = document.getElementById('session-laps-display');
+            const sessionLapsValue = document.getElementById('session-laps-value');
+            if (sessionLapsDisplay && sessionLapsValue && sessionDetails.session_laps) {
+                sessionLapsValue.textContent = `${sessionDetails.session_laps} laps`;
+                sessionLapsDisplay.classList.remove('hidden');
+            } else if (sessionLapsDisplay) {
+                sessionLapsDisplay.classList.add('hidden');
             }
             
             // Fetch and populate practice/qualifying lengths
@@ -1214,6 +1229,14 @@ class RadianPlannerApp {
                 this.strategyCalculator.toggleTimeMode();
             });
         }
+        
+        // Race mode toggle switch for Time Limit / Lap Limit mode
+        const raceModeToggle = document.getElementById('race-mode-toggle');
+        if (raceModeToggle) {
+            raceModeToggle.addEventListener('click', () => {
+                this.toggleRaceMode();
+            });
+        }
 
         // Desktop mode toggle
         const desktopModeBtn = document.getElementById('desktopModeBtn');
@@ -1299,10 +1322,11 @@ class RadianPlannerApp {
                 });
 
                 // Validate key Page 2 inputs to avoid crashes when fields are empty.
-                // Required: race duration, avg lap time > 0, fuel per lap > 0, tank capacity > 0, at least one driver
+                // Required: race duration OR lap limit, avg lap time > 0, fuel per lap > 0, tank capacity > 0, at least one driver
                 const raceDurHours = parseInt(document.getElementById('race-duration-hours')?.value) || 0;
                 const raceDurMins = parseInt(document.getElementById('race-duration-minutes')?.value) || 0;
                 const totalRaceMinutes = (raceDurHours * 60) + raceDurMins;
+                const raceLapsLimit = parseInt(document.getElementById('race-laps-limit')?.value) || 0;
 
                 const avgLapM = parseInt(document.getElementById('avg-lap-time-minutes')?.value);
                 const avgLapS = parseInt(document.getElementById('avg-lap-time-seconds')?.value);
@@ -1312,8 +1336,18 @@ class RadianPlannerApp {
                 const tankCapacity = parseFloat(document.getElementById('tank-capacity-display-input')?.value);
                 const driversCount = Array.isArray(this.selectedDrivers) ? this.selectedDrivers.length : 0;
 
+                // Check race mode: time limit or lap limit
+                const isLapMode = this.isLapMode || false;
+                
                 const missing = [];
-                if (!totalRaceMinutes || totalRaceMinutes <= 0) missing.push('Race duration');
+                if (isLapMode) {
+                    // Lap mode: require lap limit
+                    if (!raceLapsLimit || raceLapsLimit <= 0) missing.push('Lap limit');
+                } else {
+                    // Time mode: require duration
+                    if (!totalRaceMinutes || totalRaceMinutes <= 0) missing.push('Race duration');
+                }
+                
                 if (!avgLapSecs || avgLapSecs <= 0) missing.push('Avg. lap time');
                 if (isNaN(fuelPerLap) || fuelPerLap <= 0) missing.push('Fuel per lap');
                 if (isNaN(tankCapacity) || tankCapacity <= 0) missing.push('Tank capacity');
@@ -1735,6 +1769,8 @@ class RadianPlannerApp {
         return {
             raceDurationHours: document.getElementById('race-duration-hours')?.value || '',
             raceDurationMinutes: document.getElementById('race-duration-minutes')?.value || '',
+            raceLapsLimit: document.getElementById('race-laps-limit')?.value || '',
+            isLapMode: this.isLapMode || false,
             avgLapTimeMinutes: document.getElementById('avg-lap-time-minutes')?.value || '',
             avgLapTimeSeconds: document.getElementById('avg-lap-time-seconds')?.value || '',
             fuelPerLap: document.getElementById('fuel-per-lap-display-input')?.value || '',
@@ -1791,6 +1827,38 @@ class RadianPlannerApp {
                 const isDesktop = container.classList.contains('desktop-mode');
                 btn.textContent = isDesktop ? 'Mobile Mode' : 'Desktop Mode';
             }
+        }
+    }
+    
+    toggleRaceMode() {
+        // Toggle between time limit mode and lap limit mode
+        const slider = document.getElementById('race-mode-slider');
+        const timeModeLabel = document.getElementById('time-mode-label');
+        const lapModeLabel = document.getElementById('lap-mode-label');
+        
+        // Store current mode state (default is time mode = false)
+        if (!this.isLapMode) {
+            // Switch to lap mode
+            this.isLapMode = true;
+            slider.classList.add('translate-x-6');
+            slider.classList.remove('bg-blue-500');
+            slider.classList.add('bg-green-500');
+            timeModeLabel.classList.remove('text-blue-400', 'font-semibold');
+            timeModeLabel.classList.add('text-neutral-400');
+            lapModeLabel.classList.remove('text-neutral-400');
+            lapModeLabel.classList.add('text-green-400', 'font-semibold');
+            console.log('🔄 Switched to LAP LIMIT mode');
+        } else {
+            // Switch to time mode
+            this.isLapMode = false;
+            slider.classList.remove('translate-x-6');
+            slider.classList.add('bg-blue-500');
+            slider.classList.remove('bg-green-500');
+            timeModeLabel.classList.add('text-blue-400', 'font-semibold');
+            timeModeLabel.classList.remove('text-neutral-400');
+            lapModeLabel.classList.add('text-neutral-400');
+            lapModeLabel.classList.remove('text-green-400', 'font-semibold');
+            console.log('🔄 Switched to TIME LIMIT mode');
         }
     }
 
@@ -2537,6 +2605,20 @@ class RadianPlannerApp {
                 }
             } catch (e) {
                 // ignore dataset write failures
+            }
+        }
+        
+        // 1b. Setup race mode toggle (time vs laps)
+        const raceLapsLimitEl = document.getElementById('race-laps-limit');
+        if (sessionLengthEl && sessionLengthEl.dataset.sessionLaps) {
+            const lapLimit = parseInt(sessionLengthEl.dataset.sessionLaps, 10);
+            if (raceLapsLimitEl) raceLapsLimitEl.value = lapLimit || 0;
+            
+            // Show toggle if lap limit exists
+            const toggleContainer = document.getElementById('race-mode-toggle-container');
+            if (toggleContainer && lapLimit > 0) {
+                toggleContainer.classList.remove('hidden');
+                console.log(`🔄 Race mode toggle enabled - lap limit: ${lapLimit}`);
             }
         }
 
@@ -3465,6 +3547,7 @@ class RadianPlannerApp {
 
         setValue('race-duration-hours', formData.raceDurationHours);
         setValue('race-duration-minutes', formData.raceDurationMinutes);
+        setValue('race-laps-limit', formData.raceLapsLimit);
         setValue('avg-lap-time-minutes', formData.avgLapTimeMinutes);
         setValue('avg-lap-time-seconds', formData.avgLapTimeSeconds);
         setValue('fuel-per-lap-display-input', formData.fuelPerLap);
@@ -3472,6 +3555,30 @@ class RadianPlannerApp {
         setValue('pit-stop-time', formData.pitStopTime);
         setValue('fuel-slider', formData.fuelSlider || '0');
         setValue('lap-time-slider', formData.lapTimeSlider || '0');
+        
+        // Restore race mode toggle state
+        if (formData.isLapMode && formData.raceLapsLimit) {
+            this.isLapMode = true;
+            // Trigger toggle UI update
+            const slider = document.getElementById('race-mode-slider');
+            const timeModeLabel = document.getElementById('time-mode-label');
+            const lapModeLabel = document.getElementById('lap-mode-label');
+            
+            if (slider) {
+                slider.classList.add('translate-x-6');
+                slider.classList.remove('bg-blue-500');
+                slider.classList.add('bg-green-500');
+            }
+            if (timeModeLabel) {
+                timeModeLabel.classList.remove('text-blue-400', 'font-semibold');
+                timeModeLabel.classList.add('text-neutral-400');
+            }
+            if (lapModeLabel) {
+                lapModeLabel.classList.remove('text-neutral-400');
+                lapModeLabel.classList.add('text-green-400', 'font-semibold');
+            }
+            console.log('🔄 Restored LAP MODE state from saved strategy');
+        }
 
         // Trigger adjustment display updates
         this.updateAdjustmentDisplayOnly();
