@@ -626,7 +626,15 @@ export class StrategyCalculator {
             // Calculate lap numbers for this stint
             const startLap = Math.floor(currentLap);
             // After the stint, currentLap will be currentLap + stintLaps, so the end lap is that value minus 1
-            const endLap = Math.floor(currentLap + stintLaps - 1);
+            let endLap = Math.floor(currentLap + stintLaps - 1);
+            
+            // In lap mode, cap the end lap at the lap limit to prevent overshoot from rounding
+            const isLapMode = window.radianPlanner?.isLapMode || false;
+            const raceLapsLimit = parseInt(document.getElementById('race-laps-limit')?.value) || 0;
+            if (isLapMode && raceLapsLimit > 0 && endLap > raceLapsLimit) {
+                endLap = raceLapsLimit;
+                console.log(`🏁 Capped end lap from ${Math.floor(currentLap + stintLaps - 1)} to ${raceLapsLimit} (lap limit)`);
+            }
             
             // Update existing row or create new one
             const existingRow = existingStintRows[i];
