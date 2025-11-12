@@ -24,7 +24,7 @@ export class CustomDropdown {
                     <span class="selected-text">${this.selectedText}</span>
                     <i class="fas fa-chevron-down transition-transform duration-200"></i>
                 </div>
-                <div class="dropdown-list hidden absolute z-50 w-full mt-1 panel glass-strip rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                <div class="dropdown-list hidden absolute z-50 w-full mt-1 panel glass-strip rounded-lg shadow-lg h-64 overflow-y-auto">
                 </div>
             </div>
         `;
