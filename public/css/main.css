@@ -437,3 +437,22 @@ select {
         .grad-on-hover:hover {
         background: linear-gradient(270deg, rgba(225, 225, 225, 0.05), rgba(41, 41, 41, 0.05), transparent);
         }
+
+        /* Custom scrollbar for dropdown lists */
+        .dropdown-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .dropdown-list::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+
+        .dropdown-list::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 4px;
+        }
+
+        .dropdown-list::-webkit-scrollbar-thumb:hover {
+            background: #525252;
+        }
