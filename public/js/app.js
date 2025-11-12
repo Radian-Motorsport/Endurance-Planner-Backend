@@ -1994,10 +1994,14 @@ class RadianPlannerApp {
         this.selectedDrivers.push(driver);
         this.updateDriversList();
         
-        // Reset dropdown
-        driverSelect.value = '';
+        // Reset custom dropdown
+        if (this.dropdowns.driver) {
+            this.dropdowns.driver.selectedValue = '';
+            this.dropdowns.driver.selectedText = 'Select a Driver...';
+            this.dropdowns.driver.setText('Select a Driver...');
+        }
         
-        console.log(`✅ Added driver: ${driverName}`);
+        console.log(`Added driver: ${driverName}`);
         
         // Reset the lock
         this._addingDriver = false;
