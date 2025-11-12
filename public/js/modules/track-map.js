@@ -58,7 +58,7 @@ export class TrackMapComponent {
                     <div class="flex justify-between items-start mb-4">
                         <!-- Track Map SVG Container -->
                         <div class="flex-1 ${this.options.showControls ? 'mr-4' : ''}">
-                            <div id="${this.containerId}-map" class="relative panel glass-stripe rounded-lg p-4 min-h-[300px] flex items-center justify-center">
+                            <div id="${this.containerId}-map" class="relative panel glass-stripe-nb rounded-lg p-4 min-h-[300px] flex items-center justify-center">
                             <div id="${this.containerId}-loading" class="text-neutral-400">
                                 <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
                                 <p>Loading track map...</p>
