@@ -2110,7 +2110,7 @@ class RadianPlannerApp {
             
             li.innerHTML = `
                 <div class="flex items-center">
-                    <div class="flex items-center justify-between w-32 px-3 py-2 rounded-full ${groupColorClass}">
+                    <div class="flex items-center justify-between w-32 px-2 py-1 rounded-full ${groupColorClass}">
                         <span class="font-bold text-xs">${displayGroupName}</span>
                         <span class="mx-1">${safetyRating}</span>
                         <span class="font-bold">${iRating}</span>
