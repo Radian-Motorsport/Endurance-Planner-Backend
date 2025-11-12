@@ -99,9 +99,7 @@
                 <div class="p-6 rounded-lg panel glass-strip grad-on-hover">
                     <h1 class="text-xl mb-4 road-rage-font">Drivers</h1>
                     <div class="flex flex-wrap items-center gap-2 mb-4">
-                        <select id="driver-select" class="p-3  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 flex-1 min-w-[200px] panel glass-strip  text-neutral-400 text-sm">
-                            <option value="">Select a Driver...</option>
-                        </select>
+                        <div id="driver-select" class="flex-1 min-w-[200px] relative"></div>
                         <button id="add-driver-btn" class="glass-strip-nb ov-dark hover:bg-purple-700 text-neutral-400 font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-100" title="Add Driver">
                             <i class="fas fa-plus"></i>
                         </button>
@@ -127,21 +125,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
                         <div class="flex flex-col w-full">
                             <label class="text-sm font-medium text-neutral-500 mb-2">Series</label>
-                            <select id="series-select" class="p-3 pr-8 panel glass-strip rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200  text-neutral-400 text-sm">
-                                <option value="">Select a Series...</option>
-                            </select>
+                            <div id="series-select" class="w-full relative"></div>
                         </div>
                         <div class="flex flex-col w-full">
                             <label class="text-sm font-medium text-neutral-500 mb-2">Event</label>
-                            <select id="event-select" class="p-3 pr-8 panel glass-strip rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200  text-neutral-400 text-sm" disabled>
-                                <option value="">Select Series First...</option>
-                            </select>
+                            <div id="event-select" class="w-full relative"></div>
                         </div>
                         <div class="flex flex-col w-full">
                             <label class="text-sm font-medium text-neutral-500 mb-2">Session</label>
-                            <select id="session-select" class="p-3 pr-8 panel glass-strip rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200  text-neutral-400 text-sm" disabled>
-                                <option value="">Select Event First...</option>
-                            </select>
+                            <div id="session-select" class="w-full relative"></div>
                         </div>
                     </div>
                 </div>
@@ -316,15 +308,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
                             <div class="flex flex-col w-full">
                                 <label class="text-sm font-medium text-neutral-500 mb-2">Car Class</label>
-                                <select id="car-class-dropdown" class="p-3 pr-8 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400 text-sm" disabled>
-                                    <option value="">Select Session First...</option>
-                                </select>
+                                <div id="car-class-dropdown" class="w-full relative"></div>
                             </div>
                             <div class="flex flex-col w-full">
                                 <label class="text-sm font-medium text-neutral-500 mb-2">Car</label>
-                                <select id="car-dropdown" class="p-3 pr-8 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400 text-sm" disabled>
-                                    <option value="">Select Car Class First...</option>
-                                </select>
+                                <div id="car-dropdown" class="w-full relative"></div>
                             </div>
                         </div>
                         

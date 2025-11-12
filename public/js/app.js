@@ -8,6 +8,7 @@ import { Garage61Client } from './modules/garage61-client.js';
 import { WeatherComponent } from './modules/weather-component.js';
 import { TrackMapComponent } from './modules/track-map.js';
 import { getCountryFlag, getCountryFlagOrCode } from './modules/country-flags.js';
+import { CustomDropdown } from './modules/custom-dropdown.js';
 
 class RadianPlannerApp {
     constructor() {
@@ -17,6 +18,16 @@ class RadianPlannerApp {
         this.garage61Client = new Garage61Client();
         this.weatherComponent = null; // Will be initialized when needed
         this.trackMapComponent = null; // Will be initialized when needed
+        
+        // Initialize custom dropdowns
+        this.dropdowns = {
+            driver: null,
+            series: null,
+            event: null,
+            session: null,
+            carClass: null,
+            car: null
+        };
         
         this.currentStrategies = [];
         this.allData = {};
@@ -50,6 +61,9 @@ class RadianPlannerApp {
         console.log('🏁 Initializing RadianPlanner...');
         
         try {
+            // Initialize custom dropdowns
+            this.initializeDropdowns();
+            
             // Initialize UI Manager (it handles its own initialization)
             // this.uiManager will initialize automatically in constructor
             
@@ -66,6 +80,146 @@ class RadianPlannerApp {
         } catch (error) {
             console.error('❌ Failed to initialize RadianPlanner:', error);
         }
+    }
+
+    initializeDropdowns() {
+        // Driver dropdown
+        this.dropdowns.driver = new CustomDropdown('driver-select', {
+            placeholder: 'Select a Driver...',
+            onChange: (value) => this.handleDriverSelect(value)
+        });
+
+        // Series dropdown
+        this.dropdowns.series = new CustomDropdown('series-select', {
+            placeholder: 'Select a Series...',
+            onChange: (value) => this.handleSeriesSelect(value)
+        });
+
+        // Event dropdown (disabled initially)
+        this.dropdowns.event = new CustomDropdown('event-select', {
+            placeholder: 'Select Series First...',
+            disabled: true,
+            onChange: (value) => this.handleEventSelect(value)
+        });
+
+        // Session dropdown (disabled initially)
+        this.dropdowns.session = new CustomDropdown('session-select', {
+            placeholder: 'Select Event First...',
+            disabled: true,
+            onChange: (value) => this.handleSessionSelect(value)
+        });
+
+        // Car Class dropdown (disabled initially)
+        this.dropdowns.carClass = new CustomDropdown('car-class-dropdown', {
+            placeholder: 'Select Session First...',
+            disabled: true,
+            onChange: (value) => this.handleCarClassSelect(value)
+        });
+
+        // Car dropdown (disabled initially)
+        this.dropdowns.car = new CustomDropdown('car-dropdown', {
+            placeholder: 'Select Car Class First...',
+            disabled: true,
+            onChange: (value) => this.handleCarSelect(value)
+        });
+    }
+
+    handleDriverSelect(value) {
+        // Existing add driver logic would go here
+        // For now, just log
+        console.log('Driver selected:', value);
+    }
+
+    handleSeriesSelect(value) {
+        const seriesSelect = this.dropdowns.series;
+        const eventSelect = this.dropdowns.event;
+        
+        if (!value) {
+            eventSelect.reset();
+            eventSelect.disable();
+            this.dropdowns.session.reset();
+            this.dropdowns.session.disable();
+            this.selectedSeries = null;
+            this.hideSeriesLogo();
+            return;
+        }
+
+        // Get selected series data
+        this.selectedSeries = this.allData.series.find(s => s.series_id === parseInt(value));
+        console.log('Series selected:', value);
+        console.log('Selected series object:', this.selectedSeries);
+        
+        // Display series logo
+        this.displaySeriesLogo();
+        
+        // Populate events dropdown
+        this.populateEventsDropdown(parseInt(value));
+        eventSelect.enable();
+    }
+
+    handleEventSelect(value) {
+        const sessionSelect = this.dropdowns.session;
+        
+        if (!value) {
+            sessionSelect.reset();
+            sessionSelect.disable();
+            this.clearRaceInformation();
+            return;
+        }
+
+        // Populate sessions dropdown
+        this.populateSessionsDropdown(parseInt(value));
+        sessionSelect.enable();
+        
+        // Clear race information when event changes
+        this.clearRaceInformation();
+    }
+
+    handleSessionSelect(value) {
+        if (!value) {
+            this.clearRaceInformation();
+            this.dropdowns.carClass.reset();
+            this.dropdowns.carClass.disable();
+            this.dropdowns.car.reset();
+            this.dropdowns.car.disable();
+            return;
+        }
+
+        // Load session data and populate Page 2 & race information
+        this.populateRaceInformation(parseInt(value));
+    }
+
+    handleCarClassSelect(value) {
+        const carSelect = this.dropdowns.car;
+        
+        if (!value) {
+            carSelect.reset();
+            carSelect.disable();
+            this.clearCarDetails();
+            return;
+        }
+
+        // Populate cars for selected class
+        this.populateCarsByClass(parseInt(value));
+        carSelect.enable();
+        
+        // Clear car details when class changes
+        this.clearCarDetails();
+    }
+
+    handleCarSelect(value) {
+        if (!value) {
+            this.clearCarDetails();
+            return;
+        }
+        
+        // Get car name from dropdown
+        const selectedOption = this.dropdowns.car.options.find(opt => opt.value === value);
+        const carName = selectedOption ? selectedOption.text : '';
+        
+        console.log('Car selected:', value);
+        // Load car details
+        this.populateCarDetails(parseInt(value), carName);
     }
 
     async loadInitialData() {
@@ -93,37 +247,31 @@ class RadianPlannerApp {
     }
 
     populateSeriesDropdown() {
-        const seriesSelect = document.getElementById('series-select');
-        if (!seriesSelect || !this.allData.series) return;
+        if (!this.dropdowns.series || !this.allData.series) return;
 
-        seriesSelect.innerHTML = '<option value="">Select Series</option>';
-        
-        this.allData.series.forEach(series => {
-            const option = document.createElement('option');
-            option.value = series.series_id;
-            option.textContent = series.series_name;
-            seriesSelect.appendChild(option);
-        });
+        const options = this.allData.series.map(series => ({
+            value: series.series_id.toString(),
+            text: series.series_name
+        }));
+
+        this.dropdowns.series.populateOptions(options);
     }
 
     populateDriversDropdown() {
-        const driverSelect = document.getElementById('driver-select');
-        if (!driverSelect || !this.allData.drivers) return;
+        if (!this.dropdowns.driver || !this.allData.drivers) return;
 
-        driverSelect.innerHTML = '<option value="">Select a Driver...</option>';
-        
         // Filter out drivers without names and sort alphabetically
         const validDrivers = this.allData.drivers.filter(driver => driver && driver.name);
         const sortedDrivers = validDrivers.sort((a, b) => 
             a.name.localeCompare(b.name)
         );
         
-        sortedDrivers.forEach(driver => {
-            const option = document.createElement('option');
-            option.value = driver.name;
-            option.textContent = driver.name;
-            driverSelect.appendChild(option);
-        });
+        const options = sortedDrivers.map(driver => ({
+            value: driver.name,
+            text: driver.name
+        }));
+
+        this.dropdowns.driver.populateOptions(options);
 
         console.log(`✅ Populated drivers dropdown with ${sortedDrivers.length} drivers`);
     }
@@ -208,78 +356,59 @@ class RadianPlannerApp {
     }
 
     async populateEventsDropdown(seriesId) {
-        const eventsSelect = document.getElementById('event-select');
-        if (!eventsSelect) return;
+        if (!this.dropdowns.event) return;
 
-        console.log('� POPULATE EVENTS CALLED with seriesId:', seriesId);
-        console.trace('🔵 Call stack for populateEventsDropdown');
-        eventsSelect.innerHTML = '<option value="">Loading events...</option>';
+        console.log('POPULATE EVENTS CALLED with seriesId:', seriesId);
+        console.trace('Call stack for populateEventsDropdown');
         
-
+        this.dropdowns.event.setText('Loading events...');
         
         try {
             const response = await fetch(`/api/events/${seriesId}`);
             const events = await response.json();
             
-            eventsSelect.innerHTML = '<option value="">Select Event</option>';
-            
             if (!Array.isArray(events)) {
-                console.error('❌ Events response is not an array:', events);
-                eventsSelect.innerHTML = '<option value="">Error: ' + (events.error || 'Invalid response') + '</option>';
+                console.error('Events response is not an array:', events);
+                this.dropdowns.event.setText('Error: ' + (events.error || 'Invalid response'));
                 return;
             }
             
-            events.forEach(event => {
-                const option = document.createElement('option');
-                option.value = event.event_id || event.id;
-                
-                // Format the date for display
-                const eventDate = new Date(event.start_date).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                });
-                
-                // Use only event_name
-                option.textContent = event.event_name;
-                eventsSelect.appendChild(option);
-            });
+            const options = events.map(event => ({
+                value: (event.event_id || event.id).toString(),
+                text: event.event_name
+            }));
+
+            this.dropdowns.event.populateOptions(options);
+            this.dropdowns.event.setText('Select Event');
         } catch (error) {
             console.error('Error fetching events:', error);
-            eventsSelect.innerHTML = '<option value="">Error loading events</option>';
+            this.dropdowns.event.setText('Error loading events');
         }
 
         // Reset sessions dropdown
-        const sessionsSelect = document.getElementById('session-select');
-        if (sessionsSelect) {
-            sessionsSelect.innerHTML = '<option value="">Select Session</option>';
+        if (this.dropdowns.session) {
+            this.dropdowns.session.reset();
+            this.dropdowns.session.setText('Select Event First...');
+            this.dropdowns.session.disable();
         }
     }
 
 
 
     async populateSessionsDropdown(eventId) {
-        const sessionsSelect = document.getElementById('session-select');
-        if (!sessionsSelect) return;
+        if (!this.dropdowns.session) return;
 
-        console.log('🔍 Loading sessions for event ID:', eventId);
-        sessionsSelect.innerHTML = '<option value="">Loading sessions...</option>';
-        sessionsSelect.disabled = false;
+        console.log('Loading sessions for event ID:', eventId);
+        this.dropdowns.session.setText('Loading sessions...');
         
         try {
             const response = await fetch(`/api/sessions/${eventId}`);
             if (!response.ok) throw new Error('Failed to fetch sessions');
             
             const sessions = await response.json();
-            console.log('✅ Found sessions:', sessions);
+            console.log('Found sessions:', sessions);
             
-            sessionsSelect.innerHTML = '<option value="">Select Session</option>';
-            
-            sessions.forEach(session => {
-                const option = document.createElement('option');
-                option.value = session.session_id;
-                
-                // Format session display with name and date
+            const options = sessions.map(session => {
                 const sessionDate = new Date(session.session_date).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -288,13 +417,18 @@ class RadianPlannerApp {
                     minute: '2-digit'
                 });
                 
-                option.textContent = `${session.session_name} - ${sessionDate}`;
-                sessionsSelect.appendChild(option);
+                return {
+                    value: session.session_id.toString(),
+                    text: `${session.session_name} - ${sessionDate}`
+                };
             });
+
+            this.dropdowns.session.populateOptions(options);
+            this.dropdowns.session.setText('Select Session');
             
         } catch (error) {
-            console.error('❌ Error fetching sessions:', error);
-            sessionsSelect.innerHTML = '<option value="">Error loading sessions</option>';
+            console.error('Error fetching sessions:', error);
+            this.dropdowns.session.setText('Error loading sessions');
         }
     }
 
@@ -504,26 +638,24 @@ class RadianPlannerApp {
         if (carSelectionPlaceholder) carSelectionPlaceholder.classList.add('hidden');
         
         // Populate car class dropdown
-        const carClassDropdown = document.getElementById('car-class-dropdown');
-        if (carClassDropdown && sessionDetails.available_car_classes) {
-            carClassDropdown.innerHTML = '<option value="">Select Car Class...</option>';
-            carClassDropdown.disabled = false;
+        if (this.dropdowns.carClass && sessionDetails.available_car_classes) {
+            const options = sessionDetails.available_car_classes.map(carClass => ({
+                value: carClass.car_class_id.toString(),
+                text: carClass.name
+            }));
             
-            sessionDetails.available_car_classes.forEach(carClass => {
-                const option = document.createElement('option');
-                option.value = carClass.car_class_id;
-                option.textContent = carClass.name;
-                carClassDropdown.appendChild(option);
-            });
+            this.dropdowns.carClass.populateOptions(options);
+            this.dropdowns.carClass.setText('Select Car Class...');
+            this.dropdowns.carClass.enable();
             
-            console.log(`✅ Populated car classes: ${sessionDetails.available_car_classes.length} classes`);
+            console.log(`Populated car classes: ${sessionDetails.available_car_classes.length} classes`);
         }
         
         // Reset car dropdown
-        const carDropdown = document.getElementById('car-dropdown');
-        if (carDropdown) {
-            carDropdown.innerHTML = '<option value="">Select Car Class First...</option>';
-            carDropdown.disabled = true;
+        if (this.dropdowns.car) {
+            this.dropdowns.car.reset();
+            this.dropdowns.car.setText('Select Car Class First...');
+            this.dropdowns.car.disable();
         }
         
         // Store session details for later use
@@ -531,12 +663,10 @@ class RadianPlannerApp {
     }
 
     async populateCarsByClass(classId) {
-        const carDropdown = document.getElementById('car-dropdown');
-        if (!carDropdown || !classId) return;
+        if (!this.dropdowns.car || !classId) return;
         
-        console.log('🔍 Loading cars for class ID:', classId);
-        carDropdown.innerHTML = '<option value="">Loading cars...</option>';
-        carDropdown.disabled = false;
+        console.log('Loading cars for class ID:', classId);
+        this.dropdowns.car.setText('Loading cars...');
         
         try {
             // Fetch cars filtered by the selected class
@@ -548,20 +678,19 @@ class RadianPlannerApp {
                 car.iracing_class_id && car.iracing_class_id.toString() === classId.toString()
             );
             
-            carDropdown.innerHTML = '<option value="">Select Car...</option>';
+            const options = filteredCars.map(car => ({
+                value: (car.car_id || car.id).toString(),
+                text: car.car_name || car.name
+            }));
+
+            this.dropdowns.car.populateOptions(options);
+            this.dropdowns.car.setText('Select Car...');
             
-            filteredCars.forEach(car => {
-                const option = document.createElement('option');
-                option.value = car.car_id || car.id;
-                option.textContent = car.car_name || car.name;
-                carDropdown.appendChild(option);
-            });
-            
-            console.log(`✅ Found ${filteredCars.length} cars for class ${classId}`);
+            console.log(`Found ${filteredCars.length} cars for class ${classId}`);
             
         } catch (error) {
-            console.error('❌ Error fetching cars:', error);
-            carDropdown.innerHTML = '<option value="">Error loading cars</option>';
+            console.error('Error fetching cars:', error);
+            this.dropdowns.car.setText('Error loading cars');
         }
     }
 
@@ -574,17 +703,16 @@ class RadianPlannerApp {
         if (carSelectionPlaceholder) carSelectionPlaceholder.classList.remove('hidden');
         
         // Reset dropdowns
-        const carClassDropdown = document.getElementById('car-class-dropdown');
-        const carDropdown = document.getElementById('car-dropdown');
-        
-        if (carClassDropdown) {
-            carClassDropdown.innerHTML = '<option value="">Select Session First...</option>';
-            carClassDropdown.disabled = true;
+        if (this.dropdowns.carClass) {
+            this.dropdowns.carClass.reset();
+            this.dropdowns.carClass.setText('Select Session First...');
+            this.dropdowns.carClass.disable();
         }
         
-        if (carDropdown) {
-            carDropdown.innerHTML = '<option value="">Select Car Class First...</option>';
-            carDropdown.disabled = true;
+        if (this.dropdowns.car) {
+            this.dropdowns.car.reset();
+            this.dropdowns.car.setText('Select Car Class First...');
+            this.dropdowns.car.disable();
         }
         
         // Clear stored session details
@@ -1075,96 +1203,10 @@ class RadianPlannerApp {
             showAdminBtn.addEventListener('click', () => this.uiManager.showAdminPage());
         }
 
-        // iRacing series dropdowns
-        const seriesSelect = document.getElementById('series-select');
-        const eventsSelect = document.getElementById('event-select');
-        const sessionsSelect = document.getElementById('sessionsSelect');
+        // Custom dropdown change handlers are already set in initializeDropdowns()
+        // No need for separate event listeners here
 
-        if (seriesSelect) {
-            seriesSelect.addEventListener('change', (e) => {
-                if (e.target.value) {
-                    console.log('🔍 Series selected:', e.target.value, 'Type:', typeof e.target.value);
-                    console.log('🔍 Selected option text:', e.target.selectedOptions[0]?.textContent);
-                    
-                    // Find and store the selected series object
-                    const seriesId = parseInt(e.target.value);
-                    this.selectedSeries = this.allData.series.find(s => s.series_id === seriesId);
-                    console.log('🏁 Selected series object:', this.selectedSeries);
-                    console.log('🔍 Series logo field:', this.selectedSeries?.logo);
-                    console.log('🔍 All series fields:', Object.keys(this.selectedSeries || {}));
-                    
-                    // Display series logo
-                    this.displaySeriesLogo();
-                    
-                    this.populateEventsDropdown(e.target.value);
-                } else {
-                    // Clear series selection
-                    this.selectedSeries = null;
-                    this.hideSeriesLogo();
-                }
-            });
-        }
-
-        if (eventsSelect) {
-            eventsSelect.addEventListener('change', async (e) => {
-                if (e.target.value) {
-                    await this.populateSessionsDropdown(e.target.value);
-                } else {
-                    // Reset sessions dropdown when no event selected
-                    const sessionsSelect = document.getElementById('session-select');
-                    if (sessionsSelect) {
-                        sessionsSelect.innerHTML = '<option value="">Select Event First...</option>';
-                        sessionsSelect.disabled = true;
-                    }
-                }
-                // Clear race information when event changes
-                this.clearRaceInformation();
-            });
-        }
-
-        // Session selection
-        const sessionSelectElement = document.getElementById('session-select');
-        if (sessionSelectElement) {
-            sessionSelectElement.addEventListener('change', async (e) => {
-                if (e.target.value) {
-                    await this.populateRaceInformation(e.target.value);
-                } else {
-                    this.clearRaceInformation();
-                }
-            });
-        }
-
-        // Car class selection
-        const carClassDropdown = document.getElementById('car-class-dropdown');
-        if (carClassDropdown) {
-            carClassDropdown.addEventListener('change', async (e) => {
-                if (e.target.value) {
-                    await this.populateCarsByClass(e.target.value);
-                } else {
-                    // Reset car dropdown when no class selected
-                    const carDropdown = document.getElementById('car-dropdown');
-                    if (carDropdown) {
-                        carDropdown.innerHTML = '<option value="">Select Car Class First...</option>';
-                        carDropdown.disabled = true;
-                    }
-                }
-                // Clear car details when class changes
-                this.clearCarDetails();
-            });
-        }
-
-        // Car selection
-        const carDropdown = document.getElementById('car-dropdown');
-        if (carDropdown) {
-            carDropdown.addEventListener('change', async (e) => {
-                if (e.target.value) {
-                    console.log('🚗 Car selected:', e.target.value);
-                    await this.populateCarDetails(e.target.value, e.target.selectedOptions[0]?.textContent);
-                } else {
-                    this.clearCarDetails();
-                }
-            });
-        }
+        // Custom dropdown change handlers already set in initializeDropdowns()
 
         // Driver selection and management
         const addDriverBtn = document.getElementById('add-driver-btn');
