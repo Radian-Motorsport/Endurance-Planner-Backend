@@ -335,7 +335,7 @@ export class UIManager {
             case 'planner':
             case 'page2':
                 if (raceDetailsBtn) {
-                    raceDetailsBtn.className = 'bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2';
+                    raceDetailsBtn.className = 'panel glass-strip text-black hover:bg-blue-700 font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2';
                 }
                 break;
             case 'admin':

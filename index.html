@@ -62,7 +62,7 @@
     
 
 </head>
-<body class="bg-neutral-900 text-neutral-200 p-4">
+<body class="bg01 text-neutral-200 p-4">
     
     <!-- Layout Toggle Switch - HIDDEN -->
     <div class="fixed top-4 right-4 z-50 hidden">
@@ -72,15 +72,15 @@
         </button>
     </div>
     
-    <div class="max-w-6xl mx-auto bg-neutral-900 p-6 md:p-10 rounded-xl transition-colors duration-500">
+    <div class="max-w-6xl mx-auto bg01 p-6 md:p-10 rounded-xl transition-colors duration-500">
         <!-- Header -->
         <div class="text-center mb-6">
             <img src="assets/g457912.png" alt="RadianPlanner Logo" class="mx-auto w-100 h-auto">
         </div>
         
         <!-- Admin Button -->
-        <button id="admin-btn" class="bg-neutral-900 hover:bg-green-600 text-black font-bold py-1 px-1 rounded-lg transition-all duration-200 transform hover:scale-105 space-x-2">
-        </button>
+        <!--<button id="admin-btn" class="bg-neutral-900 hover:bg-green-600 text-black font-bold py-1 px-1 rounded-lg transition-all duration-200 transform hover:scale-105 space-x-2">
+        </button> -->
         
         <h2 class="text-5xl road-rage-font text-center mb-10">RACE PLANNER</h2>
 
@@ -90,31 +90,31 @@
                 <button id="race-details-btn" class="bg-neutral-800 hover:bg-blue-700 text-black font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
                     <span>DETAILS</span>
                 </button>
-                <button id="live-tracker-btn" class="bg-neutral-800 hover:bg-red-500 text-black font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">LIVE</button>
+                <button id="live-tracker-btn" class="panel glass-strip hover:bg-red-500 text-black font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">LIVE</button>
             </div>
 
             <!-- Page 1: Race Configuration -->
             <div id="planner-page" class="">
                 <!-- Driver Selection Section -->
-                <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg">
+                <div class="p-6 rounded-lg panel glass-strip grad-on-hover">
                     <h1 class="text-xl mb-4 road-rage-font">Drivers</h1>
                     <div class="flex flex-wrap items-center gap-2 mb-4">
-                        <select id="driver-select" class="p-3 border-neutral-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 flex-1 min-w-[200px] bg-neutral-900 text-neutral-400 text-sm">
+                        <select id="driver-select" class="p-3  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 flex-1 min-w-[200px] panel glass-strip  text-neutral-400 text-sm">
                             <option value="">Select a Driver...</option>
                         </select>
-                        <button id="add-driver-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105" title="Add Driver">
+                        <button id="add-driver-btn" class="glass-strip-nb ov-dark hover:bg-purple-700 text-neutral-400 font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-100" title="Add Driver">
                             <i class="fas fa-plus"></i>
                         </button>
-                        <button id="refresh-drivers-full-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105" title="Refresh All Driver Details">
+                        <button id="refresh-drivers-full-btn" class="glass-strip-nb ov-dark hover:bg-blue-700 text-neutral-400 font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-100" title="Refresh All Driver Details">
                             <i class="fas fa-sync-alt"></i>
                         </button>
-                        <button id="refresh-weather-btn" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105" title="Refresh Weather Data">
+                        <button id="refresh-weather-btn" class="glass-strip-nb ov-dark hover:bg-orange-700 text-neutral-400 font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-100" title="Refresh Weather Data">
                             <i class="fas fa-cloud"></i>
                         </button>
                     </div>
                     <div class="flex flex-wrap items-center gap-2 mb-4">
-                        <input type="number" id="new-driver-cust-id" placeholder="Enter iRacing Customer ID" class="p-3 border-neutral-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200 bg-neutral-900 text-neutral-400 text-sm flex-1 min-w-[200px]">
-                        <button id="add-driver-by-id-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105" title="Add Driver by Customer ID">
+                        <input type="number" id="new-driver-cust-id" placeholder="Enter iRacing Customer ID" class="p-3 panel glass-strip rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200 text-neutral-400 text-sm flex-1 min-w-[200px]">
+                        <button id="add-driver-by-id-btn" class="glass-strip-nb hover:bg-green-700 text-neutral-400 font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-105" title="Add Driver by Customer ID">
                             <i class="fas fa-user-plus"></i>
                         </button>
                     </div>
@@ -122,24 +122,24 @@
                 </div>
 
                 <!-- iRacing Series Selection (NEW SECTION) -->
-                <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
+                <div class="p-6 panel glass-strip rounded-lg mt-6 grad-on-hover">
                     <h1 class="text-xl mb-4 road-rage-font">iRacing Endurance Series</h1>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
                         <div class="flex flex-col w-full">
                             <label class="text-sm font-medium text-neutral-500 mb-2">Series</label>
-                            <select id="series-select" class="p-3 pr-8 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400 text-sm">
+                            <select id="series-select" class="p-3 pr-8 panel glass-strip rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200  text-neutral-400 text-sm">
                                 <option value="">Select a Series...</option>
                             </select>
                         </div>
                         <div class="flex flex-col w-full">
                             <label class="text-sm font-medium text-neutral-500 mb-2">Event</label>
-                            <select id="event-select" class="p-3 pr-8 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400 text-sm" disabled>
+                            <select id="event-select" class="p-3 pr-8 panel glass-strip rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200  text-neutral-400 text-sm" disabled>
                                 <option value="">Select Series First...</option>
                             </select>
                         </div>
                         <div class="flex flex-col w-full">
                             <label class="text-sm font-medium text-neutral-500 mb-2">Session</label>
-                            <select id="session-select" class="p-3 pr-8 border-neutral-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-neutral-900 text-neutral-400 text-sm" disabled>
+                            <select id="session-select" class="p-3 pr-8 panel glass-strip rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200  text-neutral-400 text-sm" disabled>
                                 <option value="">Select Event First...</option>
                             </select>
                         </div>
@@ -148,7 +148,7 @@
 
                 
                 <!-- Race Date & Time -->
-                <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
+                <div class="p-6 panel glass-strip rounded-lg mt-6 grad-on-hover">
                     <!-- Header -->
                     <div class="flex justify-between items-center mb-4">
                         <h1 class="text-xl road-rage-font">Race Information</h1>
@@ -309,7 +309,7 @@
                 </div>
 
                 <!-- Car Selection -->
-                <div class="p-6 bg-neutral-800 border-neutral-900 rounded-lg mt-6">
+                <div class="p-6 panel glass-strip rounded-lg mt-6 grad-on-hover">
                     <h1 class="text-xl mb-4 road-rage-font">Car Selection</h1>
                     <div id="car-selection-content" class="hidden">
                         <!-- Car Selection Dropdowns -->
@@ -381,7 +381,7 @@
 
                 <!-- Continue Button -->
                 <div class="mt-8">
-                    <button id="continue-button" onclick="window.radianPlanner && window.radianPlanner.uiManager ? window.radianPlanner.uiManager.showPage2() : console.error('RadianPlanner or UIManager not available')" class="w-full bg-blue-700 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                    <button id="continue-button" onclick="window.radianPlanner && window.radianPlanner.uiManager ? window.radianPlanner.uiManager.showPage2() : console.error('RadianPlanner or UIManager not available')" class="w-full panel glass-strip hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
                         Calculate <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                 </div>
@@ -391,7 +391,7 @@
 
              <!-- Loading Overlay (Global) - Visible by default, hidden by JavaScript when ready -->
             <div id="page2-loading-overlay" class="fixed inset-0 bg-neutral-950 flex flex-col items-center justify-center z-50">
-                <img src="assets/g457912.png" alt="RadianPlanner Logo" class="mx-auto w-64 h-auto mb-8 p-4">
+                <img src="assets/g457913.png" alt="RadianPlanner Logo" class="mx-auto w-32 h-auto mt-4 mb-4">
                 <h2 class="text-3xl road-rage-font text-center px-10"> LOADING...</h2>
             </div>
 
