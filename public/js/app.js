@@ -2073,7 +2073,7 @@ class RadianPlannerApp {
 
         this.selectedDrivers.forEach(driver => {
             const li = document.createElement('li');
-            li.className = 'bg-neutral-700 rounded-lg p-3 mb-3';
+            li.className = 'panel glass-stripe ov-dark rounded-lg p-3 mb-3';
             
             // Get country flag
             console.log(`🏁 Getting flag for driver ${driver.name} from ${driver.country}`);
