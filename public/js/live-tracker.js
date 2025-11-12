@@ -20,6 +20,23 @@ class PedalTrace {
         }
         this.ctx = this.canvas.getContext('2d');
         
+        // Apply DPI scaling for crisp rendering (deferred if canvas not visible yet)
+        const dpr = window.devicePixelRatio || 1;
+        const rect = this.canvas.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+            this.canvas.width = rect.width * dpr;
+            this.canvas.height = rect.height * dpr;
+            this.ctx.scale(dpr, dpr);
+            this.cssWidth = rect.width;
+            this.cssHeight = rect.height;
+            this.dpiScaled = true;
+        } else {
+            // Use attribute dimensions as fallback
+            this.cssWidth = this.canvas.width || 800;
+            this.cssHeight = this.canvas.height || 133;
+            this.dpiScaled = false;
+        }
+        
         // Configuration with defaults
         this.options = {
             maxPoints: options.maxPoints || 300,
@@ -68,6 +85,20 @@ class PedalTrace {
     draw() {
         if (!this.ctx) return;
         
+        // Apply DPI scaling on first draw if canvas wasn't visible during construction
+        if (!this.dpiScaled) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = this.canvas.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                this.canvas.width = rect.width * dpr;
+                this.canvas.height = rect.height * dpr;
+                this.ctx.scale(dpr, dpr);
+                this.cssWidth = rect.width;
+                this.cssHeight = rect.height;
+                this.dpiScaled = true;
+            }
+        }
+        
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
         // Throttle line
@@ -75,8 +106,8 @@ class PedalTrace {
         this.ctx.strokeStyle = this.options.throttleColor;
         this.ctx.lineWidth = 2;
         this.buffer.forEach((point, i) => {
-            const x = i * (this.canvas.width / this.options.maxPoints);
-            const y = this.canvas.height - point.throttle * (this.canvas.height / 100);
+            const x = i * (this.cssWidth / this.options.maxPoints);
+            const y = this.cssHeight - point.throttle * (this.cssHeight / 100);
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();
@@ -86,8 +117,8 @@ class PedalTrace {
         this.ctx.strokeStyle = this.options.brakeColor;
         this.ctx.lineWidth = 2;
         this.buffer.forEach((point, i) => {
-            const x = i * (this.canvas.width / this.options.maxPoints);
-            const y = this.canvas.height - point.brake * (this.canvas.height / 100);
+            const x = i * (this.cssWidth / this.options.maxPoints);
+            const y = this.cssHeight - point.brake * (this.cssHeight / 100);
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();
@@ -97,8 +128,8 @@ class PedalTrace {
         this.ctx.strokeStyle = this.options.gearColor;
         this.ctx.lineWidth = 1;
         this.buffer.forEach((point, i) => {
-            const x = i * (this.canvas.width / this.options.maxPoints);
-            const y = this.canvas.height - point.gear * (this.canvas.height / 100);
+            const x = i * (this.cssWidth / this.options.maxPoints);
+            const y = this.cssHeight - point.gear * (this.cssHeight / 100);
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();

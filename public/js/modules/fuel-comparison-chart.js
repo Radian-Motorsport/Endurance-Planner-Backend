@@ -16,6 +16,9 @@ export class FuelComparisonChart {
         }
         this.ctx = this.canvas.getContext('2d');
         
+        // DPI scaling will be done on first render when canvas dimensions are known
+        this.dpiScaled = false;
+        
         // Configuration
         this.options = {
             idealLineColor: options.idealLineColor || 'rgba(16, 185, 129, 0.5)',  // Green 50% opacity
@@ -215,6 +218,34 @@ export class FuelComparisonChart {
      */
     render() {
         if (!this.ctx || !this.isVisible) return;
+        
+        // Apply DPI scaling on first render
+        if (!this.dpiScaled) {
+            const dpr = window.devicePixelRatio || 1;
+            
+            // Get current CSS dimensions
+            const rect = this.canvas.getBoundingClientRect();
+            const cssWidth = rect.width;
+            const cssHeight = rect.height;
+            
+            // Set actual canvas pixel dimensions
+            this.canvas.width = cssWidth * dpr;
+            this.canvas.height = cssHeight * dpr;
+            
+            // Scale context to match DPI
+            this.ctx.scale(dpr, dpr);
+            
+            // Recalculate chart area with CSS dimensions
+            this.chartArea = {
+                x: this.options.paddingLeft,
+                y: this.options.paddingTop,
+                width: cssWidth - this.options.paddingLeft - this.options.paddingRight,
+                height: cssHeight - this.options.paddingTop - this.options.paddingBottom
+            };
+            
+            this.dpiScaled = true;
+            console.log('🎨 Applied DPI scaling:', { dpr, cssWidth, cssHeight, canvasWidth: this.canvas.width, canvasHeight: this.canvas.height });
+        }
         
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

@@ -26,6 +26,23 @@ class EnviroTrace {
     
     this.ctx = this.canvas.getContext('2d');
     
+    // Apply DPI scaling for crisp rendering (deferred if canvas not visible yet)
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+        this.canvas.width = rect.width * dpr;
+        this.canvas.height = rect.height * dpr;
+        this.ctx.scale(dpr, dpr);
+        this.cssWidth = rect.width;
+        this.cssHeight = rect.height;
+        this.dpiScaled = true;
+    } else {
+        // Use attribute dimensions as fallback
+        this.cssWidth = this.canvas.width || 800;
+        this.cssHeight = this.canvas.height || 200;
+        this.dpiScaled = false;
+    }
+    
     // Configuration with defaults
     this.options = {
       maxPoints: options.maxPoints || 3600, // 1 hour at 1 point per second
@@ -106,6 +123,20 @@ class EnviroTrace {
       return;
     }
     
+    // Apply DPI scaling on first draw if canvas wasn't visible during construction
+    if (!this.dpiScaled) {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = this.canvas.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+            this.canvas.width = rect.width * dpr;
+            this.canvas.height = rect.height * dpr;
+            this.ctx.scale(dpr, dpr);
+            this.cssWidth = rect.width;
+            this.cssHeight = rect.height;
+            this.dpiScaled = true;
+        }
+    }
+    
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
     if (this.buffer.length === 0) {
@@ -117,8 +148,8 @@ class EnviroTrace {
     const timeWindow = this.options.maxPoints * this.options.sampleInterval; // Total time window in ms
     const now = Date.now();
     const startTime = now - timeWindow;
-    const xScale = this.canvas.width / timeWindow;
-    const canvasHeight = this.canvas.height;
+    const xScale = this.cssWidth / timeWindow;
+    const canvasHeight = this.cssHeight;
     
     // Filter data to only show points within the time window
     const dataToDisplay = this.buffer.filter(point => point.timestamp >= startTime);
