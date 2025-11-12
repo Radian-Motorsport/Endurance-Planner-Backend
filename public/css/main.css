@@ -345,6 +345,13 @@ select {
         overflow:hidden;
         }
 
+        .panel-list{
+        background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+        border-radius:12px;
+        padding: 6px;
+        border:1px solid rgba(255,255,255,0.03);
+        }
+
         .card {
         background:linear-gradient(180deg, rgba(255, 255, 255, 0.062), transparent);
         border-radius:12px;
@@ -383,12 +390,23 @@ select {
         border:1px solid rgba(28, 28, 28, 0.141)     
         }
 
+        .glass-strip-list{ 
+        background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); 
+        border-radius:12px; 
+        padding:10px; 
+        backdrop-filter:blur(6px); 
+        border:1px solid rgba(28, 28, 28, 0.141)     
+        }  
+
         .bg01{
             background: linear-gradient(180deg, #292929 0%, #213131 50%, #27222c 100%, #2a1b28 100%);
             background-attachment: local;
         }
 
         .ov-dark{ background: rgba(0, 0, 0, 0.4) 
+        }
+
+        .ov-dark-list{ background: rgba(0, 0, 0, 0.8) 
         }
 
         .glass-strip-nb{ 
