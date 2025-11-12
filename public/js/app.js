@@ -1943,40 +1943,21 @@ class RadianPlannerApp {
     addSelectedDriver() {
         // Prevent multiple rapid calls
         if (this._addingDriver) {
-            console.log('🔒 Already adding driver, ignoring duplicate call');
+            console.log('Already adding driver, ignoring duplicate call');
             return;
         }
         
         this._addingDriver = true;
         
-        const driverSelect = document.getElementById('driver-select');
+        // Get value from custom dropdown
+        const driverName = this.dropdowns.driver ? this.dropdowns.driver.getValue() : '';
         
-        console.log('🔍 DETAILED DEBUG - Button clicked:');
+        console.log('DETAILED DEBUG - Button clicked:');
         console.log('   - Time:', new Date().toISOString());
-        console.log('   - driverSelect element exists:', !!driverSelect);
-        console.log('   - driverSelect.options.length:', driverSelect?.options?.length);
-        console.log('   - driverSelect.selectedIndex:', driverSelect?.selectedIndex);
-        console.log('   - driverSelect.value BEFORE anything:', `"${driverSelect?.value}"`);
-        console.log('   - driverSelect.value.length:', driverSelect?.value?.length);
-        
-        // Let's see all the options
-        if (driverSelect && driverSelect.options) {
-            console.log('   - Available options:');
-            for (let i = 0; i < driverSelect.options.length; i++) {
-                console.log(`     [${i}] value: "${driverSelect.options[i].value}", text: "${driverSelect.options[i].text}", selected: ${driverSelect.options[i].selected}`);
-            }
-        }
-        
-        const driverName = driverSelect.value;
-        
-        console.log('   - Final driverName after assignment:', `"${driverName}"`);
-        console.log('   - driverName === "":', driverName === "");
-        console.log('   - !driverName:', !driverName);
-        console.log('   - driverName.trim() === "":', driverName?.trim() === "");
+        console.log('   - Driver dropdown value:', `"${driverName}"`);
         
         if (!driverName || driverName.trim() === '') {
-            console.log('❌ VALIDATION FAILED - No driver name selected');
-            console.log('   - This is why the error message appears!');
+            console.log('VALIDATION FAILED - No driver name selected');
             this.uiManager.showNotification('Please select a driver first', 'error');
             this._addingDriver = false;
             return;
@@ -3396,33 +3377,31 @@ class RadianPlannerApp {
             }
 
             const strategyData = await response.json();
-            console.log('📥 Loaded shared strategy:', strategyData);
+            console.log('Loaded shared strategy:', strategyData);
 
             // Apply shared strategy data
             if (strategyData.selectedSeries) {
-                const seriesSelect = document.getElementById('series-select');
-                if (seriesSelect) {
-                    seriesSelect.value = strategyData.selectedSeries.series_id;
+                if (this.dropdowns.series) {
+                    this.dropdowns.series.setValue(strategyData.selectedSeries.series_id.toString());
                     await this.handleSeriesSelection(strategyData.selectedSeries.series_id);
                 }
             }
 
             if (strategyData.selectedEvent) {
-                const eventSelect = document.getElementById('event-select');
-                if (eventSelect) {
-                    eventSelect.value = strategyData.selectedEvent.event_id;
+                if (this.dropdowns.event) {
+                    this.dropdowns.event.setValue(strategyData.selectedEvent.event_id.toString());
                     await this.handleEventSelection(strategyData.selectedEvent.event_id);
                 }
                 
                 // CRITICAL: Restore selectedSessionDetails from saved data
                 // This is normally set by populateRaceInformation() but we skip that when loading shared strategies
                 this.selectedSessionDetails = strategyData.selectedEvent;
-                console.log('✅ Restored selectedSessionDetails:', this.selectedSessionDetails);
+                console.log('Restored selectedSessionDetails:', this.selectedSessionDetails);
                 
                 // CRITICAL: Call populateRaceInformation to set race-datetime and event-datetime data attributes
                 // These are needed for the time toggle to work correctly
                 if (strategyData.selectedEvent && strategyData.selectedEvent.session_id) {
-                    console.log('📅 Populating race information to set data attributes for time toggle');
+                    console.log('Populating race information to set data attributes for time toggle');
                     await this.populateRaceInformation(strategyData.selectedEvent.session_id);
                 }
             }
@@ -3443,9 +3422,8 @@ class RadianPlannerApp {
 
             if (strategyData.selectedCar) {
                 await this.populateCarsByClass(strategyData.selectedCar.class_id);
-                const carSelect = document.getElementById('car-select');
-                if (carSelect) {
-                    carSelect.value = strategyData.selectedCar.car_id;
+                if (this.dropdowns.car) {
+                    this.dropdowns.car.setValue(strategyData.selectedCar.car_id.toString());
                 }
                 // Populate car details using the same method as normal selection
                 await this.populateCarDetails(
