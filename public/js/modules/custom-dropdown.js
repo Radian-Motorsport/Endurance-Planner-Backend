@@ -19,12 +19,12 @@ export class CustomDropdown {
 
     render() {
         this.container.innerHTML = `
-            <div class="custom-dropdown ${this.isDisabled ? 'disabled' : ''}" data-dropdown="${this.containerId}">
-                <div class="dropdown-header p-3 panel glass-strip rounded-lg cursor-pointer text-neutral-400 text-sm transition duration-200 flex items-center justify-between">
+            <div class="custom-dropdown ${this.isDisabled ? 'disabled' : ''}" data-dropdown="${this.containerId}" style="overflow: visible;">
+                <div class="dropdown-header p-3 panel-list glass-strip-list rounded-lg cursor-pointer text-neutral-400 text-sm transition duration-200 flex items-center justify-between">
                     <span class="selected-text">${this.selectedText}</span>
                     <i class="fas fa-chevron-down transition-transform duration-200"></i>
                 </div>
-                <div class="dropdown-list hidden absolute z-50 w-full mt-1 panel glass-strip ov-dark rounded-lg shadow-lg overflow-y-auto" style="max-height: 16rem;">
+                <div class="dropdown-list hidden absolute z-50 w-full mt-1 panel-list glass-strip-list ov-dark-list rounded-lg shadow-lg overflow-y-auto" style="max-height: 16rem;">
                 </div>
             </div>
         `;
