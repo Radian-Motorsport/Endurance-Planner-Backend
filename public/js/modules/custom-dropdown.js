@@ -19,18 +19,22 @@ export class CustomDropdown {
 
     render() {
         this.container.innerHTML = `
-            <div class="custom-dropdown ${this.isDisabled ? 'disabled' : ''}" data-dropdown="${this.containerId}" style="overflow: visible;">
+            <div class="custom-dropdown ${this.isDisabled ? 'disabled' : ''}" data-dropdown="${this.containerId}" style="position: relative;">
                 <div class="dropdown-header p-3 panel-list glass-strip-list rounded-lg cursor-pointer text-neutral-400 text-sm transition duration-200 flex items-center justify-between">
                     <span class="selected-text">${this.selectedText}</span>
                     <i class="fas fa-chevron-down transition-transform duration-200"></i>
                 </div>
-                <div class="dropdown-list hidden absolute z-50 w-full mt-1 panel-list glass-strip-list ov-dark-list rounded-lg shadow-lg overflow-y-auto" style="max-height: 16rem; z-index: 9999;">
-                </div>
             </div>
         `;
         
+        // Create dropdown list separately and append to body for proper z-index layering
+        const dropdownList = document.createElement('div');
+        dropdownList.className = 'dropdown-list hidden absolute w-full panel-list glass-strip-list ov-dark-list rounded-lg shadow-lg overflow-y-auto';
+        dropdownList.style.cssText = 'max-height: 16rem; z-index: 9999;';
+        document.body.appendChild(dropdownList);
+        
         this.headerEl = this.container.querySelector('.dropdown-header');
-        this.listEl = this.container.querySelector('.dropdown-list');
+        this.listEl = dropdownList;
         this.iconEl = this.container.querySelector('.fa-chevron-down');
     }
 
@@ -43,7 +47,7 @@ export class CustomDropdown {
 
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
-            if (!this.container.contains(e.target)) {
+            if (!this.container.contains(e.target) && !this.listEl.contains(e.target)) {
                 this.close();
             }
         });
@@ -55,6 +59,14 @@ export class CustomDropdown {
 
     open() {
         if (this.isDisabled) return;
+        
+        // Position dropdown list relative to header button
+        const rect = this.headerEl.getBoundingClientRect();
+        this.listEl.style.position = 'fixed';
+        this.listEl.style.top = `${rect.bottom + 4}px`;
+        this.listEl.style.left = `${rect.left}px`;
+        this.listEl.style.width = `${rect.width}px`;
+        
         this.isOpen = true;
         this.listEl.classList.remove('hidden');
         this.iconEl.style.transform = 'rotate(180deg)';
