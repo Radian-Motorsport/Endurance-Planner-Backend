@@ -157,7 +157,7 @@ export class WeatherComponent {
     createHTML() {
         return `
             <div style="width: 100%; overflow: visible;">
-                <div class="bg-neutral-800 rounded-lg p-4" style="width: 100%;">
+                <div class="panel glass-stripe rounded-lg p-4" style="width: 100%;">
                     <div class="chakra-tabs">
                         <div class="chakra-tabs__tablist" role="tablist">
                             <button class="chakra-tabs__tab" role="tab" aria-selected="false" data-tab="temperature">

@@ -54,11 +54,11 @@ export class TrackMapComponent {
     createHTML(container) {
         container.innerHTML = `
             <div>
-                <div class="bg-neutral-800 rounded-lg p-4">
+                <div class="panel glass-stripe rounded-lg p-4">
                     <div class="flex justify-between items-start mb-4">
                         <!-- Track Map SVG Container -->
                         <div class="flex-1 ${this.options.showControls ? 'mr-4' : ''}">
-                            <div id="${this.containerId}-map" class="relative bg-neutral-800 rounded-lg p-4 min-h-[300px] flex items-center justify-center">
+                            <div id="${this.containerId}-map" class="relative panel glass-stripe rounded-lg p-4 min-h-[300px] flex items-center justify-center">
                             <div id="${this.containerId}-loading" class="text-neutral-400">
                                 <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
                                 <p>Loading track map...</p>
@@ -91,7 +91,7 @@ export class TrackMapComponent {
     createControlsHTML() {
         return `
             <!-- Layer Controls -->
-            <div id="${this.containerId}-controls" class="w-48 bg-neutral-900 border border-neutral-600 rounded-lg p-3">
+            <div id="${this.containerId}-controls" class="w-48 panel glass-stripe ov-dark rounded-lg p-3">
                 <h4 class="text-xs font-medium text-neutral-300 mb-2">Map Layers</h4>
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
