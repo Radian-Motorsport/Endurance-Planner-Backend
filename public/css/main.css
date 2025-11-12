@@ -43,7 +43,7 @@ h2 {
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    color: #4a90e2; /* Fallback */
+        color: #4a90e2; /* Fallback */
 }
 
 h3 {
@@ -331,3 +331,91 @@ select {
 #race-inputs-container input[type="number"]#avg-lap-time-seconds {
     width: 3rem !important; /* Smaller width for time inputs */
 }
+
+
+        /* Shared utilities */
+        
+        .panel{
+        background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+        border-radius:12px;
+        padding: 6px;
+        border:1px solid rgba(255,255,255,0.03);
+        min-height:10px;
+        position:relative;
+        overflow:hidden;
+        }
+
+        .card {
+        background:linear-gradient(180deg, rgba(255, 255, 255, 0.062), transparent);
+        border-radius:12px;
+        padding:14px;
+        border:1px solid rgba(255,255,255,0.03);
+        box-shadow:0 10px 30px rgba(10, 10, 10, 0.4) inset;
+        }
+
+        .title{ font-weight:600; font-size:14px; margin-bottom:6px }
+        .muted{ color:var(--muted); font-size:13px }
+        .small{ font-size:13px }
+
+        /* 1 Race Card - driver + lap */
+        .race-card{
+        display:flex; gap:12px; align-items:center;
+        background:linear-gradient(180deg,#272727,#191919);
+        padding:6px; 
+        border-radius:12px; 
+        border:1px solid rgba(255,255,255,0.03);
+        }
+        .race-card .badge{ 
+        background:#242424; 
+        padding:8px 10px; 
+        border-radius:8px; 
+        font-weight:700; 
+        color:var(--accent-2); 
+        font-family:Roboto Mono; 
+        }
+    
+        /* 17. Blurred glass strip with backdrop-filter */
+        .glass-strip{ 
+        background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); 
+        border-radius:12px; 
+        padding:10px; 
+        backdrop-filter:blur(6px); 
+        border:1px solid rgba(28, 28, 28, 0.141)     
+        }
+
+        .bg01{
+            background: linear-gradient(180deg, #292929 0%, #213131 50%, #27222c 100%, #2a1b28 100%);
+            background-attachment: local;
+        }
+
+        .ov-dark{ background: rgba(0, 0, 0, 0.4) 
+        }
+
+        .glass-strip-nb{ 
+        background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); 
+        padding:10px; 
+        backdrop-filter:blur(6px); 
+        }
+        
+        .alerts{ 
+        background:linear-gradient(180deg, rgba(255,77,79,0.06), transparent); 
+        padding:10px; border-radius:8px; 
+        display:flex; 
+        gap:8px; 
+        align-items:center; 
+        }
+        .alerts .dot{ 
+        width:10px; 
+        height:10px; 
+        background:var(--accent); 
+        border-radius:50%; 
+        box-shadow:0 6px 20px rgba(255,77,79,0.08) 
+        }
+
+        .grad{ 
+        background:linear-gradient(270deg, rgba(225, 225, 225, 0.05), transparent);
+        }
+
+        .grad-on-hover:hover {
+        background: linear-gradient(270deg, rgba(225, 225, 225, 0.05), rgba(41, 41, 41, 0.05), transparent);
+        }
