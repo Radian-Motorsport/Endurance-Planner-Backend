@@ -748,10 +748,23 @@ export class StrategyCalculator {
         }
         
         // Remove extra rows if stint count decreased
-        if (!isInitialLoad && existingStintRows.length > this.totalStints) {
-            for (let i = this.totalStints; i < existingStintRows.length; i++) {
-                existingStintRows[i]?.remove();
-                existingPitRows[i]?.remove();
+        // Pit rows: For N stints, there are N-1 pit rows (after stints 1 through N-1)
+        // So remove pit rows starting from index (totalStints - 1)
+        if (!isInitialLoad) {
+            // Remove extra stint rows
+            if (existingStintRows.length > this.totalStints) {
+                for (let i = this.totalStints; i < existingStintRows.length; i++) {
+                    existingStintRows[i]?.remove();
+                }
+            }
+            
+            // Remove extra pit rows
+            const expectedPitRows = this.totalStints - 1; // N stints = N-1 pits
+            if (existingPitRows.length > expectedPitRows) {
+                for (let i = expectedPitRows; i < existingPitRows.length; i++) {
+                    existingPitRows[i]?.remove();
+                    console.log(`🗑️ Removed extra pit row ${i}`);
+                }
             }
         }
         
