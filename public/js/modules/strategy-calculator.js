@@ -333,9 +333,9 @@ export class StrategyCalculator {
                 // Stint # (cell[0])
                 cells[0].textContent = index + 1;
                 // Start Time (cell[1])
-                cells[1].textContent = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
+                cells[1].innerHTML = this.formatTimeForDisplay(stintStartTime, displayTimeZone);
                 // End Time (cell[2])
-                cells[2].textContent = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
+                cells[2].innerHTML = this.formatTimeForDisplay(stintEndTime, displayTimeZone);
                 // Start Lap (cell[3]) - MUST be integer
                 cells[3].textContent = Math.floor(currentLap);
                 // End Lap (cell[4]) - MUST be integer
@@ -605,7 +605,9 @@ export class StrategyCalculator {
                 ? this.lapsInLastStint 
                 : this.lapsPerStint;
 
-            const stintDuration = stintLaps * avgLapTimeInSeconds * 1000; // Convert to milliseconds
+            // Use whole laps for duration calculation (can't do fractional laps)
+            const wholeLaps = Math.floor(stintLaps);
+            const stintDuration = wholeLaps * avgLapTimeInSeconds * 1000; // Convert to milliseconds
             const stintStartTime = new Date(currentTime);
             const stintEndTime = new Date(currentTime.getTime() + stintDuration);
 
