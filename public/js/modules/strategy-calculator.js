@@ -451,9 +451,13 @@ export class StrategyCalculator {
             totalLaps = raceLapsLimit;
             console.log(`🏁 LAP MODE: Using lap limit of ${totalLaps} laps`);
         } else {
-            // Time mode: calculate laps from duration
-            totalLaps = Math.floor(inputs.raceDurationSeconds / inputs.avgLapTimeInSeconds);
-            console.log(`⏱️ TIME MODE: Calculated ${totalLaps} laps from duration`);
+            // Time mode: calculate laps accounting for pit stops
+            // Estimate: totalLaps ≈ raceDuration / (lapTime + pitTime/lapsPerTank)
+            const estimatedLapsPerPitCycle = lapsPerTank;
+            const timePerPitCycle = (estimatedLapsPerPitCycle * inputs.avgLapTimeInSeconds) + inputs.pitStopTime;
+            const estimatedTotalLaps = (inputs.raceDurationSeconds / timePerPitCycle) * estimatedLapsPerPitCycle;
+            totalLaps = Math.floor(estimatedTotalLaps);
+            console.log(`⏱️ TIME MODE: Calculated ${totalLaps} laps from duration (accounting for pit stops)`);
         }
         
         const stintDuration = lapsPerTank * inputs.avgLapTimeInSeconds;
