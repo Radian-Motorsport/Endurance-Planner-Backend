@@ -100,7 +100,8 @@
             }
             
             /* Better touch targets (min 44x44px recommended) */
-            button, a, input, select, textarea {
+            /* Only apply to navigation buttons, not form controls */
+            button:not(.chakra-tabs__tab):not([data-adjust]) {
                 min-height: 44px;
                 min-width: 44px;
             }
@@ -112,9 +113,23 @@
                 -webkit-tap-highlight-color: transparent;
             }
             
-            /* Prevent zoom on input focus (iOS) */
-            input, select, textarea {
+            /* Prevent zoom on input focus (iOS) - but allow scaling */
+            input:not([type="range"]), select, textarea {
                 font-size: 16px !important;
+            }
+            
+            /* Allow sliders to scale normally */
+            input[type="range"] {
+                height: auto;
+                min-height: auto;
+            }
+            
+            /* Scale stint table driver dropdowns */
+            #stint-table-body select {
+                font-size: 0.875rem !important;
+                padding: 0.25rem 0.5rem !important;
+                min-height: auto !important;
+                height: auto !important;
             }
             
             /* Smoother animations */
