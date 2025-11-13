@@ -455,14 +455,22 @@ export class StrategyCalculator {
             totalLaps = raceLapsLimit;
             console.log(`🏁 LAP MODE: Using lap limit of ${totalLaps} laps`);
             
-            // Calculate last stint laps for fuel loading
+            // Calculate stint structure
             const fullStints = Math.floor(totalLaps / lapsPerTank);
             this.lapsInLastStint = totalLaps - (fullStints * lapsPerTank);
+            
+            // Total stints = full stints + (1 if there's a partial last stint)
+            this.totalStints = fullStints + (this.lapsInLastStint > 0 ? 1 : 0);
             
             // Add safety margin to last stint fuel (only if there is a last stint)
             if (this.lapsInLastStint > 0) {
                 lastStintFuelLaps = this.lapsInLastStint + FUEL_SAFETY_MARGIN;
+            } else {
+                // No partial stint - last stint is a full tank
+                lastStintFuelLaps = lapsPerTank;
             }
+            
+            console.log(`✅ LAP MODE Result: ${totalLaps} laps across ${this.totalStints} stints, last stint: ${this.lapsInLastStint || lapsPerTank} laps (fueled for ${lastStintFuelLaps})`);
             
         } else {
             // TIME MODE: Calculate stints based on TIME consumption, not laps
