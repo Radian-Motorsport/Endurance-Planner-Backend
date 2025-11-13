@@ -799,12 +799,19 @@ class RadianPlannerApp {
                 }
             }
             
-            // Store selected car details for later use
+            // Store selected car details for later use (with consistent property names for save/restore)
             this.selectedCar = {
+                car_id: selectedCar.car_id || carId,
+                car_name: selectedCar.car_name || carName,
+                class_id: selectedCar.iracing_class_id || selectedCar.class_id,
+                garage61_id: selectedCar.garage61_id,
+                // Legacy compatibility
                 id: carId,
                 name: carName,
                 details: selectedCar
             };
+            
+            console.log('✅ Stored selectedCar:', this.selectedCar);
             
         } catch (error) {
             console.error('❌ Error fetching car details:', error);
@@ -3425,24 +3432,55 @@ class RadianPlannerApp {
             }
 
             if (strategyData.selectedCar) {
-                await this.populateCarsByClass(strategyData.selectedCar.class_id);
-                if (this.dropdowns.car) {
-                    this.dropdowns.car.setValue(strategyData.selectedCar.car_id.toString());
+                const carId = strategyData.selectedCar.car_id || strategyData.selectedCar.id;
+                const carName = strategyData.selectedCar.car_name || strategyData.selectedCar.name;
+                const classId = strategyData.selectedCar.class_id || strategyData.selectedCar.details?.iracing_class_id;
+                
+                console.log('🚗 Restoring car:', { carId, carName, classId });
+                
+                if (classId) {
+                    // Set car class dropdown
+                    if (this.dropdowns.carClass) {
+                        this.dropdowns.carClass.setValue(classId.toString());
+                    }
+                    
+                    // Populate cars for that class
+                    await this.populateCarsByClass(classId);
+                    
+                    // Set the specific car
+                    if (this.dropdowns.car && carId) {
+                        this.dropdowns.car.setValue(carId.toString());
+                    }
+                } else {
+                    console.warn('⚠️ No class_id found in saved car data, cannot restore car class dropdown');
                 }
-                // Populate car details using the same method as normal selection
-                await this.populateCarDetails(
-                    strategyData.selectedCar.car_id || strategyData.selectedCar.id, 
-                    strategyData.selectedCar.car_name || strategyData.selectedCar.name
-                );
+                
+                // Populate car details regardless
+                if (carId) {
+                    await this.populateCarDetails(carId, carName);
+                    console.log('✅ Restored car:', carName);
+                } else {
+                    console.warn('⚠️ No car_id found in saved car data');
+                }
+            } else {
+                console.warn('⚠️ No car found in strategy data');
             }
 
             // Check for Garage61 data now that car and track are selected
             console.log('🔍 Checking for Garage61 data after loading shared strategy...');
             this.checkGarage61Data();
 
-            if (strategyData.selectedDrivers && Array.isArray(strategyData.selectedDrivers)) {
-                this.selectedDrivers = strategyData.selectedDrivers;
+            // ✅ BACKWARD COMPATIBILITY: Check both new and old driver storage locations
+            // New format: strategyData.selectedDrivers (top-level)
+            // Old format: strategyData.formData.drivers (nested in formData)
+            const driversToRestore = strategyData.selectedDrivers || strategyData.formData?.drivers;
+            
+            if (driversToRestore && Array.isArray(driversToRestore)) {
+                this.selectedDrivers = driversToRestore;
                 this.updateDriversList();
+                console.log('✅ Restored drivers:', driversToRestore.map(d => d.name || d));
+            } else {
+                console.warn('⚠️ No drivers found in strategy data');
             }
 
             // Set session metadata for strategy calculator (needed for weather/track loading)
