@@ -2746,7 +2746,7 @@ class LiveStrategyTracker {
         if (pitStopEl && !this.pitTimerInterval) {
             // Not in pits - show average or planned value
             const avgPitTime = this.getAveragePitStopTime();
-            pitStopEl.textContent = `${avgPitTime.toFixed(1)}s`;
+            pitStopEl.textContent = `${avgPitTime.value.toFixed(1)}s`;
         }
         
         // Latest lap fuel per lap
@@ -2890,7 +2890,7 @@ class LiveStrategyTracker {
         // Get running averages (falls back to planned if no history)
         const actualAvgLapTime = this.getRunningAvgLapTime();
         const actualAvgFuelPerLap = this.getRunningAvgFuelPerLap();
-        const avgPitStopTime = this.getAveragePitStopTime();
+        const avgPitStopTimeData = this.getAveragePitStopTime();
         
         // Update displays
         if (this.elements.runningAvgLapTime && actualAvgLapTime > 0) {
@@ -2902,7 +2902,7 @@ class LiveStrategyTracker {
             this.elements.runningAvgFuel.textContent = `${actualAvgFuelPerLap.toFixed(2)} L`;
         }
         if (this.elements.runningAvgPitTime) {
-            this.elements.runningAvgPitTime.textContent = `${avgPitStopTime.toFixed(1)} s`;
+            this.elements.runningAvgPitTime.textContent = `${avgPitStopTimeData.value.toFixed(1)} s`;
         }
     }
     
@@ -3527,6 +3527,28 @@ class LiveStrategyTracker {
             
             // Create pit stop row (except after last stint)
             if (index < stints.length - 1) {
+                // Get pit stop time data (value + isActual flag)
+                const pitStopTimeData = this.getAveragePitStopTime();
+                const pitDuration = pitStopTimeData.value;
+                const isActualData = pitStopTimeData.isActual;
+                
+                // Calculate pit stop times from stint end time
+                let pitStartTime = '--:--';
+                let pitEndTime = '--:--';
+                
+                if (stint.timeOfDayEnd != null) {
+                    // Pit starts when stint ends
+                    pitStartTime = this.formatTimeOfDay(stint.timeOfDayEnd);
+                    
+                    // Pit ends = pit start + pit duration (convert seconds to day fraction)
+                    const pitDurationDayFraction = pitDuration / 86400; // seconds to day fraction
+                    const pitEndTimeOfDay = stint.timeOfDayEnd + pitDurationDayFraction;
+                    pitEndTime = this.formatTimeOfDay(pitEndTimeOfDay);
+                }
+                
+                // Color-code based on data source: grey for default, yellow for actual
+                const durationColorClass = isActualData ? 'text-yellow-400' : 'text-neutral-400';
+                
                 const pitRow = document.createElement('tr');
                 pitRow.setAttribute('data-role', 'pit-stop');
                 pitRow.setAttribute('data-stint', stint.stintNumber);
@@ -3534,11 +3556,11 @@ class LiveStrategyTracker {
                 
                 pitRow.innerHTML = `
                     <td class="px-3 py-1 text-neutral-600 text-xs"></td>
-                    <td class="px-3 py-1 text-neutral-500 text-xs">--</td>
-                    <td class="px-3 py-1 text-neutral-500 text-xs">--</td>
+                    <td class="px-3 py-1 text-neutral-500 font-mono text-xs">${pitStartTime}</td>
+                    <td class="px-3 py-1 text-neutral-500 font-mono text-xs">${pitEndTime}</td>
                     <td class="px-3 py-1 text-center text-neutral-500 text-xs">PIT</td>
                     <td class="px-3 py-1 text-center text-neutral-500 text-xs">PIT</td>
-                    <td class="px-3 py-1 text-right text-neutral-400 font-mono text-xs">${pitStopTime}s</td>
+                    <td class="px-3 py-1 text-right ${durationColorClass} font-mono text-xs">${pitDuration.toFixed(1)}s</td>
                     <td class="px-3 py-1 text-neutral-600 text-xs">-</td>
                     <td class="px-3 py-1 text-neutral-600 text-xs">-</td>
                 `;
@@ -3553,40 +3575,43 @@ class LiveStrategyTracker {
     
     /**
      * Get average pit stop time with outlier filter
-     * Ignores extreme outliers (accidents/repairs) that are > 3x the minimum
+     * Ignores extreme outliers (accidents/repairs) that are +/- 10% from median
      */
     getAveragePitStopTime() {
         if (!this.strategy || !this.strategy.strategyState) {
-            return 90; // Default fallback
+            return { value: 90, isActual: false }; // Default fallback
         }
         
         // Use baseline from planner pit stop time
         const baseline = this.strategy.strategyState.pitStopTime || 90;
         
         if (this.stintHistory.length === 0) {
-            return baseline;
+            return { value: baseline, isActual: false };
         }
         
         const pitTimes = this.stintHistory.map(s => s.pitStopTime).filter(t => t > 0);
         
         if (pitTimes.length === 0) {
-            return baseline;
+            return { value: baseline, isActual: false };
         }
         
-        // Find minimum pit time as reference
-        const minPitTime = Math.min(...pitTimes);
+        // Calculate median for outlier filtering
+        const sortedTimes = [...pitTimes].sort((a, b) => a - b);
+        const median = sortedTimes[Math.floor(sortedTimes.length / 2)];
         
-        // Filter out extreme outliers (3x minimum = likely accident/repair)
-        const validPitTimes = pitTimes.filter(time => time <= minPitTime * 3);
+        // Filter out outliers: +/- 10% from median
+        const lowerBound = median * 0.9;
+        const upperBound = median * 1.1;
+        const validPitTimes = pitTimes.filter(time => time >= lowerBound && time <= upperBound);
         
         if (validPitTimes.length === 0) {
             debug(`⚠️ No valid pit stops, using baseline: ${baseline}s`);
-            return baseline;
+            return { value: baseline, isActual: false };
         }
         
         const avg = validPitTimes.reduce((a, b) => a + b, 0) / validPitTimes.length;
-        debug(`📊 Pit stop average: ${avg.toFixed(1)}s (min: ${minPitTime}s, valid samples: ${validPitTimes.length}/${pitTimes.length})`);
-        return avg;
+        debug(`📊 Pit stop average: ${avg.toFixed(1)}s (median: ${median}s, valid samples: ${validPitTimes.length}/${pitTimes.length})`);
+        return { value: avg, isActual: true };
     }
     
     /**
@@ -3752,7 +3777,8 @@ class LiveStrategyTracker {
         if (this.stintHistory.length > 0) {
             actualAvgLapTime = this.getRunningAvgLapTime();
             actualAvgFuelPerLap = this.getRunningAvgFuelPerLap();
-            avgPitStopTime = this.getAveragePitStopTime();
+            const avgPitStopTimeData = this.getAveragePitStopTime();
+            avgPitStopTime = avgPitStopTimeData.value;
             dataSource = 'ACTUAL';
         }
         
