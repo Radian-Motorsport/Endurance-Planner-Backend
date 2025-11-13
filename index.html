@@ -130,30 +130,66 @@
             }
             
             #weather-content {
-                padding: 0 !important;
+                padding: 0.25rem !important;
             }
             
-            /* Weather charts - minimal padding */
+            /* Weather charts - minimal padding and enforce aspect ratio */
             #weather-display .panel, #weather-display-page2 .panel {
                 padding: 0.25rem !important;
             }
             
+            /* Enforce weather chart dimensions */
+            #weather-display canvas, #weather-display-page2 canvas {
+                width: 100% !important;
+                height: auto !important;
+                aspect-ratio: 16/9 !important;
+            }
+            
             /* Make stint table scrollable horizontally */
-            #strategy-summary-container {
-                overflow-x: auto;
+            #stint-breakdown-display {
+                overflow-x: auto !important;
                 -webkit-overflow-scrolling: touch;
+                padding: 0.5rem !important;
             }
             
             .stint-table {
-                min-width: 800px; /* Force minimum width so table doesn't compress */
-                display: block;
+                min-width: 900px !important; /* Force minimum width */
+                width: 900px !important;
             }
             
-            .stint-table thead,
-            .stint-table tbody {
-                display: table;
-                width: 100%;
-                table-layout: fixed;
+            /* Shrink sliders on mobile */
+            input[type="range"] {
+                height: 20px !important;
+                -webkit-appearance: none;
+                appearance: none;
+                background: transparent;
+            }
+            
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 16px !important;
+                height: 16px !important;
+                border-radius: 50%;
+                background: #3b82f6;
+                cursor: pointer;
+            }
+            
+            input[type="range"]::-moz-range-thumb {
+                width: 16px !important;
+                height: 16px !important;
+                border-radius: 50%;
+                background: #3b82f6;
+                cursor: pointer;
+                border: none;
+            }
+            
+            /* Smaller slider adjustment buttons */
+            button[data-adjust] {
+                min-width: 30px !important;
+                min-height: 30px !important;
+                padding: 0.25rem !important;
+                font-size: 0.875rem !important;
             }
         }
     </style>
