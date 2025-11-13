@@ -406,7 +406,13 @@ select {
         .ov-dark{ background: rgba(0, 0, 0, 0.4) 
         }
 
+        .ov-mid{ background: rgba(0, 0, 0, 0.2) 
+        }
+
         .ov-dark-list{ background: rgba(0, 0, 0, 0.8) 
+        }
+
+        .ov-dark-hover:hover{ background: rgba(0, 0, 0, 0.4) 
         }
 
         .glass-strip-nb{ 
@@ -438,21 +444,71 @@ select {
         background: linear-gradient(270deg, rgba(225, 225, 225, 0.05), rgba(41, 41, 41, 0.05), transparent);
         }
 
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(7, 221, 4, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 15px rgb(0, 255, 68);
+            }
+        }
+
+        .neon{
+        border-radius:14px;
+        padding:18px;
+        background:linear-gradient(135deg,#054508, rgba(255,255,255,0.015));
+        box-shadow:0 8px 40px rgba(63, 233, 6, 0.14);
+        border:1px solid rgba(7, 210, 7, 0.25);
+        animation: pulse-glow 4s infinite;
+        }
+  
+
         /* Custom scrollbar for dropdown lists */
         .dropdown-list::-webkit-scrollbar {
             width: 8px;
         }
 
         .dropdown-list::-webkit-scrollbar-track {
-            background: #1a1a1a;
+            background: #6c6c6c90;
             border-radius: 4px;
         }
 
         .dropdown-list::-webkit-scrollbar-thumb {
-            background: #404040;
+            background: #959595;
             border-radius: 4px;
         }
 
         .dropdown-list::-webkit-scrollbar-thumb:hover {
             background: #525252;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #a0a0a0;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            background: #ffffff;
+            border: 2px solid #545454;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -2px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: hsl(0, 0%, 0%);
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
         }
