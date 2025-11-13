@@ -185,6 +185,19 @@
                 width: auto !important;
                 min-width: 100% !important;
             }
+            
+            /* Prevent driver names from overflowing table cells */
+            #stint-table-body td {
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+            }
+            
+            #stint-table-body select {
+                max-width: 100% !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
         }
     </style>
 
