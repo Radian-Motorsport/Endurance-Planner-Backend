@@ -125,71 +125,30 @@
             
             /* Remove weather display padding on mobile */
             #weather-display, #weather-display-page2 {
-                padding: 0 !important;
+                padding: 0.5rem !important;
                 margin-top: 0.5rem !important;
             }
             
             #weather-content {
-                padding: 0.25rem !important;
-            }
-            
-            /* Weather charts - minimal padding and enforce aspect ratio */
-            #weather-display .panel, #weather-display-page2 .panel {
-                padding: 0.25rem !important;
-            }
-            
-            /* Enforce weather chart dimensions */
-            #weather-display canvas, #weather-display-page2 canvas {
-                width: 100% !important;
-                height: auto !important;
-                aspect-ratio: 16/9 !important;
-            }
-            
-            /* Make stint table scrollable horizontally */
-            #stint-breakdown-display {
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch;
                 padding: 0.5rem !important;
             }
             
+            /* Weather charts - let them scale naturally */
+            #weather-display > div, #weather-display-page2 > div {
+                width: 100% !important;
+                height: auto !important;
+            }
+            
+            /* Make stint table scrollable horizontally - simple approach */
+            #stint-breakdown-display {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+                padding: 1rem !important;
+            }
+            
             .stint-table {
-                min-width: 900px !important; /* Force minimum width */
-                width: 900px !important;
-            }
-            
-            /* Shrink sliders on mobile */
-            input[type="range"] {
-                height: 20px !important;
-                -webkit-appearance: none;
-                appearance: none;
-                background: transparent;
-            }
-            
-            input[type="range"]::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 16px !important;
-                height: 16px !important;
-                border-radius: 50%;
-                background: #3b82f6;
-                cursor: pointer;
-            }
-            
-            input[type="range"]::-moz-range-thumb {
-                width: 16px !important;
-                height: 16px !important;
-                border-radius: 50%;
-                background: #3b82f6;
-                cursor: pointer;
-                border: none;
-            }
-            
-            /* Smaller slider adjustment buttons */
-            button[data-adjust] {
-                min-width: 30px !important;
-                min-height: 30px !important;
-                padding: 0.25rem !important;
-                font-size: 0.875rem !important;
+                width: auto !important;
+                min-width: 100% !important;
             }
         }
     </style>
