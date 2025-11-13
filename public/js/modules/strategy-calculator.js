@@ -307,8 +307,13 @@ export class StrategyCalculator {
                 ? this.lapsInLastStint
                 : this.lapsPerStint;
 
+            // For LAST stint, use FUELED laps (includes safety margin) for end time calculation
+            const displayLaps = (index === this.totalStints - 1) && (this.lastStintFuelLaps > 0)
+                ? this.lastStintFuelLaps
+                : stintLaps;
+
             // Use FULL decimal laps for duration calculation (don't round down)
-            const stintDuration = stintLaps * avgLapTimeInSeconds * 1000; // milliseconds
+            const stintDuration = displayLaps * avgLapTimeInSeconds * 1000; // milliseconds
             const stintStartTime = new Date(currentTime);
             const stintEndTime = new Date(currentTime.getTime() + stintDuration);
 
@@ -673,8 +678,14 @@ export class StrategyCalculator {
                 ? this.lapsInLastStint 
                 : this.lapsPerStint;
 
+            // For LAST stint, use FUELED laps (includes safety margin) for end time calculation
+            // This shows the driver how long they can actually run with the fuel loaded
+            const displayLaps = (i === this.totalStints - 1) && (this.lastStintFuelLaps > 0)
+                ? this.lastStintFuelLaps
+                : stintLaps;
+
             // Use FULL decimal laps for duration calculation (don't round down)
-            const stintDuration = stintLaps * avgLapTimeInSeconds * 1000; // Convert to milliseconds
+            const stintDuration = displayLaps * avgLapTimeInSeconds * 1000; // Convert to milliseconds
             const stintStartTime = new Date(currentTime);
             const stintEndTime = new Date(currentTime.getTime() + stintDuration);
 
