@@ -306,9 +306,8 @@ export class StrategyCalculator {
                 ? this.lapsInLastStint
                 : this.lapsPerStint;
 
-            // Use whole laps for duration calculation (can't do fractional laps)
-            const wholeLaps = Math.floor(stintLaps);
-            const stintDuration = wholeLaps * avgLapTimeInSeconds * 1000; // milliseconds
+            // Use FULL decimal laps for duration calculation (don't round down)
+            const stintDuration = stintLaps * avgLapTimeInSeconds * 1000; // milliseconds
             const stintStartTime = new Date(currentTime);
             const stintEndTime = new Date(currentTime.getTime() + stintDuration);
 
@@ -441,33 +440,88 @@ export class StrategyCalculator {
      */
     performCalculations(inputs) {
         const lapsPerTank = inputs.tankCapacity / inputs.fuelPerLap;
+        const FUEL_SAFETY_MARGIN = 1; // Add 1 lap of fuel to last stint for safety
         
         // Check race mode from app.js
         const isLapMode = window.radianPlanner?.isLapMode || false;
         const raceLapsLimit = parseInt(document.getElementById('race-laps-limit')?.value) || 0;
         
         let totalLaps;
+        let lastStintFuelLaps = 0; // How many laps of fuel to load in final stint
+        
         if (isLapMode && raceLapsLimit > 0) {
             // Lap mode: use exact lap limit from database
             totalLaps = raceLapsLimit;
             console.log(`🏁 LAP MODE: Using lap limit of ${totalLaps} laps`);
+            
+            // Calculate last stint laps for fuel loading
+            const fullStints = Math.floor(totalLaps / lapsPerTank);
+            this.lapsInLastStint = totalLaps - (fullStints * lapsPerTank);
+            
+            // Add safety margin to last stint fuel (only if there is a last stint)
+            if (this.lapsInLastStint > 0) {
+                lastStintFuelLaps = this.lapsInLastStint + FUEL_SAFETY_MARGIN;
+            }
+            
         } else {
-            // Time mode: calculate laps accounting for pit stops
-            // Estimate: totalLaps ≈ raceDuration / (lapTime + pitTime/lapsPerTank)
-            const estimatedLapsPerPitCycle = lapsPerTank;
-            const timePerPitCycle = (estimatedLapsPerPitCycle * inputs.avgLapTimeInSeconds) + inputs.pitStopTime;
-            const estimatedTotalLaps = (inputs.raceDurationSeconds / timePerPitCycle) * estimatedLapsPerPitCycle;
-            totalLaps = Math.floor(estimatedTotalLaps);
-            console.log(`⏱️ TIME MODE: Calculated ${totalLaps} laps from duration (accounting for pit stops)`);
+            // TIME MODE: Calculate stints based on TIME consumption, not laps
+            console.log(`⏱️ TIME MODE: Calculating stints from ${inputs.raceDurationSeconds}s race duration`);
+            
+            let timeRemaining = inputs.raceDurationSeconds;
+            let totalLapsCalculated = 0;
+            let stintCount = 0;
+            
+            // Build stints until time runs out
+            while (timeRemaining > 0) {
+                stintCount++;
+                
+                // Calculate how many laps fit in remaining time
+                const lapsAvailableByTime = timeRemaining / inputs.avgLapTimeInSeconds;
+                
+                // Stint laps = minimum of (tank capacity OR remaining time)
+                const stintLaps = Math.min(lapsPerTank, lapsAvailableByTime);
+                
+                // Duration of this stint
+                const stintDuration = stintLaps * inputs.avgLapTimeInSeconds;
+                
+                // Add to total
+                totalLapsCalculated += stintLaps;
+                
+                // Consume time for this stint
+                timeRemaining -= stintDuration;
+                
+                console.log(`  Stint ${stintCount}: ${stintLaps.toFixed(1)} laps, ${stintDuration.toFixed(0)}s, time remaining: ${timeRemaining.toFixed(0)}s`);
+                
+                // If time remains and it's enough for another full stint cycle, add pit time
+                if (timeRemaining > (inputs.avgLapTimeInSeconds * 2)) {
+                    timeRemaining -= inputs.pitStopTime;
+                    console.log(`    + Pit stop: ${inputs.pitStopTime}s, new time remaining: ${timeRemaining.toFixed(0)}s`);
+                } else {
+                    // Not enough time for another stint, this is the last one
+                    break;
+                }
+            }
+            
+            totalLaps = Math.floor(totalLapsCalculated);
+            this.totalStints = stintCount;
+            
+            // Calculate last stint laps
+            const fullStints = this.totalStints - 1;
+            const fullStintLaps = fullStints * lapsPerTank;
+            this.lapsInLastStint = totalLaps - fullStintLaps;
+            
+            // Add safety margin to last stint fuel (+1 lap)
+            lastStintFuelLaps = this.lapsInLastStint + FUEL_SAFETY_MARGIN;
+            
+            console.log(`✅ TIME MODE Result: ${totalLaps} laps across ${this.totalStints} stints, last stint: ${this.lapsInLastStint} laps (fueled for ${lastStintFuelLaps})`);
         }
         
         const stintDuration = lapsPerTank * inputs.avgLapTimeInSeconds;
-        
-        this.totalStints = Math.floor(totalLaps / lapsPerTank) + (totalLaps % Math.floor(lapsPerTank) > 0 ? 1 : 0);
         this.lapsPerStint = lapsPerTank;
-        this.lapsInLastStint = totalLaps % Math.floor(this.lapsPerStint);
-
-        const totalFuel = totalLaps * inputs.fuelPerLap;
+        
+        // Calculate total fuel (account for safety margin on last stint)
+        const fullStints = this.totalStints - 1;
+        const totalFuel = (fullStints * lapsPerTank * inputs.fuelPerLap) + (lastStintFuelLaps * inputs.fuelPerLap);
         const totalPitStops = this.totalStints - 1;
 
         return {
@@ -477,6 +531,8 @@ export class StrategyCalculator {
             totalStints: this.totalStints,
             lapsPerStint: this.lapsPerStint,
             lapsInLastStint: this.lapsInLastStint,
+            lastStintFuelLaps: lastStintFuelLaps,
+            fuelSafetyMargin: FUEL_SAFETY_MARGIN,
             totalFuel,
             totalPitStops
         };
@@ -610,9 +666,8 @@ export class StrategyCalculator {
                 ? this.lapsInLastStint 
                 : this.lapsPerStint;
 
-            // Use whole laps for duration calculation (can't do fractional laps)
-            const wholeLaps = Math.floor(stintLaps);
-            const stintDuration = wholeLaps * avgLapTimeInSeconds * 1000; // Convert to milliseconds
+            // Use FULL decimal laps for duration calculation (don't round down)
+            const stintDuration = stintLaps * avgLapTimeInSeconds * 1000; // Convert to milliseconds
             const stintStartTime = new Date(currentTime);
             const stintEndTime = new Date(currentTime.getTime() + stintDuration);
 
