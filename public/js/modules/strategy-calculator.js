@@ -348,11 +348,14 @@ export class StrategyCalculator {
             // Increment lap counter for next stint
             currentLap += stintLaps;
 
+            // Advance currentTime to end of this stint BEFORE calculating pit stop
+            currentTime = new Date(stintEndTime.getTime());
+
             // Update pit stop row if it exists
             if (index < this.totalStints - 1) {
                 const nextRow = row.nextElementSibling;
                 if (nextRow && nextRow.getAttribute('data-role') === 'pit-stop') {
-                    const pitStartTime = new Date(stintEndTime.getTime());
+                    const pitStartTime = new Date(currentTime);
                     const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                     const pitCells = nextRow.querySelectorAll('td');
                     if (pitCells.length >= 8) {
@@ -362,9 +365,7 @@ export class StrategyCalculator {
                         pitCells[5].textContent = this.formatPitStopTime(this.pitStopTime);
                     }
                     // Advance currentTime to AFTER the pit stop
-                    currentTime = pitEndTime;
-                } else {
-                    currentTime = new Date(stintEndTime.getTime() + (this.pitStopTime * 1000));
+                    currentTime = new Date(pitEndTime.getTime());
                 }
             }
         });
@@ -660,9 +661,12 @@ export class StrategyCalculator {
             // Increment lap counter for next stint - use FULL stintLaps value to preserve decimals
             currentLap += stintLaps;
 
+            // Advance currentTime to end of this stint BEFORE calculating pit stop
+            currentTime = new Date(stintEndTime.getTime());
+
             // Add pit stop row for next stint (except last stint)
             if (i < this.totalStints - 1) {
-                const pitStartTime = new Date(stintEndTime.getTime());
+                const pitStartTime = new Date(currentTime);
                 const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                 
                 // Update existing pit row or create new one
@@ -674,8 +678,8 @@ export class StrategyCalculator {
                     tbody.appendChild(pitRow);
                 }
                 
-                // IMPORTANT: Advance currentTime to AFTER the pit stop so next stint starts after pit completes
-                currentTime = pitEndTime;
+                // Advance currentTime to AFTER the pit stop so next stint starts after pit completes
+                currentTime = new Date(pitEndTime.getTime());
                 
                 console.log(`      Pit stop: ${pitStartTime.toISOString()} → ${pitEndTime.toISOString()} (${this.pitStopTime}s)`);
             }
@@ -1649,11 +1653,14 @@ export class StrategyCalculator {
 
             currentLap += stintLaps;
 
+            // Advance currentTime to end of this stint BEFORE calculating pit stop
+            currentTime = new Date(stintEndTime.getTime());
+
             // Update pit stop row if it exists
             if (index < this.totalStints - 1) {
                 const nextRow = row.nextElementSibling;
                 if (nextRow && nextRow.getAttribute('data-role') === 'pit-stop') {
-                    const pitStartTime = new Date(stintEndTime.getTime());
+                    const pitStartTime = new Date(currentTime);
                     const pitEndTime = new Date(pitStartTime.getTime() + (this.pitStopTime * 1000));
                     const pitCells = nextRow.querySelectorAll('td');
                     if (pitCells.length >= 8) {
@@ -1662,10 +1669,8 @@ export class StrategyCalculator {
                         // cells[3-4] are "PIT" text, don't touch
                         pitCells[5].textContent = this.formatPitStopTime(this.pitStopTime);
                     }
-                    // IMPORTANT: Advance currentTime to AFTER the pit stop so next stint starts after pit completes
-                    currentTime = pitEndTime;
-                } else {
-                    currentTime = new Date(stintEndTime.getTime() + (this.pitStopTime * 1000));
+                    // Advance currentTime to AFTER the pit stop so next stint starts after pit completes
+                    currentTime = new Date(pitEndTime.getTime());
                 }
             }
         });
