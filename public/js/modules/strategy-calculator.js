@@ -306,7 +306,9 @@ export class StrategyCalculator {
                 ? this.lapsInLastStint
                 : this.lapsPerStint;
 
-            const stintDuration = stintLaps * avgLapTimeInSeconds * 1000; // milliseconds
+            // Use whole laps for duration calculation (can't do fractional laps)
+            const wholeLaps = Math.floor(stintLaps);
+            const stintDuration = wholeLaps * avgLapTimeInSeconds * 1000; // milliseconds
             const stintStartTime = new Date(currentTime);
             const stintEndTime = new Date(currentTime.getTime() + stintDuration);
 
