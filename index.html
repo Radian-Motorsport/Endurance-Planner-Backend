@@ -28,7 +28,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>RadianPlanner - Race Strategy Planning</title>
     
     <!-- External Dependencies -->
@@ -76,6 +79,7 @@
             /* Prevent horizontal overflow */
             body {
                 overflow-x: hidden;
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
             }
             
             /* Ensure containers don't overflow */
@@ -93,6 +97,30 @@
             * {
                 word-wrap: break-word;
                 overflow-wrap: break-word;
+            }
+            
+            /* Better touch targets (min 44x44px recommended) */
+            button, a, input, select, textarea {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            /* Disable text selection on buttons */
+            button {
+                -webkit-user-select: none;
+                user-select: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            /* Prevent zoom on input focus (iOS) */
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+            
+            /* Smoother animations */
+            * {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
             }
         }
     </style>
