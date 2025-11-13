@@ -55,10 +55,9 @@ export class TrackMapComponent {
         container.innerHTML = `
             <div>
                 <div class="p-4 width-100%">
-                    <div class="flex justify-between items-start mb-4">
-                        <!-- Track Map SVG Container -->
-                        <div class="flex-1 ${this.options.showControls ? 'mr-4' : ''}">
-                            <div id="${this.containerId}-map" class="relative panel glass-stripe-nb rounded-lg p-4 min-h-[300px] flex items-center justify-center">
+                    <!-- Track Map SVG Container -->
+                    <div class="w-full">
+                        <div id="${this.containerId}-map" class="relative p-4 min-h-[300px] flex items-center justify-center">
                             <div id="${this.containerId}-loading" class="text-neutral-400">
                                 <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
                                 <p>Loading track map...</p>
@@ -74,7 +73,6 @@ export class TrackMapComponent {
                     </div>
                     
                     ${this.options.showControls ? this.createControlsHTML() : ''}
-                    </div>
                 </div>
             </div>
         `;
@@ -91,48 +89,37 @@ export class TrackMapComponent {
     createControlsHTML() {
         return `
             <!-- Layer Controls -->
-            <div id="${this.containerId}-controls" class="w-48 panel glass-stripe ov-dark rounded-lg p-3">
-                <h4 class="text-xs font-medium text-neutral-300 mb-2">Map Layers</h4>
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-neutral-400">Background</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="layer-background" class="sr-only peer" checked>
-                            <div class="relative w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                        </label>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-neutral-400">Active Config</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="layer-active" class="sr-only peer" checked>
-                            <div class="relative w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                        </label>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-neutral-400">Pit Road</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="layer-pitroad" class="sr-only peer">
-                            <div class="relative w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                        </label>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-neutral-400">Start/Finish</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="layer-start-finish" class="sr-only peer">
-                            <div class="relative w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                        </label>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-neutral-400">Turn Numbers</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="layer-turns" class="sr-only peer">
-                            <div class="relative w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                        </label>
-                    </div>
+            <div id="${this.containerId}-controls" class="flex items-center justify-center gap-4 mt-3 px-3 py-2">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] text-neutral-400">Background</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="layer-background" class="sr-only peer" checked>
+                        <div class="relative w-6 h-3 bg-gray-200 peer-focus:outline-none peer-focus:ring-1 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-2.5 after:w-2.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] text-neutral-400">Pit Road</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="layer-pitroad" class="sr-only peer">
+                        <div class="relative w-6 h-3 bg-gray-200 peer-focus:outline-none peer-focus:ring-1 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-2.5 after:w-2.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] text-neutral-400">Start/Finish</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="layer-start-finish" class="sr-only peer">
+                        <div class="relative w-6 h-3 bg-gray-200 peer-focus:outline-none peer-focus:ring-1 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-2.5 after:w-2.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] text-neutral-400">Turn Numbers</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="layer-turns" class="sr-only peer">
+                        <div class="relative w-6 h-3 bg-gray-200 peer-focus:outline-none peer-focus:ring-1 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-2.5 after:w-2.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
                 </div>
             </div>
         `;
@@ -141,7 +128,7 @@ export class TrackMapComponent {
     setupEventListeners() {
         if (!this.options.showControls) return;
         
-        const layerNames = ['background', 'active', 'pitroad', 'start-finish', 'turns'];
+        const layerNames = ['background', 'pitroad', 'start-finish', 'turns'];
         
         // Use event delegation on the controls container for better reliability
         const controlsContainer = document.getElementById(`${this.containerId}-controls`);
