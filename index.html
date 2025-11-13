@@ -125,18 +125,28 @@
             
             /* Remove weather display padding on mobile */
             #weather-display, #weather-display-page2 {
-                padding: 0.5rem !important;
+                padding: 0 !important;
                 margin-top: 0.5rem !important;
             }
             
             #weather-content {
-                padding: 0.5rem !important;
+                padding: 0 !important;
+            }
+            
+            /* Remove excessive padding from weather component inner div */
+            #weather-display .p-4, #weather-display-page2 .p-4 {
+                padding: 0.25rem !important;
             }
             
             /* Weather charts - let them scale naturally */
             #weather-display > div, #weather-display-page2 > div {
                 width: 100% !important;
                 height: auto !important;
+            }
+            
+            /* Scale weather chart text to use rem instead of fixed px */
+            #weather-display canvas, #weather-display-page2 canvas {
+                font-size: 1rem !important;
             }
             
             /* Make stint table scrollable horizontally - simple approach */
