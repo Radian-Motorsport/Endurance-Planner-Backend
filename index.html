@@ -60,9 +60,45 @@
         }
     </script>
     
+    <!-- Mobile Font Size Scaling -->
+    <style>
+        @media (max-width: 640px) {
+            html {
+                font-size: 10px; /*reduction from default 16px */
+            }
+            
+            /* Force elements to fit within containers */
+            * {
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            
+            /* Prevent horizontal overflow */
+            body {
+                overflow-x: hidden;
+            }
+            
+            /* Ensure containers don't overflow */
+            .panel, .glass-strip, .glass-stripe {
+                overflow: hidden;
+            }
+            
+            /* Make images and SVGs responsive */
+            img, svg {
+                max-width: 100%;
+                height: auto;
+            }
+            
+            /* Prevent text from breaking out */
+            * {
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+        }
+    </style>
 
 </head>
-<body class="bg01 text-neutral-200 p-4">
+<body class="bg01 text-neutral-200 p-1">
     
     <!-- Debug Mode: Immediate Execution Script -->
     <script>
@@ -108,9 +144,9 @@
         </button>
     </div>
     
-    <div class="max-w-6xl mx-auto bg01 p-6 md:p-10 rounded-xl transition-colors duration-500">
+    <div class="max-w-6xl mx-auto bg01 p-4 md:p-10 sm:p-2 rounded-xl transition-colors duration-500">
         <!-- Header -->
-        <div class="text-center mb-6">
+        <div class="text-center mt-6 mb-6">
             <img src="assets/g457913.png" alt="RadianPlanner Logo" class="mx-auto w-100 h-auto">
         </div>
         
