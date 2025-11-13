@@ -66,13 +66,18 @@ class RadianPlannerApp {
             console.log('🔧 DEBUG MODE: Showing all hidden elements for styling');
             document.querySelectorAll('.hidden').forEach(el => {
                 // Don't show loading overlays or other critical hidden UI elements
-                if (el.id !== 'loading-overlay' && 
-                    el.id !== 'loading-overlay-no-blur' && 
-                    !el.classList.contains('loading-overlay')) {
+                const excludedIds = ['loading-overlay', 'loading-overlay-no-blur', 'page2-loading-overlay'];
+                if (!excludedIds.includes(el.id) && !el.classList.contains('loading-overlay')) {
                     el.classList.remove('hidden');
                     el.setAttribute('data-debug-shown', 'true'); // Mark for reference
                 }
             });
+            
+            // Also manually hide the page 2 loading overlay in debug mode
+            const page2Overlay = document.getElementById('page2-loading-overlay');
+            if (page2Overlay) {
+                page2Overlay.style.display = 'none';
+            }
         }
         
         try {
