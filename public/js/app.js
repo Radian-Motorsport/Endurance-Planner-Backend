@@ -1645,15 +1645,25 @@ class RadianPlannerApp {
         // Initial display update
         updateAdjustmentDisplay();
 
+        // Debounce timer for slider recalculation
+        let recalcDebounceTimer = null;
+        const RECALC_DEBOUNCE_MS = 300; // Wait 300ms after slider stops moving
+
         // Fuel slider listeners
         if (fuelSlider) {
             fuelSlider.addEventListener('input', () => {
                 document.getElementById('fuel-slider-value').textContent = parseFloat(fuelSlider.value).toFixed(2);
                 updateAdjustmentDisplay();
-                // Trigger strategy recalculation
-                if (this.strategyCalculator) {
-                    this.strategyCalculator.recalculateWithAdjustments();
+                
+                // Debounced recalculation - only recalc after user stops moving slider
+                if (recalcDebounceTimer) {
+                    clearTimeout(recalcDebounceTimer);
                 }
+                recalcDebounceTimer = setTimeout(() => {
+                    if (this.strategyCalculator) {
+                        this.strategyCalculator.recalculateWithAdjustments();
+                    }
+                }, RECALC_DEBOUNCE_MS);
             });
         }
 
@@ -1662,10 +1672,16 @@ class RadianPlannerApp {
             lapTimeSlider.addEventListener('input', () => {
                 document.getElementById('lap-time-slider-value').textContent = parseFloat(lapTimeSlider.value).toFixed(2);
                 updateAdjustmentDisplay();
-                // Trigger strategy recalculation
-                if (this.strategyCalculator) {
-                    this.strategyCalculator.recalculateWithAdjustments();
+                
+                // Debounced recalculation - only recalc after user stops moving slider
+                if (recalcDebounceTimer) {
+                    clearTimeout(recalcDebounceTimer);
                 }
+                recalcDebounceTimer = setTimeout(() => {
+                    if (this.strategyCalculator) {
+                        this.strategyCalculator.recalculateWithAdjustments();
+                    }
+                }, RECALC_DEBOUNCE_MS);
             });
         }
 
