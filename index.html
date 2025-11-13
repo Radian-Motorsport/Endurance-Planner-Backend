@@ -122,6 +122,39 @@
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
             }
+            
+            /* Remove weather display padding on mobile */
+            #weather-display, #weather-display-page2 {
+                padding: 0 !important;
+                margin-top: 0.5rem !important;
+            }
+            
+            #weather-content {
+                padding: 0 !important;
+            }
+            
+            /* Weather charts - minimal padding */
+            #weather-display .panel, #weather-display-page2 .panel {
+                padding: 0.25rem !important;
+            }
+            
+            /* Make stint table scrollable horizontally */
+            #strategy-summary-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .stint-table {
+                min-width: 800px; /* Force minimum width so table doesn't compress */
+                display: block;
+            }
+            
+            .stint-table thead,
+            .stint-table tbody {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+            }
         }
     </style>
 
