@@ -54,7 +54,7 @@ export class TrackMapComponent {
     createHTML(container) {
         container.innerHTML = `
             <div>
-                <div class="panel glass-stripe rounded-lg p-4">
+                <div class="p-4 width-100%">
                     <div class="flex justify-between items-start mb-4">
                         <!-- Track Map SVG Container -->
                         <div class="flex-1 ${this.options.showControls ? 'mr-4' : ''}">
