@@ -62,8 +62,19 @@ class RadianPlannerApp {
         
         // Check for debug mode to show all hidden elements
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('debug') === 'true') {
+        const isDebugMode = urlParams.get('debug') === 'true';
+        
+        if (isDebugMode) {
             console.log('🔧 DEBUG MODE: Showing all hidden elements for styling');
+            
+            // First, force hide the loading overlay
+            const page2Overlay = document.getElementById('page2-loading-overlay');
+            if (page2Overlay) {
+                page2Overlay.style.display = 'none';
+                console.log('✅ Hid page2-loading-overlay');
+            }
+            
+            // Then show all hidden content elements
             document.querySelectorAll('.hidden').forEach(el => {
                 // Don't show loading overlays or other critical hidden UI elements
                 const excludedIds = ['loading-overlay', 'loading-overlay-no-blur', 'page2-loading-overlay'];
@@ -73,11 +84,7 @@ class RadianPlannerApp {
                 }
             });
             
-            // Also manually hide the page 2 loading overlay in debug mode
-            const page2Overlay = document.getElementById('page2-loading-overlay');
-            if (page2Overlay) {
-                page2Overlay.style.display = 'none';
-            }
+            console.log('✅ Debug mode activated - all content visible');
         }
         
         try {
