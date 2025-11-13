@@ -62,10 +62,27 @@ export class CustomDropdown {
         
         // Position dropdown list relative to header button
         const rect = this.headerEl.getBoundingClientRect();
+        const listMaxHeight = 256; // 16rem = 256px
+        const viewportHeight = window.innerHeight;
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        // Determine if dropdown should open upward or downward
+        const shouldOpenUpward = spaceBelow < listMaxHeight && spaceAbove > spaceBelow;
+        
         this.listEl.style.position = 'fixed';
-        this.listEl.style.top = `${rect.bottom + 4}px`;
         this.listEl.style.left = `${rect.left}px`;
         this.listEl.style.width = `${rect.width}px`;
+        
+        if (shouldOpenUpward) {
+            // Open upward - position bottom of list above the header
+            this.listEl.style.bottom = `${viewportHeight - rect.top + 4}px`;
+            this.listEl.style.top = 'auto';
+        } else {
+            // Open downward - position top of list below the header
+            this.listEl.style.top = `${rect.bottom + 4}px`;
+            this.listEl.style.bottom = 'auto';
+        }
         
         this.isOpen = true;
         this.listEl.classList.remove('hidden');
