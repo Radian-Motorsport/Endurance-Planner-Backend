@@ -329,7 +329,7 @@ export class StrategyCalculator {
 
             // Update time cells
             const cells = row.querySelectorAll('td');
-            if (cells.length >= 9) {
+            if (cells.length >= 8) {
                 // Stint # (cell[0])
                 cells[0].textContent = index + 1;
                 // Start Time (cell[1])
@@ -342,7 +342,7 @@ export class StrategyCalculator {
                 cells[4].textContent = Math.floor(currentLap + stintLaps - 1);
                 // Laps (cell[5]) - display as integer (no decimals)
                 cells[5].textContent = Math.floor(stintLaps);
-                // cell[6] = color strip, cell[7-8] = driver/backup selects (don't touch)
+                // cell[6-7] = driver/backup selects (don't touch)
             }
 
             // Increment lap counter for next stint
