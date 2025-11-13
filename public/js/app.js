@@ -60,6 +60,21 @@ class RadianPlannerApp {
     async init() {
         console.log('🏁 Initializing RadianPlanner...');
         
+        // Check for debug mode to show all hidden elements
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('debug') === 'true') {
+            console.log('🔧 DEBUG MODE: Showing all hidden elements for styling');
+            document.querySelectorAll('.hidden').forEach(el => {
+                // Don't show loading overlays or other critical hidden UI elements
+                if (el.id !== 'loading-overlay' && 
+                    el.id !== 'loading-overlay-no-blur' && 
+                    !el.classList.contains('loading-overlay')) {
+                    el.classList.remove('hidden');
+                    el.setAttribute('data-debug-shown', 'true'); // Mark for reference
+                }
+            });
+        }
+        
         try {
             // Initialize custom dropdowns
             this.initializeDropdowns();
