@@ -340,9 +340,18 @@ class LiveStrategyTracker {
         this.elements.inputGear = document.getElementById('input-gear');
         this.elements.inputRPM = document.getElementById('input-rpm');
         this.elements.inputSpeed = document.getElementById('input-speed');
-        this.elements.inputSteering = document.getElementById('input-steering');
+        this.elements.inputSpeedMax = document.getElementById('input-speed-max');
+        this.elements.inputRPMShift = document.getElementById('input-rpm-shift');
+        this.elements.shiftRPMInput = document.getElementById('shift-rpm-input');
+        this.elements.shiftIndicatorGreen = document.getElementById('shift-indicator-green');
+        this.elements.shiftIndicatorYellow = document.getElementById('shift-indicator-yellow');
+        this.elements.shiftIndicatorRed = document.getElementById('shift-indicator-red');
         this.elements.inputCoasting = document.getElementById('input-coasting');
         this.elements.inputOverlap = document.getElementById('input-overlap');
+        
+        // Max speed tracking
+        this.maxSpeed = 0;
+        this.targetShiftRPM = 7000;
     }
     
     setupEventListeners() {
@@ -356,6 +365,19 @@ class LiveStrategyTracker {
                 // Go to main planner
                 window.location.href = '/';
             }
+        });
+        
+        // Speed max reset button
+        document.getElementById('speed-reset-btn')?.addEventListener('click', () => {
+            this.maxSpeed = 0;
+            if (this.elements.inputSpeedMax) {
+                this.elements.inputSpeedMax.textContent = '--';
+            }
+        });
+        
+        // Shift RPM input change
+        document.getElementById('shift-rpm-input')?.addEventListener('change', (e) => {
+            this.targetShiftRPM = parseInt(e.target.value) || 7000;
         });
         
         document.getElementById('nav-load-strategy')?.addEventListener('click', () => {
@@ -702,12 +724,43 @@ class LiveStrategyTracker {
         if (this.elements.inputRPM) {
             this.elements.inputRPM.textContent = values.RPM ? `${Math.round(values.RPM)}` : '--';
         }
-        if (this.elements.inputSpeed) {
-            this.elements.inputSpeed.textContent = values.Speed ? `${Math.round(values.Speed * 3.6)} km/h` : '--';
+        
+        // Update shift RPM display and indicators
+        if (this.elements.inputRPMShift) {
+            const currentRPM = Math.round(values.RPM ?? 0);
+            this.elements.inputRPMShift.textContent = values.RPM ? `${currentRPM}` : '--';
+            
+            // Calculate shift RPM bands
+            const targetRPM = this.targetShiftRPM;
+            const lowerBand = targetRPM - 1000;
+            const upperBand = targetRPM + 200;
+            
+            // Update indicators based on current RPM
+            if (this.elements.shiftIndicatorGreen) {
+                this.elements.shiftIndicatorGreen.style.backgroundColor = 
+                    currentRPM >= lowerBand && currentRPM <= targetRPM ? '#16a34a' : 'rgba(0, 0, 0, 0.2)';
+            }
+            if (this.elements.shiftIndicatorYellow) {
+                this.elements.shiftIndicatorYellow.style.backgroundColor = 
+                    currentRPM > targetRPM && currentRPM <= upperBand ? '#eab308' : 'rgba(0, 0, 0, 0.2)';
+            }
+            if (this.elements.shiftIndicatorRed) {
+                this.elements.shiftIndicatorRed.style.backgroundColor = 
+                    currentRPM > upperBand ? '#dc2626' : 'rgba(0, 0, 0, 0.2)';
+            }
         }
-        if (this.elements.inputSteering) {
-            const steering = (values.SteeringWheelAngle ?? 0) * (180 / Math.PI);
-            this.elements.inputSteering.textContent = `${steering.toFixed(0)}°`;
+        
+        if (this.elements.inputSpeed) {
+            const speedKmh = Math.round(values.Speed * 3.6);
+            this.elements.inputSpeed.textContent = values.Speed ? `${speedKmh} km/h` : '--';
+            
+            // Track max speed
+            if (speedKmh > this.maxSpeed) {
+                this.maxSpeed = speedKmh;
+                if (this.elements.inputSpeedMax) {
+                    this.elements.inputSpeedMax.textContent = `${this.maxSpeed} km/h`;
+                }
+            }
         }
         
         // Calculate and display coasting/overlap status

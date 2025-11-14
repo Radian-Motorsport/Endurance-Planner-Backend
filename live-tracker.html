@@ -105,22 +105,45 @@
 
         .ov-dark{ background: rgba(0, 0, 0, 0.2) 
         }
+        
+        /* Large background logo watermark */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 2%;
+            left: 2%;
+            width: 96%;
+            height: 96%;
+            background-image: url('assets/g457913.png');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Ensure content appears above watermark */
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
     
     </style>
 </head>
-<body class="bg-neutral-900 text-neutral-200">
+<body class="bg02 text-neutral-200 p-1">
     
     <!-- Full Width Container -->
     <div class="w-full px-6">
         <!-- Header -->
         <div class="text-center mb-8 max-w-7xl mx-auto">
             <img src="assets/g457913.png" alt="RadianPlanner Logo" class="mx-auto w-32 h-auto mt-4 mb-4">
-            <h1 class="text-5xl road-rage-font mb-2" style="background-image: linear-gradient(to right, #00ffff, #d400ff); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">LIVE</h1>
+            <h2 class="text-5xl road-rage-font mb-2" style="background-image: linear-gradient(to right, #00ffff, #d400ff); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">LIVE</h2>
             <p class="text-neutral-400"></p>
         </div>
         
         <!-- Connection Status Bar - SPANS FULL WIDTH -->
-        <div class="bg-neutral-800 rounded-lg p-4 mb-6">
+        <div class="panel glass-stripe rounded-lg p-4 mb-6">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex items-center space-x-2">
@@ -128,11 +151,11 @@
                         <span class="text-sm">Telemetry: <span id="telemetry-status-text">Disconnected</span></span>
                     </div>
                     <div class="text-sm">
-                        Strategy: <span id="current-strategy-info" class="font-mono text-purple-400">Not loaded</span>
+                        Strategy: <span id="current-strategy-info" class="px-6 font-mono text-purple-400">Not loaded</span>
                     </div>
                     <div class="text-sm border-l border-neutral-600 pl-3">
-                        Session Time: <span id="header-session-time" class="font-mono text-blue-400">--:--:--</span>
-                        <span id="header-time-of-day" class="text-neutral-400 text-xs ml-1">(--:--)</span>
+                        Session Time Remaining: <span id="header-session-time" class="px-6 text-blue-400">--:--:--</span>
+                        Time: <span id="header-time-of-day" class="px-6 text-xs ml-1">--:--</span>
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
@@ -183,19 +206,19 @@
         </div>
         
         <!-- Fuel Trace Recorder - SPANS FULL WIDTH -->
-        <div class="bg-neutral-800 rounded-lg p-4 mb-6">
+        <div class="panel glass-stripe rounded-lg p-4 mb-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div id="fuel-recorder-status-indicator" class="w-3 h-3 rounded-full bg-neutral-500"></div>
-                    <span class="text-sm font-semibold">Ideal Fuel Lap Recorder</span>
-                    <span id="fuel-recorder-status-text" class="text-xs text-neutral-400">Ready to record</span>
+                    <span class="text-sm font-semibold">Fuel Recorder</span>
+                    <span id="fuel-recorder-status-text" class="px-6 text-xs text-neutral-400">Ready</span>
                 </div>
                 <div class="flex gap-2">
                     <button id="fuel-recorder-view-button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm transition">
-                        📊 View Stored Data
+                        Stored Data
                     </button>
                     <button id="fuel-recorder-button" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded text-sm transition">
-                        ⏺ Record Ideal Lap
+                        ⏺ Record Lap
                     </button>
                 </div>
             </div>
@@ -254,7 +277,7 @@
         </div>
         
         <!-- Session Info Display - SPANS FULL WIDTH -->
-        <div class="bg-neutral-800 rounded-lg p-4 mb-6">
+        <div class="panel glass-stripe rounded-lg p-4 mb-6">
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Track</div>
@@ -273,19 +296,19 @@
                     <div id="session-series" class="text-sm font-bold text-white truncate">--</div>
                 </div>
                 <div>
-                    <div class="text-xs text-neutral-500 uppercase">Avg Lap Time</div>
+                    <div class="text-xs text-neutral-500 uppercase">Avg Lap Time [P]</div>
                     <div id="setup-avg-lap-time" class="text-sm font-bold text-cyan-400 truncate">--</div>
                 </div>
                 <div>
-                    <div class="text-xs text-neutral-500 uppercase">Avg Fuel Use</div>
+                    <div class="text-xs text-neutral-500 uppercase">Avg Fuel Use [P]</div>
                     <div id="setup-avg-fuel-use" class="text-sm font-bold text-cyan-400 truncate">--</div>
                 </div>
                 <div>
-                    <div class="text-xs text-neutral-500 uppercase">Tank Size</div>
+                    <div class="text-xs text-neutral-500 uppercase">Tank Size [P]</div>
                     <div id="setup-tank-size" class="text-sm font-bold text-cyan-400 truncate">--</div>
                 </div>
                 <div>
-                    <div class="text-xs text-neutral-500 uppercase">Pit Stop Time</div>
+                    <div class="text-xs text-neutral-500 uppercase">Pit Stop Time [P]</div>
                     <div id="setup-pit-time" class="text-sm  font-bold text-cyan-400 truncate">--</div>
                 </div>
             </div>
@@ -298,11 +321,11 @@
             <div class="space-y-6">
         
         <!-- Pedal Trace & Driver Inputs -->
-        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+        <div class="panel glass-stripe rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl road-rage-font">Pedal Trace & Driver Inputs</h2>
+                <h1 class="text-white">Driver Inputs</h1>
                 <button id="toggle-pedal-inputs" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                    Show Inputs ▼
+                    ▼
                 </button>
             </div>
             
@@ -314,52 +337,73 @@
             <!-- Driver Inputs Grid (Collapsible) -->
             <div id="driver-inputs-details" class="hidden">
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Throttle</div>
-                        <div id="input-throttle" class="text-lg font-mono text-green-400">--</div>
+                    <div class="panel glass-stripe rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-2">Throttle</div>
+                        <div id="input-throttle" class="text-lg font-mono text-green-400 mb-2">--</div>                              
+                        <div class="text-xs text-neutral-400 uppercase mb-2">Brake</div>
+                        <div id="input-brake" class="text-lg font-mono text-red-400">--</div>                          
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Brake</div>
-                        <div id="input-brake" class="text-lg font-mono text-red-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Clutch</div>
+                    <div class="panel glass-stripe rounded p-3 ">
+                        <div class="text-xs text-neutral-400 uppercase mb-2">Gear</div>
+                        <div id="input-gear" class="text-lg font-mono text-cyan-400 mb-2">--</div>
+                        <div class="text-xs text-neutral-400 uppercase mb-2">Clutch</div>
                         <div id="input-clutch" class="text-lg font-mono text-blue-400">--</div>
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Gear</div>
-                        <div id="input-gear" class="text-lg font-mono text-cyan-400">--</div>
+                    <div class="panel glass-stripe rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-2 flex justify-between items-center">
+                            <span>Speed</span>
+                            <button id="speed-reset-btn" class="text-xs bg-neutral-700 hover:bg-neutral-600 px-1 py-0.5 rounded transition">Reset</button>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <div>
+                                <div id="input-speed" class="text-lg font-mono text-purple-400">--</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-neutral-400 mb-1">MAX</div>
+                                <div id="input-speed-max" class="text-lg font-mono text-orange-400">--</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">RPM</div>
-                        <div id="input-rpm" class="text-lg font-mono text-yellow-400">--</div>
+                    <div class="panel glass-stripe rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-2 flex justify-between items-center">
+                            <span>Shift RPM</span>
+                        </div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <input type="number" id="shift-rpm-input" placeholder="7000" value="7000" 
+                                   class="w-16 panel glass-strip-nb ov-dark rounded px-2 py-0.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <div class="flex gap-1">
+                                <div id="shift-indicator-green" class="w-10 h-4 ov-dark rounded-full flex items-center justify-center text-xs" title="Target -200">
+                                    <span class="text-green-400"></span>
+                                </div>
+                                <div id="shift-indicator-yellow" class="w-10 h-4 ov-dark rounded-full flex items-center justify-center text-xs" title="Target">
+                                    <span class="text-yellow-400"></span>
+                                </div>
+                                <div id="shift-indicator-red" class="w-10 h-4 ov-dark rounded-full flex items-center justify-center text-xs" title="Target +200">
+                                    <span class="text-red-400"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <div class="text-xs text-neutral-400 ">RPM:</div>
+                            <div id="input-rpm-shift" class="text-lg font-mono text-yellow-400">--</div>
+                        </div>
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Speed</div>
-                        <div id="input-speed" class="text-lg font-mono text-purple-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Steering</div>
-                        <div id="input-steering" class="text-lg font-mono text-pink-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Coasting</div>
-                        <div id="input-coasting" class="text-lg font-mono text-orange-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Overlap</div>
-                        <div id="input-overlap" class="text-lg font-mono text-amber-400">--</div>
+                    <div class="panel glass-stripe rounded p-3">
+                        <div class="text-xs text-neutral-400 uppercase mb-2">Coasting</div>
+                        <div id="input-coasting" class="text-lg font-mono text-orange-400 mb-2">--</div>                    
+                        <div class="text-xs text-neutral-400 uppercase mb-2">Overlap</div>
+                        <div id="input-overlap" class="text-lg font-mono text-cyan-400">--</div>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Fuel Consumption Comparison Chart -->
-        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+        <div class="panel glass-stripe rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl road-rage-font">Fuel Consumption vs Ideal</h2>
+                <h1 class="road-rage-font">Fuel Analysis</h1>
                 <button id="toggle-fuel-comparison" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                    Show Fuel Comparison ▼
+                   ▼
                 </button>
             </div>
             
@@ -368,30 +412,30 @@
                 <!-- Ideal Adjustment Controls -->
                 <div class="flex items-center justify-center gap-3 mb-4 bg-neutral-900 rounded p-3">
                     <span class="text-neutral-400 text-sm">Adjust Ideal:</span>
-                    <button id="ideal-adjust-minus-10" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-xs transition">-0.10L</button>
-                    <button id="ideal-adjust-minus-01" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-xs transition">-0.01L</button>
+                    <button id="ideal-adjust-minus-10" class="panel glass-stripe rounded px-3 py-1 text-xs transition">-0.10L</button>
+                    <button id="ideal-adjust-minus-01" class="panel glass-stripe rounded px-3 py-1 text-xs transition">-0.01L</button>
                     <span id="ideal-adjustment-display" class="text-white font-mono text-sm min-w-20 text-center">0.00L</span>
-                    <button id="ideal-adjust-plus-01" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-xs transition">+0.01L</button>
-                    <button id="ideal-adjust-plus-10" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-xs transition">+0.10L</button>
-                    <button id="ideal-adjust-reset" class="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-xs transition ml-2">Reset</button>
+                    <button id="ideal-adjust-plus-01" class="panel glass-stripe rounded px-3 py-1 text-xs transition">+0.01L</button>
+                    <button id="ideal-adjust-plus-10" class="panel glass-stripe rounded px-3 py-1 text-xs transition">+0.10L</button>
+                    <button id="ideal-adjust-reset" class="panel glass-stripe rounded px-3 py-1 text-xs transition ml-2">Reset</button>
                 </div>
                 <canvas id="fuel-comparison-canvas" width="800" height="250" class="w-full bg-neutral-900 rounded mb-4"></canvas>
                 
                 <!-- Fuel Stats Grid - Row 1 (Lap Consumption) -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Lap Fuel</div>
                         <div id="fuel-ideal-lap-total" class="text-lg font-mono text-green-400">--</div>
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <div class="text-xs text-neutral-400 uppercase mb-1">Current Lap Fuel</div>
                         <div id="fuel-current-lap-total" class="text-lg font-mono text-cyan-400">--</div>
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <div class="text-xs text-neutral-400 uppercase mb-1">Lap Delta</div>
                         <div id="fuel-lap-delta" class="text-lg font-mono text-white">--</div>
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <div class="text-xs text-neutral-400 uppercase mb-1">Lap Progress</div>
                         <div id="fuel-lap-progress" class="text-lg font-mono text-pink-400">--</div>
                     </div>
@@ -399,27 +443,27 @@
                 
                 <!-- Fuel Stats Grid - Row 2 (Current State) -->
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Remaining</div>
                         <div id="fuel-ideal-remaining" class="text-lg font-mono text-green-400">--</div>
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <div class="text-xs text-neutral-400 uppercase mb-1">Actual Remaining</div>
                         <div id="fuel-actual-remaining" class="text-lg font-mono text-cyan-400">--</div>
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <div class="text-xs text-neutral-400 uppercase mb-1">Position Delta</div>
                         <div id="fuel-delta" class="text-lg font-mono text-white">--</div>
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Level</div>
                         <div id="fuel-live-level" class="text-lg font-mono text-yellow-400">--</div>
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Rate</div>
                         <div id="fuel-live-rate" class="text-lg font-mono text-orange-400">--</div>
                     </div>
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Pressure</div>
                         <div id="fuel-live-pressure" class="text-lg font-mono text-purple-400">--</div>
                     </div>
@@ -428,51 +472,51 @@
         </div>
 
         <!-- Live Race Stats -->
-        <div class="bg-neutral-800 rounded-lg p-4 mb-6">
+        <div class="panel glass-stripe rounded p-4 mb-6">
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-4 mb-4">
                 
-                <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="panel glass-stripe rounded p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Total Laps</div>
                     <div id="current-lap" class="text-2xl font-mono text-green-400">--</div>
                 </div>
-                <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="panel glass-stripe rounded p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Stint Number</div>
                     <div id="stint-number" class="text-2xl font-mono text-indigo-400">--</div>
                 </div>
-                <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="panel glass-stripe rounded p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Stint Laps</div>
                     <div id="stint-lap" class="text-2xl font-mono text-cyan-400">--</div>
                 </div>
-                 <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                 <div class="panel glass-stripe rounded p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Last Lap</div>
                     <div id="last-lap-time" class="text-2xl font-mono text-purple-400">--:--</div>
                 </div>
-                <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="panel glass-stripe rounded p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Fuel Remaining</div>
                     <div id="fuel-remaining" class="text-2xl font-mono text-yellow-400">-- L</div>
                 </div>
-                <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="panel glass-stripe rounded p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Laps Remaining</div>
                     <div id="laps-remaining" class="text-2xl font-mono text-orange-400">--</div>
                 </div>
-                <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="panel glass-stripe rounded p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Pit Stop Time</div>
                     <div id="pit-stop-time" class="text-2xl font-mono text-red-400">-- s</div>
                 </div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="panel glass-stripe rounded p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-2">Fuel Per Lap</div>
                     <div id="fuel-per-lap" class="text-2xl font-mono text-orange-400 mb-2">-- L</div>
                     <div class="text-neutral-500 text-xs">Latest</div>
                 </div>
-                <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="panel glass-stripe rounded p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-2">Avg Lap Time</div>
                     <div id="avg-lap-time" class="text-2xl font-mono text-pink-400 mb-2">--:--</div>
                     <div class="text-neutral-500 text-xs">This Stint</div>
                 </div>
-                <div class="bg-neutral-800 rounded-lg p-4 text-center">
+                <div class="panel glass-stripe rounded p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-2">Avg Fuel/Lap</div>
                     <div id="avg-fuel-per-lap" class="text-2xl font-mono text-emerald-400 mb-2">-- L</div>
                     <div class="text-neutral-500 text-xs">This Stint</div>
@@ -481,10 +525,10 @@
         </div>
         
         <!-- Combined Data Display - 3 Columns -->
-        <div class="bg-neutral-800 rounded-lg p-4 mb-6">
+        <div class="panel glass-stripe rounded p-4 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Stint History -->
-                <div class="bg-neutral-800 rounded-lg p-4">
+                <div class="panel glass-stripe rounded p-4">
                     <h3 class="text-neutral-400 text-xs uppercase mb-3 font-bold">Stint History</h3>
                     <div id="stint-history-list" class="space-y-0 max-h-96 overflow-y-auto">
                         <div class="text-neutral-500 text-xs">No completed stints</div>
@@ -492,7 +536,7 @@
                 </div>
                 
                 <!-- Lap Times (Current Stint) -->
-                <div class="bg-neutral-800 rounded-lg p-4">
+                <div class="panel glass-stripe rounded p-4">
                     <div class="text-neutral-400 text-xs uppercase mb-3 font-bold">Lap Times (Current Stint)</div>
                     <div id="stint-lap-times-list" class="space-y-1 max-h-96 overflow-y-auto text-neutral-300">
                         <div class="text-neutral-500 text-xs">No data yet</div>
@@ -500,7 +544,7 @@
                 </div>
                 
                 <!-- Fuel Usage (Current Stint) -->
-                <div class="bg-neutral-800 rounded-lg p-4">
+                <div class="panel glass-stripe rounded p-4">
                     <div class="text-neutral-400 text-xs uppercase mb-3 font-bold">Fuel Usage (Current Stint)</div>
                     <div id="stint-fuel-list" class="space-y-1 max-h-96 overflow-y-auto text-neutral-300">
                         <div class="text-neutral-500 text-xs">No data yet</div>
@@ -510,8 +554,8 @@
         </div>
         
         <!-- Strategy vs Actual Comparison -->
-        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <h2 class="text-xl road-rage-font mb-4">Strategy Status</h2>
+        <div class="panel glass-stripe rounded p-6 mb-6">
+            <h1 class="road-rage-font mb-4">Strategy</h1>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
                 <div>
                     <div class="text-neutral-400 text-sm mb-1">Current Stint</div>
@@ -559,8 +603,8 @@
         </div>
         
         <!-- Stint Breakdown Table -->
-        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
-            <h2 class="text-xl road-rage-font mb-4">Stint Breakdown</h2>
+        <div class="panel glass-stripe rounded p-6 mb-6">
+            <h1 class="road-rage-font mb-4">Stints</h1>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-neutral-900">
@@ -594,11 +638,11 @@
             <div class="space-y-6">
         
         <!-- Weather & Environment -->
-        <div class="bg-neutral-800 rounded-lg p-6">
+        <div class="panel glass-stripe rounded p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl road-rage-font">Weather & Environment</h2>
+                <h1 class="road-rage-font">Environment</h1>
                 <button id="toggle-weather" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                    Show Weather ▼
+                    ▼
                 </button>
             </div>
             
@@ -631,7 +675,7 @@
                 <!-- Weather Data Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <!-- Temp & Pressure Column -->
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-2">Temp & Pressure</h3>
                         <div class="space-y-2 text-xs">
                             <div class="flex justify-between">
@@ -654,7 +698,7 @@
                     </div>
                     
                     <!-- Weather Column -->
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-2">Weather</h3>
                         <div class="space-y-2 text-xs">
                             <div class="flex justify-between">
@@ -673,7 +717,7 @@
                     </div>
                     
                     <!-- Track Conditions Column -->
-                    <div class="bg-neutral-700 rounded p-3">
+                    <div class="panel glass-stripe rounded p-3">
                         <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-2">Track Conditions</h3>
                         <div class="space-y-2 text-xs">
                             <div class="flex justify-between">
@@ -699,11 +743,11 @@
         </div>
         
         <!-- Predicted Weather (from Planner) -->
-        <div class="bg-neutral-800 rounded-lg p-6 mb-6">
+        <div class="panel glass-stripe rounded p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl road-rage-font">Predicted Weather</h2>
+                <h1 class="road-rage-font">Weather</h1>
                 <button id="toggle-predicted-weather" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                    Show Prediction ▼
+                    ▼
                 </button>
             </div>
             
@@ -716,9 +760,9 @@
         </div>
         
         <!-- Lap Progress Bar with Sectors -->
-        <div class="bg-neutral-800 rounded-lg p-6">
+        <div class="panel glass-stripe rounded p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl road-rage-font">Lap Progress</h2>
+                <h1 class="road-rage-font"></h1>
                 <div class="flex items-center gap-4 text-xs text-neutral-400">
                     <div class="flex items-center gap-1">
                         <div class="w-3 h-3 bg-yellow-500 rounded"></div>
@@ -756,11 +800,11 @@
         </div>
         
         <!-- Track Map with Car Position -->
-        <div class="bg-neutral-800 rounded-lg p-6">
+        <div class="panel glass-stripe rounded p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl road-rage-font">Track Map</h2>
+                <h1 class="road-rage-font">Map</h1>
                 <button id="toggle-track-map" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                    Show Map ▼
+                    ▼
                 </button>
             </div>
             
@@ -775,19 +819,19 @@
         </div>
         
         <!-- Sector Time Comparison -->
-        <div class="bg-neutral-800 rounded-lg p-6">
-            <h2 class="text-xl road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Sector Comparison</h2>
+        <div class="panel glass-stripe rounded p-6">
+            <h1 class="road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Sectors</h1>
             <div id="sector-comparison-container" class="space-y-1">
                 <div class="text-neutral-500 text-xs text-center py-4">Sector times will appear during session</div>
             </div>
         </div>
         
         <!-- Car Analysis -->
-        <div class="bg-neutral-800 rounded-lg p-6">
+        <div class="panel glass-stripe rounded p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl road-rage-font">Car Analysis</h2>
+                <h1 class="road-rage-font">Car Details</h1>
                 <button id="toggle-car-analysis" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
-                    Show Analysis ▼
+                    ▼
                 </button>
             </div>
             

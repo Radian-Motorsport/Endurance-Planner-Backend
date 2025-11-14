@@ -56,6 +56,14 @@ h4 {
     text-shadow: 3px 3px 0px #000000;
 }
 
+h5 {
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #000000;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+
 /* Custom Font */
 @font-face {
     font-family: 'RoadRage';
@@ -396,10 +404,15 @@ select {
         padding:10px; 
         backdrop-filter:blur(6px); 
         border:1px solid rgba(28, 28, 28, 0.141)     
-        }  
+        } 
 
         .bg01{
             background: linear-gradient(180deg, #292929 0%, #213131 50%, #27222c 100%, #2a1b28 100%);
+            background-attachment: local;
+        }
+
+        .bg02{
+            background: linear-gradient(180deg, #2a1b28 0%, #27222c 50%, #213131 100%, #292929 100%);
             background-attachment: local;
         }
 
@@ -451,6 +464,11 @@ select {
             50% {
                 box-shadow: 0 0 15px rgb(0, 255, 68);
             }
+        }
+
+        .invisible {
+        opacity: 0;
+        pointer-events: none;
         }
 
         .neon{
