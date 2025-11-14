@@ -1,0 +1,93 @@
+"TelemetryData": {
+
+
+
+"FuelLevelPct": {
+    "name": "FuelLevelPct",
+    "desc": "Percent fuel remaining",
+    "unit": "%",
+    "count": 1,
+    "type": "float"
+
+"FuelUsePerHour": {
+    "name": "FuelUsePerHour",
+    "desc": "Engine fuel used instantaneous",
+    "unit": "kg/h",
+    "count": 1,
+    "type": "float"
+
+"FuelPress": {
+    "name": "FuelPress",
+    "desc": "Engine fuel pressure",
+    "unit": "bar",
+    "count": 1,
+    "type": "float"
+
+"FuelLevel": {
+    "name": "FuelLevel",
+    "desc": "Liters of fuel remaining",
+    "unit": "l",
+    "count": 1,
+    "type": "float"
+
+"FuelLevelPct": {
+    "name": "FuelLevelPct",
+    "desc": "Percent fuel remaining",
+    "unit": "%",
+    "count": 1,
+    "type": "float"
+
+
+
+"CarIdxLapDistPct": {
+    "name": "CarIdxLapDistPct",
+    "desc": "Percentage distance around lap by car index",
+    "unit": "%",
+    "count": 64,
+    "type": "float"
+
+"PlayerCarIdx": {
+    "name": "PlayerCarIdx",
+    "desc": "Players carIdx",
+    "unit": "",
+    "count": 1,
+    "type": "int"
+
+"CarIdxLap": {
+    "name": "CarIdxLap",
+    "desc": "Laps started by car index",
+    "unit": "",
+    "count": 64,
+    "type": "int"
+
+"CarIdxLapCompleted": {
+    "name": "CarIdxLapCompleted",
+    "desc": "Laps completed by car index",
+    "unit": "",
+    "count": 64,
+    "type": "int"
+
+"CarIdxEstTime": {
+    "name": "CarIdxEstTime",
+    "desc": "Estimated time to reach current location on track",
+    "unit": "s",
+    "count": 64,
+    "type": "float"
+
+"CarIdxLastLapTime": {
+    "name": "CarIdxLastLapTime",
+    "desc": "Cars last lap time",
+    "unit": "s",
+    "count": 64,
+    "type": "float"
+
+
+
+FROM SESSION DATA STREAM:[
+
+"session data""DriverInfo"
+
+        "DriverCarFuelKgPerLtr": 0.75,
+        "DriverCarFuelMaxLtr": 104,
+        "DriverCarMaxFuelPct": 1
+        ,

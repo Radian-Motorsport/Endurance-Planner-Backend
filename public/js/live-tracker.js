@@ -186,6 +186,7 @@ class LiveStrategyTracker {
         this.currentStintLapTimes = [];  // Lap times for current stint
         this.currentStintFuelUse = [];   // Fuel use for each lap in current stint
         this.stintHistory = [];          // Array of completed stints with their data
+        this.currentTyreData = null;     // Tyre data captured at stint start
         
         // Stint calculation flag
         this.hasCalculatedStints = false; // Track if stints have been calculated with live session time
@@ -343,9 +344,12 @@ class LiveStrategyTracker {
         this.elements.inputSpeedMax = document.getElementById('input-speed-max');
         this.elements.inputRPMShift = document.getElementById('input-rpm-shift');
         this.elements.shiftRPMInput = document.getElementById('shift-rpm-input');
+        this.elements.shiftIndicatorBlue = document.getElementById('shift-indicator-blue');
+        this.elements.shiftIndicatorWhite = document.getElementById('shift-indicator-white');
         this.elements.shiftIndicatorGreen = document.getElementById('shift-indicator-green');
         this.elements.shiftIndicatorYellow = document.getElementById('shift-indicator-yellow');
-        this.elements.shiftIndicatorRed = document.getElementById('shift-indicator-red');
+        this.elements.shiftIndicatorPurple = document.getElementById('shift-indicator-purple');
+        this.elements.shiftIndicatorOrange = document.getElementById('shift-indicator-orange');
         this.elements.inputCoasting = document.getElementById('input-coasting');
         this.elements.inputOverlap = document.getElementById('input-overlap');
         
@@ -376,7 +380,7 @@ class LiveStrategyTracker {
         });
         
         // Shift RPM input change
-        document.getElementById('shift-rpm-input')?.addEventListener('change', (e) => {
+        document.getElementById('shift-rpm-input')?.addEventListener('input', (e) => {
             this.targetShiftRPM = parseInt(e.target.value) || 7000;
         });
         
@@ -408,11 +412,11 @@ class LiveStrategyTracker {
                 if (pedalInputsDetails.classList.contains('hidden')) {
                     pedalInputsDetails.classList.remove('hidden');
                     if (pedalCanvas) pedalCanvas.classList.remove('hidden');
-                    togglePedalBtn.textContent = 'Hide Inputs ▲';
+                    togglePedalBtn.textContent = '▲';
                 } else {
                     pedalInputsDetails.classList.add('hidden');
                     if (pedalCanvas) pedalCanvas.classList.add('hidden');
-                    togglePedalBtn.textContent = 'Show Inputs ▼';
+                    togglePedalBtn.textContent = '▼';
                 }
             });
         }
@@ -442,10 +446,10 @@ class LiveStrategyTracker {
             toggleTrackMapBtn.addEventListener('click', () => {
                 if (trackMapDetails.classList.contains('hidden')) {
                     trackMapDetails.classList.remove('hidden');
-                    toggleTrackMapBtn.textContent = 'Hide Map ▲';
+                    toggleTrackMapBtn.textContent = '▲';
                 } else {
                     trackMapDetails.classList.add('hidden');
-                    toggleTrackMapBtn.textContent = 'Show Map ▼';
+                    toggleTrackMapBtn.textContent = '▼';
                 }
             });
         }
@@ -457,10 +461,10 @@ class LiveStrategyTracker {
             toggleCarAnalysisBtn.addEventListener('click', () => {
                 if (carAnalysisDetails.classList.contains('hidden')) {
                     carAnalysisDetails.classList.remove('hidden');
-                    toggleCarAnalysisBtn.textContent = 'Hide Analysis ▲';
+                    toggleCarAnalysisBtn.textContent = '▲';
                 } else {
                     carAnalysisDetails.classList.add('hidden');
-                    toggleCarAnalysisBtn.textContent = 'Show Analysis ▼';
+                    toggleCarAnalysisBtn.textContent = '▼';
                 }
             });
         }
@@ -472,10 +476,10 @@ class LiveStrategyTracker {
             toggleWeatherBtn.addEventListener('click', () => {
                 if (weatherDetails.classList.contains('hidden')) {
                     weatherDetails.classList.remove('hidden');
-                    toggleWeatherBtn.textContent = 'Hide Weather ▲';
+                    toggleWeatherBtn.textContent = '▲';
                 } else {
                     weatherDetails.classList.add('hidden');
-                    toggleWeatherBtn.textContent = 'Show Weather ▼';
+                    toggleWeatherBtn.textContent = '▼';
                 }
             });
         }
@@ -487,7 +491,7 @@ class LiveStrategyTracker {
             togglePredictedWeatherBtn.addEventListener('click', () => {
                 if (predictedWeatherDetails.classList.contains('hidden')) {
                     predictedWeatherDetails.classList.remove('hidden');
-                    togglePredictedWeatherBtn.textContent = 'Hide Prediction ▲';
+                    togglePredictedWeatherBtn.textContent = '▲';
                     // Load weather component if not already loaded
                     if (!this.weatherComponent && this.strategy) {
                         this.loadWeatherComponent();
@@ -500,7 +504,7 @@ class LiveStrategyTracker {
                     }
                 } else {
                     predictedWeatherDetails.classList.add('hidden');
-                    togglePredictedWeatherBtn.textContent = 'Show Prediction ▼';
+                    togglePredictedWeatherBtn.textContent = '▼';
                 }
             });
         }
@@ -732,21 +736,37 @@ class LiveStrategyTracker {
             
             // Calculate shift RPM bands
             const targetRPM = this.targetShiftRPM;
-            const lowerBand = targetRPM - 1000;
-            const upperBand = targetRPM + 200;
+            const band1 = targetRPM - 4000;
+            const band2 = targetRPM - 3000;
+            const band3 = targetRPM - 2000;
+            const band4 = targetRPM - 1200;
+            const band5 = targetRPM - 150;
+            const band6 = targetRPM + 150;
             
             // Update indicators based on current RPM
+            if (this.elements.shiftIndicatorBlue) {
+                this.elements.shiftIndicatorBlue.style.backgroundColor = 
+                    currentRPM >= band1 && currentRPM <= band6 ? '#05218fa6' : 'rgba(0, 0, 0, 0.2)';
+            }
             if (this.elements.shiftIndicatorGreen) {
                 this.elements.shiftIndicatorGreen.style.backgroundColor = 
-                    currentRPM >= lowerBand && currentRPM <= targetRPM ? '#16a34a' : 'rgba(0, 0, 0, 0.2)';
+                    currentRPM >= band2 && currentRPM <= band6 ? '#580cc3a2' : 'rgba(0, 0, 0, 0.2)';
             }
             if (this.elements.shiftIndicatorYellow) {
                 this.elements.shiftIndicatorYellow.style.backgroundColor = 
-                    currentRPM > targetRPM && currentRPM <= upperBand ? '#eab308' : 'rgba(0, 0, 0, 0.2)';
+                    currentRPM > band3 && currentRPM <= band6 ? '#c408eaa4' : 'rgba(0, 0, 0, 0.2)';
             }
-            if (this.elements.shiftIndicatorRed) {
-                this.elements.shiftIndicatorRed.style.backgroundColor = 
-                    currentRPM > upperBand ? '#dc2626' : 'rgba(0, 0, 0, 0.2)';
+            if (this.elements.shiftIndicatorOrange) {
+                this.elements.shiftIndicatorOrange.style.backgroundColor = 
+                    currentRPM > band4 && currentRPM <= band6 ? '#00fcda86' : 'rgba(0, 0, 0, 0.2)';
+            }
+            if (this.elements.shiftIndicatorWhite) {
+                this.elements.shiftIndicatorWhite.style.backgroundColor = 
+                    currentRPM > band5 && currentRPM <= band6 ? '#d9d9d99f' : 'rgba(0, 0, 0, 0.2)';
+            }
+            if (this.elements.shiftIndicatorPurple) {
+                this.elements.shiftIndicatorPurple.style.backgroundColor = 
+                    currentRPM > band6 ? '#ff00006f' : 'rgba(0, 0, 0, 0.2)';
             }
         }
         
@@ -2543,6 +2563,10 @@ class LiveStrategyTracker {
             
             this.finishCurrentStint();  // Save current stint data
             this.startNewStint();       // Initialize new stint
+            
+            // Capture tyre data at pit exit
+            this.captureTyreData(values);
+            
             debug(`🏁 NEW STINT #${this.currentStintNumber} started!`);
         }
         
@@ -2656,7 +2680,8 @@ class LiveStrategyTracker {
                 avgLapTime: this.getAverageLapTime(this.currentStintLapTimes),
                 avgFuelPerLap: this.getAverageFuelPerLap(this.currentStintFuelUse),
                 totalLapTime: totalLapTime || 0,
-                totalStintTime: totalStintTime || 0
+                totalStintTime: totalStintTime || 0,
+                tyres: this.currentTyreData // Compact: {t:[[],[]...], w:[[],[]...]}
             };
             this.stintHistory.push(stintData);
             debug(`✅ Stint #${this.currentStintNumber} completed:`, stintData);
@@ -2843,7 +2868,16 @@ class LiveStrategyTracker {
         if (this.elements.stintHistoryList) {
             if (this.stintHistory.length > 0) {
                 this.elements.stintHistoryList.innerHTML = this.stintHistory
-                    .map(stint => `
+                    .map(stint => {
+                        let tyreHTML = '';
+                        if (stint.tyres && stint.tyres.w) {
+                            const lf = ((stint.tyres.w[0][0] + stint.tyres.w[0][1] + stint.tyres.w[0][2]) / 3 * 100).toFixed(0);
+                            const rf = ((stint.tyres.w[1][0] + stint.tyres.w[1][1] + stint.tyres.w[1][2]) / 3 * 100).toFixed(0);
+                            const lr = ((stint.tyres.w[2][0] + stint.tyres.w[2][1] + stint.tyres.w[2][2]) / 3 * 100).toFixed(0);
+                            const rr = ((stint.tyres.w[3][0] + stint.tyres.w[3][1] + stint.tyres.w[3][2]) / 3 * 100).toFixed(0);
+                            tyreHTML = `<div class="text-xs text-neutral-500 mt-1">LF${lf} RF${rf} LR${lr} RR${rr}</div>`;
+                        }
+                        return `
                         <div class="text-sm font-mono border-b border-neutral-700 pb-2 mb-2">
                             <div class="flex justify-between items-center">
                                 <span class="font-bold text-blue-400">Stint #${stint.stintNumber}</span>
@@ -2857,8 +2891,9 @@ class LiveStrategyTracker {
                             <div class="text-xs text-neutral-500 mt-1">
                                 Pit: ${stint.pitStopTime}s | Lap Time: ${stint.totalLapTime ? this.formatLapTime(stint.totalLapTime) : '--'}
                             </div>
-                        </div>
-                    `)
+                            ${tyreHTML}
+                        </div>`;
+                    })
                     .join('');
             } else {
                 this.elements.stintHistoryList.innerHTML = '<div class="text-neutral-500 text-xs">No completed stints</div>';
@@ -2927,6 +2962,69 @@ class LiveStrategyTracker {
         
         // Update stint table rows
         this.updateStintTableStatus();
+    }
+    
+    /**
+     * Capture tyre data at pit exit (compact format)
+     */
+    captureTyreData(values) {
+        // Store in compact array format: [LF, RF, LR, RR] each with [L,M,R] temps and wear
+        this.currentTyreData = {
+            t: [ // temps (°C)
+                [values.LFtempCL, values.LFtempCM, values.LFtempCR],
+                [values.RFtempCL, values.RFtempCM, values.RFtempCR],
+                [values.LRtempCL, values.LRtempCM, values.LRtempCR],
+                [values.RRtempCL, values.RRtempCM, values.RRtempCR]
+            ],
+            w: [ // wear (0-1 scale)
+                [values.LFwearL, values.LFwearM, values.LFwearR],
+                [values.RFwearL, values.RFwearM, values.RFwearR],
+                [values.LRwearL, values.LRwearM, values.LRwearR],
+                [values.RRwearL, values.RRwearM, values.RRwearR]
+            ]
+        };
+        
+        this.updateTyreDisplay(this.currentTyreData);
+        debug('🛞 Tyre data captured at pit exit');
+    }
+    
+    /**
+     * Update tyre health display (compact data format)
+     */
+    updateTyreDisplay(tyreData) {
+        if (!tyreData) return;
+        
+        const fmt = (v) => v?.toFixed(1) || '--';
+        const fmtW = (v) => v ? (v * 100).toFixed(0) + '%' : '--';
+        
+        // [LF, RF, LR, RR] index 0,1,2,3
+        document.getElementById('tyre-lf-temp-l').textContent = fmt(tyreData.t[0][0]);
+        document.getElementById('tyre-lf-temp-m').textContent = fmt(tyreData.t[0][1]);
+        document.getElementById('tyre-lf-temp-r').textContent = fmt(tyreData.t[0][2]);
+        document.getElementById('tyre-lf-wear-l').textContent = fmtW(tyreData.w[0][0]);
+        document.getElementById('tyre-lf-wear-m').textContent = fmtW(tyreData.w[0][1]);
+        document.getElementById('tyre-lf-wear-r').textContent = fmtW(tyreData.w[0][2]);
+        
+        document.getElementById('tyre-rf-temp-l').textContent = fmt(tyreData.t[1][0]);
+        document.getElementById('tyre-rf-temp-m').textContent = fmt(tyreData.t[1][1]);
+        document.getElementById('tyre-rf-temp-r').textContent = fmt(tyreData.t[1][2]);
+        document.getElementById('tyre-rf-wear-l').textContent = fmtW(tyreData.w[1][0]);
+        document.getElementById('tyre-rf-wear-m').textContent = fmtW(tyreData.w[1][1]);
+        document.getElementById('tyre-rf-wear-r').textContent = fmtW(tyreData.w[1][2]);
+        
+        document.getElementById('tyre-lr-temp-l').textContent = fmt(tyreData.t[2][0]);
+        document.getElementById('tyre-lr-temp-m').textContent = fmt(tyreData.t[2][1]);
+        document.getElementById('tyre-lr-temp-r').textContent = fmt(tyreData.t[2][2]);
+        document.getElementById('tyre-lr-wear-l').textContent = fmtW(tyreData.w[2][0]);
+        document.getElementById('tyre-lr-wear-m').textContent = fmtW(tyreData.w[2][1]);
+        document.getElementById('tyre-lr-wear-r').textContent = fmtW(tyreData.w[2][2]);
+        
+        document.getElementById('tyre-rr-temp-l').textContent = fmt(tyreData.t[3][0]);
+        document.getElementById('tyre-rr-temp-m').textContent = fmt(tyreData.t[3][1]);
+        document.getElementById('tyre-rr-temp-r').textContent = fmt(tyreData.t[3][2]);
+        document.getElementById('tyre-rr-wear-l').textContent = fmtW(tyreData.w[3][0]);
+        document.getElementById('tyre-rr-wear-m').textContent = fmtW(tyreData.w[3][1]);
+        document.getElementById('tyre-rr-wear-r').textContent = fmtW(tyreData.w[3][2]);
     }
     
     /**

@@ -217,7 +217,7 @@
                     <button id="fuel-recorder-view-button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm transition">
                         Stored Data
                     </button>
-                    <button id="fuel-recorder-button" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded text-sm transition">
+                    <button id="fuel-recorder-button" class="text-white px-4 py-1.5 rounded text-sm transition">
                         ⏺ Record Lap
                     </button>
                 </div>
@@ -321,88 +321,288 @@
             <div class="space-y-6">
         
         <!-- Pedal Trace & Driver Inputs -->
-        <div class="panel glass-stripe rounded-lg p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h1 class="text-white">Driver Inputs</h1>
-                <button id="toggle-pedal-inputs" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+        <div class="panel glass-stripe rounded-lg p-1 mb-6">
+            <div class="flex items-center justify-between">
+                <h1 class="text-neutral-300 text-shadow px-4 mt-4 ">Driver Inputs</h1>
+                <button id="toggle-pedal-inputs" class="ov-dark-hover mt-4 px-3 py-1 rounded text-sm transition">
                     ▼
                 </button>
             </div>
             
             <!-- Pedal Trace Canvas -->
-            <div class="mb-4">
-                <canvas id="pedal-canvas" width="800" height="133" class="w-full bg-neutral-900 rounded hidden"></canvas>
+            <div class="mb-4 px-6">
+                <canvas id="pedal-canvas" width="800" height="133" class="w-full bg-neutral-900 rounded-xl mt-6 hidden"></canvas>
             </div>
             
             <!-- Driver Inputs Grid (Collapsible) -->
             <div id="driver-inputs-details" class="hidden">
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                    <div class="panel glass-stripe rounded p-3">
+                <div class="grid grid-cols-3 md:grid-cols-3 w-full mb-3 max-w-4xl gap-3 mx-auto">
+                    <div class="panel glass-stripe rounded-lg p-2 flex-items-center justify-between gap-3">
+                    <div class="flex justify-between items-center">
                         <div class="text-xs text-neutral-400 uppercase mb-2">Throttle</div>
-                        <div id="input-throttle" class="text-lg font-mono text-green-400 mb-2">--</div>                              
+                        <div id="input-throttle" class="text-lg font-mono text-green-400">--</div>
+                    </div> 
+                    <div class="flex justify-between items-center">                             
                         <div class="text-xs text-neutral-400 uppercase mb-2">Brake</div>
                         <div id="input-brake" class="text-lg font-mono text-red-400">--</div>                          
                     </div>
-                    <div class="panel glass-stripe rounded p-3 ">
+                    <div class="flex justify-between items-center">
                         <div class="text-xs text-neutral-400 uppercase mb-2">Gear</div>
-                        <div id="input-gear" class="text-lg font-mono text-cyan-400 mb-2">--</div>
-                        <div class="text-xs text-neutral-400 uppercase mb-2">Clutch</div>
-                        <div id="input-clutch" class="text-lg font-mono text-blue-400">--</div>
+                        <div id="input-gear" class="text-lg font-mono text-cyan-400">--</div>
                     </div>
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-2 flex justify-between items-center">
-                            <span>Speed</span>
-                            <button id="speed-reset-btn" class="text-xs bg-neutral-700 hover:bg-neutral-600 px-1 py-0.5 rounded transition">Reset</button>
+                    
+                    </div>
+                    <div class="panel glass-stripe rounded-lg p-2 flex-items-center justify-between gap-3">
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-neutral-400 uppercase mb-2">Speed</div>
+                            <div id="input-speed" class="text-lg font-mono text-purple-400">--</div>
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <div>
-                                <div id="input-speed" class="text-lg font-mono text-purple-400">--</div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-neutral-400 mb-1">MAX</div>
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-neutral-400 mb-1">MAX<button id="speed-reset-btn" class="text-xs ov-dark-hover px-3 py-1 ml-10 rounded transition">Reset</button></div>
                                 <div id="input-speed-max" class="text-lg font-mono text-orange-400">--</div>
                             </div>
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-neutral-400 mb-1">RPM</div>
+                            <div id="input-rpm-shift" class="text-lg font-mono text-yellow-400">--</div>    
+                        </div>
+                            <div>
+                                
+                           
                         </div>
                     </div>
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-2 flex justify-between items-center">
+                    <div class="panel glass-stripe rounded p-2">
+                        <div class="text-xs text-neutral-400 uppercase flex justify-between items-center mb-4">
                             <span>Shift RPM</span>
                         </div>
-                        <div class="flex items-center gap-2 mb-3">
-                            <input type="number" id="shift-rpm-input" placeholder="7000" value="7000" 
-                                   class="w-16 panel glass-strip-nb ov-dark rounded px-2 py-0.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <div class="flex gap-1">
-                                <div id="shift-indicator-green" class="w-10 h-4 ov-dark rounded-full flex items-center justify-center text-xs" title="Target -200">
+                        <div class="flex items-center w-full gap-2 mb-4">
+                                <div id="shift-indicator-blue" class="flex-1 h-1 ov-dark rounded-full flex items-center justify-center text-xs" title="Target -200">
+                                    <span class="text-blue-400"></span>
+                                </div>
+                                <div id="shift-indicator-green" class="flex-1 h-1 ov-dark rounded-full flex items-center justify-center text-xs" title="Target">
                                     <span class="text-green-400"></span>
                                 </div>
-                                <div id="shift-indicator-yellow" class="w-10 h-4 ov-dark rounded-full flex items-center justify-center text-xs" title="Target">
+                                <div id="shift-indicator-yellow" class="flex-1 h-1 ov-dark rounded-full flex items-center justify-center text-xs" title="Target +200">
                                     <span class="text-yellow-400"></span>
                                 </div>
-                                <div id="shift-indicator-red" class="w-10 h-4 ov-dark rounded-full flex items-center justify-center text-xs" title="Target +200">
+                                <div id="shift-indicator-orange" class="flex-1 h-1 ov-dark rounded-full flex items-center justify-center text-xs" title="Target +200">
+                                    <span class="text-orange-400"></span>
+                                </div>
+                                <div id="shift-indicator-white" class="flex-1 h-1 ov-dark rounded-full flex items-center justify-center text-xs" title="Target +200">
                                     <span class="text-red-400"></span>
                                 </div>
-                            </div>
+                                <div id="shift-indicator-purple" class="flex-1 h-1 ov-dark rounded-full flex items-center justify-center text-xs" title="Target +200">
+                                    <span class="text-white"></span>
+                                </div>
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <div class="text-xs text-neutral-400 ">RPM:</div>
-                            <div id="input-rpm-shift" class="text-lg font-mono text-yellow-400">--</div>
+                        <div class="text-xs text-neutral-400 uppercase  flex justify-between items-center">
+                                <span>SET RPM</span>
+                                <input type="number" id="shift-rpm-input" placeholder="7000" value="7000" 
+                                class="w-12 panel glass-strip-nb ov-dark rounded px-1 py-1 text-center text-neutral-400 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
-                    </div>
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-2">Coasting</div>
-                        <div id="input-coasting" class="text-lg font-mono text-orange-400 mb-2">--</div>                    
-                        <div class="text-xs text-neutral-400 uppercase mb-2">Overlap</div>
-                        <div id="input-overlap" class="text-lg font-mono text-cyan-400">--</div>
                     </div>
                 </div>
             </div>
         </div>
         
+        <!-- Tyre Health Display -->
+        <div class="panel glass-stripe rounded-lg p-1 mb-6">
+            <div class="flex items-center justify-between">
+                <h1 class="text-neutral-300 text-shadow px-4 mt-4 mb-6">Tyre Health</h1>
+                <button id="toggle-tyre-health" class="ov-dark-hover px-3 py-1 rounded text-sm transition">
+                    ▼
+                </button>
+            </div>
+            
+            <!-- Collapsible Tyre Health Content -->
+            <div id="tyre-health-details" class="hidden">
+                <div class="text-xs text-neutral-400 4 text-center">
+                    
+                </div>
+                
+                <!-- 4-Wheel Grid: LF RF on top, LR RR on bottom -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- Left Front (LF) -->
+                    <div class="p-4 rounded-lg">
+                        <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-3 text-center">Left Front</h3>
+                        
+                        <!-- Temperatures -->
+                        <div class="mb-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-2">Temp (°C)</div>
+                            <div class="grid grid-cols-3 gap-2 ov-mid rounded-xl">
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Left</div>
+                                    <div id="tyre-lf-temp-l" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Mid</div>
+                                    <div id="tyre-lf-temp-m" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Right</div>
+                                    <div id="tyre-lf-temp-r" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Wear -->
+                        <div>
+                            <div class="text-xs text-neutral-400 uppercase mb-2">Remaining (%)</div>
+                            <div class="grid grid-cols-3 gap-2 ov-dark rounded-xl">
+                                <div class=" rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Left</div>
+                                    <div id="tyre-lf-wear-l" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                                <div class=" rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Mid</div>
+                                    <div id="tyre-lf-wear-m" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                                <div class=" rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Right</div>
+                                    <div id="tyre-lf-wear-r" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Front (RF) -->
+                    <div class="p-4">
+                        <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-3 text-center">Right Front</h3>
+                        
+                        <!-- Temperatures -->
+                        <div class="mb-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-2">Temp (°C)</div>
+                            <div class="grid grid-cols-3 gap-2 ov-mid rounded-xl">
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Left</div>
+                                    <div id="tyre-rf-temp-l" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Mid</div>
+                                    <div id="tyre-rf-temp-m" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Right</div>
+                                    <div id="tyre-rf-temp-r" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Wear -->
+                        <div>
+                            <div class="text-xs text-neutral-400 uppercase mb-2">Remaining (%)</div>
+                            <div class="grid grid-cols-3 gap-2 ov-dark rounded-xl">
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Left</div>
+                                    <div id="tyre-rf-wear-l" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Mid</div>
+                                    <div id="tyre-rf-wear-m" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Right</div>
+                                    <div id="tyre-rf-wear-r" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Left Rear (LR) -->
+                    <div class="p-4">
+                        <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-3 text-center">Left Rear</h3>
+                        
+                        <!-- Temperatures -->
+                        <div class="mb-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-2">Temp (°C)</div>
+                            <div class="grid grid-cols-3 gap-2 ov-mid rounded-xl">
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Left</div>
+                                    <div id="tyre-lr-temp-l" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Mid</div>
+                                    <div id="tyre-lr-temp-m" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Right</div>
+                                    <div id="tyre-lr-temp-r" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Wear -->
+                        <div>
+                            <div class="text-xs text-neutral-400 uppercase mb-2">Remaining (%)</div>
+                            <div class="grid grid-cols-3 gap-2 ov-dark rounded-xl">
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Left</div>
+                                    <div id="tyre-lr-wear-l" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Mid</div>
+                                    <div id="tyre-lr-wear-m" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Right</div>
+                                    <div id="tyre-lr-wear-r" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rear Right (RR) -->
+                    <div class="p-4">
+                        <h3 class="text-sm font-semibold text-neutral-300 uppercase mb-3 text-center">Right Rear</h3>
+                        
+                        <!-- Temperatures -->
+                        <div class="mb-3">
+                            <div class="text-xs text-neutral-400 uppercase mb-2">Temp (°C)</div>
+                            <div class="grid grid-cols-3 gap-2 ov-mid rounded-xl">
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Left</div>
+                                    <div id="tyre-rr-temp-l" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Mid</div>
+                                    <div id="tyre-rr-temp-m" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Right</div>
+                                    <div id="tyre-rr-temp-r" class="text-lg font-mono text-orange-400">--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Wear -->
+                        <div>
+                            <div class="text-xs text-neutral-400 uppercase mb-2">Remaining (%)</div>
+                            <div class="grid grid-cols-3 gap-2 ov-dark rounded-xl">
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Left</div>
+                                    <div id="tyre-rr-wear-l" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Mid</div>
+                                    <div id="tyre-rr-wear-m" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                                <div class="rounded p-2 text-center">
+                                    <div class="text-xs text-neutral-500">Right</div>
+                                    <div id="tyre-rr-wear-r" class="text-lg font-mono text-green-400">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
         <!-- Fuel Consumption Comparison Chart -->
-        <div class="panel glass-stripe rounded-lg p-6 mb-6">
+        <div class="panel glass-stripe rounded-lg p-1 mb-6">
             <div class="flex items-center justify-between mb-4">
-                <h1 class="road-rage-font">Fuel Analysis</h1>
-                <button id="toggle-fuel-comparison" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                <h1 class="text-neutral-300 text-shadow px-4 mt-4">Fuel Analysis</h1>
+                <button id="toggle-fuel-comparison" class="ov-dark-hover mt-3 px-3 py-1 rounded text-sm transition">
                    ▼
                 </button>
             </div>
@@ -410,8 +610,8 @@
             <!-- Collapsible Fuel Comparison Content -->
             <div id="fuel-comparison-details" class="hidden">
                 <!-- Ideal Adjustment Controls -->
-                <div class="flex items-center justify-center gap-3 mb-4 bg-neutral-900 rounded p-3">
-                    <span class="text-neutral-400 text-sm">Adjust Ideal:</span>
+                <div class="flex items-center justify-center gap-3 mb-4 ov-dark rounded-full w-fit mx-auto px-6 py-3">
+                    <span class="text-neutral-400 text-sm">Adjust:</span>
                     <button id="ideal-adjust-minus-10" class="panel glass-stripe rounded px-3 py-1 text-xs transition">-0.10L</button>
                     <button id="ideal-adjust-minus-01" class="panel glass-stripe rounded px-3 py-1 text-xs transition">-0.01L</button>
                     <span id="ideal-adjustment-display" class="text-white font-mono text-sm min-w-20 text-center">0.00L</span>
@@ -419,60 +619,62 @@
                     <button id="ideal-adjust-plus-10" class="panel glass-stripe rounded px-3 py-1 text-xs transition">+0.10L</button>
                     <button id="ideal-adjust-reset" class="panel glass-stripe rounded px-3 py-1 text-xs transition ml-2">Reset</button>
                 </div>
-                <canvas id="fuel-comparison-canvas" width="800" height="250" class="w-full bg-neutral-900 rounded mb-4"></canvas>
+                <div class="px-8">
+                    <canvas id="fuel-comparison-canvas" width="800" height="250" class="w-full ov-dark rounded-xl mb-6"></canvas>
+                </div>
+                <!-- Fuel Stats Grid -->
                 
-                <!-- Fuel Stats Grid - Row 1 (Lap Consumption) -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Lap Fuel</div>
-                        <div id="fuel-ideal-lap-total" class="text-lg font-mono text-green-400">--</div>
-                    </div>
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Current Lap Fuel</div>
+                <div class="mb-6">
+                <div class="grid grid-cols-3 md:grid-cols-3 mb-3 w-full max-w-4xl gap-3 mx-auto">
+                    <div class="panel glass-stripe rounded-lg p-3 flex-items-centre justify-between gap-3">
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Lap Fuel</div>
+                            <div id="fuel-ideal-lap-total" class="text-lg font-mono text-green-400">--</div>
+                        </div> 
+                            <div class="flex justify-between items-center">               
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Current Lap Fuel</div>
                         <div id="fuel-current-lap-total" class="text-lg font-mono text-cyan-400">--</div>
+                        </div>
+                            <div class="flex justify-between items-center">  
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Lap Delta</div>
+                        <div id="fuel-lap-delta" class="text-lg font-mono text-white">--</div> 
+                        </div>
                     </div>
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Lap Delta</div>
-                        <div id="fuel-lap-delta" class="text-lg font-mono text-white">--</div>
+                    <div class="panel glass-stripe rounded-lg p-3 flex-items-centre justify-between gap-3">
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Remaining</div>
+                            <div id="fuel-ideal-remaining" class="text-lg font-mono text-green-400">--</div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Actual Remaining</div>
+                            <div id="fuel-actual-remaining" class="text-lg font-mono text-cyan-400">--</div>
+                        </div>     
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Position Delta</div>
+                            <div id="fuel-delta" class="text-lg font-mono text-white">--</div>
+                        </div>
                     </div>
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Lap Progress</div>
-                        <div id="fuel-lap-progress" class="text-lg font-mono text-pink-400">--</div>
+                    <div class="panel glass-stripe rounded-lg p-3 flex-items-centre justify-between gap-3">
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Level</div>
+                            <div id="fuel-live-level" class="text-lg font-mono text-yellow-400">--</div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Rate</div>
+                            <div id="fuel-live-rate" class="text-lg font-mono text-orange-400">--</div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Pressure</div>
+                            <div id="fuel-live-pressure" class="text-lg font-mono text-purple-400">--</div>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Fuel Stats Grid - Row 2 (Current State) -->
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Ideal Remaining</div>
-                        <div id="fuel-ideal-remaining" class="text-lg font-mono text-green-400">--</div>
-                    </div>
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Actual Remaining</div>
-                        <div id="fuel-actual-remaining" class="text-lg font-mono text-cyan-400">--</div>
-                    </div>
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Position Delta</div>
-                        <div id="fuel-delta" class="text-lg font-mono text-white">--</div>
-                    </div>
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Level</div>
-                        <div id="fuel-live-level" class="text-lg font-mono text-yellow-400">--</div>
-                    </div>
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Rate</div>
-                        <div id="fuel-live-rate" class="text-lg font-mono text-orange-400">--</div>
-                    </div>
-                    <div class="panel glass-stripe rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Pressure</div>
-                        <div id="fuel-live-pressure" class="text-lg font-mono text-purple-400">--</div>
-                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Live Race Stats -->
-        <div class="panel glass-stripe rounded p-4 mb-6">
+        <div class="">
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-4 mb-4">
                 
                 <div class="panel glass-stripe rounded p-4 text-center">
@@ -525,7 +727,7 @@
         </div>
         
         <!-- Combined Data Display - 3 Columns -->
-        <div class="panel glass-stripe rounded p-4 mb-6">
+        <div class="">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Stint History -->
                 <div class="panel glass-stripe rounded p-4">
@@ -554,8 +756,8 @@
         </div>
         
         <!-- Strategy vs Actual Comparison -->
-        <div class="panel glass-stripe rounded p-6 mb-6">
-            <h1 class="road-rage-font mb-4">Strategy</h1>
+        <div class="panel glass-stripe rounded-lg p-6 mb-6">
+            <h1 class="text-neutral-300 text-shadow mb-4">Strategy</h1>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
                 <div>
                     <div class="text-neutral-400 text-sm mb-1">Current Stint</div>
@@ -603,8 +805,8 @@
         </div>
         
         <!-- Stint Breakdown Table -->
-        <div class="panel glass-stripe rounded p-6 mb-6">
-            <h1 class="road-rage-font mb-4">Stints</h1>
+        <div class="panel glass-stripe rounded-lg p-6 mb-6">
+            <h1 class="text-neutral-300 text-shadow mb-4">Stints</h1>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-neutral-900">
@@ -638,10 +840,10 @@
             <div class="space-y-6">
         
         <!-- Weather & Environment -->
-        <div class="panel glass-stripe rounded p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h1 class="road-rage-font">Environment</h1>
-                <button id="toggle-weather" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+        <div class="panel glass-stripe rounded-lg p-1 mb-6">
+            <div class="flex items-center justify-between mt-4 mb-4">
+                <h1 class="text-neutral-300 text-shadow px-4">Environment</h1>
+                <button id="toggle-weather" class="ov-dark-hover px-3 py-1 rounded text-sm transition">
                     ▼
                 </button>
             </div>
@@ -743,10 +945,10 @@
         </div>
         
         <!-- Predicted Weather (from Planner) -->
-        <div class="panel glass-stripe rounded p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h1 class="road-rage-font">Weather</h1>
-                <button id="toggle-predicted-weather" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+        <div class="panel glass-stripe rounded-lg p-1 mb-6">
+            <div class="flex items-center justify-between mt-4 mb-4">
+                <h1 class="text-neutral-300 text-shadow px-4">Weather</h1>
+                <button id="toggle-predicted-weather" class="ov-dark-hover px-3 py-1 rounded text-sm transition">
                     ▼
                 </button>
             </div>
@@ -768,7 +970,7 @@
                         <div class="w-3 h-3 bg-yellow-500 rounded"></div>
                         <span>Incident</span>
                     </div>
-                    <button id="toggle-progress-cars" class="ml-4 px-2 py-1 bg-neutral-700 hover:bg-neutral-600 rounded text-xs transition">
+                    <button id="toggle-progress-cars" class="ov-dark-hover px-2 py-1 rounded text-xs transition">
                         Show All Cars
                     </button>
                     <span id="current-sector-display" class="ml-2">Sector --</span>
@@ -819,18 +1021,18 @@
         </div>
         
         <!-- Sector Time Comparison -->
-        <div class="panel glass-stripe rounded p-6">
-            <h1 class="road-rage-font mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Sectors</h1>
+        <div class="panel glass-stripe rounded-lg p-6">
+            <h1 class="text-neutral-300 text-shadow mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Sectors</h1>
             <div id="sector-comparison-container" class="space-y-1">
                 <div class="text-neutral-500 text-xs text-center py-4">Sector times will appear during session</div>
             </div>
         </div>
         
         <!-- Car Analysis -->
-        <div class="panel glass-stripe rounded p-6">
+        <div class="panel glass-stripe rounded-lg p-6">
             <div class="flex items-center justify-between mb-4">
-                <h1 class="road-rage-font">Car Details</h1>
-                <button id="toggle-car-analysis" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
+                <h1 class="text-neutral-300 text-shadow">Class Details</h1>
+                <button id="toggle-car-analysis" class="ov-dark-hover px-3 py-1 rounded text-sm transition">
                     ▼
                 </button>
             </div>
@@ -996,10 +1198,27 @@
                     const isHidden = detailsDiv.classList.contains('hidden');
                     if (isHidden) {
                         detailsDiv.classList.remove('hidden');
-                        toggleBtn.textContent = 'Hide Fuel Comparison ▲';
+                        toggleBtn.textContent = '▲';
                     } else {
                         detailsDiv.classList.add('hidden');
-                        toggleBtn.textContent = 'Show Fuel Comparison ▼';
+                        toggleBtn.textContent = '▼';
+                    }
+                });
+            }
+            
+            // Setup toggle for tyre health (start collapsed)
+            const toggleTyreBtn = document.getElementById('toggle-tyre-health');
+            const tyreDetailsDiv = document.getElementById('tyre-health-details');
+            
+            if (toggleTyreBtn && tyreDetailsDiv) {
+                toggleTyreBtn.addEventListener('click', () => {
+                    const isHidden = tyreDetailsDiv.classList.contains('hidden');
+                    if (isHidden) {
+                        tyreDetailsDiv.classList.remove('hidden');
+                        toggleTyreBtn.textContent = '▲';
+                    } else {
+                        tyreDetailsDiv.classList.add('hidden');
+                        toggleTyreBtn.textContent = '▼';
                     }
                 });
             }
