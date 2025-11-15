@@ -76,7 +76,7 @@ export class FuelTraceRecorder {
      */
     async loadAndDisplayStoredData() {
         if (!this.trackId || !this.carName) {
-            this.showDataMessage('⚠️ No session loaded yet');
+            this.showDataMessage('No session loaded yet');
             return;
         }
         
@@ -441,9 +441,9 @@ export class FuelTraceRecorder {
         switch (state) {
             case 'idle':
                 this.statusIndicator.className = 'w-3 h-3 rounded-full bg-neutral-500';
-                this.statusText.textContent = 'Ready to record';
-                this.recordButton.textContent = '⏺ Record Ideal Lap';
-                this.recordButton.className = 'bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded text-sm transition';
+                this.statusText.textContent = 'Ready...';
+                this.recordButton.textContent = '⏺ Record Lap';
+                this.recordButton.className = 'ov-dark hover:bg-purple-600 text-white px-4 py-1.5 rounded text-sm transition';
                 break;
                 
             case 'armed':

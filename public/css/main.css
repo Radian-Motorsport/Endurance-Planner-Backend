@@ -419,7 +419,7 @@ select {
         .ov-dark{ background: rgba(0, 0, 0, 0.4) 
         }
 
-        .ov-mid{ background: rgba(0, 0, 0, 0.2) 
+        .ov-mid{ background: rgba(0, 0, 0, 0.1) 
         }
 
         .ov-dark-list{ background: rgba(0, 0, 0, 0.8) 
@@ -471,7 +471,7 @@ select {
         pointer-events: none;
         }
 
-        .neon{
+        .neon-green-glow {
         border-radius:14px;
         padding:18px;
         background:linear-gradient(135deg,#054508, rgba(255,255,255,0.015));
@@ -479,7 +479,20 @@ select {
         border:1px solid rgba(7, 210, 7, 0.25);
         animation: pulse-glow 4s infinite;
         }
-  
+        
+        .neon-purple-glow {
+        border-radius:14px;
+        padding:18px;
+        background:linear-gradient(135deg,#310545, rgba(255,255,255,0.015));
+        box-shadow:0 8px 40px rgba(169, 6, 233, 0.14);
+        border:1px solid rgba(169, 7, 210, 0.25);
+        animation: pulse-glow 4s infinite;
+        }
+
+        .neon-purple-glow:hover {
+            box-shadow: 0 8px 40px rgba(169, 6, 233, 0.14);
+            border: 1px solid rgba(169, 7, 210, 0.25);
+        }
 
         /* Custom scrollbar for dropdown lists */
         .dropdown-list::-webkit-scrollbar {
