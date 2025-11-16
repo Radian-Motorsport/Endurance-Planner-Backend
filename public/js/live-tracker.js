@@ -545,6 +545,13 @@ class LiveStrategyTracker {
             this.isConnected = true;
             this.updateConnectionStatus(true);
             
+            // Join strategy room if strategy ID in URL
+            const strategyId = new URLSearchParams(window.location.search).get('strategy');
+            if (strategyId) {
+                this.socket.emit('joinStrategy', strategyId);
+                debug(`📍 Joined strategy room: ${strategyId}`);
+            }
+            
             // Initialize pedal trace visualization
             this.initializePedalTrace();
             
