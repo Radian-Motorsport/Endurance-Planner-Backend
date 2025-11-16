@@ -578,14 +578,7 @@ class LiveStrategyTracker {
         
         // Listen for telemetry data
         this.socket.on('telemetry', (data) => {
-            // FILTER: Only accept telemetry from John Sowerby
-            const driverName = data?.driverName;
-            
-            if (driverName !== 'John Sowerby') {
-                // Silently reject telemetry from other drivers
-                return;
-            }
-            
+            // Room-based filtering via strategy ID - no need for name filtering
             this.lastTelemetryTime = Date.now();  // Track last telemetry received
             this.handleTelemetryUpdate(data);
             this.updateDriverInputs(data);  // Update driver inputs display
@@ -601,21 +594,7 @@ class LiveStrategyTracker {
         // Listen for session info
         this.socket.on('sessionInfo', (data) => {
             debug('📊 Received sessionInfo:', data);
-            
-            // FILTER: Only accept sessionInfo from John Sowerby
-            const driverCarIdx = data?.DriverInfo?.DriverCarIdx;
-            let driverName = null;
-            
-            if (driverCarIdx !== undefined && data?.DriverInfo?.Drivers?.[driverCarIdx]) {
-                driverName = data.DriverInfo.Drivers[driverCarIdx].UserName;
-            }
-            
-            if (driverName !== 'John Sowerby') {
-                debug('🚫 REJECTED: SessionInfo from', driverName || 'Unknown', '- not John Sowerby');
-                return;
-            }
-            
-            debug('✅ ACCEPTED: SessionInfo from John Sowerby');
+            // Room-based filtering via strategy ID - accept all sessionInfo in this room
             this.handleSessionInfo(data);
         });
         
