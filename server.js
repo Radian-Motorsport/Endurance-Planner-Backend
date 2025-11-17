@@ -942,6 +942,51 @@ app.put('/api/strategies/:id', async (req, res) => {
     }
 });
 
+// Get recent strategies for display
+app.get('/api/strategies/recent', async (req, res) => {
+    if (!pool) {
+        return res.status(503).json({ error: 'Database not available' });
+    }
+
+    try {
+        const result = await pool.query(`
+            SELECT 
+                id,
+                strategy_data->'selectedCar' as car_data,
+                strategy_data->'selectedEvent' as event_data,
+                strategy_data->'selectedDrivers' as drivers_data,
+                strategy_data->>'updatedAt' as updated_at
+            FROM strategies
+            ORDER BY (strategy_data->>'updatedAt')::timestamp DESC
+            LIMIT 10
+        `);
+
+        const strategies = result.rows.map(row => {
+            const carData = row.car_data || {};
+            const eventData = row.event_data || {};
+            const driversData = row.drivers_data || [];
+            
+            return {
+                id: row.id,
+                carName: carData.car_name || carData.name || 'Unknown Car',
+                trackName: eventData.track_name || 'Unknown Track',
+                seasonName: eventData.season_name || '',
+                sessionDate: eventData.session_date || null,
+                drivers: driversData.map(d => d.name || d.display_name).filter(Boolean),
+                updatedAt: row.updated_at
+            };
+        });
+
+        res.json(strategies);
+    } catch (error) {
+        console.error('Failed to fetch recent strategies:', error);
+        res.status(500).json({ 
+            error: 'Failed to fetch strategies',
+            message: error.message 
+        });
+    }
+});
+
 // 🌞 DAYLIGHT CALCULATION API ENDPOINTS
 // ====================================
 
@@ -1658,51 +1703,6 @@ app.get('/api/ideal-fuel-lap/:trackId/:carName', async (req, res) => {
         res.status(500).json({
             error: 'Failed to fetch ideal fuel lap',
             message: error.message
-        });
-    }
-});
-
-// Get recent strategies for display
-app.get('/api/strategies/recent', async (req, res) => {
-    if (!pool) {
-        return res.status(503).json({ error: 'Database not available' });
-    }
-
-    try {
-        const result = await pool.query(`
-            SELECT 
-                id,
-                strategy_data->'selectedCar' as car_data,
-                strategy_data->'selectedEvent' as event_data,
-                strategy_data->'selectedDrivers' as drivers_data,
-                strategy_data->>'updatedAt' as updated_at
-            FROM strategies
-            ORDER BY (strategy_data->>'updatedAt')::timestamp DESC
-            LIMIT 10
-        `);
-
-        const strategies = result.rows.map(row => {
-            const carData = row.car_data || {};
-            const eventData = row.event_data || {};
-            const driversData = row.drivers_data || [];
-            
-            return {
-                id: row.id,
-                carName: carData.car_name || carData.name || 'Unknown Car',
-                trackName: eventData.track_name || 'Unknown Track',
-                seasonName: eventData.season_name || '',
-                sessionDate: eventData.session_date || null,
-                drivers: driversData.map(d => d.name || d.display_name).filter(Boolean),
-                updatedAt: row.updated_at
-            };
-        });
-
-        res.json(strategies);
-    } catch (error) {
-        console.error('Failed to fetch recent strategies:', error);
-        res.status(500).json({ 
-            error: 'Failed to fetch strategies',
-            message: error.message 
         });
     }
 });
