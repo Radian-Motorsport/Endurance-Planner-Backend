@@ -2,7 +2,7 @@
 // Fetches and displays recent strategies from the database
 
 export class StrategyListComponent {
-    constructor(apiBaseUrl = '') {
+    constructor(apiBaseUrl = window.location.origin || '') {
         this.apiBaseUrl = apiBaseUrl;
         this.strategies = [];
     }
