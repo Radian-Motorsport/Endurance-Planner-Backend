@@ -103,7 +103,9 @@ export class StrategyListComponent {
     renderPlannerDropdown(selectElement) {
         if (!selectElement) return;
 
-        selectElement.innerHTML = '<option value="">-- Load Recent Strategy --</option>';
+        // Apply custom styling to match other dropdowns
+        selectElement.className = 'p-3 panel glass-strip rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-200 text-neutral-400 text-sm flex-1 min-w-[200px]';
+        selectElement.innerHTML = '<option value="">Load Recent Strategy</option>';
 
         this.strategies.forEach(strategy => {
             const option = document.createElement('option');
