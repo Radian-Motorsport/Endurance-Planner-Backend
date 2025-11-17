@@ -198,6 +198,30 @@
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
             }
+
+        }
+        
+        /* Large background logo watermark */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 2%;
+            left: 2%;
+            width: 96%;
+            height: 96%;
+            background-image: url('assets/g457913.png');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Ensure content appears above watermark */
+        body > * {
+            position: relative;
+            z-index: 1;
         }
     </style>
 
@@ -250,10 +274,11 @@
     
     <div class="max-w-6xl mx-auto bg01 p-4 md:p-10 sm:p-2 rounded-xl transition-colors duration-500">
         <!-- Header -->
-        <div class="text-center mt-6 mb-6">
-            <img src="assets/g457913.png" alt="RadianPlanner Logo" class="mx-auto w-100 h-auto">
-        </div>
-        
+        <div class="text-center mb-8">
+            <a href="https://radianmotorsport.com" class="inline-block">
+                <img src="/assets/g457913.png" alt="RadianPlanner Logo" class="mx-auto w-32 h-auto mt-4 mb-4 transition-transform hover:scale-110 cursor-pointer">
+            </a>
+        </div>  
         <!-- Admin Button -->
         <!--<button id="admin-btn" class="bg-neutral-900 hover:bg-green-600 text-black font-bold py-1 px-1 rounded-lg transition-all duration-200 transform hover:scale-105 space-x-2">
         </button> -->
@@ -555,9 +580,7 @@
 
              <!-- Loading Overlay (Global) - Visible by default, hidden by JavaScript when ready -->
             <div id="page2-loading-overlay" class="fixed inset-0 bg-neutral-950 flex flex-col items-center justify-center z-50">
-                <a href="https://radianmotorsport.com" class="inline-block">
-                <img src="/assets/g457913.png" alt="RadianApp Logo" class="mx-auto w-32 h-auto mt-4 mb-4 transition-transform hover:scale-110 cursor-pointer">
-            </a>                <h2 class="text-3xl road-rage-font text-center px-10"> LOADING...</h2>
+                              <h2 class="text-3xl road-rage-font text-center px-10"> LOADING...</h2>
             </div>
 
             <!-- Page 2: Race Strategy -->
