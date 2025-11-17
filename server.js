@@ -1672,9 +1672,9 @@ app.get('/api/strategies/recent', async (req, res) => {
         const result = await pool.query(`
             SELECT 
                 id,
-                strategy_data->>'selectedCar' as car_data,
-                strategy_data->>'selectedEvent' as event_data,
-                strategy_data->>'selectedDrivers' as drivers_data,
+                strategy_data->'selectedCar' as car_data,
+                strategy_data->'selectedEvent' as event_data,
+                strategy_data->'selectedDrivers' as drivers_data,
                 strategy_data->>'updatedAt' as updated_at
             FROM strategies
             ORDER BY (strategy_data->>'updatedAt')::timestamp DESC
@@ -1682,13 +1682,13 @@ app.get('/api/strategies/recent', async (req, res) => {
         `);
 
         const strategies = result.rows.map(row => {
-            const carData = JSON.parse(row.car_data || '{}');
-            const eventData = JSON.parse(row.event_data || '{}');
-            const driversData = JSON.parse(row.drivers_data || '[]');
+            const carData = row.car_data || {};
+            const eventData = row.event_data || {};
+            const driversData = row.drivers_data || [];
             
             return {
                 id: row.id,
-                carName: carData.name || 'Unknown Car',
+                carName: carData.car_name || carData.name || 'Unknown Car',
                 trackName: eventData.track_name || 'Unknown Track',
                 seasonName: eventData.season_name || '',
                 sessionDate: eventData.session_date || null,
