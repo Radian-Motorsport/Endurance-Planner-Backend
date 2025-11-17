@@ -2,7 +2,7 @@
 // Fetches and displays recent strategies from the database
 
 export class StrategyListComponent {
-    constructor(apiBaseUrl = window.location.origin || '') {
+    constructor(apiBaseUrl = 'https://planner.radianmotorsport.com') {
         this.apiBaseUrl = apiBaseUrl;
         this.strategies = [];
     }

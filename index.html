@@ -1001,8 +1001,8 @@
     <script type="module">
         import { StrategyListComponent } from '/public/js/modules/strategy-list.js';
         
-        // Initialize recent strategies dropdown with explicit base URL
-        const strategiesList = new StrategyListComponent(window.location.origin);
+        // Initialize recent strategies dropdown
+        const strategiesList = new StrategyListComponent();
         const dropdown = document.getElementById('recent-strategies-dropdown');
         if (dropdown) {
             strategiesList.initPlannerPage(dropdown);
