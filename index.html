@@ -287,11 +287,7 @@
 
         <div id="app-container">
             <!-- Load Recent Strategy Dropdown -->
-            <div class="flex justify-center mb-6">
-                <select id="recent-strategies-dropdown" class="bg-neutral-800 text-white px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[300px]">
-                    <option value="">-- Load Recent Strategy --</option>
-                </select>
-            </div>
+            
             
             <!-- Navigation -->
             <div class="flex justify-center space-x-4 mb-8">
@@ -306,7 +302,12 @@
                 <!-- Driver Selection Section -->
                 <div class="p-6 rounded-lg panel glass-strip grad-on-hover">
                     <h1 class="text-xl mb-4 road-rage-font">Drivers</h1>
+                    <div class="flex flex-wrap w-full gap-2 mb-4">
+                            <div id="recent-strategies-dropdown" class="flex-1 min-w-[200px] relative"></div>
+                        </div>
+                    
                     <div class="flex flex-wrap items-center gap-2 mb-4">
+                        
                         <div id="driver-select" class="flex-1 min-w-[200px] relative"></div>
                         <button id="add-driver-btn" class="glass-strip-nb ov-dark hover:bg-purple-700 text-neutral-400 font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-100" title="Add Driver">
                             <i class="fas fa-plus"></i>
@@ -1003,10 +1004,7 @@
         
         // Initialize recent strategies dropdown
         const strategiesList = new StrategyListComponent();
-        const dropdown = document.getElementById('recent-strategies-dropdown');
-        if (dropdown) {
-            strategiesList.initPlannerPage(dropdown);
-        }
+        strategiesList.initPlannerPage('recent-strategies-dropdown');
     </script>
     
     <!-- Modular Navigation: Debug script removed - using app.js modules instead -->

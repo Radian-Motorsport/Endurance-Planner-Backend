@@ -1,10 +1,13 @@
 // Strategy List Module
 // Fetches and displays recent strategies from the database
 
+import { CustomDropdown } from './custom-dropdown.js';
+
 export class StrategyListComponent {
     constructor(apiBaseUrl = 'https://planner.radianmotorsport.com') {
         this.apiBaseUrl = apiBaseUrl;
         this.strategies = [];
+        this.dropdown = null;
     }
 
     // Fetch recent strategies from API
@@ -99,34 +102,34 @@ export class StrategyListComponent {
         });
     }
 
-    // Render for planner page (dropdown select)
-    renderPlannerDropdown(selectElement) {
-        if (!selectElement) return;
+    // Render for planner page (custom dropdown)
+    renderPlannerDropdown(containerId) {
+        if (!containerId) return;
 
-        // Apply custom styling to match other dropdowns
-        selectElement.className = 'p-3 panel glass-strip rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-200 text-neutral-400 text-sm flex-1 min-w-[200px]';
-        selectElement.innerHTML = '<option value="">Load Recent Strategy</option>';
+        // Create custom dropdown instance
+        this.dropdown = new CustomDropdown(containerId, {
+            placeholder: 'Load Recent Strategy',
+            onChange: (value, text) => {
+                if (value) {
+                    const plannerLink = this.getPlannerLink(value);
+                    window.location.href = plannerLink;
+                }
+            }
+        });
 
-        this.strategies.forEach(strategy => {
-            const option = document.createElement('option');
-            option.value = strategy.id;
-            
+        // Populate with strategies
+        const options = this.strategies.map(strategy => {
             const driversText = strategy.drivers.length > 0 
                 ? strategy.drivers.slice(0, 2).join(', ') + (strategy.drivers.length > 2 ? '...' : '')
                 : 'Unassigned';
             
-            option.textContent = `${strategy.carName} | ${strategy.trackName} | ${driversText}`;
-            selectElement.appendChild(option);
+            return {
+                value: strategy.id,
+                text: `${strategy.carName} | ${strategy.trackName} | ${driversText}`
+            };
         });
 
-        // Add change handler to auto-load strategy
-        selectElement.addEventListener('change', (e) => {
-            const strategyId = e.target.value;
-            if (strategyId) {
-                const plannerLink = this.getPlannerLink(strategyId);
-                window.location.href = plannerLink;
-            }
-        });
+        this.dropdown.populateOptions(options);
     }
 
     // Initialize and render for connections page
@@ -136,8 +139,8 @@ export class StrategyListComponent {
     }
 
     // Initialize and render for planner page
-    async initPlannerPage(selectElement) {
+    async initPlannerPage(containerId) {
         await this.fetchStrategies();
-        this.renderPlannerDropdown(selectElement);
+        this.renderPlannerDropdown(containerId);
     }
 }
