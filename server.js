@@ -65,6 +65,17 @@ if (process.env.DATABASE_URL) {
 // Increase JSON body size to handle full data imports
 app.use(express.json({ limit: '2mb' }));
 
+// Enable CORS for cross-origin API requests
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
 // Serve static files with proper MIME types
 app.use('/public', express.static('public', {
     setHeaders: (res, path) => {
