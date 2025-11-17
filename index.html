@@ -286,6 +286,13 @@
         <h2 class="text-5xl road-rage-font text-center mb-10">RACE PLANNER</h2>
 
         <div id="app-container">
+            <!-- Load Recent Strategy Dropdown -->
+            <div class="flex justify-center mb-6">
+                <select id="recent-strategies-dropdown" class="bg-neutral-800 text-white px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[300px]">
+                    <option value="">-- Load Recent Strategy --</option>
+                </select>
+            </div>
+            
             <!-- Navigation -->
             <div class="flex justify-center space-x-4 mb-8">
                 <button id="race-details-btn" class="bg-neutral-800 hover:bg-blue-700 text-black font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
@@ -989,6 +996,18 @@
 
     <!-- Weather Integration -->
     <!-- <script src="public/weather-integration.js"></script> -->
+    
+    <!-- Recent Strategies Dropdown -->
+    <script type="module">
+        import { StrategyListComponent } from '/public/js/modules/strategy-list.js';
+        
+        // Initialize recent strategies dropdown
+        const strategiesList = new StrategyListComponent();
+        const dropdown = document.getElementById('recent-strategies-dropdown');
+        if (dropdown) {
+            strategiesList.initPlannerPage(dropdown);
+        }
+    </script>
     
     <!-- Modular Navigation: Debug script removed - using app.js modules instead -->
     <!-- JavaScript Modules -->
