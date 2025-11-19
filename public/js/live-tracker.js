@@ -1123,7 +1123,7 @@ class LiveStrategyTracker {
                 positionLabel.style.userSelect = 'none';
                 positionLabel.style.opacity = '0';
                 positionLabel.style.transition = 'font-size 0.2s';
-                positionLabel.style.transform = 'translateY(-8%)';  // Move up by 8%
+                positionLabel.style.transform = 'translateY(-6%)';  // Move up by 6%
                 dot.appendChild(positionLabel);
                 
                 // Add transition class AFTER initial position is set (prevents animation on creation)
@@ -1183,11 +1183,11 @@ class LiveStrategyTracker {
             if (innerCircle) {
                 innerCircle.style.backgroundColor = color;
                 
-                // Add red border animation if off-track
+                // Add red border size animation if off-track
                 if (isCarOffTrack) {
-                    innerCircle.classList.add('ring-2', 'ring-red-500', 'animate-pulse');
+                    innerCircle.classList.add('ring-8', 'ring-red-500', 'animate-pulse');
                 } else {
-                    innerCircle.classList.remove('ring-2', 'ring-red-500', 'animate-pulse');
+                    innerCircle.classList.remove('ring-8', 'ring-red-500', 'animate-pulse');
                 }
             }
             
