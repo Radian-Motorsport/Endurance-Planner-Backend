@@ -66,6 +66,7 @@ export class CarPositionTracker {
         this.defaultClassColor = '#9ca3af'; // Gray for unknown classes
         
         this.svg = null;
+        this.carGroups = new Map();  // Map of carIdx -> SVG group element containing marker + text
         this.carMarkers = new Map();  // Map of carIdx -> SVG circle element
         this.carPositionTexts = new Map();  // Map of carIdx -> SVG text element for position numbers
         this.classColors = new Map();  // Map of classId -> assigned color (now just for tracking)
@@ -243,33 +244,43 @@ export class CarPositionTracker {
      */
     getOrCreateCarMarker(carIdx, isPlayer, classId) {
         // Check if marker already exists
-        if (this.carMarkers.has(carIdx)) {
+        if (this.carGroups.has(carIdx)) {
             return this.carMarkers.get(carIdx);
         }
         
-        // Create new car marker as a circle
+        // Get starting position
+        const startPoint = this.racingLinePoints[0];
+        const radius = isPlayer ? this.options.playerCarRadius : this.options.carRadius;
+        
+        // Create group container for marker + text
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.setAttribute('id', `car-group-${carIdx}`);
+        group.setAttribute('transform', `translate(${startPoint.x}, ${startPoint.y})`);
+        group.style.transition = 'transform 0.05s linear';  // Smooth movement
+        group.setAttribute('data-car-idx', carIdx);
+        
+        // Create car marker circle (positioned at 0,0 relative to group)
         const marker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         marker.setAttribute('id', `car-marker-${carIdx}`);
-        // Use larger radius for player car
-        const radius = isPlayer ? this.options.playerCarRadius : this.options.carRadius;
+        marker.setAttribute('cx', '0');
+        marker.setAttribute('cy', '0');
         marker.setAttribute('r', radius);
         marker.setAttribute('stroke-width', this.options.carStrokeWidth);
         marker.setAttribute('opacity', '0.9');
-        marker.style.transition = 'cx 0.05s linear, cy 0.05s linear, r 0.2s, opacity 0.2s';  // Smooth movement with 50ms transition
-        marker.style.cursor = 'pointer';  // Show pointer cursor on hover
+        marker.style.transition = 'r 0.2s, opacity 0.2s';  // Only transition size/opacity
+        marker.style.cursor = 'pointer';
         marker.setAttribute('data-car-idx', carIdx);
         marker.setAttribute('data-class-id', classId);
         
-        // Add click handler if callback provided
+        // Add click handler to marker
         if (this.options.onCarClick) {
             marker.addEventListener('click', (e) => {
-                e.stopPropagation();  // Prevent event bubbling
+                e.stopPropagation();
                 this.options.onCarClick(carIdx);
             });
         }
         
         // Get color for this car's class
-        // Only the PLAYER car gets the playerCarColor, not the whole class
         const fillColor = isPlayer ? this.options.playerCarColor : this.getClassColor(classId, false);
         marker.setAttribute('fill', fillColor);
         marker.setAttribute('stroke', this.options.carStroke);
@@ -284,22 +295,11 @@ export class CarPositionTracker {
             marker.appendChild(animate);
         }
         
-        // Initialize at start/finish (first point in racing line)
-        const startPoint = this.racingLinePoints[0];
-        marker.setAttribute('cx', startPoint.x);
-        marker.setAttribute('cy', startPoint.y);
-        
-        // Append to SVG
-        this.svg.appendChild(marker);
-        
-        // Store in map
-        this.carMarkers.set(carIdx, marker);
-        
-        // Create position number text element (only shown for player's class)
+        // Create position number text (positioned at 0,0 relative to group)
         const posText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         posText.setAttribute('id', `car-position-text-${carIdx}`);
-        posText.setAttribute('x', startPoint.x);
-        posText.setAttribute('y', startPoint.y);
+        posText.setAttribute('x', '0');
+        posText.setAttribute('y', '0');
         posText.setAttribute('text-anchor', 'middle');
         posText.setAttribute('dominant-baseline', 'central');
         posText.setAttribute('fill', '#ffffff');
@@ -307,13 +307,22 @@ export class CarPositionTracker {
         posText.setAttribute('stroke-width', '1');
         posText.setAttribute('font-family', 'Arial, sans-serif');
         posText.setAttribute('font-weight', 'bold');
-        posText.setAttribute('font-size', radius * 1.2); // Larger font size (was 0.8)
-        posText.setAttribute('opacity', '0'); // Hidden by default until position data arrives
-        posText.style.transition = 'x 0.05s linear, y 0.05s linear, font-size 0.2s, opacity 0.2s'; // Smooth movement locked with marker (50ms)
-        posText.style.pointerEvents = 'none'; // Don't block clicks
+        posText.setAttribute('font-size', radius * 1.2);
+        posText.setAttribute('opacity', '0');
+        posText.style.transition = 'font-size 0.2s, opacity 0.2s';  // Only transition size/opacity
+        posText.style.pointerEvents = 'none';
         posText.textContent = '';
         
-        this.svg.appendChild(posText);
+        // Add marker and text to group
+        group.appendChild(marker);
+        group.appendChild(posText);
+        
+        // Add group to SVG
+        this.svg.appendChild(group);
+        
+        // Store references
+        this.carGroups.set(carIdx, group);
+        this.carMarkers.set(carIdx, marker);
         this.carPositionTexts.set(carIdx, posText);
         
         debug(`✅ Created car marker: idx=${carIdx}, class=${classId}, color=${fillColor}, isPlayer=${isPlayer}, position=(${startPoint.x.toFixed(1)}, ${startPoint.y.toFixed(1)})`);
@@ -326,17 +335,14 @@ export class CarPositionTracker {
      * @param {number} carIdx - Car index to remove
      */
     removeCarMarker(carIdx) {
-        const marker = this.carMarkers.get(carIdx);
-        if (marker && marker.parentNode) {
-            marker.parentNode.removeChild(marker);
-            this.carMarkers.delete(carIdx);
+        const group = this.carGroups.get(carIdx);
+        if (group && group.parentNode) {
+            group.parentNode.removeChild(group);
+            this.carGroups.delete(carIdx);
         }
         
-        const posText = this.carPositionTexts.get(carIdx);
-        if (posText && posText.parentNode) {
-            posText.parentNode.removeChild(posText);
-            this.carPositionTexts.delete(carIdx);
-        }
+        this.carMarkers.delete(carIdx);
+        this.carPositionTexts.delete(carIdx);
     }
     
     /**
@@ -441,23 +447,20 @@ export class CarPositionTracker {
                 const interpolatedX = point1.x + (point2.x - point1.x) * t;
                 const interpolatedY = point1.y + (point2.y - point1.y) * t;
                 
-                // Update marker position
-                marker.setAttribute('cx', interpolatedX);
-                marker.setAttribute('cy', interpolatedY);
+                // Update group position (moves marker and text together)
+                const group = this.carGroups.get(carIdx);
+                if (group) {
+                    group.setAttribute('transform', `translate(${interpolatedX}, ${interpolatedY})`);
+                }
                 
-                // Update position text element (always update x/y with marker to stay synced)
+                // Update position number text content
                 const posText = this.carPositionTexts.get(carIdx);
                 if (posText) {
-                    posText.setAttribute('x', interpolatedX);
-                    posText.setAttribute('y', interpolatedY);
-                    
-                    // Update position number text content (update every frame for player's class)
                     if (isSameClass && CarIdxClassPosition && CarIdxClassPosition[carIdx] != null) {
                         const position = CarIdxClassPosition[carIdx];
                         posText.textContent = position;
                         posText.setAttribute('opacity', '1');
                     } else if (!isSameClass) {
-                        // Hide position for cars not in player's class
                         posText.setAttribute('opacity', '0');
                     }
                 }
@@ -686,20 +689,14 @@ export class CarPositionTracker {
      * Clean up resources
      */
     destroy() {
-        // Remove all car markers
-        for (const [carIdx, marker] of this.carMarkers.entries()) {
-            if (marker && marker.parentNode) {
-                marker.parentNode.removeChild(marker);
+        // Remove all car groups (contains markers and texts)
+        for (const [carIdx, group] of this.carGroups.entries()) {
+            if (group && group.parentNode) {
+                group.parentNode.removeChild(group);
             }
         }
+        this.carGroups.clear();
         this.carMarkers.clear();
-        
-        // Remove all position texts
-        for (const [carIdx, posText] of this.carPositionTexts.entries()) {
-            if (posText && posText.parentNode) {
-                posText.parentNode.removeChild(posText);
-            }
-        }
         this.carPositionTexts.clear();
         
         if (this.racingLineLayer && this.racingLineLayer.parentNode) {
