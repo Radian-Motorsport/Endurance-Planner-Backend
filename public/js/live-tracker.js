@@ -1005,16 +1005,16 @@ class LiveStrategyTracker {
                     // Scale player dot if selected (200%)
                     const isPlayerSelected = playerCarIdx === this.selectedCarIdx;
                     if (isPlayerSelected) {
-                        lapProgressDot.style.width = '40px';
-                        lapProgressDot.style.height = '40px';
+                        lapProgressDot.style.width = '60px';  // 200% of 30px
+                        lapProgressDot.style.height = '60px';
                         if (playerPositionLabel) {
-                            playerPositionLabel.style.fontSize = '24px';
+                            playerPositionLabel.style.fontSize = '36px';  // 200% of 18px
                         }
                     } else {
-                        lapProgressDot.style.width = '20px';
-                        lapProgressDot.style.height = '20px';
+                        lapProgressDot.style.width = '30px';
+                        lapProgressDot.style.height = '30px';
                         if (playerPositionLabel) {
-                            playerPositionLabel.style.fontSize = '12px';
+                            playerPositionLabel.style.fontSize = '18px';
                         }
                     }
                 }
@@ -1106,14 +1106,16 @@ class LiveStrategyTracker {
                 
                 // Create inner circle (the colored dot)
                 const innerCircle = document.createElement('div');
-                innerCircle.className = 'progress-dot-circle w-3 h-3 rounded-full';
+                innerCircle.className = 'progress-dot-circle rounded-full';
+                innerCircle.style.width = '18px';  // 50% larger baseline (was 12px)
+                innerCircle.style.height = '18px';
                 innerCircle.style.transition = 'width 0.2s, height 0.2s';
                 dot.appendChild(innerCircle);
                 
                 // Create position label (only for player's class)
                 positionLabel = document.createElement('span');
                 positionLabel.className = 'progress-position-label absolute';
-                positionLabel.style.fontSize = '10px';
+                positionLabel.style.fontSize = '14px';  // Larger font (was 10px)
                 positionLabel.style.fontWeight = 'bold';
                 positionLabel.style.color = '#ffffff';
                 positionLabel.style.textShadow = '0 0 3px #000000, 0 0 3px #000000, 1px 1px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000';
@@ -1203,16 +1205,16 @@ class LiveStrategyTracker {
             const isSelected = carIdx === this.selectedCarIdx;
             if (innerCircle) {
                 if (isSelected) {
-                    innerCircle.style.width = '24px';  // 200% of 12px
-                    innerCircle.style.height = '24px';
+                    innerCircle.style.width = '36px';  // 200% of 18px
+                    innerCircle.style.height = '36px';
                     if (positionLabel) {
-                        positionLabel.style.fontSize = '16px';  // Scale position text too
+                        positionLabel.style.fontSize = '28px';  // Scale position text too (200% of 14px)
                     }
                 } else {
-                    innerCircle.style.width = '12px';
-                    innerCircle.style.height = '12px';
+                    innerCircle.style.width = '18px';
+                    innerCircle.style.height = '18px';
                     if (positionLabel) {
-                        positionLabel.style.fontSize = '10px';
+                        positionLabel.style.fontSize = '14px';
                     }
                 }
             }

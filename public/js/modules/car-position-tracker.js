@@ -18,8 +18,8 @@ export class CarPositionTracker {
     constructor(svgContainerId, options = {}) {
         this.svgContainerId = svgContainerId;
         this.options = {
-            carRadius: options.carRadius || 14,
-            playerCarRadius: options.playerCarRadius || 20,  // Larger radius for player car
+            carRadius: options.carRadius || 21,  // 50% larger baseline (was 14)
+            playerCarRadius: options.playerCarRadius || 30,  // 50% larger baseline (was 20)
             playerCarColor: options.playerCarColor || '#00d9ffff',  // Cyan for player
             carStroke: options.carStroke || 'transparent',  // Transparent by default (on track)
             carStrokeWidth: options.carStrokeWidth || 3,
@@ -311,9 +311,9 @@ export class CarPositionTracker {
         posText.setAttribute('stroke-width', '2');
         posText.setAttribute('font-family', 'Arial, sans-serif');
         posText.setAttribute('font-weight', 'bold');
-        posText.setAttribute('font-size', radius * 0.8); // Scale with marker size
+        posText.setAttribute('font-size', radius * 1.2); // Larger font size (was 0.8)
         posText.setAttribute('opacity', '0'); // Hidden by default until position data arrives
-        posText.style.transition = 'x 0.1s linear, y 0.1s linear, font-size 0.2s';
+        posText.style.transition = 'font-size 0.2s'; // Only transition font-size, not position (prevents jiggle)
         posText.style.pointerEvents = 'none'; // Don't block clicks
         posText.textContent = '';
         
@@ -776,7 +776,7 @@ export class CarPositionTracker {
             if (prevText) {
                 const isPlayerCar = this.selectedCarIdx === this.playerCarIdx;
                 const normalRadius = isPlayerCar ? this.options.playerCarRadius : this.options.carRadius;
-                prevText.setAttribute('font-size', normalRadius * 0.8);
+                prevText.setAttribute('font-size', normalRadius * 1.2);
             }
         }
         
@@ -799,7 +799,7 @@ export class CarPositionTracker {
                 const isPlayerCar = carIdx === this.playerCarIdx;
                 const normalRadius = isPlayerCar ? this.options.playerCarRadius : this.options.carRadius;
                 const scaledRadius = normalRadius * this.options.selectedCarScale;
-                newText.setAttribute('font-size', scaledRadius * 0.8);
+                newText.setAttribute('font-size', scaledRadius * 1.2);
             }
             
             if (this.options.showDebugInfo) {
