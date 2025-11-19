@@ -1020,6 +1020,14 @@ export class WeatherComponent {
             // Calculate target timestamp for current race time
             const targetTimestamp = raceStartTimestamp + this.currentRaceTime;
             
+            console.log('🔴 RED LINE DEBUG:', {
+                currentRaceTimeSeconds: this.currentRaceTime,
+                currentRaceTimeFormatted: new Date(this.currentRaceTime * 1000).toISOString().substr(11, 8),
+                raceStartIndex: raceStartIndex,
+                raceStartTimestamp: forecast[raceStartIndex].timestamp,
+                targetTimestamp: new Date(targetTimestamp * 1000).toISOString()
+            });
+            
             // Find forecast item with closest matching timestamp
             let closestDiff = Infinity;
             for (let i = 0; i < forecast.length; i++) {
@@ -1030,6 +1038,8 @@ export class WeatherComponent {
                     currentTimeIndex = i;
                 }
             }
+            
+            console.log('🔴 Found index:', currentTimeIndex, 'timestamp:', forecast[currentTimeIndex]?.timestamp);
         }
         
         // Update markLine data for both charts
