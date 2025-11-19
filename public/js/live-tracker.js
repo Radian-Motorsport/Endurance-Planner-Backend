@@ -79,11 +79,16 @@ class PedalTrace {
     }
     
     startAnimation() {
-        requestAnimationFrame(this.draw.bind(this));
+        this.draw();
     }
     
     draw() {
         if (!this.ctx) return;
+        
+        // 30 FPS = 33.33ms per frame
+        setTimeout(() => {
+            this.draw();
+        }, 33);
         
         // Apply DPI scaling on first draw if canvas wasn't visible during construction
         if (!this.dpiScaled) {
@@ -101,13 +106,18 @@ class PedalTrace {
         
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
+        // Add margins to avoid drawing at the very edges
+        const marginTop = 35; // Space for COASTING/OVERLAP text
+        const marginBottom = 5;
+        const drawableHeight = this.cssHeight - marginTop - marginBottom;
+        
         // Throttle line
         this.ctx.beginPath();
         this.ctx.strokeStyle = this.options.throttleColor;
         this.ctx.lineWidth = 2;
         this.buffer.forEach((point, i) => {
             const x = i * (this.cssWidth / this.options.maxPoints);
-            const y = this.cssHeight - point.throttle * (this.cssHeight / 100);
+            const y = marginTop + (drawableHeight - point.throttle * (drawableHeight / 100));
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();
@@ -118,7 +128,7 @@ class PedalTrace {
         this.ctx.lineWidth = 2;
         this.buffer.forEach((point, i) => {
             const x = i * (this.cssWidth / this.options.maxPoints);
-            const y = this.cssHeight - point.brake * (this.cssHeight / 100);
+            const y = marginTop + (drawableHeight - point.brake * (drawableHeight / 100));
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();
@@ -129,7 +139,7 @@ class PedalTrace {
         this.ctx.lineWidth = 1;
         this.buffer.forEach((point, i) => {
             const x = i * (this.cssWidth / this.options.maxPoints);
-            const y = this.cssHeight - point.gear * (this.cssHeight / 100);
+            const y = marginTop + (drawableHeight - point.gear * (drawableHeight / 100));
             i === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
         });
         this.ctx.stroke();
@@ -143,8 +153,6 @@ class PedalTrace {
             this.ctx.fillStyle = latestData.overlap ? '#14b8a6' : '#6b7280';
             this.ctx.fillText('OVERLAP', 10, 30);
         }
-        
-        requestAnimationFrame(this.draw.bind(this));
     }
 }
 
@@ -362,6 +370,13 @@ class LiveStrategyTracker {
         // Max speed tracking
         this.maxSpeed = 0;
         this.targetShiftRPM = 7000;
+        
+        // Shift lights toggle
+        this.shiftLightsEnabled = true;
+        
+        // Throttle timers
+        this.lastWeatherUpdate = 0;
+        this.lastFuelUpdate = 0;
     }
     
     setupEventListeners() {
@@ -388,6 +403,24 @@ class LiveStrategyTracker {
         // Shift RPM input change
         document.getElementById('shift-rpm-input')?.addEventListener('input', (e) => {
             this.targetShiftRPM = parseInt(e.target.value) || 7000;
+        });
+        
+        // Shift lights toggle
+        document.getElementById('shift-lights-toggle')?.addEventListener('click', () => {
+            this.shiftLightsEnabled = !this.shiftLightsEnabled;
+            const toggleBtn = document.getElementById('shift-lights-toggle');
+            if (toggleBtn) {
+                toggleBtn.textContent = this.shiftLightsEnabled ? 'Hide Lights' : 'Show Lights';
+            }
+            // Reset all indicators if disabled
+            if (!this.shiftLightsEnabled) {
+                if (this.elements.shiftIndicatorBlue) this.elements.shiftIndicatorBlue.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+                if (this.elements.shiftIndicatorGreen) this.elements.shiftIndicatorGreen.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+                if (this.elements.shiftIndicatorYellow) this.elements.shiftIndicatorYellow.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+                if (this.elements.shiftIndicatorOrange) this.elements.shiftIndicatorOrange.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+                if (this.elements.shiftIndicatorWhite) this.elements.shiftIndicatorWhite.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+                if (this.elements.shiftIndicatorPurple) this.elements.shiftIndicatorPurple.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+            }
         });
         
         document.getElementById('nav-load-strategy')?.addEventListener('click', () => {
@@ -592,7 +625,13 @@ class LiveStrategyTracker {
             this.lastTelemetryTime = Date.now();  // Track last telemetry received
             this.handleTelemetryUpdate(data);
             this.updateDriverInputs(data);  // Update driver inputs display
-            this.updateWeatherData(data?.values);  // Update weather display
+            
+            // Throttle weather updates to 1000ms
+            const now = Date.now();
+            if (now - this.lastWeatherUpdate > 1000) {
+                this.updateWeatherData(data?.values);
+                this.lastWeatherUpdate = now;
+            }
         });
         
         // Listen for connection info (to display connected apps)
@@ -770,19 +809,21 @@ class LiveStrategyTracker {
             const currentRPM = Math.round(values.RPM ?? 0);
             this.elements.inputRPMShift.textContent = values.RPM ? `${currentRPM}` : '--';
             
-            // Calculate shift RPM bands
-            const targetRPM = this.targetShiftRPM;
-            const band1 = targetRPM - 4000;
-            const band2 = targetRPM - 3000;
-            const band3 = targetRPM - 2000;
-            const band4 = targetRPM - 1200;
-            const band5 = targetRPM - 150;
-            const band6 = targetRPM + 150;
-            
-            // Update indicators based on current RPM
-            if (this.elements.shiftIndicatorBlue) {
-                this.elements.shiftIndicatorBlue.style.backgroundColor = 
-                    currentRPM >= band1 && currentRPM <= band6 ? '#05218fa6' : 'rgba(0, 0, 0, 0.2)';
+            // Only update indicators if shift lights are enabled
+            if (this.shiftLightsEnabled) {
+                // Calculate shift RPM bands
+                const targetRPM = this.targetShiftRPM;
+                const band1 = targetRPM - 4000;
+                const band2 = targetRPM - 3000;
+                const band3 = targetRPM - 2000;
+                const band4 = targetRPM - 1200;
+                const band5 = targetRPM - 150;
+                const band6 = targetRPM + 150;
+                
+                // Update indicators based on current RPM
+                if (this.elements.shiftIndicatorBlue) {
+                    this.elements.shiftIndicatorBlue.style.backgroundColor = 
+                        currentRPM >= band1 && currentRPM <= band6 ? '#05218fa6' : 'rgba(0, 0, 0, 0.2)';
             }
             if (this.elements.shiftIndicatorGreen) {
                 this.elements.shiftIndicatorGreen.style.backgroundColor = 
@@ -803,6 +844,7 @@ class LiveStrategyTracker {
             if (this.elements.shiftIndicatorPurple) {
                 this.elements.shiftIndicatorPurple.style.backgroundColor = 
                     currentRPM > band6 ? '#ff00006f' : 'rgba(0, 0, 0, 0.2)';
+                }
             }
         }
         
@@ -833,6 +875,13 @@ class LiveStrategyTracker {
         
         // Update car position on track map
         this.updateCarPosition(values);
+        
+        // Throttle fuel stats updates to 500ms
+        const now = Date.now();
+        if (now - this.lastFuelUpdate > 500) {
+            this.updateLiveFuelStats(values);
+            this.lastFuelUpdate = now;
+        }
     }
     
     updateLiveFuelStats(values) {

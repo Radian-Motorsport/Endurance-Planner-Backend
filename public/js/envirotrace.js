@@ -111,7 +111,7 @@ class EnviroTrace {
    * Start the animation loop
    */
   startAnimation() {
-    requestAnimationFrame(this.draw.bind(this));
+    this.draw();
   }
   
   /**
@@ -140,7 +140,10 @@ class EnviroTrace {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
     if (this.buffer.length === 0) {
-      requestAnimationFrame(this.draw.bind(this));
+      // 30 FPS = 33.33ms per frame
+      setTimeout(() => {
+        this.draw();
+      }, 33);
       return;
     }
     
@@ -251,7 +254,10 @@ class EnviroTrace {
     });
     this.ctx.stroke();
     
-    requestAnimationFrame(this.draw.bind(this));
+    // 30 FPS = 33.33ms per frame
+    setTimeout(() => {
+      this.draw();
+    }, 33);
   }
   
   /**
