@@ -145,147 +145,34 @@
         </div>
         
         <!-- Connection Status Bar - SPANS FULL WIDTH -->
-        <div class="panel glass-stripe rounded-lg p-4 mb-6">
+        <div class="p-4 mb-6">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex items-center space-x-2">
                         <div id="telemetry-status" class="w-3 h-3 rounded-full status-offline"></div>
                         <span class="text-sm">Telemetry: <span id="telemetry-status-text">Disconnected</span></span>
                     </div>
-                    <div class="text-sm">
-                        Strategy: <span id="current-strategy-info" class="px-6 font-mono text-purple-400">Not loaded</span>
-                    </div>
-                    <div class="text-sm border-l border-neutral-600 pl-3">
+                    <div class="text-sm border-l border-neutral-700 pl-3">
                         Connected Apps: <span id="connected-apps-count" class="px-2 text-cyan-400">0</span>
                     </div>
                     <div class="text-sm">
-                        <span id="connected-apps-list" class="text-neutral-400 text-xs">No apps connected</span>
-                    </div>
-                    <div class="text-sm border-l border-neutral-600 pl-3">
-                        Session Time Remaining: <span id="header-session-time" class="px-6 text-blue-400">--:--:--</span>
-                        Time: <span id="header-time-of-day" class="px-6 text-xs ml-1">--:--</span>
+                        <span id="connected-apps-list" class="text-neutral-300 text-xs">No apps connected</span>
                     </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <button id="time-mode-auto" class="time-mode-btn bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm transition">
-                        Auto
-                    </button>
-                    <button id="time-mode-manual" class="time-mode-btn bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1.5 rounded text-sm transition">
-                        Manual
-                    </button>
-                    <button id="recalc-stints-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-sm transition">
-                        Recalculate
-                    </button>
-                    <button id="load-strategy-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded-lg text-sm transition">
+                
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="text-sm">
+                        Strategy: <span id="current-strategy-info" class="px-6 font-mono text-purple-400">Not loaded</span>
+                    </div>
+                    <button id="load-strategy-btn" class="ov-dark hover:bg-purple-700 text-neutral-300 px-4 py-1.5 rounded-lg text-sm transition">
                         <i class="fas fa-upload mr-2"></i>Load Strategy
                     </button>
                 </div>
             </div>
-            
-            <!-- Manual Mode Controls (Hidden by default) -->
-            <div id="manual-mode-controls" class="hidden mt-3 pt-3 border-t border-neutral-700">
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="flex items-center space-x-2">
-                        <label class="text-xs text-neutral-400">Hours</label>
-                        <input type="number" id="manual-hours" min="0" max="23" value="0" class="w-16 bg-neutral-900 border border-neutral-600 rounded px-2 py-1 text-white text-sm">
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <label class="text-xs text-neutral-400">Minutes</label>
-                        <input type="number" id="manual-minutes" min="0" max="59" value="0" class="w-16 bg-neutral-900 border border-neutral-600 rounded px-2 py-1 text-white text-sm">
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <label class="text-xs text-neutral-400">Seconds</label>
-                        <input type="number" id="manual-seconds" min="0" max="59" value="0" class="w-16 bg-neutral-900 border border-neutral-600 rounded px-2 py-1 text-white text-sm">
-                    </div>
-                    <button id="manual-start-btn" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition">
-                        ▶ Start
-                    </button>
-                    <button id="manual-stop-btn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm transition">
-                        ⏹ Stop
-                    </button>
-                    <button id="manual-reset-btn" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition">
-                        ⟲ Reset
-                    </button>
-                    <button id="manual-recalc-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm transition">
-                        Recalculate
-                    </button>
-                </div>
-            </div>
         </div>
         
-        <!-- Fuel Trace Recorder - SPANS FULL WIDTH -->
-        <div class="panel glass-stripe rounded-lg p-4 mb-6">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div id="fuel-recorder-status-indicator" class="w-3 h-3 rounded-full bg-neutral-500"></div>
-                    <span class="text-sm font-semibold">Fuel Recorder</span>
-                    <span id="fuel-recorder-status-text" class="px-6 text-xs text-neutral-400">Ready</span>
-                </div>
-                <div class="flex gap-2">
-                    <button id="fuel-recorder-view-button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm transition">
-                        Stored Data
-                    </button>
-                    <button id="fuel-recorder-button" class="text-white px-4 py-1.5 rounded text-sm transition">
-                        ⏺ Record Lap
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Stored Data Display (Hidden by default) -->
-            <div id="fuel-recorder-data-display" class="hidden mt-4 pt-4 border-t border-neutral-700">
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Track</div>
-                        <div id="stored-track-name" class="text-sm font-mono text-white">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Car</div>
-                        <div id="stored-car-name" class="text-sm font-mono text-white">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Lap Time</div>
-                        <div id="stored-lap-time" class="text-sm font-mono text-cyan-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Used</div>
-                        <div id="stored-fuel-used" class="text-sm font-mono text-orange-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Track Temp</div>
-                        <div id="stored-track-temp" class="text-sm font-mono text-red-400">--</div>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-3">
-                        <div class="text-xs text-neutral-400 uppercase mb-1">Samples</div>
-                        <div id="stored-sample-count" class="text-sm font-mono text-green-400">--</div>
-                    </div>
-                </div>
-                <div class="mt-3 grid grid-cols-2 md:grid-cols-5 gap-3">
-                    <div class="bg-neutral-700 rounded p-2 text-xs">
-                        <span class="text-neutral-400">Air Temp:</span>
-                        <span id="stored-air-temp" class="text-white ml-1">--</span>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-2 text-xs">
-                        <span class="text-neutral-400">Wind:</span>
-                        <span id="stored-wind" class="text-white ml-1">--</span>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-2 text-xs">
-                        <span class="text-neutral-400">Humidity:</span>
-                        <span id="stored-humidity" class="text-white ml-1">--</span>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-2 text-xs">
-                        <span class="text-neutral-400">Tank Size:</span>
-                        <span id="stored-tank-capacity" class="text-white ml-1">--</span>
-                    </div>
-                    <div class="bg-neutral-700 rounded p-2 text-xs">
-                        <span class="text-neutral-400">Recorded:</span>
-                        <span id="stored-recorded-at" class="text-white ml-1">--</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Session Info Display - SPANS FULL WIDTH -->
-        <div class="panel glass-stripe rounded-lg p-4 mb-6">
+        <!-- Session Info Display - Track/Car/Event -->
+        <div class="p-4 mb-6">
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 <div>
                     <div class="text-xs text-neutral-500 uppercase">Track</div>
@@ -321,6 +208,138 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Session Time Controls & Fuel Trace Recorder -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Session Time & Controls -->
+            <div class="panel glass-stripe rounded-lg p-4">
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-4">
+                            <div class="text-sm">
+                                Session Time Remaining: <span id="header-session-time" class="text-blue-400 ml-2">--:--:--</span>
+                            </div>
+                            <div class="text-sm">
+                                Time: <span id="header-time-of-day" class="text-xs ml-1">--:--</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button id="time-mode-auto" class="time-mode-btn ov-dark hover:bg-blue-700 text-neutral-300 px-3 py-1.5 rounded text-sm transition">
+                                Auto
+                            </button>
+                            <button id="time-mode-manual" class="time-mode-btn ov-dark hover:bg-orange-600 text-neutral-300 px-3 py-1.5 rounded text-sm transition">
+                                Manual
+                            </button>
+                            <button id="recalc-stints-btn" class="ov-dark hover:bg-pink-700 text-neutral-300 px-3 py-1.5 rounded text-sm transition">
+                                Recalculate
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Manual Mode Controls (Hidden by default) -->
+                    <div id="manual-mode-controls" class="hidden mt-3 pt-3 border-t border-neutral-700">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="flex items-center space-x-2">
+                                <label class="text-xs text-neutral-400">Hours</label>
+                                <input type="number" id="manual-hours" min="0" max="23" value="0" class="w-16 ov-dark rounded px-2 py-1 text-neutral-300 text-sm">
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <label class="text-xs text-neutral-400">Minutes</label>
+                                <input type="number" id="manual-minutes" min="0" max="59" value="0" class="w-16 ov-dark rounded px-2 py-1 text-neutral-300 text-sm">
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <label class="text-xs text-neutral-400">Seconds</label>
+                                <input type="number" id="manual-seconds" min="0" max="59" value="0" class="w-16 ov-dark rounded px-2 py-1 text-neutral-300 text-sm">
+                            </div>
+                            <button id="manual-start-btn" class="ov-dark hover:bg-green-700 text-neutral-300 px-3 py-1 rounded text-sm transition">
+                                ▶ Start
+                            </button>
+                            <button id="manual-stop-btn" class="ov-dark hover:bg-yellow-700 text-neutral-300 px-3 py-1 rounded text-sm transition">
+                                ⏹ Stop
+                            </button>
+                            <button id="manual-reset-btn" class="ov-dark hover:bg-red-700 text-neutral-300 px-3 py-1 rounded text-sm transition">
+                                ⟲ Reset
+                            </button>
+                            <button id="manual-recalc-btn" class="ov-dark hover:bg-purple-700 text-neutral-300 px-3 py-1 rounded text-sm transition">
+                                Recalculate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Fuel Trace Recorder -->
+            <div class="panel glass-stripe rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div id="fuel-recorder-status-indicator" class="w-3 h-3 rounded-full bg-neutral-500"></div>
+                        <span class="text-sm font-semibold">Fuel Recorder</span>
+                        <span id="fuel-recorder-status-text" class="px-6 text-xs text-neutral-400">Ready</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="fuel-recorder-view-button" class="ov-dark hover:bg-blue-700 text-neutral-300 px-4 py-1.5 rounded text-sm transition">
+                            Stored Data
+                        </button>
+                        <button id="fuel-recorder-button" class="text-neutral-300 px-4 py-1.5 rounded text-sm transition">
+                            ⏺ Record Lap
+                        </button>
+                    </div>
+                </div>
+            
+            <!-- Stored Data Display (Hidden by default) -->
+            <div id="fuel-recorder-data-display" class="hidden mt-4 pt-4 border-t border-neutral-700">
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <div class="panel glass-stripe rounded-lg ov-dark">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Track</div>
+                        <div id="stored-track-name" class="text-sm font-mono text-white">--</div>
+                    </div>
+                    <div class="panel glass-stripe rounded-lg ov-dark">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Car</div>
+                        <div id="stored-car-name" class="text-sm font-mono text-white">--</div>
+                    </div>
+                    <div class="panel glass-stripe rounded-lg ov-dark">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Lap Time</div>
+                        <div id="stored-lap-time" class="text-sm font-mono text-cyan-400">--</div>
+                    </div>
+                    <div class="panel glass-stripe rounded-lg ov-dark">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Fuel Used</div>
+                        <div id="stored-fuel-used" class="text-sm font-mono text-orange-400">--</div>
+                    </div>
+                    <div class="panel glass-stripe rounded-lg ov-dark">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Track Temp</div>
+                        <div id="stored-track-temp" class="text-sm font-mono text-red-400">--</div>
+                    </div>
+                    <div class="panel glass-stripe rounded-lg ov-dark">
+                        <div class="text-xs text-neutral-400 uppercase mb-1">Samples</div>
+                        <div id="stored-sample-count" class="text-sm font-mono text-green-400">--</div>
+                    </div>
+                </div>
+                <div class="mt-3 grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div class="panel glass-stripe rounded-lg ov-dark p-2 text-xs">
+                        <span class="text-neutral-400">Air Temp:</span>
+                        <span id="stored-air-temp" class="text-white ml-1">--</span>
+                    </div>
+                    <div class="panel glass-stripe rounded-lg ov-dark p-2 text-xs">
+                        <span class="text-neutral-400">Wind:</span>
+                        <span id="stored-wind" class="text-white ml-1">--</span>
+                    </div>
+                    <div class="panel glass-stripe rounded-lg ov-dark p-2 text-xs">
+                        <span class="text-neutral-400">Humidity:</span>
+                        <span id="stored-humidity" class="text-white ml-1">--</span>
+                    </div>
+                    <div class="panel glass-stripe rounded-lg ov-dark p-2 text-xs">
+                        <span class="text-neutral-400">Tank Size:</span>
+                        <span id="stored-tank-capacity" class="text-white ml-1">--</span>
+                    </div>
+                    <div class="panel glass-stripe rounded-lg ov-dark p-2 text-xs">
+                        <span class="text-neutral-400">Recorded:</span>
+                        <span id="stored-recorded-at" class="text-white ml-1">--</span>
+                    </div>
+                </div>
+            </div>
+            </div>
+      </div>
         
         <!-- TWO COLUMN LAYOUT: Left side and Right side -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 max-w-full">
@@ -685,48 +704,48 @@
         <div class="">
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-4 mb-4">
                 
-                <div class="panel glass-stripe rounded p-4 text-center">
+                <div class="p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Total Laps</div>
                     <div id="current-lap" class="text-2xl font-mono text-green-400">--</div>
                 </div>
-                <div class="panel glass-stripe rounded p-4 text-center">
+                <div class="p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Stint Number</div>
                     <div id="stint-number" class="text-2xl font-mono text-indigo-400">--</div>
                 </div>
-                <div class="panel glass-stripe rounded p-4 text-center">
+                <div class="p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Stint Laps</div>
                     <div id="stint-lap" class="text-2xl font-mono text-cyan-400">--</div>
                 </div>
-                 <div class="panel glass-stripe rounded p-4 text-center">
+                 <div class="p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Last Lap</div>
                     <div id="last-lap-time" class="text-2xl font-mono text-purple-400">--:--</div>
                 </div>
-                <div class="panel glass-stripe rounded p-4 text-center">
+                <div class="p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Fuel Remaining</div>
                     <div id="fuel-remaining" class="text-2xl font-mono text-yellow-400">-- L</div>
                 </div>
-                <div class="panel glass-stripe rounded p-4 text-center">
+                <div class="p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Laps Remaining</div>
                     <div id="laps-remaining" class="text-2xl font-mono text-orange-400">--</div>
                 </div>
-                <div class="panel glass-stripe rounded p-4 text-center">
+                <div class="p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-1">Pit Stop Time</div>
                     <div id="pit-stop-time" class="text-2xl font-mono text-red-400">-- s</div>
                 </div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="panel glass-stripe rounded p-4 text-center">
+                <div class="p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-2">Fuel Per Lap</div>
                     <div id="fuel-per-lap" class="text-2xl font-mono text-orange-400 mb-2">-- L</div>
                     <div class="text-neutral-500 text-xs">Latest</div>
                 </div>
-                <div class="panel glass-stripe rounded p-4 text-center">
+                <div class="p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-2">Avg Lap Time</div>
                     <div id="avg-lap-time" class="text-2xl font-mono text-pink-400 mb-2">--:--</div>
                     <div class="text-neutral-500 text-xs">This Stint</div>
                 </div>
-                <div class="panel glass-stripe rounded p-4 text-center">
+                <div class="p-4 text-center">
                     <div class="text-neutral-400 text-xs uppercase mb-2">Avg Fuel/Lap</div>
                     <div id="avg-fuel-per-lap" class="text-2xl font-mono text-emerald-400 mb-2">-- L</div>
                     <div class="text-neutral-500 text-xs">This Stint</div>
@@ -1012,7 +1031,7 @@
         <!-- Track Map with Car Position -->
         <div class="panel glass-stripe rounded p-6">
             <div class="flex items-center justify-between mb-4">
-                <h1 class="road-rage-font">Map</h1>
+                <h1 class="road-rage-font text-neutral-300">Map</h1>
                 <button id="toggle-track-map" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1 rounded text-sm transition">
                     ▼
                 </button>
@@ -1030,7 +1049,7 @@
         
         <!-- Sector Time Comparison -->
         <div class="panel glass-stripe rounded-lg p-6">
-            <h1 class="text-neutral-300 text-shadow mb-4" style="color: #ffffff; text-shadow: 3px 3px 0px #000000;">Sectors</h1>
+            <h1 class="text-neutral-300 text-shadow mb-4" style=" text-shadow: 3px 3px 0px #000000;">Sectors</h1>
             <div id="sector-comparison-container" class="space-y-1">
                 <div class="text-neutral-500 text-xs text-center py-4">Sector times will appear during session</div>
             </div>
