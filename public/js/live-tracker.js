@@ -432,6 +432,13 @@ class LiveStrategyTracker {
             this.elements.loadModal.classList.remove('hidden');
         });
         
+        // Reset data button
+        document.getElementById('reset-data-btn')?.addEventListener('click', () => {
+            if (confirm('Reset all stint data? This will clear lap times, fuel data, and stint history.')) {
+                this.resetStintData();
+            }
+        });
+        
         // Load confirm
         document.getElementById('load-confirm-btn').addEventListener('click', () => {
             this.loadStrategyFromInput();
@@ -2890,6 +2897,38 @@ class LiveStrategyTracker {
         this.pitStopStartTime = null;  // Reset pit timer
         // Update table status now that stint number has changed
         this.updateStintTableStatus();
+    }
+    
+    resetStintData() {
+        debug('🔄 Resetting all stint data');
+        
+        // Reset stint tracking
+        this.currentStintNumber = 0;
+        this.currentStintLap = 0;
+        this.stintStartLap = this.currentLap;
+        this.currentStintLapTimes = [];
+        this.currentStintFuelUse = [];
+        this.stintHistory = [];
+        this.fuelUsageHistory = [];
+        this.fuelPerLap = 0;
+        this.lastProcessedLap = this.currentLap - 1;
+        this.fuelAtLapStart = this.fuelLevel;
+        this.actualPitStopTime = 0;
+        this.pitStopStartTime = null;
+        this.maxSpeed = 0;
+        
+        // Reset tyre data
+        this.currentTyreData = null;
+        
+        // Update UI
+        this.updateLiveStats();
+        this.updateStintDataDisplay();
+        
+        if (this.elements.inputSpeedMax) {
+            this.elements.inputSpeedMax.textContent = '--';
+        }
+        
+        debug('✅ Stint data reset complete');
     }
     
     finishCurrentStint() {
