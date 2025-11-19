@@ -3160,7 +3160,10 @@ class LiveStrategyTracker {
         // Display lap times for current stint
         if (this.elements.stintLapTimesList && this.currentStintLapTimes.length > 0) {
             this.elements.stintLapTimesList.innerHTML = this.currentStintLapTimes
-                .map((time, idx) => `<div class="text-xs font-mono">L${idx + 1}: ${this.formatLapTime(time)}</div>`)
+                .map((time, idx) => {
+                    const lapLabel = (time === 0 || !time) ? 'OUT' : `L${idx + 1}`;
+                    return `<div class="text-xs font-mono">${lapLabel}: ${this.formatLapTime(time)}</div>`;
+                })
                 .join('');
         } else if (this.elements.stintLapTimesList) {
             this.elements.stintLapTimesList.innerHTML = '<div class="text-xs text-neutral-500">No data yet</div>';
@@ -3169,7 +3172,10 @@ class LiveStrategyTracker {
         // Display fuel use for current stint
         if (this.elements.stintFuelList && this.currentStintFuelUse.length > 0) {
             this.elements.stintFuelList.innerHTML = this.currentStintFuelUse
-                .map((fuel, idx) => `<div class="text-xs font-mono">L${idx + 1}: ${fuel.toFixed(2)}L</div>`)
+                .map((fuel, idx) => {
+                    const lapLabel = (fuel === 0 || !fuel) ? 'OUT' : `L${idx + 1}`;
+                    return `<div class="text-xs font-mono">${lapLabel}: ${fuel.toFixed(2)}L</div>`;
+                })
                 .join('');
         } else if (this.elements.stintFuelList) {
             this.elements.stintFuelList.innerHTML = '<div class="text-xs text-neutral-500">No data yet</div>';
