@@ -992,11 +992,18 @@ export class WeatherComponent {
     }
     
     setCurrentRaceTime(raceTimeSeconds) {
+        console.log('⏰ setCurrentRaceTime called:', raceTimeSeconds, 'seconds');
+        console.log('⏰ Charts exist?', !!this.temperatureChart, !!this.cloudsChart);
+        console.log('⏰ Weather data exists?', !!this.weatherData);
+        
         this.currentRaceTime = raceTimeSeconds;
         
         // Update just the red line without full re-render
         if (this.temperatureChart && this.cloudsChart && this.weatherData) {
+            console.log('⏰ Calling updateRedLine()...');
             this.updateRedLine();
+        } else {
+            console.log('⏰ NOT calling updateRedLine - missing requirements');
         }
     }
     
