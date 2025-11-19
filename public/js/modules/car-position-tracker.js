@@ -88,10 +88,6 @@ export class CarPositionTracker {
         // Selected car tracking (for car analysis UI)
         this.selectedCarIdx = null;
         
-        // Position number throttling (update every 100ms to avoid excessive DOM updates)
-        this.lastPositionUpdate = 0;
-        this.positionUpdateInterval = 100;
-        
         // Racing line mode properties
         this.racingLinePoints = null;  // Array of {x, y} points from database
         this.racingLineLayer = null;   // SVG polyline element for racing line visualization
@@ -307,11 +303,11 @@ export class CarPositionTracker {
         posText.setAttribute('text-anchor', 'middle');
         posText.setAttribute('dominant-baseline', 'central');
         posText.setAttribute('fill', '#ffffff');
-        posText.setAttribute('stroke', '#000000');
-        posText.setAttribute('stroke-width', '2');
+        posText.setAttribute('stroke', '#cdcdcdff');
+        posText.setAttribute('stroke-width', '1');
         posText.setAttribute('font-family', 'Arial, sans-serif');
         posText.setAttribute('font-weight', 'bold');
-        posText.setAttribute('font-size', radius * 1.2); // Larger font size (was 0.8)
+        posText.setAttribute('font-size', radius * 1.6); // Larger font size (was 0.8)
         posText.setAttribute('opacity', '0'); // Hidden by default until position data arrives
         posText.style.transition = 'font-size 0.2s'; // Only transition font-size, not position (prevents jiggle)
         posText.style.pointerEvents = 'none'; // Don't block clicks
@@ -361,10 +357,6 @@ export class CarPositionTracker {
             CarIdxTrackSurface,
             CarIdxClassPosition
         } = telemetryData;
-        
-        // Throttle position number updates (every 100ms)
-        const now = Date.now();
-        const shouldUpdatePositions = (now - this.lastPositionUpdate) >= this.positionUpdateInterval;
         
         // Debug logging for first call
         if (!this.hasLoggedFirstUpdate) {
@@ -453,14 +445,14 @@ export class CarPositionTracker {
                 marker.setAttribute('cx', interpolatedX);
                 marker.setAttribute('cy', interpolatedY);
                 
-                // Update position text element
+                // Update position text element (always update x/y with marker to stay synced)
                 const posText = this.carPositionTexts.get(carIdx);
                 if (posText) {
                     posText.setAttribute('x', interpolatedX);
                     posText.setAttribute('y', interpolatedY);
                     
-                    // Update position number if throttle allows and this car is in player's class
-                    if (shouldUpdatePositions && isSameClass && CarIdxClassPosition && CarIdxClassPosition[carIdx] != null) {
+                    // Update position number text content (update every frame for player's class)
+                    if (isSameClass && CarIdxClassPosition && CarIdxClassPosition[carIdx] != null) {
                         const position = CarIdxClassPosition[carIdx];
                         posText.textContent = position;
                         posText.setAttribute('opacity', '1');
@@ -501,11 +493,6 @@ export class CarPositionTracker {
                 if (!activeCars.has(carIdx)) {
                     this.removeCarMarker(carIdx);
                 }
-            }
-            
-            // Update position timestamp if we processed positions this frame
-            if (shouldUpdatePositions) {
-                this.lastPositionUpdate = now;
             }
             
             if (this.options.showDebugInfo || (carsProcessed === 0 && Math.random() < 0.1)) {

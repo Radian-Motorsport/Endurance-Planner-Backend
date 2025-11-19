@@ -1107,8 +1107,8 @@ class LiveStrategyTracker {
                 // Create inner circle (the colored dot)
                 const innerCircle = document.createElement('div');
                 innerCircle.className = 'progress-dot-circle rounded-full';
-                innerCircle.style.width = '18px';  // 50% larger baseline (was 12px)
-                innerCircle.style.height = '18px';
+                innerCircle.style.width = '20px';  // 50% larger baseline (was 12px)
+                innerCircle.style.height = '20px';
                 innerCircle.style.transition = 'width 0.2s, height 0.2s';
                 dot.appendChild(innerCircle);
                 
@@ -1118,7 +1118,7 @@ class LiveStrategyTracker {
                 positionLabel.style.fontSize = '14px';  // Larger font (was 10px)
                 positionLabel.style.fontWeight = 'bold';
                 positionLabel.style.color = '#ffffff';
-                positionLabel.style.textShadow = '0 0 3px #000000, 0 0 3px #000000, 1px 1px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000';
+                /*positionLabel.style.textShadow = '0 0 3px #777777ff, 0 0 3px #000000, 1px 1px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000';*/
                 positionLabel.style.pointerEvents = 'none';
                 positionLabel.style.userSelect = 'none';
                 positionLabel.style.opacity = '0';
@@ -2894,7 +2894,7 @@ class LiveStrategyTracker {
         if (this.sessionTimeOfDay != null) {
             const timeOfDayStr = this.formatTimeOfDay(this.sessionTimeOfDay);
             const displayText = `Race Time: ${timeOfDayStr}`;
-            const headerDisplayText = `(${timeOfDayStr})`;
+            const headerDisplayText = `${timeOfDayStr}`;
             
             if (timeOfDayEl) timeOfDayEl.textContent = displayText;
             if (headerTimeOfDay) headerTimeOfDay.textContent = headerDisplayText;
