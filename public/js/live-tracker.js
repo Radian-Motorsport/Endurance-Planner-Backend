@@ -2801,11 +2801,11 @@ class LiveStrategyTracker {
             // Sync currentStintLap with calculated value
             this.currentStintLap = Math.max(0, this.currentLap - this.stintStartLap);
             
-            // Only process completed lap if we have valid lap time data
-            // This ensures lap times and fuel data stay synchronized
+            // Record lap time (always record, even if 0 or invalid - keeps arrays in sync)
+            this.currentStintLapTimes.push(this.lastLapTime || 0);
+            
+            // Only process fuel data if we have valid lap time data
             if (this.lastLapTime > 0) {
-                // Record lap time (always, even when spotting)
-                this.currentStintLapTimes.push(this.lastLapTime);
                 
                 // Process fuel data if available (only when driving)
                 if (this.fuelAtLapStart !== null && this.fuelAtLapStart > 0) {
@@ -2840,11 +2840,18 @@ class LiveStrategyTracker {
                         const plannedFuelPerLap = parseFloat(this.strategy.formData.fuelPerLap);
                         this.currentStintFuelUse.push(plannedFuelPerLap);
                         debug(`📊 Lap ${this.lastProcessedLap + 1} (Stint lap ${this.currentStintLap}): ${this.formatLapTime(this.lastLapTime)} [Est. fuel: ${plannedFuelPerLap.toFixed(2)}L]`);
+                    } else {
+                        // No strategy data - push 0 to keep array synchronized
+                        this.currentStintFuelUse.push(0);
                     }
                 }
-                
-                // Increment stint lap count (completed laps with valid lap time)
-                this.currentStintLap++;
+            } else {
+                // No valid lap time - push 0 fuel to keep array synchronized
+                if (this.strategy && this.strategy.formData && this.strategy.formData.fuelPerLap) {
+                    this.currentStintFuelUse.push(parseFloat(this.strategy.formData.fuelPerLap));
+                } else {
+                    this.currentStintFuelUse.push(0);
+                }
             }
             
             // Record fuel at start of new lap
