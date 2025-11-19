@@ -2816,18 +2816,39 @@ class LiveStrategyTracker {
             // Sync currentStintLap with calculated value
             this.currentStintLap = Math.max(0, this.currentLap - this.stintStartLap);
             
-            // Skip recording for stint lap 0 and 1
+            // Skip recording for stint lap 0
             // Lap 0: Not on track yet (stale data from previous session)
-            // Lap 1: Just crossed line after pit exit - lastLapTime is still old pre-pit data
-            // Start recording from lap 2 onwards when lastLapTime has the actual out-lap time
-            if (this.currentStintLap <= 1) {
-                debug(`⏭️ Skipping lap data recording - stint lap ${this.currentStintLap} (waiting for lap 2 to start recording)`);
+            if (this.currentStintLap === 0) {
+                debug(`⏭️ Skipping lap data recording - stint lap 0 (not on track yet)`);
                 this.lastProcessedLap = this.currentLap;
                 return; // Exit early without recording anything
             }
             
-            // Record lap data immediately for all laps after the first
-            this.recordLapData();
+            // Delay recording by 2 seconds to allow iRacing to update CarIdxLastLapTime
+            // This prevents recording stale pre-pit lap times
+            debug(`⏱️ Delaying lap recording by 2 seconds (stint lap ${this.currentStintLap})`);
+            
+            // Clear any existing pending timeout
+            if (this.pendingLapTimeout) {
+                clearTimeout(this.pendingLapTimeout);
+            }
+            
+            // Store the lap data to process after delay
+            this.pendingLapData = {
+                lapNumber: this.lastProcessedLap + 1,
+                stintLap: this.currentStintLap,
+                currentLap: this.currentLap
+            };
+            
+            // Set timeout to record lap data after 2 seconds
+            this.pendingLapTimeout = setTimeout(() => {
+                debug(`✅ Processing delayed lap data (stint lap ${this.pendingLapData.stintLap})`);
+                this.recordLapData();
+                this.pendingLapData = null;
+                this.pendingLapTimeout = null;
+            }, 2000);
+            
+            // Mark lap as processed to prevent re-triggering
             this.lastProcessedLap = this.currentLap;
         }
         
