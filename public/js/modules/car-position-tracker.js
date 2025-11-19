@@ -27,6 +27,7 @@ export class CarPositionTracker {
             showOnlyPlayerClass: options.showOnlyPlayerClass !== false,  // Default true
             showAllCars: options.showAllCars || false,  // Default false
             onCarClick: options.onCarClick || null,  // Callback when car marker is clicked
+            selectedCarScale: options.selectedCarScale || 2.0,  // Scale factor for selected car (200%)
             ...options
         };
         
@@ -66,7 +67,7 @@ export class CarPositionTracker {
         
         this.svg = null;
         this.carMarkers = new Map();  // Map of carIdx -> SVG circle element
-        this.carCenterDots = new Map();  // Map of carIdx -> center dot element for selected cars
+        this.carPositionTexts = new Map();  // Map of carIdx -> SVG text element for position numbers
         this.classColors = new Map();  // Map of classId -> assigned color (now just for tracking)
         this.discoveredClasses = new Set();  // Set of all discovered class IDs
         this.isInitialized = false;
@@ -86,6 +87,10 @@ export class CarPositionTracker {
         
         // Selected car tracking (for car analysis UI)
         this.selectedCarIdx = null;
+        
+        // Position number throttling (update every 100ms to avoid excessive DOM updates)
+        this.lastPositionUpdate = 0;
+        this.positionUpdateInterval = 100;
         
         // Racing line mode properties
         this.racingLinePoints = null;  // Array of {x, y} points from database
@@ -294,19 +299,26 @@ export class CarPositionTracker {
         // Store in map
         this.carMarkers.set(carIdx, marker);
         
-        // Create center dot for selection indicator (initially hidden)
-        const centerDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        centerDot.setAttribute('id', `car-center-dot-${carIdx}`);
-        centerDot.setAttribute('r', this.options.carRadius / 3); // 1/3 of main marker size
-        centerDot.setAttribute('fill', '#000000'); // Black dot
-        centerDot.setAttribute('opacity', '0'); // Hidden by default
-        centerDot.setAttribute('cx', startPoint.x);
-        centerDot.setAttribute('cy', startPoint.y);
-        centerDot.style.transition = 'cx 0.1s linear, cy 0.1s linear, opacity 0.2s';
-        centerDot.style.pointerEvents = 'none'; // Don't block clicks
+        // Create position number text element (only shown for player's class)
+        const posText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        posText.setAttribute('id', `car-position-text-${carIdx}`);
+        posText.setAttribute('x', startPoint.x);
+        posText.setAttribute('y', startPoint.y);
+        posText.setAttribute('text-anchor', 'middle');
+        posText.setAttribute('dominant-baseline', 'central');
+        posText.setAttribute('fill', '#ffffff');
+        posText.setAttribute('stroke', '#000000');
+        posText.setAttribute('stroke-width', '2');
+        posText.setAttribute('font-family', 'Arial, sans-serif');
+        posText.setAttribute('font-weight', 'bold');
+        posText.setAttribute('font-size', radius * 0.8); // Scale with marker size
+        posText.setAttribute('opacity', '0'); // Hidden by default until position data arrives
+        posText.style.transition = 'x 0.1s linear, y 0.1s linear, font-size 0.2s';
+        posText.style.pointerEvents = 'none'; // Don't block clicks
+        posText.textContent = '';
         
-        this.svg.appendChild(centerDot);
-        this.carCenterDots.set(carIdx, centerDot);
+        this.svg.appendChild(posText);
+        this.carPositionTexts.set(carIdx, posText);
         
         debug(`✅ Created car marker: idx=${carIdx}, class=${classId}, color=${fillColor}, isPlayer=${isPlayer}, position=(${startPoint.x.toFixed(1)}, ${startPoint.y.toFixed(1)})`);
         
@@ -324,10 +336,10 @@ export class CarPositionTracker {
             this.carMarkers.delete(carIdx);
         }
         
-        const centerDot = this.carCenterDots.get(carIdx);
-        if (centerDot && centerDot.parentNode) {
-            centerDot.parentNode.removeChild(centerDot);
-            this.carCenterDots.delete(carIdx);
+        const posText = this.carPositionTexts.get(carIdx);
+        if (posText && posText.parentNode) {
+            posText.parentNode.removeChild(posText);
+            this.carPositionTexts.delete(carIdx);
         }
     }
     
@@ -346,8 +358,13 @@ export class CarPositionTracker {
             PlayerCarClass,
             CarIdxLapDistPct,
             CarIdxClass,
-            CarIdxTrackSurface
+            CarIdxTrackSurface,
+            CarIdxClassPosition
         } = telemetryData;
+        
+        // Throttle position number updates (every 100ms)
+        const now = Date.now();
+        const shouldUpdatePositions = (now - this.lastPositionUpdate) >= this.positionUpdateInterval;
         
         // Debug logging for first call
         if (!this.hasLoggedFirstUpdate) {
@@ -436,11 +453,21 @@ export class CarPositionTracker {
                 marker.setAttribute('cx', interpolatedX);
                 marker.setAttribute('cy', interpolatedY);
                 
-                // Update center dot position if it exists
-                const centerDot = this.carCenterDots.get(carIdx);
-                if (centerDot) {
-                    centerDot.setAttribute('cx', interpolatedX);
-                    centerDot.setAttribute('cy', interpolatedY);
+                // Update position text element
+                const posText = this.carPositionTexts.get(carIdx);
+                if (posText) {
+                    posText.setAttribute('x', interpolatedX);
+                    posText.setAttribute('y', interpolatedY);
+                    
+                    // Update position number if throttle allows and this car is in player's class
+                    if (shouldUpdatePositions && isSameClass && CarIdxClassPosition && CarIdxClassPosition[carIdx] != null) {
+                        const position = CarIdxClassPosition[carIdx];
+                        posText.textContent = position;
+                        posText.setAttribute('opacity', '1');
+                    } else if (!isSameClass) {
+                        // Hide position for cars not in player's class
+                        posText.setAttribute('opacity', '0');
+                    }
                 }
                 
                 // Update stroke color based on track surface (all cars)
@@ -474,6 +501,11 @@ export class CarPositionTracker {
                 if (!activeCars.has(carIdx)) {
                     this.removeCarMarker(carIdx);
                 }
+            }
+            
+            // Update position timestamp if we processed positions this frame
+            if (shouldUpdatePositions) {
+                this.lastPositionUpdate = now;
             }
             
             if (this.options.showDebugInfo || (carsProcessed === 0 && Math.random() < 0.1)) {
@@ -675,6 +707,14 @@ export class CarPositionTracker {
         }
         this.carMarkers.clear();
         
+        // Remove all position texts
+        for (const [carIdx, posText] of this.carPositionTexts.entries()) {
+            if (posText && posText.parentNode) {
+                posText.parentNode.removeChild(posText);
+            }
+        }
+        this.carPositionTexts.clear();
+        
         if (this.racingLineLayer && this.racingLineLayer.parentNode) {
             this.racingLineLayer.parentNode.removeChild(this.racingLineLayer);
         }
@@ -718,30 +758,52 @@ export class CarPositionTracker {
     
     /**
      * Set the selected car for analysis UI highlighting
-     * Shows a black center dot on the selected car's marker
+     * Scales the selected car marker to 200% size
      * @param {number|null} carIdx - Car index to select, or null to clear selection
      */
     setSelectedCar(carIdx) {
-        // Hide previous selection's center dot
+        // Reset previous selection to normal size
         if (this.selectedCarIdx !== null) {
-            const prevDot = this.carCenterDots.get(this.selectedCarIdx);
-            if (prevDot) {
-                prevDot.setAttribute('opacity', '0');
+            const prevMarker = this.carMarkers.get(this.selectedCarIdx);
+            const prevText = this.carPositionTexts.get(this.selectedCarIdx);
+            
+            if (prevMarker) {
+                const isPlayerCar = this.selectedCarIdx === this.playerCarIdx;
+                const normalRadius = isPlayerCar ? this.options.playerCarRadius : this.options.carRadius;
+                prevMarker.setAttribute('r', normalRadius);
+            }
+            
+            if (prevText) {
+                const isPlayerCar = this.selectedCarIdx === this.playerCarIdx;
+                const normalRadius = isPlayerCar ? this.options.playerCarRadius : this.options.carRadius;
+                prevText.setAttribute('font-size', normalRadius * 0.8);
             }
         }
         
         // Update selected car
         this.selectedCarIdx = carIdx;
         
-        // Show new selection's center dot
+        // Scale up new selection to 200%
         if (carIdx !== null) {
-            const newDot = this.carCenterDots.get(carIdx);
-            if (newDot) {
-                newDot.setAttribute('opacity', '1');
-                
-                if (this.options.showDebugInfo) {
-                    debug(`🎯 Selected car ${carIdx} on track map`);
-                }
+            const newMarker = this.carMarkers.get(carIdx);
+            const newText = this.carPositionTexts.get(carIdx);
+            
+            if (newMarker) {
+                const isPlayerCar = carIdx === this.playerCarIdx;
+                const normalRadius = isPlayerCar ? this.options.playerCarRadius : this.options.carRadius;
+                const scaledRadius = normalRadius * this.options.selectedCarScale;
+                newMarker.setAttribute('r', scaledRadius);
+            }
+            
+            if (newText) {
+                const isPlayerCar = carIdx === this.playerCarIdx;
+                const normalRadius = isPlayerCar ? this.options.playerCarRadius : this.options.carRadius;
+                const scaledRadius = normalRadius * this.options.selectedCarScale;
+                newText.setAttribute('font-size', scaledRadius * 0.8);
+            }
+            
+            if (this.options.showDebugInfo) {
+                debug(`🎯 Selected car ${carIdx} scaled to ${this.options.selectedCarScale * 100}%`);
             }
         }
     }

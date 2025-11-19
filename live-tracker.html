@@ -1018,8 +1018,10 @@
                 <div id="progress-car-dots-container" class="absolute w-full h-full hidden"></div>
                 
                 <!-- Player car position dot (always visible) -->
-                <div id="lap-progress-dot" class="absolute w-5 h-5 bg-cyan-400 rounded-full shadow-lg transition-all duration-100 z-10 ring-2 ring-cyan-300" 
-                     style="left: 0%; transform: translateX(-50%);"></div>
+                <div id="lap-progress-dot" class="absolute bg-cyan-400 rounded-full shadow-lg transition-all duration-100 z-10 ring-2 ring-cyan-300" 
+                     style="left: 0%; transform: translateX(-50%); width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">
+                    <span id="player-position-label" style="font-size: 12px; font-weight: bold; color: #ffffff; text-shadow: 0 0 3px #000000, 0 0 3px #000000, 1px 1px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000; pointer-events: none; user-select: none; transition: font-size 0.2s;"></span>
+                </div>
             </div>
             
             <!-- Sector info display -->

@@ -972,6 +972,7 @@ class LiveStrategyTracker {
         
         // Update simple lap progress bar
         const lapProgressDot = document.getElementById('lap-progress-dot');
+        const playerPositionLabel = document.getElementById('player-position-label');
         
         if (lapProgressDot) {
             const playerCarIdx = values.PlayerCarIdx;
@@ -994,6 +995,27 @@ class LiveStrategyTracker {
                     } else {
                         lapProgressDot.classList.remove('bg-orange-400', 'ring-orange-300');
                         lapProgressDot.classList.add('bg-cyan-400', 'ring-cyan-300');
+                    }
+                    
+                    // Update player's position number
+                    if (playerPositionLabel && values.CarIdxClassPosition && values.CarIdxClassPosition[playerCarIdx] != null) {
+                        playerPositionLabel.textContent = values.CarIdxClassPosition[playerCarIdx];
+                    }
+                    
+                    // Scale player dot if selected (200%)
+                    const isPlayerSelected = playerCarIdx === this.selectedCarIdx;
+                    if (isPlayerSelected) {
+                        lapProgressDot.style.width = '40px';
+                        lapProgressDot.style.height = '40px';
+                        if (playerPositionLabel) {
+                            playerPositionLabel.style.fontSize = '24px';
+                        }
+                    } else {
+                        lapProgressDot.style.width = '20px';
+                        lapProgressDot.style.height = '20px';
+                        if (playerPositionLabel) {
+                            playerPositionLabel.style.fontSize = '12px';
+                        }
                     }
                 }
             }
@@ -1067,14 +1089,39 @@ class LiveStrategyTracker {
             
             // Create or get existing dot
             let dot = container.querySelector(`[data-car-idx="${carIdx}"]`);
+            let positionLabel = null;
+            
             if (!dot) {
+                // Create dot wrapper
                 dot = document.createElement('div');
                 dot.dataset.carIdx = carIdx;
-                dot.className = 'absolute w-3 h-3 rounded-full';
+                dot.className = 'absolute rounded-full';
                 dot.style.top = '50%';
                 dot.style.left = `${percentage}%`; // Set position BEFORE appending to prevent jump
                 dot.style.transform = 'translate(-50%, -50%)';
+                dot.style.display = 'flex';
+                dot.style.alignItems = 'center';
+                dot.style.justifyContent = 'center';
                 dot.title = driver.UserName || `Car ${carIdx}`;
+                
+                // Create inner circle (the colored dot)
+                const innerCircle = document.createElement('div');
+                innerCircle.className = 'progress-dot-circle w-3 h-3 rounded-full';
+                innerCircle.style.transition = 'width 0.2s, height 0.2s';
+                dot.appendChild(innerCircle);
+                
+                // Create position label (only for player's class)
+                positionLabel = document.createElement('span');
+                positionLabel.className = 'progress-position-label absolute';
+                positionLabel.style.fontSize = '10px';
+                positionLabel.style.fontWeight = 'bold';
+                positionLabel.style.color = '#ffffff';
+                positionLabel.style.textShadow = '0 0 3px #000000, 0 0 3px #000000, 1px 1px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000';
+                positionLabel.style.pointerEvents = 'none';
+                positionLabel.style.userSelect = 'none';
+                positionLabel.style.opacity = '0';
+                positionLabel.style.transition = 'font-size 0.2s';
+                dot.appendChild(positionLabel);
                 
                 // Add transition class AFTER initial position is set (prevents animation on creation)
                 requestAnimationFrame(() => {
@@ -1085,6 +1132,7 @@ class LiveStrategyTracker {
             } else {
                 // Update existing dot position (has transition class already)
                 dot.style.left = `${percentage}%`;
+                positionLabel = dot.querySelector('.progress-position-label');
             }
             
             // Check if car is currently off-track (in any sector)
@@ -1125,13 +1173,48 @@ class LiveStrategyTracker {
             };
             
             const color = classColorMap[classId] || '#9ca3af'; // Default gray for unknown
+            const isPlayerClass = classId === this.playerCarClass;
             
-            // Apply color - if off-track, add pulsing animation with red border
-            dot.style.backgroundColor = color;
-            if (isCarOffTrack) {
-                dot.classList.add('ring-2', 'ring-red-500', 'animate-pulse');
-            } else {
-                dot.classList.remove('ring-2', 'ring-red-500', 'animate-pulse');
+            // Apply color to inner circle
+            const innerCircle = dot.querySelector('.progress-dot-circle');
+            if (innerCircle) {
+                innerCircle.style.backgroundColor = color;
+                
+                // Add red border animation if off-track
+                if (isCarOffTrack) {
+                    innerCircle.classList.add('ring-2', 'ring-red-500', 'animate-pulse');
+                } else {
+                    innerCircle.classList.remove('ring-2', 'ring-red-500', 'animate-pulse');
+                }
+            }
+            
+            // Update position number (only for player's class)
+            if (positionLabel) {
+                const classPosition = values.CarIdxClassPosition?.[carIdx];
+                if (isPlayerClass && classPosition != null) {
+                    positionLabel.textContent = classPosition;
+                    positionLabel.style.opacity = '1';
+                } else {
+                    positionLabel.style.opacity = '0';
+                }
+            }
+            
+            // Scale up selected car dot (200%)
+            const isSelected = carIdx === this.selectedCarIdx;
+            if (innerCircle) {
+                if (isSelected) {
+                    innerCircle.style.width = '24px';  // 200% of 12px
+                    innerCircle.style.height = '24px';
+                    if (positionLabel) {
+                        positionLabel.style.fontSize = '16px';  // Scale position text too
+                    }
+                } else {
+                    innerCircle.style.width = '12px';
+                    innerCircle.style.height = '12px';
+                    if (positionLabel) {
+                        positionLabel.style.fontSize = '10px';
+                    }
+                }
             }
         });
         
