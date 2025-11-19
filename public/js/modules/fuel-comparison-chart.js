@@ -72,8 +72,6 @@ export class FuelComparisonChart {
      */
     async loadIdealLap(trackId, carName) {
         try {
-            console.log(`🔍 Loading ideal lap: Track ${trackId}, Car ${carName}`);
-            
             const response = await fetch(`/api/ideal-fuel-lap/${trackId}/${encodeURIComponent(carName)}`);
             
             if (response.ok) {
@@ -82,23 +80,18 @@ export class FuelComparisonChart {
                 this.idealData = data.samples;
                 this.idealAdjustment = 0;
                 this.updateAdjustmentDisplay();
-                console.log(`✅ Ideal lap loaded: ${this.idealData.length} samples`);
                 this.scheduleRender();
                 return true;
-            } else if (response.status === 404) {
-                console.log('📭 No ideal lap found for this track/car');
+            } else {
+                // Silently handle missing fuel data (404 or other errors)
                 this.idealData = null;
                 this.scheduleRender();
-                return false;
-            } else if (response.status === 404) {
-                // Silently handle missing fuel data
-                return false;
-            } else {
-                console.warn('⚠️ Failed to load ideal lap:', response.status);
                 return false;
             }
         } catch (err) {
             // Silently handle network errors for missing fuel data
+            this.idealData = null;
+            this.scheduleRender();
             return false;
         }
     }

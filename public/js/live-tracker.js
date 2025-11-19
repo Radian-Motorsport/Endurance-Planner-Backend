@@ -191,6 +191,9 @@ class LiveStrategyTracker {
         // Stint calculation flag
         this.hasCalculatedStints = false; // Track if stints have been calculated with live session time
         
+        // Ideal lap data load flag
+        this.idealLapLoaded = false; // Prevent repeated API calls for ideal fuel lap
+        
         // Weather component
         this.weatherComponent = null;
         
@@ -1460,15 +1463,16 @@ class LiveStrategyTracker {
             this.fuelRecorder.updateSessionInfo(sessionData);
         }
         
-        // Load ideal lap data for comparison chart
+        // Load ideal lap data for comparison chart - ONLY ONCE per session
         const trackId = sessionData?.WeekendInfo?.TrackID;
         const chartPlayerCarIdx = sessionData?.DriverInfo?.DriverCarIdx;
-        if (trackId && chartPlayerCarIdx != null && sessionData?.DriverInfo?.Drivers) {
+        if (trackId && chartPlayerCarIdx != null && sessionData?.DriverInfo?.Drivers && !this.idealLapLoaded) {
             const chartPlayerCar = sessionData.DriverInfo.Drivers[chartPlayerCarIdx];
             if (chartPlayerCar) {
                 const carName = chartPlayerCar.CarScreenName || chartPlayerCar.CarPath;
                 if (this.fuelComparisonChart && carName) {
                     this.fuelComparisonChart.loadIdealLap(trackId, carName);
+                    this.idealLapLoaded = true; // Prevent repeated loads
                 }
             }
         }
