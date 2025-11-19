@@ -1359,18 +1359,18 @@ class LiveStrategyTracker {
         // Update button states
         if (this.elements.timeAutoBtn && this.elements.timeManualBtn) {
             if (mode === 'auto') {
-                this.elements.timeAutoBtn.classList.add('bg-blue-600');
-                this.elements.timeAutoBtn.classList.remove('bg-neutral-700');
-                this.elements.timeManualBtn.classList.remove('bg-blue-600');
-                this.elements.timeManualBtn.classList.add('bg-neutral-700');
+                this.elements.timeAutoBtn.classList.add('ov-light');
+                this.elements.timeAutoBtn.classList.remove('ov-dark');
+                this.elements.timeManualBtn.classList.remove('ov-light');
+                this.elements.timeManualBtn.classList.add('ov-dark');
                 this.elements.manualControls.classList.add('hidden');
                 // Stop manual timer when switching to auto
                 this.stopManualTimer();
             } else {
-                this.elements.timeManualBtn.classList.add('bg-blue-600');
-                this.elements.timeManualBtn.classList.remove('bg-neutral-700');
-                this.elements.timeAutoBtn.classList.remove('bg-blue-600');
-                this.elements.timeAutoBtn.classList.add('bg-neutral-700');
+                this.elements.timeManualBtn.classList.add('ov-light');
+                this.elements.timeManualBtn.classList.remove('ov-dark');
+                this.elements.timeAutoBtn.classList.remove('ov-light');
+                this.elements.timeAutoBtn.classList.add('ov-dark');
                 this.elements.manualControls.classList.remove('hidden');
                 this.resetManualTimer();
             }
@@ -2811,7 +2811,7 @@ class LiveStrategyTracker {
             if (headerTimeOfDay) headerTimeOfDay.textContent = headerDisplayText;
         } else {
             if (timeOfDayEl) timeOfDayEl.textContent = '--:--';
-            if (headerTimeOfDay) headerTimeOfDay.textContent = '(--:--)';
+            if (headerTimeOfDay) headerTimeOfDay.textContent = '--:--';
         }
     }
     
@@ -3508,6 +3508,35 @@ class LiveStrategyTracker {
             if (currentStintIndex > 0) {
                 this.strategy.stints = this.strategy.stints.slice(currentStintIndex);
                 debug(`  ✂️ Trimmed ${currentStintIndex} completed stints, showing from stint #${this.strategy.stints[0].stintNumber}`);
+            }
+            
+            // Additional filter: remove stints that would end after session time runs out
+            if (this.sessionTimeRemain > 0 && this.sessionTimeOfDay != null) {
+                const sessionEndTimeOfDay = this.sessionTimeOfDay + this.sessionTimeRemain;
+                const originalStintCount = this.strategy.stints.length;
+                
+                // Filter out stints that start after the session ends
+                this.strategy.stints = this.strategy.stints.filter(stint => {
+                    if (stint.timeOfDayStart == null) return true; // Keep if no time data
+                    
+                    // Handle day wraparound
+                    let stintStartsBeforeEnd = false;
+                    if (sessionEndTimeOfDay >= 86400) {
+                        // Session end wraps to next day
+                        const wrappedEnd = sessionEndTimeOfDay - 86400;
+                        stintStartsBeforeEnd = (stint.timeOfDayStart <= wrappedEnd) || 
+                                              (stint.timeOfDayStart >= this.sessionTimeOfDay);
+                    } else {
+                        stintStartsBeforeEnd = stint.timeOfDayStart < sessionEndTimeOfDay;
+                    }
+                    
+                    return stintStartsBeforeEnd;
+                });
+                
+                const trimmedCount = originalStintCount - this.strategy.stints.length;
+                if (trimmedCount > 0) {
+                    debug(`  ⏱️ Filtered out ${trimmedCount} stints beyond session end time (${this.formatTime(this.sessionTimeRemain)} remaining)`);
+                }
             }
             
             console.log('📋 Calling populateStintTable() with planner stints');
