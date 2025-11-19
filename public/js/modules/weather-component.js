@@ -4,6 +4,10 @@
  * Can be imported and used in other projects
  */
 
+// Debug flag for weather component
+const DEBUG_WEATHER = false;
+const debugLog = (...args) => { if (DEBUG_WEATHER) console.log(...args); };
+
 export class WeatherComponent {
     constructor(containerId, options = {}) {
         this.containerId = containerId;
@@ -95,7 +99,7 @@ export class WeatherComponent {
     }
     
     async loadWeatherData(weatherUrl) {
-        console.log('🌦️ WeatherComponent: Loading weather data from:', weatherUrl);
+        debugLog('🌦️ WeatherComponent: Loading weather data from:', weatherUrl);
         
         try {
             // Use the weather proxy to avoid CORS issues
@@ -106,7 +110,7 @@ export class WeatherComponent {
             }
             
             const weatherData = await response.json();
-            console.log('🌦️ WeatherComponent: Weather data received:', weatherData);
+            debugLog('🌦️ WeatherComponent: Weather data received:', weatherData);
             
             // Handle different weather data formats
             let processedWeatherData;
@@ -248,7 +252,7 @@ export class WeatherComponent {
     }
     
     renderTemperatureChart() {
-        console.log('🌡️ WeatherComponent: Rendering temperature chart...');
+        debugLog('🌡️ WeatherComponent: Rendering temperature chart...');
         
         if (this.temperatureChart) {
             this.temperatureChart.dispose();
@@ -397,7 +401,7 @@ export class WeatherComponent {
     }
     
     renderCloudsChart() {
-        console.log('☁️ WeatherComponent: Rendering clouds chart...');
+        debugLog('☁️ WeatherComponent: Rendering clouds chart...');
         
         if (this.cloudsChart) {
             this.cloudsChart.dispose();
@@ -539,17 +543,17 @@ export class WeatherComponent {
     }
     
     renderDriversChart() {
-        console.log('🏁 WeatherComponent: Rendering drivers chart...');
-        console.log('   Container ID:', this.containerId);
-        console.log('   Stint data:', this.stintData);
-        console.log('   Weather data:', this.weatherData ? 'present' : 'missing');
+        debugLog('🏁 WeatherComponent: Rendering drivers chart...');
+        debugLog('   Container ID:', this.containerId);
+        debugLog('   Stint data:', this.stintData);
+        debugLog('   Weather data:', this.weatherData ? 'present' : 'missing');
         
         if (this.driversChart) {
             this.driversChart.dispose();
         }
         
         const container = document.getElementById(`${this.containerId}-drivers-chart`);
-        console.log('   Container element:', container);
+        debugLog('   Container element:', container);
         
         if (!container) {
             console.error('❌ Drivers chart container not found! Looking for:', `${this.containerId}-drivers-chart`);
@@ -558,12 +562,12 @@ export class WeatherComponent {
         
         if (!this.stintData || !this.stintData.stints || this.stintData.stints.length === 0) {
             console.warn('⚠️ No stint data available for drivers chart');
-            console.log('   stintData:', this.stintData);
+            debugLog('   stintData:', this.stintData);
             container.innerHTML = '<div style="text-align: center; padding: 40px; color: #a3a3a3;">No stint data available. Please calculate strategy first.</div>';
             return;
         }
         
-        console.log('   Found', this.stintData.stints.length, 'stints to display');
+        debugLog('   Found', this.stintData.stints.length, 'stints to display');
         
         this.driversChart = echarts.init(container);
         
@@ -619,7 +623,7 @@ export class WeatherComponent {
             const driverSeries = driverSeriesMap.get(driverName);
             driverSeries.data[i] = laps;
             
-            console.log(`   Stint ${i + 1}:`, {
+            debugLog(`   Stint ${i + 1}:`, {
                 driver: driverName,
                 colorIndex: colorIndex,
                 color: color,
@@ -638,7 +642,7 @@ export class WeatherComponent {
             };
         });
         
-        console.log('   Chart data prepared:', {
+        debugLog('   Chart data prepared:', {
             labels: stintLabels,
             dataPoints: stintData.length,
             uniqueDrivers: driverSeriesMap.size,
@@ -737,9 +741,9 @@ export class WeatherComponent {
             }
         };
         
-        console.log('   Setting ECharts option:', option);
+        debugLog('   Setting ECharts option:', option);
         this.driversChart.setOption(option);
-        console.log('✅ Drivers chart rendered successfully');
+        debugLog('✅ Drivers chart rendered successfully');
     }
     
     createDayNightMarkingsForDrivers(forecast, stints) {
@@ -981,12 +985,12 @@ export class WeatherComponent {
     }
     
     setStintData(stintData) {
-        console.log('📊 WeatherComponent: Setting stint data:', stintData);
+        debugLog('📊 WeatherComponent: Setting stint data:', stintData);
         this.stintData = stintData;
         
         // Render drivers chart immediately if weather data and echarts are available
         if (this.weatherData && typeof echarts !== 'undefined') {
-            console.log('🎨 Triggering renderDriversChart from setStintData');
+            debugLog('🎨 Triggering renderDriversChart from setStintData');
             this.renderDriversChart();
         } else {
             console.warn('⚠️ Cannot render drivers chart yet:', {
@@ -997,18 +1001,18 @@ export class WeatherComponent {
     }
     
     setCurrentRaceTime(raceTimeSeconds) {
-        console.log('⏰ setCurrentRaceTime called:', raceTimeSeconds, 'seconds');
-        console.log('⏰ Charts exist?', !!this.temperatureChart, !!this.cloudsChart);
-        console.log('⏰ Weather data exists?', !!this.weatherData);
+        debugLog('⏰ setCurrentRaceTime called:', raceTimeSeconds, 'seconds');
+        debugLog('⏰ Charts exist?', !!this.temperatureChart, !!this.cloudsChart);
+        debugLog('⏰ Weather data exists?', !!this.weatherData);
         
         this.currentRaceTime = raceTimeSeconds;
         
         // Update just the red line without full re-render
         if (this.temperatureChart && this.cloudsChart && this.weatherData) {
-            console.log('⏰ Calling updateRedLine()...');
+            debugLog('⏰ Calling updateRedLine()...');
             this.updateRedLine();
         } else {
-            console.log('⏰ NOT calling updateRedLine - missing requirements');
+            debugLog('⏰ NOT calling updateRedLine - missing requirements');
         }
     }
     

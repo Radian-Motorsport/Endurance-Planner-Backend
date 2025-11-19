@@ -258,8 +258,8 @@ class EnviroTrace {
    * Load buffer data from localStorage
    */
   loadFromStorage() {
+    // StorageManager disabled - skip loading from storage
     if (!window.storageManager) {
-      enviroDebugWarn('EnviroTrace: StorageManager not available');
       return;
     }
     
@@ -267,10 +267,9 @@ class EnviroTrace {
       const savedData = window.storageManager.loadVisualizationData('enviroTrace');
       if (savedData && Array.isArray(savedData)) {
         this.buffer = savedData;
-        // enviroDebug(`EnviroTrace: Loaded ${this.buffer.length} data points from storage`);
       }
     } catch (error) {
-      enviroDebugWarn('EnviroTrace: Failed to load data from storage:', error);
+      // Silently handle storage errors
       this.buffer = [];
     }
   }
@@ -279,15 +278,15 @@ class EnviroTrace {
    * Save buffer data to localStorage
    */
   saveToStorage() {
+    // StorageManager disabled - skip saving to storage
     if (!window.storageManager) {
-      enviroDebugWarn('EnviroTrace: StorageManager not available');
       return;
     }
     
     try {
       window.storageManager.saveVisualizationData('enviroTrace', this.buffer);
     } catch (error) {
-      enviroDebugWarn('EnviroTrace: Failed to save data to storage:', error);
+      // Silently handle storage errors
     }
   }
   
