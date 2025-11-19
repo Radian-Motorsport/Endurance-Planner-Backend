@@ -550,6 +550,10 @@ class LiveStrategyTracker {
             if (strategyId) {
                 this.socket.emit('joinStrategy', strategyId);
                 debug(`📍 Joined strategy room: ${strategyId}`);
+                this.currentStrategyId = strategyId;
+                
+                // Request connection info to see connected apps
+                this.socket.emit('requestConnectionInfo');
             }
             
             // Initialize pedal trace visualization
@@ -584,6 +588,23 @@ class LiveStrategyTracker {
             this.updateDriverInputs(data);  // Update driver inputs display
             this.updateWeatherData(data?.values);  // Update weather display
         });
+        
+        // Listen for connection info (to display connected apps)
+        this.socket.on('connectionInfo', (info) => {
+            this.updateConnectedApps(info.racingApps || []);
+        });
+        
+        // Listen for strategy binding updates
+        this.socket.on('strategyBindingUpdate', () => {
+            this.socket.emit('requestConnectionInfo');
+        });
+        
+        // Periodic connection info refresh
+        setInterval(() => {
+            if (this.isConnected && this.currentStrategyId) {
+                this.socket.emit('requestConnectionInfo');
+            }
+        }, 5000);
         
         // Listen for driver info
         this.socket.on('currentBroadcaster', (info) => {
@@ -1273,6 +1294,20 @@ class LiveStrategyTracker {
             this.elements.telemetryStatus.classList.remove('status-on-track');
             this.elements.telemetryStatus.classList.add('status-offline');
             this.elements.telemetryStatusText.textContent = 'Disconnected';
+        }
+    }
+    
+    updateConnectedApps(allApps) {
+        // Filter apps connected to this strategy
+        const appsForThisStrategy = allApps.filter(app => app.strategyId === this.currentStrategyId);
+        
+        const connectedAppsEl = document.getElementById('connected-apps-info');
+        if (connectedAppsEl) {
+            connectedAppsEl.textContent = appsForThisStrategy.length.toString();
+            
+            // Update tooltip/title with driver names
+            const driverNames = appsForThisStrategy.map(app => app.appName || 'Unknown').join(', ');
+            connectedAppsEl.title = driverNames || 'No apps connected';
         }
     }
     
