@@ -4286,8 +4286,8 @@ class LiveStrategyTracker {
     }
     
     formatLapTime(seconds) {
-        // Handle invalid values
-        if (!seconds || seconds < 0 || isNaN(seconds)) {
+        // Handle invalid values (but allow 0 for out-laps to show as 0:00.000)
+        if (seconds === null || seconds === undefined || seconds < 0 || isNaN(seconds)) {
             return '--:--';
         }
         const minutes = Math.floor(seconds / 60);
