@@ -1301,13 +1301,35 @@ class LiveStrategyTracker {
         // Filter apps connected to this strategy
         const appsForThisStrategy = allApps.filter(app => app.strategyId === this.currentStrategyId);
         
-        const connectedAppsEl = document.getElementById('connected-apps-info');
-        if (connectedAppsEl) {
-            connectedAppsEl.textContent = appsForThisStrategy.length.toString();
-            
-            // Update tooltip/title with driver names
-            const driverNames = appsForThisStrategy.map(app => app.appName || 'Unknown').join(', ');
-            connectedAppsEl.title = driverNames || 'No apps connected';
+        // Update count
+        const countEl = document.getElementById('connected-apps-count');
+        if (countEl) {
+            countEl.textContent = appsForThisStrategy.length.toString();
+        }
+        
+        // Update app list with IsOnTrack status
+        const listEl = document.getElementById('connected-apps-list');
+        if (listEl) {
+            if (appsForThisStrategy.length === 0) {
+                listEl.textContent = 'No apps connected';
+                listEl.className = 'text-neutral-400 text-xs';
+            } else {
+                // Find the active driver (IsOnTrack = true)
+                const activeApp = appsForThisStrategy.find(app => app.isOnTrack === true);
+                
+                // Build display string
+                const appStrings = appsForThisStrategy.map(app => {
+                    const name = app.appName || 'Unknown';
+                    const status = app.isOnTrack ? '🟢 Driving' : '⚫ Spectating';
+                    return `${name} (${status})`;
+                });
+                
+                listEl.innerHTML = appStrings.join(' <span class="text-neutral-600">|</span> ');
+                listEl.className = 'text-neutral-300 text-xs';
+                
+                // Store active app for telemetry priority
+                this.activeDriverApp = activeApp;
+            }
         }
     }
     
