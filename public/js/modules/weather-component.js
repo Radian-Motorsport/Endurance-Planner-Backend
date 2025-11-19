@@ -1000,12 +1000,12 @@ export class WeatherComponent {
     }
     
     updateRedLine() {
-        if (!this.weatherData || !this.weatherData.weather_info || !this.weatherData.weather_info.forecast_options) {
+        if (!this.weatherData || !this.weatherData.weather_forecast) {
             return;
         }
-        const forecast = this.weatherData.weather_info.forecast_options;
+        const forecast = this.weatherData.weather_forecast;
         
-        // Find race start index
+        // Find race start index (same logic as renderTemperatureChart)
         const raceStartIndex = forecast.findIndex((item, index) => 
             item.affects_session && (index === 0 || !forecast[index-1].affects_session)
         );
