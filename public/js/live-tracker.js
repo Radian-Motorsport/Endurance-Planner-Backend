@@ -2824,29 +2824,20 @@ class LiveStrategyTracker {
                 return; // Exit early without recording anything
             }
             
-            // Delay recording by 2 seconds to allow iRacing to update CarIdxLastLapTime
-            // This prevents recording stale pre-pit lap times
-            debug(`⏱️ Delaying lap recording by 2 seconds (stint lap ${this.currentStintLap})`);
+            // Delay recording by 3 seconds to allow iRacing to update CarIdxLastLapTime
+            debug(`⏱️ Delaying lap recording by 3 seconds (stint lap ${this.currentStintLap})`);
             
             // Clear any existing pending timeout
             if (this.pendingLapTimeout) {
                 clearTimeout(this.pendingLapTimeout);
             }
             
-            // Store the lap data to process after delay
-            this.pendingLapData = {
-                lapNumber: this.lastProcessedLap + 1,
-                stintLap: this.currentStintLap,
-                currentLap: this.currentLap
-            };
-            
-            // Set timeout to record lap data after 2 seconds
+            // Set timeout to record lap data after 3 seconds
             this.pendingLapTimeout = setTimeout(() => {
-                debug(`✅ Processing delayed lap data (stint lap ${this.pendingLapData.stintLap})`);
+                debug(`✅ Recording lap data after 3 second delay`);
                 this.recordLapData();
-                this.pendingLapData = null;
                 this.pendingLapTimeout = null;
-            }, 2000);
+            }, 3000);
             
             // Mark lap as processed to prevent re-triggering
             this.lastProcessedLap = this.currentLap;
