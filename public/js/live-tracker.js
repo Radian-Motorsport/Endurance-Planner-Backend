@@ -2790,7 +2790,11 @@ class LiveStrategyTracker {
             // Capture tyre data at pit exit
             this.captureTyreData(values);
             
-            debug(`🏁 NEW STINT #${this.currentStintNumber} started!`);
+            // Reset lastProcessedLap to allow first lap of new stint to be recorded
+            // Without this, if pit exit happens on same lap number, the lap won't process
+            this.lastProcessedLap = this.currentLap - 1;
+            
+            debug(`🏁 NEW STINT #${this.currentStintNumber} started! Reset lastProcessedLap to ${this.lastProcessedLap}`);
         }
         
         this.wasOnPitRoad = isOnPitRoad;
