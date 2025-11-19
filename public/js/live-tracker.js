@@ -3423,20 +3423,13 @@ class LiveStrategyTracker {
     updateWeatherComponentRaceTime() {
         if (!this.weatherComponent) return;
         
-        // Get race duration from strategy
-        if (!this.strategy?.strategyState?.raceDurationSeconds) return;
-        
-        const raceDuration = this.strategy.strategyState.raceDurationSeconds;
-        
-        // Calculate elapsed time into the race (not into the 24h session)
-        const elapsedTime = raceDuration - this.sessionTimeRemain;
+        // Use session time of day (seconds since midnight) - same as what's displayed in header
+        if (this.sessionTimeOfDay == null) return;
         
         // Only update if time changed significantly (avoid redrawing 50 times/sec)
-        if (!this.lastWeatherUpdateTime || Math.abs(elapsedTime - this.lastWeatherUpdateTime) > 1) {
-            this.lastWeatherUpdateTime = elapsedTime;
-            if (elapsedTime >= 0 && elapsedTime <= raceDuration) {
-                this.weatherComponent.setCurrentRaceTime(elapsedTime);
-            }
+        if (!this.lastWeatherUpdateTime || Math.abs(this.sessionTimeOfDay - this.lastWeatherUpdateTime) > 60) {
+            this.lastWeatherUpdateTime = this.sessionTimeOfDay;
+            this.weatherComponent.setCurrentRaceTime(this.sessionTimeOfDay);
         }
     }
     

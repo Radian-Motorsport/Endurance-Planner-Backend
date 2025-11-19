@@ -268,20 +268,25 @@ export class WeatherComponent {
             item.affects_session && (index === 0 || !forecast[index-1].affects_session)
         );
         
-        // Calculate current time index by matching timestamps
+        // Calculate current time index by matching time of day
         let currentTimeIndex = -1;
-        if (this.currentRaceTime !== null && raceStartIndex >= 0) {
-            // Get race start timestamp
-            const raceStartTimestamp = new Date(forecast[raceStartIndex].timestamp).getTime() / 1000;
+        if (this.currentRaceTime !== null) {
+            // currentRaceTime is seconds since midnight (sessionTimeOfDay from telemetry)
+            const currentHours = Math.floor(this.currentRaceTime / 3600) % 24;
+            const currentMinutes = Math.floor((this.currentRaceTime % 3600) / 60);
             
-            // Calculate target timestamp for current race time
-            const targetTimestamp = raceStartTimestamp + this.currentRaceTime;
-            
-            // Find forecast item with closest matching timestamp
+            // Find forecast item with closest matching time of day
             let closestDiff = Infinity;
             for (let i = 0; i < forecast.length; i++) {
-                const itemTimestamp = new Date(forecast[i].timestamp).getTime() / 1000;
-                const diff = Math.abs(itemTimestamp - targetTimestamp);
+                const forecastDate = new Date(forecast[i].timestamp);
+                const forecastHours = forecastDate.getUTCHours();
+                const forecastMinutes = forecastDate.getUTCMinutes();
+                
+                // Calculate difference in minutes
+                const forecastTimeInMinutes = forecastHours * 60 + forecastMinutes;
+                const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+                const diff = Math.abs(forecastTimeInMinutes - currentTimeInMinutes);
+                
                 if (diff < closestDiff) {
                     closestDiff = diff;
                     currentTimeIndex = i;
@@ -1018,35 +1023,30 @@ export class WeatherComponent {
             item.affects_session && (index === 0 || !forecast[index-1].affects_session)
         );
         
-        // Calculate current time index by matching timestamps
+        // Calculate current time index by matching time of day
         let currentTimeIndex = -1;
-        if (this.currentRaceTime !== null && raceStartIndex >= 0) {
-            // Get race start timestamp
-            const raceStartTimestamp = new Date(forecast[raceStartIndex].timestamp).getTime() / 1000;
+        if (this.currentRaceTime !== null) {
+            // currentRaceTime is seconds since midnight (sessionTimeOfDay from telemetry)
+            const currentHours = Math.floor(this.currentRaceTime / 3600) % 24;
+            const currentMinutes = Math.floor((this.currentRaceTime % 3600) / 60);
             
-            // Calculate target timestamp for current race time
-            const targetTimestamp = raceStartTimestamp + this.currentRaceTime;
-            
-            console.log('🔴 RED LINE DEBUG:', {
-                currentRaceTimeSeconds: this.currentRaceTime,
-                currentRaceTimeFormatted: new Date(this.currentRaceTime * 1000).toISOString().substr(11, 8),
-                raceStartIndex: raceStartIndex,
-                raceStartTimestamp: forecast[raceStartIndex].timestamp,
-                targetTimestamp: new Date(targetTimestamp * 1000).toISOString()
-            });
-            
-            // Find forecast item with closest matching timestamp
+            // Find forecast item with closest matching time of day
             let closestDiff = Infinity;
             for (let i = 0; i < forecast.length; i++) {
-                const itemTimestamp = new Date(forecast[i].timestamp).getTime() / 1000;
-                const diff = Math.abs(itemTimestamp - targetTimestamp);
+                const forecastDate = new Date(forecast[i].timestamp);
+                const forecastHours = forecastDate.getUTCHours();
+                const forecastMinutes = forecastDate.getUTCMinutes();
+                
+                // Calculate difference in minutes
+                const forecastTimeInMinutes = forecastHours * 60 + forecastMinutes;
+                const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+                const diff = Math.abs(forecastTimeInMinutes - currentTimeInMinutes);
+                
                 if (diff < closestDiff) {
                     closestDiff = diff;
                     currentTimeIndex = i;
                 }
             }
-            
-            console.log('🔴 Found index:', currentTimeIndex, 'timestamp:', forecast[currentTimeIndex]?.timestamp);
         }
         
         // Update markLine data for both charts
