@@ -422,21 +422,29 @@ export class WeatherComponent {
             item.affects_session && (index === 0 || !forecast[index-1].affects_session)
         );
         
-        // Calculate interval from timestamps
-        let intervalSeconds = 900;
-        if (forecast.length >= 2) {
-            const time1 = new Date(forecast[0].timestamp).getTime() / 1000;
-            const time2 = new Date(forecast[1].timestamp).getTime() / 1000;
-            intervalSeconds = time2 - time1;
-        }
-        
-        // Calculate current time index based on race time
+        // Calculate current time index by matching time of day
         let currentTimeIndex = -1;
-        if (this.currentRaceTime !== null && raceStartIndex >= 0) {
-            const indexOffset = Math.round(this.currentRaceTime / intervalSeconds);
-            currentTimeIndex = raceStartIndex + indexOffset;
-            if (currentTimeIndex >= forecast.length) {
-                currentTimeIndex = forecast.length - 1;
+        if (this.currentRaceTime !== null) {
+            // currentRaceTime is seconds since midnight (sessionTimeOfDay from telemetry)
+            const currentHours = Math.floor(this.currentRaceTime / 3600) % 24;
+            const currentMinutes = Math.floor((this.currentRaceTime % 3600) / 60);
+            
+            // Find forecast item with closest matching time of day
+            let closestDiff = Infinity;
+            for (let i = 0; i < forecast.length; i++) {
+                const forecastDate = new Date(forecast[i].timestamp);
+                const forecastHours = forecastDate.getUTCHours();
+                const forecastMinutes = forecastDate.getUTCMinutes();
+                
+                // Calculate difference in minutes
+                const forecastTimeInMinutes = forecastHours * 60 + forecastMinutes;
+                const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+                const diff = Math.abs(forecastTimeInMinutes - currentTimeInMinutes);
+                
+                if (diff < closestDiff) {
+                    closestDiff = diff;
+                    currentTimeIndex = i;
+                }
             }
         }
 
