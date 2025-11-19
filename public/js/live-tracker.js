@@ -2812,6 +2812,13 @@ class LiveStrategyTracker {
             // Sync currentStintLap with calculated value
             this.currentStintLap = Math.max(0, this.currentLap - this.stintStartLap);
             
+            // Skip recording if stint lap is 0 (not on track yet - stale data from previous session)
+            if (this.currentStintLap === 0) {
+                debug(`⏭️ Skipping lap data recording - stint lap is 0 (not on track yet)`);
+                this.lastProcessedLap = this.currentLap;
+                return; // Exit early without recording anything
+            }
+            
             // Record lap time (always record, even if 0 or invalid - keeps arrays in sync)
             this.currentStintLapTimes.push(this.lastLapTime || 0);
             
