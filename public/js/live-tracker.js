@@ -270,6 +270,10 @@ class LiveStrategyTracker {
         // Card ordering optimization
         this.previousCardOrder = [];
         
+        // Pending lap data (for delayed recording after pit exit)
+        this.pendingLapData = null;
+        this.pendingLapTimeout = null;
+        
         // Fuel trace recorder
         this.fuelRecorder = null;
         
@@ -2819,11 +2823,64 @@ class LiveStrategyTracker {
                 return; // Exit early without recording anything
             }
             
-            // Record lap time (always record, even if 0 or invalid - keeps arrays in sync)
-            this.currentStintLapTimes.push(this.lastLapTime || 0);
+            // For first lap of stint (out-lap), delay recording by 3 seconds
+            // This allows iRacing time to update CarIdxLastLapTime with the actual out-lap time
+            // instead of using the stale pre-pit lap time
+            if (this.currentStintLapTimes.length === 0) {
+                debug(`⏱️ First lap of stint - delaying recording by 3 seconds to get accurate lap time`);
+                
+                // Clear any existing pending timeout
+                if (this.pendingLapTimeout) {
+                    clearTimeout(this.pendingLapTimeout);
+                }
+                
+                // Store the lap data to process after delay
+                this.pendingLapData = {
+                    lapNumber: this.lastProcessedLap + 1,
+                    stintLap: this.currentStintLap,
+                    currentLap: this.currentLap
+                };
+                
+                // Set timeout to record lap data after 3 seconds
+                this.pendingLapTimeout = setTimeout(() => {
+                    debug(`✅ Processing delayed first lap data (lap ${this.pendingLapData.lapNumber})`);
+                    this.recordLapData();
+                    this.pendingLapData = null;
+                    this.pendingLapTimeout = null;
+                }, 3000);
+                
+                // Mark lap as processed to prevent re-triggering
+                this.lastProcessedLap = this.currentLap;
+                return;
+            }
             
-            // Only process fuel data if we have valid lap time data
-            if (this.lastLapTime > 0) {
+            // Record lap data immediately for all laps after the first
+            this.recordLapData();
+            this.lastProcessedLap = this.currentLap;
+        }
+        
+        // Update UI
+        this.updateLiveStats();
+        
+        // Update strategy comparison (works for both auto and manual modes)
+        if (this.strategy) {
+            this.updateStrategyComparison();
+        }
+        
+        // Update sector comparison display (throttled to 2000ms = 2 seconds to reduce jumping)
+        const now = Date.now();
+        if (now - this.lastSectorComparisonUpdate > 2000) {
+            this.updateSectorComparison(values);
+            this.lastSectorComparisonUpdate = now;
+        }
+    }
+    
+    recordLapData() {
+        // Record lap time (always record, even if 0 or invalid - keeps arrays in sync)
+        this.currentStintLapTimes.push(this.lastLapTime || 0);
+        
+        // Only process fuel data if we have valid lap time data
+        if (this.lastLapTime > 0) {
                 
                 // Process fuel data if available (only when driving)
                 if (this.fuelAtLapStart !== null && this.fuelAtLapStart > 0) {
@@ -2871,26 +2928,9 @@ class LiveStrategyTracker {
                     this.currentStintFuelUse.push(0);
                 }
             }
-            
-            // Record fuel at start of new lap
-            this.fuelAtLapStart = this.fuelLevel;
-            this.lastProcessedLap = this.currentLap;
-        }
         
-        // Update UI
-        this.updateLiveStats();
-        
-        // Update strategy comparison (works for both auto and manual modes)
-        if (this.strategy) {
-            this.updateStrategyComparison();
-        }
-        
-        // Update sector comparison display (throttled to 2000ms = 2 seconds to reduce jumping)
-        const now = Date.now();
-        if (now - this.lastSectorComparisonUpdate > 2000) {
-            this.updateSectorComparison(values);
-            this.lastSectorComparisonUpdate = now;
-        }
+        // Record fuel at start of new lap
+        this.fuelAtLapStart = this.fuelLevel;
     }
     
     startNewStint() {
@@ -2908,6 +2948,13 @@ class LiveStrategyTracker {
     
     resetStintData() {
         debug('🔄 Resetting all stint data');
+        
+        // Clear pending lap timeout
+        if (this.pendingLapTimeout) {
+            clearTimeout(this.pendingLapTimeout);
+            this.pendingLapTimeout = null;
+            this.pendingLapData = null;
+        }
         
         // Reset stint tracking
         this.currentStintNumber = 0;
