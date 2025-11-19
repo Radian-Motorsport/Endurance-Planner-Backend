@@ -2816,42 +2816,14 @@ class LiveStrategyTracker {
             // Sync currentStintLap with calculated value
             this.currentStintLap = Math.max(0, this.currentLap - this.stintStartLap);
             
-            // Skip recording if stint lap is 0 (not on track yet - stale data from previous session)
-            if (this.currentStintLap === 0) {
-                debug(`⏭️ Skipping lap data recording - stint lap is 0 (not on track yet)`);
+            // Skip recording for stint lap 0 and 1
+            // Lap 0: Not on track yet (stale data from previous session)
+            // Lap 1: Just crossed line after pit exit - lastLapTime is still old pre-pit data
+            // Start recording from lap 2 onwards when lastLapTime has the actual out-lap time
+            if (this.currentStintLap <= 1) {
+                debug(`⏭️ Skipping lap data recording - stint lap ${this.currentStintLap} (waiting for lap 2 to start recording)`);
                 this.lastProcessedLap = this.currentLap;
                 return; // Exit early without recording anything
-            }
-            
-            // For first lap of stint (out-lap), delay recording by 3 seconds
-            // This allows iRacing time to update CarIdxLastLapTime with the actual out-lap time
-            // instead of using the stale pre-pit lap time
-            if (this.currentStintLapTimes.length === 0) {
-                debug(`⏱️ First lap of stint - delaying recording by 3 seconds to get accurate lap time`);
-                
-                // Clear any existing pending timeout
-                if (this.pendingLapTimeout) {
-                    clearTimeout(this.pendingLapTimeout);
-                }
-                
-                // Store the lap data to process after delay
-                this.pendingLapData = {
-                    lapNumber: this.lastProcessedLap + 1,
-                    stintLap: this.currentStintLap,
-                    currentLap: this.currentLap
-                };
-                
-                // Set timeout to record lap data after 3 seconds
-                this.pendingLapTimeout = setTimeout(() => {
-                    debug(`✅ Processing delayed first lap data (lap ${this.pendingLapData.lapNumber})`);
-                    this.recordLapData();
-                    this.pendingLapData = null;
-                    this.pendingLapTimeout = null;
-                }, 3000);
-                
-                // Mark lap as processed to prevent re-triggering
-                this.lastProcessedLap = this.currentLap;
-                return;
             }
             
             // Record lap data immediately for all laps after the first
