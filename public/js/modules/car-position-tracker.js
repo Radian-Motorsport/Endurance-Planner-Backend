@@ -255,7 +255,7 @@ export class CarPositionTracker {
         marker.setAttribute('r', radius);
         marker.setAttribute('stroke-width', this.options.carStrokeWidth);
         marker.setAttribute('opacity', '0.9');
-        marker.style.transition = 'r 0.2s, opacity 0.2s';  // Only transition size/opacity, not position
+        marker.style.transition = 'cx 0.05s linear, cy 0.05s linear, r 0.2s, opacity 0.2s';  // Smooth movement with 50ms transition
         marker.style.cursor = 'pointer';  // Show pointer cursor on hover
         marker.setAttribute('data-car-idx', carIdx);
         marker.setAttribute('data-class-id', classId);
@@ -307,9 +307,9 @@ export class CarPositionTracker {
         posText.setAttribute('stroke-width', '1');
         posText.setAttribute('font-family', 'Arial, sans-serif');
         posText.setAttribute('font-weight', 'bold');
-        posText.setAttribute('font-size', radius * 1.6); // Larger font size (was 0.8)
+        posText.setAttribute('font-size', radius * 1.2); // Larger font size (was 0.8)
         posText.setAttribute('opacity', '0'); // Hidden by default until position data arrives
-        posText.style.transition = 'font-size 0.2s'; // Only transition font-size, not position (prevents jiggle)
+        posText.style.transition = 'x 0.05s linear, y 0.05s linear, font-size 0.2s, opacity 0.2s'; // Smooth movement locked with marker (50ms)
         posText.style.pointerEvents = 'none'; // Don't block clicks
         posText.textContent = '';
         
