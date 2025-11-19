@@ -255,7 +255,7 @@ export class CarPositionTracker {
         marker.setAttribute('r', radius);
         marker.setAttribute('stroke-width', this.options.carStrokeWidth);
         marker.setAttribute('opacity', '0.9');
-        marker.style.transition = 'cx 0.1s linear, cy 0.1s linear';
+        marker.style.transition = 'r 0.2s, opacity 0.2s';  // Only transition size/opacity, not position
         marker.style.cursor = 'pointer';  // Show pointer cursor on hover
         marker.setAttribute('data-car-idx', carIdx);
         marker.setAttribute('data-class-id', classId);
