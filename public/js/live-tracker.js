@@ -1123,7 +1123,7 @@ class LiveStrategyTracker {
                 positionLabel.style.userSelect = 'none';
                 positionLabel.style.opacity = '0';
                 positionLabel.style.transition = 'font-size 0.2s';
-                positionLabel.style.transform = 'translateY(-20%)';  // Move up by 2/10ths (20%)
+                positionLabel.style.transform = 'translateY(-8%)';  // Move up by 8%
                 dot.appendChild(positionLabel);
                 
                 // Add transition class AFTER initial position is set (prevents animation on creation)
