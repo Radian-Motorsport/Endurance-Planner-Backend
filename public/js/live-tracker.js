@@ -3159,9 +3159,16 @@ class LiveStrategyTracker {
     updateStintDataDisplay() {
         // Display lap times for current stint
         if (this.elements.stintLapTimesList && this.currentStintLapTimes.length > 0) {
+            let lapCounter = 0;
             this.elements.stintLapTimesList.innerHTML = this.currentStintLapTimes
                 .map((time, idx) => {
-                    const lapLabel = (time === 0 || !time) ? 'OUT' : `L${idx + 1}`;
+                    let lapLabel;
+                    if (time === 0 || !time) {
+                        lapLabel = 'OUT';
+                    } else {
+                        lapCounter++;
+                        lapLabel = `L${lapCounter}`;
+                    }
                     return `<div class="text-xs font-mono">${lapLabel}: ${this.formatLapTime(time)}</div>`;
                 })
                 .join('');
@@ -3171,9 +3178,16 @@ class LiveStrategyTracker {
         
         // Display fuel use for current stint
         if (this.elements.stintFuelList && this.currentStintFuelUse.length > 0) {
+            let lapCounter = 0;
             this.elements.stintFuelList.innerHTML = this.currentStintFuelUse
                 .map((fuel, idx) => {
-                    const lapLabel = (fuel === 0 || !fuel) ? 'OUT' : `L${idx + 1}`;
+                    let lapLabel;
+                    if (fuel === 0 || !fuel) {
+                        lapLabel = 'OUT';
+                    } else {
+                        lapCounter++;
+                        lapLabel = `L${lapCounter}`;
+                    }
                     return `<div class="text-xs font-mono">${lapLabel}: ${fuel.toFixed(2)}L</div>`;
                 })
                 .join('');
