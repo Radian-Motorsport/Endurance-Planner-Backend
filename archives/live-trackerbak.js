@@ -259,9 +259,6 @@ class LiveStrategyTracker {
         // Lap progress multi-car display
         this.showAllCarsOnProgress = false;
         
-        // Card ordering optimization
-        this.previousCardOrder = [];
-        
         // Fuel trace recorder
         this.fuelRecorder = null;
         
@@ -1313,8 +1310,8 @@ class LiveStrategyTracker {
         const carListContainer = document.getElementById('car-list');
         if (!carListContainer) return;
         
-        // Get all cards and sort them by class position (single query)
-        const cards = Array.from(carListContainer.querySelectorAll('.car-card'));
+        // Get all cards and sort them by class position
+        const cards = Array.from(document.querySelectorAll('.car-card'));
         cards.sort((a, b) => {
             const carIdxA = parseInt(a.dataset.carIdx);
             const carIdxB = parseInt(b.dataset.carIdx);
@@ -1323,45 +1320,29 @@ class LiveStrategyTracker {
             return posA - posB;
         });
         
-        // Only reorder if positions actually changed
-        const currentOrder = cards.map(c => c.dataset.carIdx);
-        const orderChanged = currentOrder.length !== this.previousCardOrder.length || 
-                            currentOrder.some((id, i) => id !== this.previousCardOrder[i]);
+        // Re-append cards in sorted order (triggers reflow but maintains sort)
+        cards.forEach(card => carListContainer.appendChild(card));
         
-        if (orderChanged) {
-            cards.forEach(card => carListContainer.appendChild(card));
-            this.previousCardOrder = currentOrder;
-        }
-        
-        // Update card data (use already-queried cards array)
-        cards.forEach(card => {
+        // Update all card header data without re-rendering entire list (prevents flashing)
+        document.querySelectorAll('.car-card').forEach(card => {
             const carIdx = parseInt(card.dataset.carIdx);
             const carData = this.carAnalysisData[carIdx] || {};
             
-            // Cache selectors on first access
-            if (!card._cachedElements) {
-                card._cachedElements = {
-                    position: card.querySelector('.car-position'),
-                    inc: card.querySelector('[data-stat="inc"]'),
-                    last: card.querySelector('[data-stat="last"]'),
-                    stint: card.querySelector('[data-stat="stint"]')
-                };
-            }
-            const cached = card._cachedElements;
-            
-            // Update position (only if changed)
-            const position = (carData.classPosition || '--').toString();
-            if (cached.position && cached.position.textContent !== position) {
-                cached.position.textContent = position;
+            // Update position
+            const position = carData.classPosition || '--';
+            const positionEl = card.querySelector('.car-position');
+            if (positionEl) {
+                positionEl.textContent = position;
             }
             
-            // Update off-track incidents count (only if changed)
-            const offTrackCount = (this.carPositionTracker?.getOffTrackCount(carIdx) || 0).toString();
-            if (cached.inc && cached.inc.textContent !== offTrackCount) {
-                cached.inc.textContent = offTrackCount;
+            // Update off-track incidents count
+            const offTrackCount = this.carPositionTracker?.getOffTrackCount(carIdx) || 0;
+            const incElement = card.querySelector('[data-stat="inc"]');
+            if (incElement) {
+                incElement.textContent = offTrackCount;
             }
             
-            // Update last lap time (only if changed)
+            // Update last lap time
             const lastLapTime = carData.lastLapTime || 0;
             const formatLapTime = (seconds) => {
                 if (!seconds || seconds <= 0) return '--';
@@ -1369,15 +1350,16 @@ class LiveStrategyTracker {
                 const secs = (seconds % 60).toFixed(3);
                 return `${mins}:${secs.padStart(6, '0')}`;
             };
-            const formattedLapTime = formatLapTime(lastLapTime);
-            if (cached.last && cached.last.textContent !== formattedLapTime) {
-                cached.last.textContent = formattedLapTime;
+            const lastElement = card.querySelector('[data-stat="last"]');
+            if (lastElement) {
+                lastElement.textContent = formatLapTime(lastLapTime);
             }
             
-            // Update stint laps (only if changed)
-            const stintLaps = `${carData.stintLaps || 0}L`;
-            if (cached.stint && cached.stint.textContent !== stintLaps) {
-                cached.stint.textContent = stintLaps;
+            // Update stint laps
+            const stintLaps = carData.stintLaps || 0;
+            const stintElement = card.querySelector('[data-stat="stint"]');
+            if (stintElement) {
+                stintElement.textContent = `${stintLaps}L`;
             }
         });
     }
