@@ -1045,7 +1045,7 @@ export class WeatherComponent {
             }] : [])
         ];
         
-        // Update temperature chart
+        // Update temperature chart - only update the first series' markLine
         this.temperatureChart.setOption({
             series: [{
                 markLine: {
@@ -1055,9 +1055,9 @@ export class WeatherComponent {
                     data: markLineData
                 }
             }]
-        }, { replaceMerge: ['series'] });
+        });
         
-        // Update clouds chart
+        // Update clouds chart - only update the first series' markLine
         this.cloudsChart.setOption({
             series: [{
                 markLine: {
@@ -1067,7 +1067,7 @@ export class WeatherComponent {
                     data: markLineData
                 }
             }]
-        }, { replaceMerge: ['series'] });
+        });
     }
     
     resize() {
