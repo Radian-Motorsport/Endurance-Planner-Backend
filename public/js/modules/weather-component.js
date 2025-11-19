@@ -1010,22 +1010,23 @@ export class WeatherComponent {
             item.affects_session && (index === 0 || !forecast[index-1].affects_session)
         );
         
-        // Calculate interval between forecast items from actual timestamps
-        let intervalSeconds = 900; // Default 15 minutes
-        if (forecast.length >= 2) {
-            const time1 = new Date(forecast[0].timestamp).getTime() / 1000;
-            const time2 = new Date(forecast[1].timestamp).getTime() / 1000;
-            intervalSeconds = time2 - time1;
-        }
-        
-        // Calculate current position based on race time
+        // Find the current time index by matching timestamps
         let currentTimeIndex = -1;
         if (this.currentRaceTime !== null && raceStartIndex >= 0) {
-            const indexOffset = Math.round(this.currentRaceTime / intervalSeconds);
-            currentTimeIndex = raceStartIndex + indexOffset;
+            // Get the race start timestamp
+            const raceStartTime = new Date(forecast[raceStartIndex].timestamp).getTime() / 1000;
+            // Calculate what the current timestamp should be
+            const currentTimestamp = raceStartTime + this.currentRaceTime;
             
-            if (currentTimeIndex >= forecast.length) {
-                currentTimeIndex = forecast.length - 1;
+            // Find the forecast entry with the closest timestamp
+            let closestDiff = Infinity;
+            for (let i = 0; i < forecast.length; i++) {
+                const forecastTime = new Date(forecast[i].timestamp).getTime() / 1000;
+                const diff = Math.abs(forecastTime - currentTimestamp);
+                if (diff < closestDiff) {
+                    closestDiff = diff;
+                    currentTimeIndex = i;
+                }
             }
         }
         
