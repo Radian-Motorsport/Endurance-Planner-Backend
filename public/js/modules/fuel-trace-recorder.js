@@ -87,13 +87,14 @@ export class FuelTraceRecorder {
                 const data = await response.json();
                 this.displayStoredData(data);
             } else if (response.status === 404) {
+                // Silently handle - no data available yet
                 this.showDataMessage('📭 No ideal lap recorded for this track/car combination');
             } else {
                 this.showDataMessage('❌ Error loading data');
             }
         } catch (err) {
-            console.error('Failed to load stored data:', err);
-            this.showDataMessage('❌ Network error');
+            // Silently handle network errors for missing fuel data
+            this.showDataMessage('No fuel data available');
         }
     }
     
@@ -134,13 +135,6 @@ export class FuelTraceRecorder {
         if (el('stored-tank-capacity')) el('stored-tank-capacity').textContent = 
             data.metadata.tankCapacity ? `${data.metadata.tankCapacity.toFixed(1)} L` : '--';
         if (el('stored-recorded-at')) el('stored-recorded-at').textContent = recordedDate;
-        
-        console.log('📊 Displayed stored data:', {
-            trackId: data.trackId,
-            carName: data.carName,
-            samples: data.samples.length,
-            fuelUsed: fuelUsed
-        });
     }
     
     /**
@@ -184,12 +178,6 @@ export class FuelTraceRecorder {
                 // For now we'll use carName as identifier
             }
         }
-        
-        console.log('🎯 Fuel recorder context:', {
-            trackId: this.trackId,
-            carName: this.carName,
-            playerCarIdx: this.playerCarIdx
-        });
     }
     
     /**
@@ -265,7 +253,6 @@ export class FuelTraceRecorder {
         this.currentBucket = -1;
         
         this.updateUI('armed');
-        console.log('🔴 Armed - waiting for lap start...');
     }
     
     /**
@@ -291,7 +278,6 @@ export class FuelTraceRecorder {
         };
         
         this.updateUI('recording');
-        console.log('🟢 Recording started', this.metadata);
     }
     
     /**
@@ -330,8 +316,6 @@ export class FuelTraceRecorder {
         this.isRecording = false;
         this.updateUI('complete');
         
-        console.log(`🟡 Recording complete: ${this.samples.length} samples`);
-        
         // Calculate lap time
         const lapTime = this.metadata.lapStartTime ? (Date.now() - this.metadata.lapStartTime) / 1000 : null;
         
@@ -348,8 +332,6 @@ export class FuelTraceRecorder {
         
         delete payload.metadata.lapStartTime; // Don't send internal timestamp
         
-        console.log('📤 Uploading ideal fuel lap:', payload);
-        
         // Upload to backend
         try {
             const response = await fetch('/api/ideal-fuel-lap', {
@@ -360,7 +342,6 @@ export class FuelTraceRecorder {
             
             if (response.ok) {
                 const result = await response.json();
-                console.log('✅ Ideal lap saved:', result);
                 
                 // Verify by fetching back
                 await this.verifyStoredData(this.trackId, this.carName);
@@ -370,13 +351,11 @@ export class FuelTraceRecorder {
                 }
             } else {
                 const error = await response.text();
-                console.error('❌ Failed to save ideal lap:', error);
                 if (this.statusText) {
                     this.statusText.textContent = `❌ Failed to save: ${error}`;
                 }
             }
         } catch (err) {
-            console.error('❌ Network error:', err);
             if (this.statusText) {
                 this.statusText.textContent = `❌ Network error: ${err.message}`;
             }
@@ -393,31 +372,13 @@ export class FuelTraceRecorder {
      */
     async verifyStoredData(trackId, carName) {
         try {
-            console.log(`🔍 Verifying stored data for Track ${trackId}, Car ${carName}...`);
-            
             const response = await fetch(`/api/ideal-fuel-lap/${trackId}/${encodeURIComponent(carName)}`);
             
             if (response.ok) {
                 const data = await response.json();
-                console.log('✅ Data verification successful:', {
-                    id: data.id,
-                    trackId: data.trackId,
-                    carName: data.carName,
-                    sampleCount: data.samples.length,
-                    lapTime: data.metadata.lapTime,
-                    trackTemp: data.metadata.trackTemp,
-                    fuelRange: {
-                        start: data.samples[0].fuelLevel,
-                        end: data.samples[data.samples.length - 1].fuelLevel,
-                        used: (data.samples[0].fuelLevel - data.samples[data.samples.length - 1].fuelLevel).toFixed(2)
-                    },
-                    recordedAt: data.metadata.recordedAt
-                });
-            } else {
-                console.warn('⚠️ Could not verify data:', response.status);
             }
         } catch (err) {
-            console.warn('⚠️ Verification failed:', err.message);
+            // Silently handle
         }
     }
     
@@ -429,7 +390,6 @@ export class FuelTraceRecorder {
         this.isRecording = false;
         this.samples = [];
         this.updateUI('idle');
-        console.log('⚪ Recording cancelled');
     }
     
     /**

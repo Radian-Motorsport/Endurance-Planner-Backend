@@ -90,12 +90,15 @@ export class FuelComparisonChart {
                 this.idealData = null;
                 this.scheduleRender();
                 return false;
+            } else if (response.status === 404) {
+                // Silently handle missing fuel data
+                return false;
             } else {
                 console.warn('⚠️ Failed to load ideal lap:', response.status);
                 return false;
             }
         } catch (err) {
-            console.error('❌ Error loading ideal lap:', err);
+            // Silently handle network errors for missing fuel data
             return false;
         }
     }
