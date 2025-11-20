@@ -50,7 +50,7 @@ export class FuelComparisonChart {
         this.needsRedraw = false;       // Track if redraw is needed
         this.animationFrameId = null;   // Store RAF ID for cancellation
         this.lastRenderTime = 0;        // Timestamp of last render
-        this.renderInterval = 1000;     // Minimum ms between renders (1 second)
+        this.renderInterval = 100;      // Minimum ms between renders (100ms = 10 FPS)
         
         // Chart bounds
         this.chartArea = {
