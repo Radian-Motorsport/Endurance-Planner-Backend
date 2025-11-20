@@ -51,6 +51,22 @@ export class FuelTraceRecorder {
             viewButton.addEventListener('click', () => this.toggleDataDisplay());
         }
         
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+F to toggle recording (arm/disarm)
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault(); // Prevent browser's find dialog
+                this.toggleRecording();
+            }
+            // Ctrl+R to cancel recording
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault(); // Prevent browser reload
+                if (this.isRecording || this.isArmed) {
+                    this.cancelRecording();
+                }
+            }
+        });
+        
         this.updateUI('idle');
     }
     
