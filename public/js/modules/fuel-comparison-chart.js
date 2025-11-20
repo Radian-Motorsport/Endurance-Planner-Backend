@@ -362,13 +362,15 @@ export class FuelComparisonChart {
             const liveConsumed = this.lapStartFuel - liveSample.fuelLevel;
             const idealConsumed = idealStartFuel - idealSample.fuelLevel;
             
-            // Deviation: positive = using less fuel (good), negative = using more (bad)
-            const deviation = idealConsumed - liveConsumed;
+            // Deviation: using LESS than ideal = positive (good), using MORE = negative (bad)
+            const deviation = liveConsumed - idealConsumed;  // REVERSED: live - ideal
             
             // Clamp to range for display
             const clampedDeviation = Math.max(-range/2, Math.min(range/2, deviation));
             
             const xPos = x + (width * liveSample.pct / 100);
+            // Negative deviation (using less) should go UP (subtract from midY)
+            // Canvas Y increases downward, so subtract to go up
             const yPos = midY - (clampedDeviation / (range/2)) * (height / 2);
             
             // Color based on deviation
