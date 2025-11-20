@@ -412,7 +412,7 @@ select {
         }
 
         .bg02{
-            background: linear-gradient(180deg, #2a1b28 0%, #27222c 50%, #213131 100%, #292929 100%);
+            background: linear-gradient(180deg, #38284a 0%, #2b222c 50%, #213131 75%, #292929 100%);
             background-attachment: local;
         }
 
@@ -420,6 +420,9 @@ select {
         }
 
         .ov-mid{ background: rgba(0, 0, 0, 0.1) 
+        }
+
+        .ov-light{ background: rgba(229, 229, 229, 0.1) 
         }
 
         .ov-dark-list{ background: rgba(0, 0, 0, 0.8) 
