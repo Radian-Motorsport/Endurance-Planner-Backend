@@ -22,8 +22,8 @@ export class FuelComparisonChart {
         // Configuration
         this.options = {
             idealLineColor: options.idealLineColor || 'rgba(16, 185, 129, 0.5)',  // Green 50% opacity
-            deviationPositiveColor: options.deviationPositiveColor || '#10b981',  // Green (using less)
-            deviationNegativeColor: options.deviationNegativeColor || '#ef4444',  // Red (using more)
+            deviationPositiveColor: options.deviationPositiveColor || '#ef4444',  // Green (using less)
+            deviationNegativeColor: options.deviationNegativeColor || '#10b981',  // Red (using more)
             gridColor: options.gridColor || '#374151',
             textColor: options.textColor || '#9ca3af',
             zeroLineColor: options.zeroLineColor || '#ffffff',
@@ -646,7 +646,7 @@ export class FuelComparisonChart {
                 if (typeof lapDelta === 'number') {
                     const sign = lapDelta >= 0 ? '+' : '';
                     lapDeltaEl.textContent = sign + lapDelta.toFixed(2) + ' L';
-                    lapDeltaEl.style.color = lapDelta <= 0 ? '#10b981' : '#ef4444'; // Green if using less
+                    lapDeltaEl.style.color = lapDelta <= 0 ? '#ef4444' : '#10b981'; // Green if using less
                 } else {
                     lapDeltaEl.textContent = lapDelta;
                     lapDeltaEl.style.color = '#ffffff';
@@ -664,8 +664,8 @@ export class FuelComparisonChart {
                 const deltaEl = el('fuel-delta');
                 const sign = deviation > 0 ? '+' : '';
                 deltaEl.textContent = sign + deviation.toFixed(2) + ' L';
-                deltaEl.style.color = deviation > 0.05 ? '#10b981' : 
-                                     deviation < -0.05 ? '#ef4444' : '#ffffff';
+                deltaEl.style.color = deviation > 0.05 ? '#ef4444' : 
+                                     deviation < -0.05 ? '#10b981' : '#ffffff';
             }
             if (el('fuel-lap-progress')) {
                 el('fuel-lap-progress').textContent = this.currentLapDistPct.toFixed(1) + '%';
@@ -784,9 +784,9 @@ export class FuelComparisonChart {
             
             // Color code: green = less fuel, red = more fuel
             if (this.idealAdjustment > 0) {
-                displayEl.style.color = '#ef4444'; // Red (ideal is higher = you need more)
+                displayEl.style.color = '#10b981'; // Red (ideal is higher = you need more)
             } else if (this.idealAdjustment < 0) {
-                displayEl.style.color = '#10b981'; // Green (ideal is lower = you need less)
+                displayEl.style.color = '#ef4444'; // Green (ideal is lower = you need less)
             } else {
                 displayEl.style.color = '#ffffff'; // White (neutral)
             }
