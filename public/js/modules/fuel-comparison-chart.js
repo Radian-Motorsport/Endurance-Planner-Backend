@@ -374,9 +374,9 @@ export class FuelComparisonChart {
             const yPos = midY - (clampedDeviation / (range/2)) * (height / 2);
             
             // Color based on deviation
-            if (deviation > 0.05) {
+            if (deviation > 0.025) {
                 this.ctx.strokeStyle = this.options.deviationPositiveColor;
-            } else if (deviation < -0.05) {
+            } else if (deviation < -0.025) {
                 this.ctx.strokeStyle = this.options.deviationNegativeColor;
             } else {
                 this.ctx.strokeStyle = this.options.textColor;
