@@ -578,18 +578,18 @@ export class FuelComparisonChart {
             this.ctx.stroke();
             this.ctx.setLineDash([]);
             
-            // Draw marker dot
-            const color = deviation > 0.05 ? this.options.deviationPositiveColor : 
-                         deviation < -0.05 ? this.options.deviationNegativeColor : 
-                         '#ffffff';
-            
-            this.ctx.fillStyle = color;
-            this.ctx.strokeStyle = '#000000';
-            this.ctx.lineWidth = 2;
-            this.ctx.beginPath();
-            this.ctx.arc(xPos, yPos, 6, 0, Math.PI * 2);
-            this.ctx.fill();
-            this.ctx.stroke();
+            // Draw marker dot - DISABLED (not accurate)
+            // const color = deviation > 0.05 ? this.options.deviationPositiveColor : 
+            //              deviation < -0.05 ? this.options.deviationNegativeColor : 
+            //              '#ffffff';
+            // 
+            // this.ctx.fillStyle = color;
+            // this.ctx.strokeStyle = '#000000';
+            // this.ctx.lineWidth = 2;
+            // this.ctx.beginPath();
+            // this.ctx.arc(xPos, yPos, 6, 0, Math.PI * 2);
+            // this.ctx.fill();
+            // this.ctx.stroke();
         }
     }
     
