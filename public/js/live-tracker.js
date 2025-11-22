@@ -2412,21 +2412,34 @@ class LiveStrategyTracker {
             const driver = this.driversList.find(d => d.CarIdx === carIdx);
             if (!driver) continue;
             
-            // Get class name and position
+            // Get class name, position, and color
             const classPosition = values.CarIdxClassPosition?.[carIdx] || '--';
             const className = this.getCarClassName(driver.CarClassID);
+            const classColor = this.getCarClassColor(driver.CarClassID);
+            
+            // Convert hex color to RGB for background with opacity
+            const hexToRgb = (hex) => {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : { r: 239, g: 68, b: 68 }; // Default red
+            };
+            const rgb = hexToRgb(classColor);
+            const bgColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`;
             
             rows.push(`
-                <div class="bg-red-900/30 border-l-4 border-red-500 px-3 py-2 rounded text-sm flex items-center justify-between">
+                <div class="border-l-4 px-3 py-2 rounded text-sm flex items-center justify-between" style="background-color: ${bgColor}; border-color: ${classColor};">
                     <div class="flex items-center gap-3">
                         <div class="flex items-center gap-1">
-                            <span class="text-xs text-red-400 font-bold">${className}</span>
+                            <span class="text-xs font-bold" style="color: ${classColor};">${className}</span>
                             <span class="text-xs text-neutral-400">P${classPosition}</span>
                         </div>
                         <span class="text-white font-semibold">${driver.UserName || 'Unknown'}</span>
                         <span class="text-neutral-400 text-xs">${driver.TeamName || 'No Team'}</span>
                     </div>
-                    <span class="text-xs text-red-400">OFF TRACK</span>
+                    <span class="text-xs" style="color: ${classColor};">OFF TRACK</span>
                 </div>
             `);
         }
@@ -2444,6 +2457,37 @@ class LiveStrategyTracker {
             }
         }
         return 'Unknown';
+    }
+    
+    /**
+     * Get class color from class ID
+     */
+    getCarClassColor(classId) {
+        const classColorMap = {
+            // GTP
+            4029: '#fff265',
+            4074: '#fff265',
+            // LMP
+            2523: '#598afc',
+            // GT3
+            4046: '#fa59e7',
+            4091: '#fa59e7',
+            4090: '#fa59e7',
+            4083: '#fa59e7',
+            4072: '#fa59e7',
+            4011: '#fa59e7',
+            // TCR
+            4084: '#a855f7',
+            4085: '#a855f7',
+            // GT4
+            4088: '#35ff12',
+            // M2 CS
+            4073: '#06b6d4',
+            // 992 Cup
+            3104: '#3b82f6'
+        };
+        
+        return classColorMap[classId] || '#ef4444'; // Default red for unknown
     }
     
     initializeCarAnalysis(sessionData) {
