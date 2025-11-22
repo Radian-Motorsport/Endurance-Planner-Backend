@@ -3866,34 +3866,7 @@ class LiveStrategyTracker {
                 debug(`  ⚠️ Could not determine current stint (index: ${currentStintIndex}) - showing all ${this.strategy.stints.length} stints`);
             }
             
-            // Additional filter: remove stints that would end after session time runs out
-            if (this.sessionTimeRemain > 0 && this.sessionTimeOfDay != null) {
-                const sessionEndTimeOfDay = this.sessionTimeOfDay + this.sessionTimeRemain;
-                const originalStintCount = this.strategy.stints.length;
-                
-                // Filter out stints that start after the session ends
-                this.strategy.stints = this.strategy.stints.filter(stint => {
-                    if (stint.timeOfDayStart == null) return true; // Keep if no time data
-                    
-                    // Handle day wraparound
-                    let stintStartsBeforeEnd = false;
-                    if (sessionEndTimeOfDay >= 86400) {
-                        // Session end wraps to next day
-                        const wrappedEnd = sessionEndTimeOfDay - 86400;
-                        stintStartsBeforeEnd = (stint.timeOfDayStart <= wrappedEnd) || 
-                                              (stint.timeOfDayStart >= this.sessionTimeOfDay);
-                    } else {
-                        stintStartsBeforeEnd = stint.timeOfDayStart < sessionEndTimeOfDay;
-                    }
-                    
-                    return stintStartsBeforeEnd;
-                });
-                
-                const trimmedCount = originalStintCount - this.strategy.stints.length;
-                if (trimmedCount > 0) {
-                    debug(`  ⏱️ Filtered out ${trimmedCount} stints beyond session end time (${this.formatTime(this.sessionTimeRemain)} remaining)`);
-                }
-            }
+
             
             console.log('📋 Calling populateStintTable() with planner stints');
             this.populateStintTable();
