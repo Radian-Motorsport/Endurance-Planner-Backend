@@ -375,8 +375,8 @@ class LiveStrategyTracker {
         this.maxSpeed = 0;
         this.targetShiftRPM = 7000;
         
-        // Shift lights toggle
-        this.shiftLightsEnabled = true;
+        // Shift lights toggle - default OFF
+        this.shiftLightsEnabled = false;
         
         // Throttle timers
         this.lastWeatherUpdate = 0;
@@ -798,6 +798,11 @@ class LiveStrategyTracker {
         const values = data?.values;
         if (!values) return;
         
+        // Skip ALL updates if driver inputs section is collapsed (performance optimization)
+        const driverInputsContainer = document.getElementById('driver-inputs-details');
+        const isCollapsed = driverInputsContainer?.classList.contains('hidden');
+        if (isCollapsed) return; // Early exit - no DOM manipulation when hidden
+        
         // Update inputs with formatting
         if (this.elements.inputThrottle) {
             this.elements.inputThrottle.textContent = `${((values.ThrottleRaw ?? 0) * 100).toFixed(0)}%`;
@@ -820,7 +825,7 @@ class LiveStrategyTracker {
             const currentRPM = Math.round(values.RPM ?? 0);
             this.elements.inputRPMShift.textContent = values.RPM ? `${currentRPM}` : '--';
             
-            // Only update indicators if shift lights are enabled
+            // Only update indicators if shift lights are enabled (no need to check collapsed - already filtered by early return)
             if (this.shiftLightsEnabled) {
                 // Calculate shift RPM bands
                 const targetRPM = this.targetShiftRPM;
