@@ -3816,47 +3816,54 @@ class LiveStrategyTracker {
                 const minutes = Math.floor((currentTimeOfDay % 3600) / 60);
                 debug(`  Current time of day: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} (${currentTimeOfDay}s)`);
                 
-                // Find which stint we're currently in based on time of day
+                // Find the first stint that hasn't ended yet (current or future)
                 for (let i = 0; i < this.strategy.stints.length; i++) {
                     const stint = this.strategy.stints[i];
-                if (stint.timeOfDayStart != null && stint.timeOfDayEnd != null) {
-                    // Handle day wraparound (e.g., stint from 23:00 to 01:00)
-                    let inStint = false;
-                    if (stint.timeOfDayEnd < stint.timeOfDayStart) {
-                        // Crosses midnight
-                        inStint = (currentTimeOfDay >= stint.timeOfDayStart || currentTimeOfDay <= stint.timeOfDayEnd);
-                    } else {
-                        // Normal same-day stint
-                        inStint = (currentTimeOfDay >= stint.timeOfDayStart && currentTimeOfDay <= stint.timeOfDayEnd);
-                    }
-                    
-                    if (inStint) {
-                        currentStintIndex = i;
-                        this.currentStintNumber = stint.stintNumber; // Update current stint number
-                        debug(`  📍 Currently in stint #${stint.stintNumber} (${stint.driver})`);
-                        break;
-                    }
-                }
-                }
-                
-                // If we couldn't find current stint, find the next upcoming one
-                if (currentStintIndex === -1) {
-                    for (let i = 0; i < this.strategy.stints.length; i++) {
-                    const stint = this.strategy.stints[i];
-                    if (stint.timeOfDayStart != null && currentTimeOfDay < stint.timeOfDayStart) {
-                        currentStintIndex = i;
-                        this.currentStintNumber = stint.stintNumber; // Update to next stint number
-                        debug(`  ⏭️ Next stint is #${stint.stintNumber} (${stint.driver})`);
-                        break;
-                    }
+                    if (stint.timeOfDayEnd != null) {
+                        // Check if this stint's end time is still in the future
+                        let stintNotEnded = false;
+                        
+                        // Handle day wraparound
+                        if (stint.timeOfDayEnd < stint.timeOfDayStart) {
+                            // Stint crosses midnight
+                            if (currentTimeOfDay >= stint.timeOfDayStart) {
+                                // We're in the first part (before midnight) - stint not ended
+                                stintNotEnded = true;
+                            } else if (currentTimeOfDay <= stint.timeOfDayEnd) {
+                                // We're in the second part (after midnight) - stint not ended
+                                stintNotEnded = true;
+                            } else {
+                                // We're between end and start (stint has ended)
+                                stintNotEnded = false;
+                            }
+                        } else {
+                            // Normal stint (same day)
+                            stintNotEnded = currentTimeOfDay < stint.timeOfDayEnd;
+                        }
+                        
+                        if (stintNotEnded) {
+                            currentStintIndex = i;
+                            this.currentStintNumber = stint.stintNumber;
+                            
+                            // Check if we're actually IN this stint or it's upcoming
+                            const inProgress = (stint.timeOfDayStart != null && currentTimeOfDay >= stint.timeOfDayStart);
+                            if (inProgress) {
+                                debug(`  📍 Currently in stint #${stint.stintNumber} (${stint.driver})`);
+                            } else {
+                                debug(`  ⏭️ Next stint is #${stint.stintNumber} (${stint.driver})`);
+                            }
+                            break;
+                        }
                     }
                 }
             }
             
             // Keep only current and future stints if we determined the current stint
-            if (currentStintIndex > 0) {
+            if (currentStintIndex >= 0) {
                 this.strategy.stints = this.strategy.stints.slice(currentStintIndex);
                 debug(`  ✂️ Trimmed ${currentStintIndex} completed stints, showing from stint #${this.strategy.stints[0].stintNumber}`);
+            } else {
+                debug(`  ⚠️ Could not determine current stint (index: ${currentStintIndex}) - showing all ${this.strategy.stints.length} stints`);
             }
             
             // Additional filter: remove stints that would end after session time runs out
