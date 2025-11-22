@@ -2207,8 +2207,15 @@ class LiveStrategyTracker {
     trackSectorIncident(carIdx, trackSurface, lapDistPct) {
         if (!this.sectors.length || lapDistPct === undefined) return;
         
-        const isOffTrack = trackSurface === 'OffTrack';
         const now = Date.now();
+        
+        // Throttle incident tracking to 200ms per car to reduce Map operations
+        if (!this.lastIncidentCheck) this.lastIncidentCheck = new Map();
+        const lastCheck = this.lastIncidentCheck.get(carIdx) || 0;
+        if (now - lastCheck < 200) return;
+        this.lastIncidentCheck.set(carIdx, now);
+        
+        const isOffTrack = trackSurface === 'OffTrack';
         
         // Determine which sector the car is in
         let carSectorNum = null;
@@ -2747,11 +2754,16 @@ class LiveStrategyTracker {
         if (!data || !data.values) return;
         
         const values = data.values;
+        const now = Date.now();
         
         // Update SessionTimeOfDay from telemetry (seconds since midnight) - updates live
         if (values.SessionTimeOfDay != null) {
             this.sessionTimeOfDay = values.SessionTimeOfDay;
-            this.updateSessionTimeDisplay(); // Update time-of-day display immediately
+            // Throttle time display updates to 500ms
+            if (!this.lastTimeDisplayUpdate || now - this.lastTimeDisplayUpdate > 500) {
+                this.updateSessionTimeDisplay();
+                this.lastTimeDisplayUpdate = now;
+            }
         }
         
         // Capture total session time if not set
@@ -2888,19 +2900,23 @@ class LiveStrategyTracker {
             this.lastProcessedLap = this.currentLap;
         }
         
-        // Update UI
-        this.updateLiveStats();
+        // Update UI (throttled to 250ms to prevent DOM thrashing)
+        const uiUpdateNow = Date.now();
+        if (!this.lastLiveStatsUpdate || uiUpdateNow - this.lastLiveStatsUpdate > 250) {
+            this.updateLiveStats();
+            this.lastLiveStatsUpdate = uiUpdateNow;
+        }
         
-        // Update strategy comparison (works for both auto and manual modes)
-        if (this.strategy) {
+        // Update strategy comparison (throttled to 500ms)
+        if (this.strategy && (!this.lastStrategyComparisonUpdate || uiUpdateNow - this.lastStrategyComparisonUpdate > 500)) {
             this.updateStrategyComparison();
+            this.lastStrategyComparisonUpdate = uiUpdateNow;
         }
         
         // Update sector comparison display (throttled to 2000ms = 2 seconds to reduce jumping)
-        const now = Date.now();
-        if (now - this.lastSectorComparisonUpdate > 2000) {
+        if (!this.lastSectorComparisonUpdate || uiUpdateNow - this.lastSectorComparisonUpdate > 2000) {
             this.updateSectorComparison(values);
-            this.lastSectorComparisonUpdate = now;
+            this.lastSectorComparisonUpdate = uiUpdateNow;
         }
     }
     
