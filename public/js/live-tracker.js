@@ -2817,6 +2817,12 @@ class LiveStrategyTracker {
         // Update weather component with current race time
         this.updateWeatherComponentRaceTime();
         
+        // Skip telemetry processing until we have playerCarIdx from sessionInfo
+        if (this.playerCarIdx === null || this.playerCarIdx === undefined) {
+            debug('⏭️ Skipping telemetry - waiting for sessionInfo to set playerCarIdx');
+            return;
+        }
+        
         // Update remaining stats - use CarIdx arrays for player data
         this.currentLap = values.CarIdxLap?.[this.playerCarIdx] || 0;
         this.fuelLevel = values.FuelLevel || 0;
