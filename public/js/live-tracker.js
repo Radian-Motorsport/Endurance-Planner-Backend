@@ -3770,30 +3770,8 @@ class LiveStrategyTracker {
         const hasTimeOfDayData = this.strategy.stints && this.strategy.stints.length > 0 && 
                                   this.strategy.stints[0].timeOfDayStart != null;
         
-        // Determine if planner stints are still valid for remaining time
-        let usePlannerStints = false;
-        if (hasTimeOfDayData && this.sessionTimeOfDay != null && this.sessionTimeRemain > 0) {
-            const sessionEndTimeOfDay = this.sessionTimeOfDay + this.sessionTimeRemain;
-            
-            // Check if planner calculated for roughly the same session duration
-            const plannerLastStint = this.strategy.stints[this.strategy.stints.length - 1];
-            const plannerEndTime = plannerLastStint.timeOfDayEnd;
-            
-            // Allow 10% tolerance for planner end time vs actual session end time
-            const timeDifference = Math.abs(plannerEndTime - sessionEndTimeOfDay);
-            const tolerance = this.sessionTimeRemain * 0.1; // 10% of remaining time
-            
-            usePlannerStints = timeDifference <= tolerance;
-            
-            if (!usePlannerStints) {
-                console.log(`⚠️ Planner stints calculated for different duration - recalculating`);
-                console.log(`  Planner ends: ${this.formatTimeOfDay(plannerEndTime)}`);
-                console.log(`  Session ends: ${this.formatTimeOfDay(sessionEndTimeOfDay)}`);
-                console.log(`  Time difference: ${this.formatTime(timeDifference)}`);
-            }
-        }
-        
-        if (usePlannerStints) {
+        // Always use planner stints if they have time-of-day data
+        if (hasTimeOfDayData) {
             console.log('✅ Using original planner stints with time-of-day data');
             console.log('📊 Total stints in strategy:', this.strategy.stints.length);
             console.log('📊 Stint data check:');
