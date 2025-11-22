@@ -239,10 +239,19 @@ export class Garage61Client {
                 if (avgFuel !== null) {
                     const adjustedFuel = avgFuel * (1 + margin/100);
                     adjustedFuelEl.textContent = `${adjustedFuel.toFixed(2)}L`;
-                    // Populate fuel-per-lap input used by the strategy calculator
+                    // Only populate fuel-per-lap input if it's currently empty
+                    // This prevents overwriting manually entered or loaded strategy values
                     try {
                         const fuelInput = document.getElementById('fuel-per-lap-display-input');
-                        if (fuelInput) fuelInput.value = adjustedFuel.toFixed(2);
+                        const currentValue = parseFloat(fuelInput?.value) || 0;
+                        
+                        // Only auto-fill if input is empty (0 or blank)
+                        if (fuelInput && currentValue === 0) {
+                            fuelInput.value = adjustedFuel.toFixed(2);
+                            console.log('📊 G61: Auto-filled empty fuel input:', adjustedFuel.toFixed(2));
+                        } else if (fuelInput) {
+                            console.log('📊 G61: Preserved existing fuel input:', currentValue.toFixed(2), 'L (not overwriting with G61:', adjustedFuel.toFixed(2), 'L)');
+                        }
                     } catch (e) {
                         console.warn('Could not set fuel-per-lap input from Garage61 adjusted value', e);
                     }
