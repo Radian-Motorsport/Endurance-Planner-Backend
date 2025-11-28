@@ -41,6 +41,7 @@ function createLapTimesEmbed(laps, carName, trackName, g61Client) {
         const driver = lap.driver ? `${lap.driver.firstName || ''} ${lap.driver.lastName || ''}`.trim() : 'Unknown';
         const time = g61Client.formatLapTime(lap.lapTime);
         const fuel = lap.fuelUsed ? `${lap.fuelUsed.toFixed(2)}L` : 'N/A';
+        const lapCarName = lap.car?.name || '';
         
         // Sectors with highlighting for fastest
         const sectors = lap.sectors && lap.sectors.length > 0 ? 
@@ -66,7 +67,7 @@ function createLapTimesEmbed(laps, carName, trackName, g61Client) {
         const season = lap.season?.name || 'Unknown Season';
         
         return {
-            name: `${idx + 1}. ${driver} - ${time} ${condition}`,
+            name: `${idx + 1}. ${driver} - ${time} ${condition}${lapCarName ? ` (${lapCarName})` : ''}`,
             value: 
                 `**Date:** ${lapDate} | **Season:** ${season}\n` +
                 `**Fuel:** ${fuel}\n` +
@@ -147,7 +148,8 @@ function createLeaderboardEmbed(laps, carName, trackName, g61Client, condition =
         const fuel = lap.fuelUsed ? `${lap.fuelUsed.toFixed(2)}L` : 'N/A';
         const wetness = lap.trackWetness > 0 ? 'WET' : 'DRY';
         const lapDate = lap.startTime ? new Date(lap.startTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '?';
-        return `${idx + 1}. **${driver}** ${wetness} - ${time} (${fuel}) - ${lapDate}`;
+        const lapCarName = lap.car?.name || '';
+        return `${idx + 1}. **${driver}** ${wetness} - ${time} (${fuel}) - ${lapDate}${lapCarName ? ` - ${lapCarName}` : ''}`;
     }).join('\n');
 
     embed.setDescription(leaderboard || 'None');
