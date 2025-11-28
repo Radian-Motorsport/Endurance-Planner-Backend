@@ -111,7 +111,14 @@ client.on('messageCreate', async (message) => {
         }
 
         const unixTimestamp = Math.floor(date.getTime() / 1000);
-        const timestamp = `<t:${unixTimestamp}:f> (<t:${unixTimestamp}:R>)`;
+        
+        // Use time-only format if only 1-2 params (time today), otherwise full date+time
+        let timestamp;
+        if (params.length <= 2) {
+            timestamp = `<t:${unixTimestamp}:t> (<t:${unixTimestamp}:R>)`;  // Time only
+        } else {
+            timestamp = `<t:${unixTimestamp}:f> (<t:${unixTimestamp}:R>)`;  // Full date+time
+        }
 
         // Replace !time command in original message with Discord timestamp
         const responseContent = message.content.replace(match[0], timestamp);
