@@ -8,18 +8,6 @@ module.exports = {
         .setName('laps')
         .setDescription('Get lap times for a car/track combination')
         .addIntegerOption(option =>
-            option.setName('cargroup')
-                .setDescription('Select car class (GT3, GT4, GTE, etc.) - optional if car specified')
-                .setRequired(false)
-                .setAutocomplete(true)
-        )
-        .addIntegerOption(option =>
-            option.setName('car')
-                .setDescription('Search for specific car name - optional if cargroup specified')
-                .setRequired(false)
-                .setAutocomplete(true)
-        )
-        .addIntegerOption(option =>
             option.setName('track')
                 .setDescription('Search for track name')
                 .setRequired(true)
@@ -34,6 +22,18 @@ module.exports = {
                     { name: 'DRY', value: 'DRY' },
                     { name: 'WET', value: 'WET' }
                 )
+        )
+        .addIntegerOption(option =>
+            option.setName('cargroup')
+                .setDescription('Select car class (GT3, GT4, GTE, etc.) - optional if car specified')
+                .setRequired(false)
+                .setAutocomplete(true)
+        )
+        .addIntegerOption(option =>
+            option.setName('car')
+                .setDescription('Search for specific car name - optional if cargroup specified')
+                .setRequired(false)
+                .setAutocomplete(true)
         )
         .addStringOption(option =>
             option.setName('driver')
