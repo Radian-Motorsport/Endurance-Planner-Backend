@@ -88,8 +88,11 @@ client.on('messageCreate', async (message) => {
         const unixTimestamp = Math.floor(date.getTime() / 1000);
         const timestamp = `<t:${unixTimestamp}:f> (<t:${unixTimestamp}:R>)`;
 
+        // Replace !time command in original message with Discord timestamp
+        const responseContent = message.content.replace(match[0], timestamp);
+
         await message.reply({
-            content: timestamp,
+            content: responseContent,
             allowedMentions: { repliedUser: false }
         });
     } catch (error) {
