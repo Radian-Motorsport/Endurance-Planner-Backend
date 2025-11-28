@@ -38,53 +38,52 @@ client.once('ready', async () => {
     await cache.updateCache(g61);
 });
 
-// Message handling for text commands
+// Message handling for prefix commands
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
+    if (!message.content.startsWith('!')) return;
 
-    // Handle !time command
-    if (message.content.includes('!time')) {
-        const timeMatch = message.content.match(/!time(?:\s+(\d+)\s+(\d+)\s+(\d+))?(?:\s+(\d+))?(?:\s+(\d+))?/);
-        
-        if (timeMatch !== null) {
-            try {
-                let day = timeMatch[1] ? parseInt(timeMatch[1]) : new Date().getDate();
-                let month = timeMatch[2] ? parseInt(timeMatch[2]) : new Date().getMonth() + 1;
-                let year = timeMatch[3] ? parseInt(timeMatch[3]) : new Date().getFullYear();
-                let hour = timeMatch[4] ? parseInt(timeMatch[4]) : new Date().getHours();
-                let minute = timeMatch[5] ? parseInt(timeMatch[5]) : 0;
+    const args = message.content.slice(1).trim().split(/\s+/);
+    const command = args.shift().toLowerCase();
 
-                // Validate ranges
-                if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 2100 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-                    return await message.reply({
-                        content: '❌ Invalid date or time. Use: `!time [day] [month] [year] [hour] [minute]`\nExample: `!time 28 11 2025 20 30`',
-                        allowedMentions: { repliedUser: false }
-                    });
-                }
+    if (command === 'time') {
+        try {
+            let day = args[0] ? parseInt(args[0]) : new Date().getDate();
+            let month = args[1] ? parseInt(args[1]) : new Date().getMonth() + 1;
+            let year = args[2] ? parseInt(args[2]) : new Date().getFullYear();
+            let hour = args[3] ? parseInt(args[3]) : new Date().getHours();
+            let minute = args[4] ? parseInt(args[4]) : 0;
 
-                const date = new Date(year, month - 1, day, hour, minute, 0);
-                
-                if (isNaN(date.getTime())) {
-                    return await message.reply({
-                        content: '❌ Invalid date or time provided.',
-                        allowedMentions: { repliedUser: false }
-                    });
-                }
-
-                const unixTimestamp = Math.floor(date.getTime() / 1000);
-                const timestamp = `<t:${unixTimestamp}:f> (<t:${unixTimestamp}:R>)`;
-
-                await message.reply({
-                    content: timestamp,
-                    allowedMentions: { repliedUser: false }
-                });
-            } catch (error) {
-                console.error('Error in !time command:', error);
-                await message.reply({
-                    content: `❌ Error: ${error.message}`,
+            // Validate ranges
+            if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 2100 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                return await message.reply({
+                    content: '❌ Invalid date or time. Use: `!time [day] [month] [year] [hour] [minute]`\nExample: `!time 28 11 2025 20 30`',
                     allowedMentions: { repliedUser: false }
                 });
             }
+
+            const date = new Date(year, month - 1, day, hour, minute, 0);
+            
+            if (isNaN(date.getTime())) {
+                return await message.reply({
+                    content: '❌ Invalid date or time provided.',
+                    allowedMentions: { repliedUser: false }
+                });
+            }
+
+            const unixTimestamp = Math.floor(date.getTime() / 1000);
+            const timestamp = `<t:${unixTimestamp}:f> (<t:${unixTimestamp}:R>)`;
+
+            await message.reply({
+                content: timestamp,
+                allowedMentions: { repliedUser: false }
+            });
+        } catch (error) {
+            console.error('Error in !time command:', error);
+            await message.reply({
+                content: `❌ Error: ${error.message}`,
+                allowedMentions: { repliedUser: false }
+            });
         }
     }
 });
