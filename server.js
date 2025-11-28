@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
@@ -1707,11 +1708,32 @@ app.get('/api/ideal-fuel-lap/:trackId/:carName', async (req, res) => {
     }
 });
 
+// Start Discord Bot
+async function startDiscordBot() {
+    try {
+        // Check if Discord environment variables are set
+        if (!process.env.DISCORD_BOT_TOKEN) {
+            console.log('⚠️  Discord bot disabled (no DISCORD_BOT_TOKEN)');
+            return;
+        }
+
+        console.log('🤖 Starting Discord bot...');
+        const discordBot = require('./discord-bot/bot.js');
+        console.log('✅ Discord bot started successfully');
+    } catch (error) {
+        console.error('❌ Discord bot failed to start:', error.message);
+        console.log('⚠️  Continuing without Discord bot...');
+    }
+}
+
 // Start the server
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   // console.log(`iRacing service will initialize automatically...`);
   console.log(`iRacing integration disabled (files in .gitignore)`);
+  
+  // Start Discord bot after server is running
+  startDiscordBot();
 });
 
 
