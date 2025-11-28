@@ -9,8 +9,14 @@ module.exports = {
         .setDescription('Get lap times for a car/track combination')
         .addIntegerOption(option =>
             option.setName('cargroup')
-                .setDescription('Select car class (GT3, GT4, GTE, etc.)')
-                .setRequired(true)
+                .setDescription('Select car class (GT3, GT4, GTE, etc.) - optional if car specified')
+                .setRequired(false)
+                .setAutocomplete(true)
+        )
+        .addIntegerOption(option =>
+            option.setName('car')
+                .setDescription('Search for specific car name - optional if cargroup specified')
+                .setRequired(false)
                 .setAutocomplete(true)
         )
         .addIntegerOption(option =>
@@ -41,22 +47,40 @@ module.exports = {
 
         try {
             const carGroupId = interaction.options.getInteger('cargroup');
+            const carId = interaction.options.getInteger('car');
             const trackId = interaction.options.getInteger('track');
             const condition = interaction.options.getString('condition');
             const driverFilter = interaction.options.getString('driver');
 
+            // Must specify either cargroup OR car
+            if (!carGroupId && !carId) {
+                return await interaction.editReply({ content: '❌ Please specify either a car group or a specific car' });
+            }
+
             const g61 = new Garage61Client(process.env.GARAGE61_TOKEN);
             const cache = require('../modules/cache');
 
-            // Get car IDs from the selected car group
-            const carGroups = cache.getCarGroups();
-            const carGroup = carGroups.find(g => g.id === carGroupId);
-            if (!carGroup) {
-                return await interaction.editReply({ content: '❌ Car group not found' });
-            }
+            let carIds;
+            let carName;
 
-            const carIds = carGroup.cars.join(',');
-            console.log(`🏁 Fetching laps for ${carGroup.name} (${carGroup.cars.length} cars)`);
+            if (carGroupId) {
+                // Get car IDs from the selected car group
+                const carGroups = cache.getCarGroups();
+                const carGroup = carGroups.find(g => g.id === carGroupId);
+                if (!carGroup) {
+                    return await interaction.editReply({ content: '❌ Car group not found' });
+                }
+                carIds = carGroup.cars.join(',');
+                carName = carGroup.name;
+                console.log(`🏁 Fetching laps for ${carGroup.name} (${carGroup.cars.length} cars)`);
+            } else {
+                // Single car
+                carIds = carId.toString();
+                const cars = cache.getCars();
+                const car = cars.find(c => c.id === carId);
+                carName = car?.name || `Car ${carId}`;
+                console.log(`🏁 Fetching laps for ${carName}`);
+            }
 
             // Fetch lap times with wetness filter using searchLaps
             const fetchOptions = {
@@ -112,11 +136,9 @@ module.exports = {
             // Sort by fastest lap time
             filteredLaps = filteredLaps.sort((a, b) => a.lapTime - b.lapTime);
 
-            // Get track name and car group name
+            // Get track name
             const tracks = cache.getTracks();
             const track = tracks.find(t => t.id === trackId);
-
-            const carName = carGroup.name; // Use group name instead of individual car
             const trackName = track?.name || `Track ${trackId}`;
 
             // Create embed and send
