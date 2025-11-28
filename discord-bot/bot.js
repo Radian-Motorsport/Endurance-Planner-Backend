@@ -95,10 +95,19 @@ client.on('messageCreate', async (message) => {
 
         // Validate ranges
         if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 2100 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-            return await message.reply({
-                content: '❌ Invalid date or time. Use: `!time [day] [month] [year] [hour] [minute]`\nExample: `!time 28 11 2025 20 30`',
-                allowedMentions: { repliedUser: false }
-            });
+            // Only show detailed error for full date format (3+ params)
+            if (params.length > 2) {
+                return await message.reply({
+                    content: '❌ Invalid date or time. Use: `!time [day] [month] [year] [hour] [minute]`\nExample: `!time 28 11 2025 20 30`',
+                    allowedMentions: { repliedUser: false }
+                });
+            } else {
+                // Simple error for time-only format
+                return await message.reply({
+                    content: '❌ Invalid time. Use: `!time [hour] [minute]` (0-23 hours, 0-59 minutes)\nExample: `!time 20 30`',
+                    allowedMentions: { repliedUser: false }
+                });
+            }
         }
 
         const date = new Date(year, month - 1, day, hour, minute, 0);
