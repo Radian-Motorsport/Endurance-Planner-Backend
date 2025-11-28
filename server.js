@@ -238,6 +238,16 @@ async function createTables() {
 createTables();
 
 
+// Discord OAuth2 callback (for bot re-authorization)
+app.get('/callback', (req, res) => {
+  const { code, state } = req.query;
+  if (code) {
+    res.send('Bot authorized successfully! You can close this window.');
+  } else {
+    res.send('Authorization canceled or failed.');
+  }
+});
+
 // Serve the main HTML file
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
