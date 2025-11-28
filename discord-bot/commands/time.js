@@ -3,61 +3,67 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('time')
-        .setDescription('Convert a date and time to Discord timestamp format')
+        .setDescription('Convert a date and time to Discord timestamp')
         .addStringOption(option =>
             option.setName('date')
-                .setDescription('Date (YYYY-MM-DD format, e.g., 2025-11-28)')
+                .setDescription('Date in DD-MM-YYYY format (e.g., 28-11-2025)')
                 .setRequired(false)
         )
-        .addStringOption(option =>
-            option.setName('time')
-                .setDescription('Time (HH:MM format in 24h, e.g., 14:30)')
+        .addIntegerOption(option =>
+            option.setName('hour')
+                .setDescription('Hour (0-23)')
                 .setRequired(false)
+                .setMinValue(0)
+                .setMaxValue(23)
+        )
+        .addIntegerOption(option =>
+            option.setName('minute')
+                .setDescription('Minute (0-59)')
+                .setRequired(false)
+                .setMinValue(0)
+                .setMaxValue(59)
         ),
 
     async execute(interaction) {
         try {
             let dateStr = interaction.options.getString('date');
-            let timeStr = interaction.options.getString('time');
+            let hour = interaction.options.getInteger('hour');
+            let minute = interaction.options.getInteger('minute');
 
             // If no date provided, use today
             if (!dateStr) {
                 const now = new Date();
-                dateStr = now.toISOString().split('T')[0];
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = now.getFullYear();
+                dateStr = `${day}-${month}-${year}`;
             }
 
             // If no time provided, use current time
-            if (!timeStr) {
+            if (hour === null) {
                 const now = new Date();
-                timeStr = now.toISOString().split('T')[1].substring(0, 5);
+                hour = now.getHours();
+                minute = now.getMinutes();
+            }
+            if (minute === null) {
+                minute = 0;
             }
 
-            // Parse date
+            // Parse date (DD-MM-YYYY)
             const dateParts = dateStr.split('-');
             if (dateParts.length !== 3) {
                 return await interaction.reply({
-                    content: '❌ Invalid date format. Use YYYY-MM-DD (e.g., 2025-11-28)',
-                    ephemeral: true
-                });
-            }
-
-            // Parse time
-            const timeParts = timeStr.split(':');
-            if (timeParts.length !== 2) {
-                return await interaction.reply({
-                    content: '❌ Invalid time format. Use HH:MM (e.g., 14:30)',
+                    content: '❌ Invalid date format. Use DD-MM-YYYY (e.g., 28-11-2025)',
                     ephemeral: true
                 });
             }
 
             // Create date object
-            const year = parseInt(dateParts[0]);
+            const day = parseInt(dateParts[0]);
             const month = parseInt(dateParts[1]) - 1; // JS months are 0-indexed
-            const day = parseInt(dateParts[2]);
-            const hours = parseInt(timeParts[0]);
-            const minutes = parseInt(timeParts[1]);
+            const year = parseInt(dateParts[2]);
 
-            const date = new Date(year, month, day, hours, minutes, 0);
+            const date = new Date(year, month, day, hour, minute, 0);
 
             // Check if date is valid
             if (isNaN(date.getTime())) {
@@ -70,26 +76,10 @@ module.exports = {
             // Convert to Unix timestamp (seconds)
             const unixTimestamp = Math.floor(date.getTime() / 1000);
 
-            // Display formats
-            const formats = {
-                'Default': `<t:${unixTimestamp}>`,
-                'Short Date': `<t:${unixTimestamp}:d>`,
-                'Long Date': `<t:${unixTimestamp}:D>`,
-                'Short Time': `<t:${unixTimestamp}:t>`,
-                'Long Time': `<t:${unixTimestamp}:T>`,
-                'Short Date/Time': `<t:${unixTimestamp}:f>`,
-                'Long Date/Time': `<t:${unixTimestamp}:F>`,
-                'Relative': `<t:${unixTimestamp}:R>`
-            };
+            // Show timestamp with relative time
+            const timestamp = `<t:${unixTimestamp}:f> (<t:${unixTimestamp}:R>)`;
 
-            // Build response
-            let response = `📅 **${dateStr} ${timeStr}**\n\n**Unix Timestamp:** \`${unixTimestamp}\`\n\n**Discord Format Examples:**\n\n`;
-            
-            for (const [name, format] of Object.entries(formats)) {
-                response += `**${name}:** ${format}\n`;
-            }
-
-            await interaction.reply(response);
+            await interaction.reply(timestamp);
 
         } catch (error) {
             console.error('Error in time command:', error);
