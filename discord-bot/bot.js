@@ -62,11 +62,36 @@ client.on('messageCreate', async (message) => {
 
         // Process first match only to avoid spam
         const match = matches[0];
-        const day = match[1] ? parseInt(match[1]) : new Date().getDate();
-        const month = match[2] ? parseInt(match[2]) : new Date().getMonth() + 1;
-        const year = match[3] ? parseInt(match[3]) : new Date().getFullYear();
-        const hour = match[4] ? parseInt(match[4]) : new Date().getHours();
-        const minute = match[5] ? parseInt(match[5]) : 0;
+        
+        // Smart parsing: if only 1-2 params provided, treat as time (hour/minute)
+        const params = [match[1], match[2], match[3], match[4], match[5]].filter(p => p !== undefined);
+        
+        let day, month, year, hour, minute;
+        
+        if (params.length === 0) {
+            // !time with no params = current date/time
+            const now = new Date();
+            day = now.getDate();
+            month = now.getMonth() + 1;
+            year = now.getFullYear();
+            hour = now.getHours();
+            minute = now.getMinutes();
+        } else if (params.length <= 2) {
+            // 1-2 params = time only (hour [minute]) for TODAY
+            const now = new Date();
+            day = now.getDate();
+            month = now.getMonth() + 1;
+            year = now.getFullYear();
+            hour = parseInt(params[0]);
+            minute = params[1] ? parseInt(params[1]) : 0;
+        } else {
+            // 3+ params = full date format (day month year [hour] [minute])
+            day = parseInt(params[0]);
+            month = parseInt(params[1]);
+            year = parseInt(params[2]);
+            hour = params[3] ? parseInt(params[3]) : 0;
+            minute = params[4] ? parseInt(params[4]) : 0;
+        }
 
         // Validate ranges
         if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 2100 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
