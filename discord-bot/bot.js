@@ -161,6 +161,12 @@ client.on('interactionCreate', async (interaction) => {
                     .filter(c => c.name.toLowerCase().includes(focusedOption.value.toLowerCase()))
                     .slice(0, 25)
                     .map(c => ({ name: c.name, value: c.id }));
+            } else if (focusedOption.name === 'cargroup') {
+                const carGroups = cache.getCarGroups();
+                choices = carGroups
+                    .filter(g => g.name.toLowerCase().includes(focusedOption.value.toLowerCase()))
+                    .slice(0, 25)
+                    .map(g => ({ name: `${g.name} (${g.cars.length} cars)`, value: g.id }));
             } else if (focusedOption.name === 'track') {
                 const tracks = cache.getTracks();
                 choices = tracks

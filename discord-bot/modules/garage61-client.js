@@ -59,6 +59,12 @@ class Garage61Client {
         return data.members || [];
     }
 
+    async getCarGroups() {
+        console.log('🏁 Fetching car groups from Garage61...');
+        const data = await this.makeRequest('/car-groups');
+        return data.items || [];
+    }
+
     async getLapTimes(carId, trackId, options = {}) {
         const params = new URLSearchParams();
         params.append('cars', carId);

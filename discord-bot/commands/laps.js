@@ -8,8 +8,8 @@ module.exports = {
         .setName('laps')
         .setDescription('Get lap times for a car/track combination')
         .addIntegerOption(option =>
-            option.setName('car')
-                .setDescription('Search for car name')
+            option.setName('cargroup')
+                .setDescription('Select car class (GT3, GT4, GTE, etc.)')
                 .setRequired(true)
                 .setAutocomplete(true)
         )
@@ -40,22 +40,38 @@ module.exports = {
         await interaction.deferReply();
 
         try {
-            const carId = interaction.options.getInteger('car');
+            const carGroupId = interaction.options.getInteger('cargroup');
             const trackId = interaction.options.getInteger('track');
             const condition = interaction.options.getString('condition');
             const driverFilter = interaction.options.getString('driver');
 
             const g61 = new Garage61Client(process.env.GARAGE61_TOKEN);
+            const cache = require('../modules/cache');
 
-            // Fetch lap times with wetness filter
-            const fetchOptions = {};
+            // Get car IDs from the selected car group
+            const carGroups = cache.getCarGroups();
+            const carGroup = carGroups.find(g => g.id === carGroupId);
+            if (!carGroup) {
+                return await interaction.editReply({ content: '❌ Car group not found' });
+            }
+
+            const carIds = carGroup.cars.join(',');
+            console.log(`🏁 Fetching laps for ${carGroup.name} (${carGroup.cars.length} cars)`);
+
+            // Fetch lap times with wetness filter using searchLaps
+            const fetchOptions = {
+                cars: carIds,
+                tracks: trackId,
+                teams: 'radian-motorsport'
+            };
+            
             if (condition === 'WET') {
-                fetchOptions.minConditionsTrackWetness = 1; // Track wetness > 0
+                fetchOptions.minConditionsTrackWetness = 1;
             } else if (condition === 'DRY') {
-                fetchOptions.maxConditionsTrackWetness = 0; // Track wetness = 0
+                fetchOptions.maxConditionsTrackWetness = 0;
             }
             
-            const laps = await g61.getLapTimes(carId, trackId, fetchOptions);
+            const laps = await g61.searchLaps(fetchOptions);
             console.log(`📊 Total laps fetched: ${laps.length}`);
             
             // Log all John's laps to compare with Garage61
@@ -96,13 +112,11 @@ module.exports = {
             // Sort by fastest lap time
             filteredLaps = filteredLaps.sort((a, b) => a.lapTime - b.lapTime);
 
-            // Get car and track names
-            const cars = await g61.getCars();
-            const tracks = await g61.getTracks();
-            const car = cars.find(c => c.id === carId);
+            // Get track name and car group name
+            const tracks = cache.getTracks();
             const track = tracks.find(t => t.id === trackId);
 
-            const carName = car?.name || `Car ${carId}`;
+            const carName = carGroup.name; // Use group name instead of individual car
             const trackName = track?.name || `Track ${trackId}`;
 
             // Create embed and send
