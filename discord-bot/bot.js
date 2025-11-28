@@ -44,15 +44,15 @@ client.on('messageCreate', async (message) => {
 
     // Handle !time command
     if (message.content.includes('!time')) {
-        const timeMatch = message.content.match(/!time(?:\s+(\d+)\s+(\d+)\s+(\d+)(?:\s+(\d+)\s+(\d+))?)?/);
+        const timeMatch = message.content.match(/!time(?:\s+(\d+)\s+(\d+)\s+(\d+))?(?:\s+(\d+))?(?:\s+(\d+))?/);
         
-        if (timeMatch) {
+        if (timeMatch !== null) {
             try {
-                let day = parseInt(timeMatch[1]) || new Date().getDate();
-                let month = parseInt(timeMatch[2]) || new Date().getMonth() + 1;
-                let year = parseInt(timeMatch[3]) || new Date().getFullYear();
-                let hour = parseInt(timeMatch[4]) || new Date().getHours();
-                let minute = parseInt(timeMatch[5]) || 0;
+                let day = timeMatch[1] ? parseInt(timeMatch[1]) : new Date().getDate();
+                let month = timeMatch[2] ? parseInt(timeMatch[2]) : new Date().getMonth() + 1;
+                let year = timeMatch[3] ? parseInt(timeMatch[3]) : new Date().getFullYear();
+                let hour = timeMatch[4] ? parseInt(timeMatch[4]) : new Date().getHours();
+                let minute = timeMatch[5] ? parseInt(timeMatch[5]) : 0;
 
                 // Validate ranges
                 if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 2100 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
