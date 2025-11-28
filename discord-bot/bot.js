@@ -10,7 +10,8 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
-        GatewayIntentBits.DirectMessages
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.DirectMessageTyping
     ]
 });
 
@@ -38,15 +39,18 @@ client.once('ready', async () => {
     await cache.updateCache(g61);
 });
 
-// Message handling for prefix commands
+// Message handling for prefix commands - MUST BE BEFORE LOGIN
 client.on('messageCreate', async (message) => {
+    console.log(`📨 MESSAGE RECEIVED: "${message.content}" from ${message.author.username} (bot: ${message.author.bot})`);
     if (message.author.bot) return;
     if (!message.content.startsWith('!')) return;
 
+    console.log(`⏰ PREFIX COMMAND DETECTED: ${message.content}`);
     const args = message.content.slice(1).trim().split(/\s+/);
     const command = args.shift().toLowerCase();
 
     if (command === 'time') {
+        console.log(`⏰ !TIME COMMAND EXECUTING`);
         try {
             let day = args[0] ? parseInt(args[0]) : new Date().getDate();
             let month = args[1] ? parseInt(args[1]) : new Date().getMonth() + 1;
