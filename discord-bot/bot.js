@@ -10,9 +10,9 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
-        GatewayIntentBits.DirectMessages,
-        GatewayIntentBits.DirectMessageTyping
-    ]
+        GatewayIntentBits.DirectMessages
+    ],
+    partials: []
 });
 
 client.commands = new Collection();
@@ -41,9 +41,16 @@ client.once('ready', async () => {
 
 // Message handling for prefix commands - MUST BE BEFORE LOGIN
 client.on('messageCreate', async (message) => {
-    console.log(`📨 MESSAGE RECEIVED: "${message.content}" from ${message.author.username} (bot: ${message.author.bot})`);
+    console.log(`📨 MESSAGE RECEIVED:`);
+    console.log(`   Content: "${message.content}"`);
+    console.log(`   Author: ${message.author.username}`);
+    console.log(`   Bot: ${message.author.bot}`);
+    console.log(`   Guild: ${message.guild?.name}`);
+    console.log(`   Channel: ${message.channel?.name}`);
+    console.log(`   Full message object keys:`, Object.keys(message));
+    
     if (message.author.bot) return;
-    if (!message.content.startsWith('!')) return;
+    if (!message.content || !message.content.startsWith('!')) return;
 
     console.log(`⏰ PREFIX COMMAND DETECTED: ${message.content}`);
     const args = message.content.slice(1).trim().split(/\s+/);
