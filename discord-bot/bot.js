@@ -41,61 +41,63 @@ client.once('ready', async () => {
 
 // Message handling for prefix commands - MUST BE BEFORE LOGIN
 client.on('messageCreate', async (message) => {
-    console.log(`📨 MESSAGE RECEIVED:`);
+    if (message.author.bot) return;
+    if (!message.content) return;
+
+    // Check if message contains !time anywhere
+    if (!message.content.includes('!time')) return;
+
+    console.log(`📨 MESSAGE WITH !TIME DETECTED:`);
     console.log(`   Content: "${message.content}"`);
     console.log(`   Author: ${message.author.username}`);
-    console.log(`   Bot: ${message.author.bot}`);
-    console.log(`   Guild: ${message.guild?.name}`);
-    console.log(`   Channel: ${message.channel?.name}`);
-    console.log(`   Full message object keys:`, Object.keys(message));
-    
-    if (message.author.bot) return;
-    if (!message.content || !message.content.startsWith('!')) return;
 
-    console.log(`⏰ PREFIX COMMAND DETECTED: ${message.content}`);
-    const args = message.content.slice(1).trim().split(/\s+/);
-    const command = args.shift().toLowerCase();
+    try {
+        // Find all !time occurrences with regex
+        const timeRegex = /!time(?:\s+(\d+))?(?:\s+(\d+))?(?:\s+(\d+))?(?:\s+(\d+))?(?:\s+(\d+))?/g;
+        const matches = [...message.content.matchAll(timeRegex)];
 
-    if (command === 'time') {
-        console.log(`⏰ !TIME COMMAND EXECUTING`);
-        try {
-            let day = args[0] ? parseInt(args[0]) : new Date().getDate();
-            let month = args[1] ? parseInt(args[1]) : new Date().getMonth() + 1;
-            let year = args[2] ? parseInt(args[2]) : new Date().getFullYear();
-            let hour = args[3] ? parseInt(args[3]) : new Date().getHours();
-            let minute = args[4] ? parseInt(args[4]) : 0;
+        if (matches.length === 0) return;
 
-            // Validate ranges
-            if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 2100 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-                return await message.reply({
-                    content: '❌ Invalid date or time. Use: `!time [day] [month] [year] [hour] [minute]`\nExample: `!time 28 11 2025 20 30`',
-                    allowedMentions: { repliedUser: false }
-                });
-            }
+        console.log(`⏰ Found ${matches.length} !time command(s)`);
 
-            const date = new Date(year, month - 1, day, hour, minute, 0);
-            
-            if (isNaN(date.getTime())) {
-                return await message.reply({
-                    content: '❌ Invalid date or time provided.',
-                    allowedMentions: { repliedUser: false }
-                });
-            }
+        // Process first match only to avoid spam
+        const match = matches[0];
+        const day = match[1] ? parseInt(match[1]) : new Date().getDate();
+        const month = match[2] ? parseInt(match[2]) : new Date().getMonth() + 1;
+        const year = match[3] ? parseInt(match[3]) : new Date().getFullYear();
+        const hour = match[4] ? parseInt(match[4]) : new Date().getHours();
+        const minute = match[5] ? parseInt(match[5]) : 0;
 
-            const unixTimestamp = Math.floor(date.getTime() / 1000);
-            const timestamp = `<t:${unixTimestamp}:f> (<t:${unixTimestamp}:R>)`;
-
-            await message.reply({
-                content: timestamp,
-                allowedMentions: { repliedUser: false }
-            });
-        } catch (error) {
-            console.error('Error in !time command:', error);
-            await message.reply({
-                content: `❌ Error: ${error.message}`,
+        // Validate ranges
+        if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 2100 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+            return await message.reply({
+                content: '❌ Invalid date or time. Use: `!time [day] [month] [year] [hour] [minute]`\nExample: `!time 28 11 2025 20 30`',
                 allowedMentions: { repliedUser: false }
             });
         }
+
+        const date = new Date(year, month - 1, day, hour, minute, 0);
+        
+        if (isNaN(date.getTime())) {
+            return await message.reply({
+                content: '❌ Invalid date or time provided.',
+                allowedMentions: { repliedUser: false }
+            });
+        }
+
+        const unixTimestamp = Math.floor(date.getTime() / 1000);
+        const timestamp = `<t:${unixTimestamp}:f> (<t:${unixTimestamp}:R>)`;
+
+        await message.reply({
+            content: timestamp,
+            allowedMentions: { repliedUser: false }
+        });
+    } catch (error) {
+        console.error('Error in !time command:', error);
+        await message.reply({
+            content: `❌ Error: ${error.message}`,
+            allowedMentions: { repliedUser: false }
+        });
     }
 });
 
