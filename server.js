@@ -223,7 +223,9 @@ async function createTables() {
                 id SERIAL PRIMARY KEY,
                 track_id INTEGER NOT NULL,
                 car_name VARCHAR(255) NOT NULL,
-                samples JSONB NOT NULL,
+                lap_dist_pct JSONB NOT NULL,
+                brake_input JSONB NOT NULL,
+                long_g JSONB NOT NULL,
                 lap_time FLOAT,
                 track_temp FLOAT,
                 air_temp FLOAT,
@@ -1595,20 +1597,27 @@ app.post('/api/brake-zone-trace', async (req, res) => {
 
         console.log(`🛑 Saving brake zone trace: Track ${trackId}, Car ${carName}, ${samples.length} samples`);
 
+        // Extract separate arrays for each telemetry field
+        const lapDistPct = samples.map(s => s.lapDistPct);
+        const brakeInput = samples.map(s => s.brakeInput);
+        const longG = samples.map(s => s.longG);
+
         // UPSERT query (insert or update if track+car already exists)
         const query = `
             INSERT INTO brake_zone_traces (
                 track_id, car_name,
-                samples,
+                lap_dist_pct, brake_input, long_g,
                 lap_time,
                 track_temp, air_temp, wind_velocity, wind_direction,
                 humidity, skies
             ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
             )
             ON CONFLICT (track_id, car_name)
             DO UPDATE SET
-                samples = EXCLUDED.samples,
+                lap_dist_pct = EXCLUDED.lap_dist_pct,
+                brake_input = EXCLUDED.brake_input,
+                long_g = EXCLUDED.long_g,
                 lap_time = EXCLUDED.lap_time,
                 track_temp = EXCLUDED.track_temp,
                 air_temp = EXCLUDED.air_temp,
@@ -1623,7 +1632,9 @@ app.post('/api/brake-zone-trace', async (req, res) => {
         const result = await pool.query(query, [
             trackId,
             carName,
-            JSON.stringify(samples),
+            JSON.stringify(lapDistPct),
+            JSON.stringify(brakeInput),
+            JSON.stringify(longG),
             metadata?.lapTime || null,
             metadata?.trackTemp || null,
             metadata?.airTemp || null,
@@ -1666,27 +1677,38 @@ app.get('/api/brake-zone-trace/:trackId/:carName', async (req, res) => {
         const query = `
             SELECT * FROM brake_zone_traces
             WHERE track_id = $1 AND car_name = $2
-            LIMIT 1;
-        `;
-
-        const result = await pool.query(query, [parseInt(trackId), carName]);
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'No brake zone trace found for this track/car combination' });
-        }
-
         const row = result.rows[0];
+
+        // Reconstruct samples array from separate JSONB columns
+        const lapDistPct = row.lap_dist_pct;
+        const brakeInput = row.brake_input;
+        const longG = row.long_g;
+
+        const samples = lapDistPct.map((pct, i) => ({
+            lapDistPct: pct,
+            brakeInput: brakeInput[i],
+            longG: longG[i]
+        }));
 
         const response = {
             id: row.id,
             trackId: row.track_id,
             carName: row.car_name,
-            samples: row.samples,
+            samples: samples,
             metadata: {
                 lapTime: row.lap_time,
                 trackTemp: row.track_temp,
                 airTemp: row.air_temp,
                 windVel: row.wind_velocity,
+                windDir: row.wind_direction,
+                humidity: row.humidity,
+                skies: row.skies,
+                recordedAt: row.recorded_at
+            }
+        };
+
+        console.log(`✅ Found brake zone trace with ${samples.length} samples`);
+        res.json(response);w.wind_velocity,
                 windDir: row.wind_direction,
                 humidity: row.humidity,
                 skies: row.skies,
