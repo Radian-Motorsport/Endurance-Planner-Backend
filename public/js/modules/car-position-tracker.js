@@ -135,15 +135,18 @@ export class CarPositionTracker {
      * Set racing line data from database
      * @param {Object} racingLineData - Racing line data with points array
      */
-    setRacingLineData(racingLineData) {
+    setRacingLineData(racingLineData, reverseDirection = false) {
         if (!racingLineData || !racingLineData.points || racingLineData.points.length === 0) {
             debugWarn('⚠️ Invalid racing line data provided');
             return false;
         }
         
-        this.racingLinePoints = racingLineData.points;
+        // Reverse the points array if flag is set
+        this.racingLinePoints = reverseDirection 
+            ? [...racingLineData.points].reverse() 
+            : racingLineData.points;
         
-        debug(`✅ Racing line data loaded: ${this.racingLinePoints.length} points`);
+        debug(`✅ Racing line data loaded: ${this.racingLinePoints.length} points (reversed: ${reverseDirection})`);
         
         return true;
     }

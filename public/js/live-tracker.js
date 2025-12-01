@@ -1012,7 +1012,7 @@ class LiveStrategyTracker {
             // If racing line data is available, use it
             if (trackAssets && trackAssets.racing_line) {
                 debug('🏁 Racing line data available, using racing line mode');
-                this.carPositionTracker.setRacingLineData(trackAssets.racing_line);
+                this.carPositionTracker.setRacingLineData(trackAssets.racing_line, trackAssets.reverse_direction);
             } else {
                 debug('⚠️ No racing line data, using SVG path fallback');
             }

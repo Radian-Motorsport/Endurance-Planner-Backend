@@ -459,28 +459,30 @@ app.get('/api/track-assets/:trackId', async (req, res) => {
             return res.status(404).json({ error: 'Track assets not found' });
         }
         
+        // Convert individual SVG columns to track_map_layers format expected by frontend
+        const trackAssets = result.rows[0];
+        
         // Fetch racing line data from tracks table
         let racingLine = null;
+        let reverseDirection = false;
         try {
             const racingLineResult = await pool.query(`
-                SELECT racing_line 
+                SELECT racing_line, reverse_direction 
                 FROM tracks 
                 WHERE track_id = $1
             `, [trackId]);
             
             if (racingLineResult.rows.length > 0 && racingLineResult.rows[0].racing_line) {
                 racingLine = racingLineResult.rows[0].racing_line;
+                reverseDirection = racingLineResult.rows[0].reverse_direction || false;
                 console.log('✅ Racing line data found for track ID:', trackId, 
-                    `(${racingLine.point_count || racingLine.points?.length || 0} points)`);
+                    `(${racingLine.point_count || racingLine.points?.length || 0} points, reverse: ${reverseDirection})`);
             } else {
                 console.log('⚠️ No racing line data found for track ID:', trackId);
             }
         } catch (racingLineErr) {
             console.warn('⚠️ Error fetching racing line (column may not exist):', racingLineErr.message);
         }
-        
-        // Convert individual SVG columns to track_map_layers format expected by frontend
-        const trackAssets = result.rows[0];
         const track_map_layers = {
             'background': trackAssets.background_svg,
             'active': trackAssets.active_svg,
@@ -500,7 +502,8 @@ app.get('/api/track-assets/:trackId', async (req, res) => {
             pitroad_svg: trackAssets.pitroad_svg,
             start_finish_svg: trackAssets.start_finish_svg,
             turns_svg: trackAssets.turns_svg,
-            racing_line: racingLine  // Add racing line data
+            racing_line: racingLine,  // Add racing line data
+            reverse_direction: reverseDirection  // Add direction flag
         };
         
         console.log('✅ Track assets found for track ID:', trackId);
