@@ -32,7 +32,8 @@ export class BrakeZoneVisualizer {
         this.liftingCars = new Set();     // Set of carIdx currently lifting before brake zones
         this.baselineRPM = new Map();     // Map of "carIdx-zoneIndex" -> baseline RPM at brake zone entry
         this.selectedCarIdx = null;       // Currently selected car for analysis
-        this.liftMarkers = [];            // Array of lift marker positions for selected car
+        this.liftMarkers = new Map();     // Map of marker position -> lap number when created
+        this.lastLapPct = 0;              // Track last lap position to detect lap completion
         
         // Create lift markers container if it doesn't exist
         if (!document.getElementById('brake-zone-lift-markers')) {
@@ -373,24 +374,51 @@ export class BrakeZoneVisualizer {
      */
     addLiftMarker(lapDistPct) {
         // Check if marker already exists at this position (within 0.5%)
-        const exists = this.liftMarkers.some(pos => Math.abs(pos - lapDistPct) < 0.5);
-        if (exists) return;
+        for (const [pos, lap] of this.liftMarkers.entries()) {
+            if (Math.abs(pos - lapDistPct) < 0.5) {
+                // Marker exists, update to current lap
+                this.liftMarkers.delete(pos);
+                this.liftMarkers.set(lapDistPct, 'current');
+                this.renderLiftMarkers();
+                return;
+            }
+        }
         
-        this.liftMarkers.push(lapDistPct);
+        // New marker
+        this.liftMarkers.set(lapDistPct, 'current');
         this.renderLiftMarkers();
     }
     
     /**
-     * Remove lift marker when car passes over it
+     * Remove lift marker when car passes over it again on next lap
      */
     removeLiftMarkerAtPosition(currentLapDistPct) {
-        // Remove markers within 0.5% of current position
-        const before = this.liftMarkers.length;
-        this.liftMarkers = this.liftMarkers.filter(pos => Math.abs(pos - currentLapDistPct) > 0.5);
+        // Detect lap wrap (crossing start/finish)
+        const lapWrapped = this.lastLapPct > 90 && currentLapDistPct < 10;
         
-        if (this.liftMarkers.length !== before) {
+        if (lapWrapped) {
+            // Mark all markers as 'old' (created on previous lap)
+            for (const [pos, lap] of this.liftMarkers.entries()) {
+                if (lap === 'current') {
+                    this.liftMarkers.set(pos, 'old');
+                }
+            }
+        }
+        
+        // Remove markers that car has passed AND were created on a previous lap
+        let removed = false;
+        for (const [pos, lap] of this.liftMarkers.entries()) {
+            if (lap === 'old' && currentLapDistPct > pos && (currentLapDistPct - pos) > 0.5) {
+                this.liftMarkers.delete(pos);
+                removed = true;
+            }
+        }
+        
+        if (removed) {
             this.renderLiftMarkers();
         }
+        
+        this.lastLapPct = currentLapDistPct;
     }
     
     /**
@@ -401,17 +429,17 @@ export class BrakeZoneVisualizer {
         
         this.liftMarkersContainer.innerHTML = '';
         
-        this.liftMarkers.forEach(lapDistPct => {
+        for (const [lapDistPct, lap] of this.liftMarkers.entries()) {
             const marker = document.createElement('div');
             marker.className = 'absolute bg-green-400';
             marker.style.left = `${lapDistPct}%`;
             marker.style.width = '2px';
-            marker.style.height = '100%';
+            marker.style.height = '50%';
             marker.style.top = '0';
             marker.title = `Lift detected at ${lapDistPct.toFixed(1)}%`;
             
             this.liftMarkersContainer.appendChild(marker);
-        });
+        }
     }
     
     /**
@@ -420,7 +448,8 @@ export class BrakeZoneVisualizer {
     setSelectedCar(carIdx) {
         // Clear markers when changing car
         if (this.selectedCarIdx !== carIdx) {
-            this.liftMarkers = [];
+            this.liftMarkers.clear();
+            this.lastLapPct = 0;
             this.renderLiftMarkers();
         }
         this.selectedCarIdx = carIdx;
