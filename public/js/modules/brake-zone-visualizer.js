@@ -33,6 +33,7 @@ export class BrakeZoneVisualizer {
         this.baselineRPM = new Map();     // Map of "carIdx-zoneIndex" -> baseline RPM at brake zone entry
         this.selectedCarIdx = null;       // Currently selected car for analysis
         this.liftMarkers = new Map();     // Map of marker position -> lap number when created
+        this.baselineMarkers = new Map(); // Map of zone index -> baseline RPM position
         this.lastLapPct = 0;              // Track last lap position to detect lap completion
         
         // Create lift markers container if it doesn't exist
@@ -43,6 +44,15 @@ export class BrakeZoneVisualizer {
             this.markersContainer?.parentElement?.appendChild(liftMarkersContainer);
         }
         this.liftMarkersContainer = document.getElementById('brake-zone-lift-markers');
+        
+        // Create baseline markers container if it doesn't exist
+        if (!document.getElementById('brake-zone-baseline-markers')) {
+            const baselineMarkersContainer = document.createElement('div');
+            baselineMarkersContainer.id = 'brake-zone-baseline-markers';
+            baselineMarkersContainer.className = 'absolute inset-0';
+            this.markersContainer?.parentElement?.appendChild(baselineMarkersContainer);
+        }
+        this.baselineMarkersContainer = document.getElementById('brake-zone-baseline-markers');
         
         this.setupEventListeners();
     }
@@ -341,6 +351,11 @@ export class BrakeZoneVisualizer {
                     const currentBaseline = this.baselineRPM.get(key);
                     if (currentBaseline == null || rpm > currentBaseline) {
                         this.baselineRPM.set(key, rpm);
+                        // Record position where max baseline RPM was detected (for selected car only)
+                        if (carIdx === this.selectedCarIdx) {
+                            this.baselineMarkers.set(zoneIndex, lapDistPct);
+                            this.renderBaselineMarkers();
+                        }
                     }
                 }
                 
@@ -436,9 +451,33 @@ export class BrakeZoneVisualizer {
             marker.style.top = '50%';
             marker.style.transform = 'translateY(-50%)';
             marker.style.pointerEvents = 'none';
-            marker.title = `Lift detected at ${lapDistPct.toFixed(1)}%`;
+            marker.title = `Lift detected at ${lapDistPct}%`;
             
             this.liftMarkersContainer.appendChild(marker);
+        }
+    }
+    
+    /**
+     * Render all baseline RPM markers (orange lines)
+     */
+    renderBaselineMarkers() {
+        if (!this.baselineMarkersContainer) return;
+        
+        this.baselineMarkersContainer.innerHTML = '';
+        
+        for (const [zoneIndex, lapDistPct] of this.baselineMarkers.entries()) {
+            const marker = document.createElement('div');
+            marker.className = 'absolute bg-orange-400';
+            marker.style.left = `${lapDistPct}%`;
+            marker.style.width = '2px';
+            marker.style.height = '100%';
+            marker.style.top = '50%';
+            marker.style.transform = 'translateY(-50%)';
+            marker.style.pointerEvents = 'none';
+            marker.style.opacity = '0.7';
+            marker.title = `Max RPM baseline for zone ${zoneIndex} at ${lapDistPct}%`;
+            
+            this.baselineMarkersContainer.appendChild(marker);
         }
     }
     
@@ -449,8 +488,10 @@ export class BrakeZoneVisualizer {
         // Clear markers when changing car
         if (this.selectedCarIdx !== carIdx) {
             this.liftMarkers.clear();
+            this.baselineMarkers.clear();
             this.lastLapPct = 0;
             this.renderLiftMarkers();
+            this.renderBaselineMarkers();
         }
         this.selectedCarIdx = carIdx;
     }
