@@ -201,11 +201,11 @@ export class BrakeZoneVisualizer {
     updateCarPositions(carIdxLapDistPct, carIdxPosition, carIdxCarNumber, carIdxClass) {
         if (!this.allCarsVisible || !this.carDotsContainer) return;
         
-        console.log('🚗 Brake zone updateCarPositions:', {
+        /*console.log('🚗 Brake zone updateCarPositions:', {
             playerCarClass: this.playerCarClass,
             hasCarIdxClass: !!carIdxClass,
             totalCars: carIdxLapDistPct?.length
-        });
+        });*/
         
         const activeCars = new Set();
         let carsFiltered = 0;
@@ -284,10 +284,10 @@ export class BrakeZoneVisualizer {
             }
         });
         
-        console.log('🚗 Brake zone cars:', {
+        /*console.log('🚗 Brake zone cars:', {
             active: activeCars.size,
             filtered: carsFiltered
-        });
+        });*/
         
         // Remove dots for inactive cars
         const existingDots = this.carDotsContainer.querySelectorAll('[data-car-idx]');
@@ -307,12 +307,6 @@ export class BrakeZoneVisualizer {
      */
     detectLiftAndCoast(carIdxRPM, carIdxLapDistPct, carIdxClass) {
         if (!this.brakeZones || !carIdxRPM || !carIdxLapDistPct || !carIdxClass) {
-            console.log('🔍 Lift detection skipped:', {
-                hasBrakeZones: !!this.brakeZones,
-                hasCarIdxRPM: !!carIdxRPM,
-                hasLapDistPct: !!carIdxLapDistPct,
-                hasCarIdxClass: !!carIdxClass
-            });
             return;
         }
         
@@ -320,7 +314,6 @@ export class BrakeZoneVisualizer {
         
         // Group brake zones for easier lookup
         const zones = this.groupBrakeZones(this.brakeZones);
-        console.log('🔍 Detecting lift in', zones.length, 'brake zones, threshold:', this.liftThreshold + '%');
         
         carIdxRPM.forEach((rpm, carIdx) => {
             // Skip player and invalid data
@@ -334,6 +327,15 @@ export class BrakeZoneVisualizer {
             
             const lapDistPct = lapDist * 100; // Convert to 0-100
             
+            // Get previous RPM - must exist to compare
+            const prevRPM = this.previousRPM.get(carIdx);
+            
+            // Store current RPM for next comparison
+            this.previousRPM.set(carIdx, rpm);
+            
+            // Skip if no previous RPM stored yet
+            if (prevRPM == null) return;
+            
             // Check if approaching any brake zone
             for (const zone of zones) {
                 // Calculate the "lift zone" - threshold% before brake zone
@@ -342,9 +344,6 @@ export class BrakeZoneVisualizer {
                 
                 // Check if car is in the lift detection zone
                 if (lapDistPct >= liftZoneStart && lapDistPct < liftZoneEnd) {
-                    // Get previous RPM
-                    const prevRPM = this.previousRPM.get(carIdx) || rpm;
-                    
                     // Detect significant RPM drop (>15% drop indicates lift)
                     const rpmDrop = (prevRPM - rpm) / prevRPM;
                     if (rpmDrop > 0.15) {
@@ -353,9 +352,6 @@ export class BrakeZoneVisualizer {
                     }
                 }
             }
-            
-            // Store current RPM for next comparison
-            this.previousRPM.set(carIdx, rpm);
         });
     }
     

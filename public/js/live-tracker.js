@@ -2612,6 +2612,11 @@ class LiveStrategyTracker {
         const playerDriver = this.driversList[this.playerCarIdx];
         if (playerDriver) {
             this.playerCarClass = playerDriver.CarClassID;
+            
+            // Update brake zone visualizer with player class
+            if (this.brakeZoneVisualizer) {
+                this.brakeZoneVisualizer.setPlayerCarClass(this.playerCarClass);
+            }
         }
         
         if (isFirstInit) {
