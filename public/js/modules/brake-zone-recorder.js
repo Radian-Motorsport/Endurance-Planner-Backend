@@ -332,7 +332,7 @@ export class BrakeZoneRecorder {
         // Always capture sample (we'll filter to brake zones later)
         const sample = {
             lapDistPct: lapDistPct * 100, // Store as 0-100 for consistency
-            brakeInput: values.BrakeRaw ?? null,
+            brakeInput: values.Brake ?? null,
             longG: values.LongAccel ?? null // Longitudinal G-force
         };
         
