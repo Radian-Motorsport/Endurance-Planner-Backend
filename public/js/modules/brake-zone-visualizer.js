@@ -209,7 +209,7 @@ export class BrakeZoneVisualizer {
      * Update all car positions
      */
     updateCarPositions(carIdxLapDistPct, carIdxPosition, carIdxCarNumber, carIdxClass) {
-        if (!this.allCarsVisible || !this.carDotsContainer || this.selectedCarIdx === null) return;
+        if (!this.carDotsContainer || this.selectedCarIdx === null) return;
         
         /*console.log('🚗 Brake zone updateCarPositions:', {
             playerCarClass: this.playerCarClass,
