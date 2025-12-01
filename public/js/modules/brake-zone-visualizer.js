@@ -180,12 +180,12 @@ export class BrakeZoneVisualizer {
     /**
      * Update info display
      */
-    updateInfoDisplay() {
+    /*updateInfoDisplay() {
         if (!this.infoDisplay || !this.brakeZones) return;
         
         const zones = this.groupBrakeZones(this.brakeZones);
         this.infoDisplay.textContent = `${zones.length} brake zones recorded`;
-    }
+    }*/
     
     /**
      * Update player position
