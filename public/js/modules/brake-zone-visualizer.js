@@ -30,7 +30,7 @@ export class BrakeZoneVisualizer {
         // Lift-and-coast detection
         this.liftThreshold = 5;           // % before brake zone to check for lift (default 5%)
         this.liftingCars = new Set();     // Set of carIdx currently lifting before brake zones
-        this.previousRPM = new Map();     // Track previous RPM per car
+        this.baselineRPM = new Map();     // Map of "carIdx-zoneIndex" -> baseline RPM at brake zone entry
         
         this.setupEventListeners();
     }
@@ -327,31 +327,37 @@ export class BrakeZoneVisualizer {
             
             const lapDistPct = lapDist * 100; // Convert to 0-100
             
-            // Get previous RPM - must exist to compare
-            const prevRPM = this.previousRPM.get(carIdx);
-            
-            // Store current RPM for next comparison
-            this.previousRPM.set(carIdx, rpm);
-            
-            // Skip if no previous RPM stored yet
-            if (prevRPM == null) return;
-            
-            // Check if approaching any brake zone
-            for (const zone of zones) {
-                // Calculate the "lift zone" - threshold% before brake zone
+            // Check each brake zone
+            zones.forEach((zone, zoneIndex) => {
+                const key = `${carIdx}-${zoneIndex}`;
+                
+                // Check if car is at the START of brake zone (record/update baseline RPM)
+                if (lapDistPct >= zone.start && lapDistPct < zone.start + 0.5) {
+                    // Always update baseline RPM when entering brake zone (keeps highest RPM across laps)
+                    const currentBaseline = this.baselineRPM.get(key);
+                    if (currentBaseline == null || rpm > currentBaseline) {
+                        this.baselineRPM.set(key, rpm);
+                    }
+                }
+                
+                // Check if car is in the lift detection zone (before brake zone)
                 const liftZoneStart = Math.max(0, zone.start - this.liftThreshold);
                 const liftZoneEnd = zone.start;
                 
-                // Check if car is in the lift detection zone
                 if (lapDistPct >= liftZoneStart && lapDistPct < liftZoneEnd) {
-                    // Detect significant RPM drop (>15% drop indicates lift)
-                    const rpmDrop = (prevRPM - rpm) / prevRPM;
-                    if (rpmDrop > 0.15) {
-                        this.liftingCars.add(carIdx);
-                        break;
+                    const baselineRPM = this.baselineRPM.get(key);
+                    
+                    // If we have baseline RPM from previous lap, compare current RPM
+                    if (baselineRPM != null) {
+                        const rpmDrop = (baselineRPM - rpm) / baselineRPM;
+                        
+                        // Check if RPM drop exceeds threshold (15% default, controlled by slider)
+                        if (rpmDrop > 0.15) {
+                            this.liftingCars.add(carIdx);
+                        }
                     }
                 }
-            }
+            });
         });
     }
     
