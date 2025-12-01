@@ -1141,13 +1141,17 @@ class LiveStrategyTracker {
         
         // Update brake zone visualizer with all car positions
         if (this.brakeZoneVisualizer) {
-            // Detect lift-and-coast behavior
+            // Debug: Check if CarIdxRPM is available
             if (values.CarIdxRPM) {
+                console.log('🔍 CarIdxRPM available:', values.CarIdxRPM.length, 'cars, player RPM:', values.CarIdxRPM[values.PlayerCarIdx]);
+                
                 this.brakeZoneVisualizer.detectLiftAndCoast(
                     values.CarIdxRPM,
                     values.CarIdxLapDistPct,
                     values.CarIdxClass
                 );
+            } else {
+                console.warn('⚠️ CarIdxRPM not available in telemetry');
             }
             
             this.brakeZoneVisualizer.updateCarPositions(
@@ -1192,7 +1196,7 @@ class LiveStrategyTracker {
             containerClassList: container?.classList.toString()
         });
         
-        if (!container || !this.driversList.length) return;
+        if (!container || !this.driversList.length || !values) return;
         
         const playerCarIdx = values.PlayerCarIdx;
         const carIdxLapDistPct = values.CarIdxLapDistPct;

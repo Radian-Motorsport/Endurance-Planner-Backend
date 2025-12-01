@@ -291,12 +291,21 @@ export class BrakeZoneVisualizer {
      * @param {Array} carIdxClass - Car class IDs
      */
     detectLiftAndCoast(carIdxRPM, carIdxLapDistPct, carIdxClass) {
-        if (!this.brakeZones || !carIdxRPM || !carIdxLapDistPct || !carIdxClass) return;
+        if (!this.brakeZones || !carIdxRPM || !carIdxLapDistPct || !carIdxClass) {
+            console.log('🔍 Lift detection skipped:', {
+                hasBrakeZones: !!this.brakeZones,
+                hasCarIdxRPM: !!carIdxRPM,
+                hasLapDistPct: !!carIdxLapDistPct,
+                hasCarIdxClass: !!carIdxClass
+            });
+            return;
+        }
         
         this.liftingCars.clear();
         
         // Group brake zones for easier lookup
         const zones = this.groupBrakeZones(this.brakeZones);
+        console.log('🔍 Detecting lift in', zones.length, 'brake zones, threshold:', this.liftThreshold + '%');
         
         carIdxRPM.forEach((rpm, carIdx) => {
             // Skip player and invalid data
