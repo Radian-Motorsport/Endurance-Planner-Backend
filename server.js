@@ -218,6 +218,25 @@ async function createTables() {
             );
         `;
         
+        const createBrakeZoneTracesTable = `
+            CREATE TABLE IF NOT EXISTS brake_zone_traces (
+                id SERIAL PRIMARY KEY,
+                track_id INTEGER NOT NULL,
+                car_name VARCHAR(255) NOT NULL,
+                samples JSONB NOT NULL,
+                lap_time FLOAT,
+                track_temp FLOAT,
+                air_temp FLOAT,
+                wind_velocity FLOAT,
+                wind_direction FLOAT,
+                humidity FLOAT,
+                skies INTEGER,
+                recorded_at TIMESTAMP DEFAULT NOW(),
+                notes TEXT,
+                UNIQUE(track_id, car_name)
+            );
+        `;
+        
         await pool.query(createDriversTable);
         await pool.query(createCarsTable);
         await pool.query(createCarClassesTable);
@@ -227,6 +246,7 @@ async function createTables() {
         await pool.query(createEventsTable);
         await pool.query(createSessionsTable);
         await pool.query(createIdealFuelLapsTable);
+        await pool.query(createBrakeZoneTracesTable);
         console.log('Database tables created/verified successfully.');
     } catch (err) {
         console.error('Error creating database tables:', err);
@@ -1546,6 +1566,141 @@ app.post('/api/drivers/add', async (req, res) => {
         console.error('Failed to add driver:', error.message);
         res.status(500).json({
             error: 'Failed to add driver',
+            message: error.message
+        });
+    }
+});
+
+// ========================================
+// BRAKE ZONE TRACE API ENDPOINTS
+// ========================================
+
+// Save brake zone trace
+app.post('/api/brake-zone-trace', async (req, res) => {
+    try {
+        if (!pool) {
+            return res.status(500).json({ error: 'Database not available' });
+        }
+
+        const { trackId, carName, samples, metadata } = req.body;
+
+        // Validate input
+        if (!trackId || !carName || !samples || !Array.isArray(samples)) {
+            return res.status(400).json({ error: 'Missing required fields: trackId, carName, samples' });
+        }
+
+        if (samples.length === 0) {
+            return res.status(400).json({ error: 'No brake zone samples provided' });
+        }
+
+        console.log(`🛑 Saving brake zone trace: Track ${trackId}, Car ${carName}, ${samples.length} samples`);
+
+        // UPSERT query (insert or update if track+car already exists)
+        const query = `
+            INSERT INTO brake_zone_traces (
+                track_id, car_name,
+                samples,
+                lap_time,
+                track_temp, air_temp, wind_velocity, wind_direction,
+                humidity, skies
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+            )
+            ON CONFLICT (track_id, car_name)
+            DO UPDATE SET
+                samples = EXCLUDED.samples,
+                lap_time = EXCLUDED.lap_time,
+                track_temp = EXCLUDED.track_temp,
+                air_temp = EXCLUDED.air_temp,
+                wind_velocity = EXCLUDED.wind_velocity,
+                wind_direction = EXCLUDED.wind_direction,
+                humidity = EXCLUDED.humidity,
+                skies = EXCLUDED.skies,
+                recorded_at = NOW()
+            RETURNING id;
+        `;
+
+        const result = await pool.query(query, [
+            trackId,
+            carName,
+            JSON.stringify(samples),
+            metadata?.lapTime || null,
+            metadata?.trackTemp || null,
+            metadata?.airTemp || null,
+            metadata?.windVel || null,
+            metadata?.windDir || null,
+            metadata?.humidity || null,
+            metadata?.skies || null
+        ]);
+
+        console.log(`✅ Brake zone trace saved with ID: ${result.rows[0].id}`);
+
+        res.json({
+            message: 'Brake zone trace saved successfully',
+            id: result.rows[0].id,
+            trackId,
+            carName,
+            sampleCount: samples.length
+        });
+
+    } catch (error) {
+        console.error('Failed to save brake zone trace:', error);
+        res.status(500).json({
+            error: 'Failed to save brake zone trace',
+            message: error.message
+        });
+    }
+});
+
+// Get brake zone trace
+app.get('/api/brake-zone-trace/:trackId/:carName', async (req, res) => {
+    try {
+        if (!pool) {
+            return res.status(500).json({ error: 'Database not available' });
+        }
+
+        const { trackId, carName } = req.params;
+
+        console.log(`🔍 Fetching brake zone trace: Track ${trackId}, Car ${carName}`);
+
+        const query = `
+            SELECT * FROM brake_zone_traces
+            WHERE track_id = $1 AND car_name = $2
+            LIMIT 1;
+        `;
+
+        const result = await pool.query(query, [parseInt(trackId), carName]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'No brake zone trace found for this track/car combination' });
+        }
+
+        const row = result.rows[0];
+
+        const response = {
+            id: row.id,
+            trackId: row.track_id,
+            carName: row.car_name,
+            samples: row.samples,
+            metadata: {
+                lapTime: row.lap_time,
+                trackTemp: row.track_temp,
+                airTemp: row.air_temp,
+                windVel: row.wind_velocity,
+                windDir: row.wind_direction,
+                humidity: row.humidity,
+                skies: row.skies,
+                recordedAt: row.recorded_at
+            }
+        };
+
+        console.log(`✅ Found brake zone trace with ${row.samples.length} samples`);
+        res.json(response);
+
+    } catch (error) {
+        console.error('Failed to fetch brake zone trace:', error);
+        res.status(500).json({
+            error: 'Failed to fetch brake zone trace',
             message: error.message
         });
     }

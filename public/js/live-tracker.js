@@ -617,6 +617,9 @@ class LiveStrategyTracker {
             
             // Initialize fuel comparison chart
             this.initializeFuelComparisonChart();
+            
+            // Initialize brake zone recorder
+            this.initializeBrakeZoneRecorder();
         });
         
         this.socket.on('disconnect', () => {
@@ -739,6 +742,22 @@ class LiveStrategyTracker {
                 debug('✅ Fuel comparison chart initialized');
             } catch (error) {
                 debugError('❌ Failed to initialize fuel comparison chart:', error);
+            }
+        }
+    }
+    
+    initializeBrakeZoneRecorder() {
+        if (!this.brakeZoneRecorder && this.socket && window.BrakeZoneRecorder) {
+            try {
+                this.brakeZoneRecorder = new window.BrakeZoneRecorder(this.socket, this.sessionInfo);
+                this.brakeZoneRecorder.initUI(
+                    'brake-recorder-button',
+                    'brake-recorder-status-indicator',
+                    'brake-recorder-status-text'
+                );
+                debug('✅ Brake zone recorder initialized');
+            } catch (error) {
+                debugError('❌ Failed to initialize brake zone recorder:', error);
             }
         }
     }
@@ -1630,6 +1649,11 @@ class LiveStrategyTracker {
         // Update fuel recorder with session info
         if (this.fuelRecorder) {
             this.fuelRecorder.updateSessionInfo(sessionData);
+        }
+        
+        // Update brake zone recorder with session info
+        if (this.brakeZoneRecorder) {
+            this.brakeZoneRecorder.updateSessionInfo(sessionData);
         }
         
         // Load ideal lap data for comparison chart - ONLY ONCE per session
