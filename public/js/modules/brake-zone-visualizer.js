@@ -31,6 +31,7 @@ export class BrakeZoneVisualizer {
         this.liftThreshold = 5;           // % before brake zone to check for lift (default 5%)
         this.liftingCars = new Set();     // Set of carIdx currently lifting before brake zones
         this.baselineRPM = new Map();     // Map of "carIdx-zoneIndex" -> baseline RPM at brake zone entry
+        this.liftingCarsTimers = new Map(); // Timers for delayed green circle removal
         
         this.setupEventListeners();
     }
@@ -104,7 +105,7 @@ export class BrakeZoneVisualizer {
             marker.className = 'absolute bg-red-500 opacity-30 rounded';
             marker.style.left = `${zone.start}%`;
             marker.style.width = `${zone.end - zone.start}%`;
-            marker.style.height = '4px';
+            marker.style.height = '32px';
             marker.style.top = '50%';
             marker.style.transform = 'translateY(-50%)';
             marker.title = `Brake Zone ${zone.start.toFixed(1)}% - ${zone.end.toFixed(1)}%`;
@@ -183,15 +184,14 @@ export class BrakeZoneVisualizer {
         this.playerLapDistPct = lapDistPct;
         this.playerPosition = position;
         
-        // Update player dot position
+        // Hide player dot
         if (this.progressDot) {
-            const pct = (lapDistPct * 100);
-            this.progressDot.style.left = `${pct}%`;
+            this.progressDot.style.display = 'none';
         }
         
-        // Update position label
-        if (this.playerLabel && position != null) {
-            this.playerLabel.textContent = position.toString();
+        // Hide position label
+        if (this.playerLabel) {
+            this.playerLabel.style.display = 'none';
         }
     }
     
@@ -231,8 +231,8 @@ export class BrakeZoneVisualizer {
                 // Create new dot
                 dot = document.createElement('div');
                 dot.className = 'absolute bg-white rounded-full shadow-lg transition-all duration-100';
-                dot.style.width = '20px';
-                dot.style.height = '20px';
+                dot.style.width = '24px';
+                dot.style.height = '24px';
                 dot.style.top = '50%';
                 dot.style.transform = 'translate(-50%, -50%)';
                 dot.style.display = 'flex';
@@ -278,9 +278,20 @@ export class BrakeZoneVisualizer {
             
             // Apply green ring if car is lifting before brake zones
             if (this.liftingCars.has(carIdx)) {
-                dot.style.boxShadow = '0 0 0 3px #10b981';
-            } else {
-                dot.style.boxShadow = '';
+                dot.style.boxShadow = '0 0 0 4px #10b981';
+                
+                // Clear any existing timer for this car
+                if (this.liftingCarsTimers.has(carIdx)) {
+                    clearTimeout(this.liftingCarsTimers.get(carIdx));
+                }
+                
+                // Set timer to remove green circle after 2 seconds
+                const timer = setTimeout(() => {
+                    dot.style.boxShadow = '';
+                    this.liftingCarsTimers.delete(carIdx);
+                }, 2000);
+                
+                this.liftingCarsTimers.set(carIdx, timer);
             }
         });
         
