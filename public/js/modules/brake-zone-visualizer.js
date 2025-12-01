@@ -353,9 +353,9 @@ export class BrakeZoneVisualizer {
                         // Check if RPM drop exceeds threshold (15% default, controlled by slider)
                         if (rpmDrop > 0.15) {
                             this.liftingCars.add(carIdx);
-                            // Place vertical marker only for selected car
+                            // Place vertical marker only for selected car, once per zone
                             if (carIdx === this.selectedCarIdx) {
-                                this.addLiftMarker(lapDistPct);
+                                this.addLiftMarker(lapDistPct, zoneIndex);
                             }
                         }
                     }
@@ -372,20 +372,20 @@ export class BrakeZoneVisualizer {
     /**
      * Add vertical lift marker at position
      */
-    addLiftMarker(lapDistPct) {
-        // Check if marker already exists at this position (within 0.5%)
+    addLiftMarker(lapDistPct, zoneIndex) {
+        // Only place one marker per brake zone per lap
+        const key = `zone-${zoneIndex}`;
+        
+        // Check if marker already exists for this brake zone
         for (const [pos, lap] of this.liftMarkers.entries()) {
-            if (Math.abs(pos - lapDistPct) < 0.5) {
-                // Marker exists, update to current lap
-                this.liftMarkers.delete(pos);
-                this.liftMarkers.set(lapDistPct, 'current');
-                this.renderLiftMarkers();
+            if (lap === key) {
+                // Marker already placed for this brake zone this lap
                 return;
             }
         }
         
-        // New marker
-        this.liftMarkers.set(lapDistPct, 'current');
+        // New marker - tag it with zone index
+        this.liftMarkers.set(lapDistPct, key);
         this.renderLiftMarkers();
     }
     
@@ -393,22 +393,11 @@ export class BrakeZoneVisualizer {
      * Remove lift marker when car passes over it again on next lap
      */
     removeLiftMarkerAtPosition(currentLapDistPct) {
-        // Detect lap wrap (crossing start/finish)
-        const lapWrapped = this.lastLapPct > 90 && currentLapDistPct < 10;
-        
-        if (lapWrapped) {
-            // Mark all markers as 'old' (created on previous lap)
-            for (const [pos, lap] of this.liftMarkers.entries()) {
-                if (lap === 'current') {
-                    this.liftMarkers.set(pos, 'old');
-                }
-            }
-        }
-        
-        // Remove markers that car has passed AND were created on a previous lap
+        // Remove markers that car has passed (within 0.5% tolerance)
         let removed = false;
-        for (const [pos, lap] of this.liftMarkers.entries()) {
-            if (lap === 'old' && currentLapDistPct > pos && (currentLapDistPct - pos) > 0.5) {
+        for (const [pos, zoneKey] of this.liftMarkers.entries()) {
+            // If car is within 0.5% of marker position and has passed it
+            if (Math.abs(currentLapDistPct - pos) < 0.5 && currentLapDistPct >= pos) {
                 this.liftMarkers.delete(pos);
                 removed = true;
             }
@@ -434,8 +423,10 @@ export class BrakeZoneVisualizer {
             marker.className = 'absolute bg-green-400';
             marker.style.left = `${lapDistPct}%`;
             marker.style.width = '2px';
-            marker.style.height = '50%';
-            marker.style.top = '0';
+            marker.style.height = '100%';
+            marker.style.top = '50%';
+            marker.style.transform = 'translateY(-50%)';
+            marker.style.pointerEvents = 'none';
             marker.title = `Lift detected at ${lapDistPct.toFixed(1)}%`;
             
             this.liftMarkersContainer.appendChild(marker);
