@@ -1099,6 +1099,41 @@
             </div>
         </div>
         
+        <!-- Brake Zone Progress Bar -->
+        <div class="panel glass-stripe rounded p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-neutral-300 text-shadow">Brake Zones</h1>
+                <div class="flex items-center gap-4 text-xs text-neutral-400">
+                    <button id="toggle-brake-zones-cars" class="ov-dark-hover px-2 py-1 rounded text-xs transition">
+                        Show All Cars
+                    </button>
+                    <span id="brake-zone-status" class="ml-2">--</span>
+                </div>
+            </div>
+            
+            <div class="relative w-full h-16 flex items-center overflow-hidden">
+                <!-- Base progress line -->
+                <div class="absolute w-full h-1 bg-neutral-700 rounded"></div>
+                
+                <!-- Brake zone markers container -->
+                <div id="brake-zone-markers-container" class="absolute w-full h-full"></div>
+                
+                <!-- All car dots container -->
+                <div id="brake-zone-car-dots-container" class="absolute w-full h-full hidden"></div>
+                
+                <!-- Player car position dot (always visible) -->
+                <div id="brake-zone-progress-dot" class="absolute bg-cyan-400 rounded-full shadow-lg transition-all duration-100 z-10 ring-2 ring-cyan-300" 
+                     style="left: 0%; transform: translateX(-50%); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                    <span id="brake-zone-player-label" style="font-size: 18px; font-weight: bold; color: #ffffff; text-shadow: 0 0 3px #000000, 0 0 3px #000000, 1px 1px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000; pointer-events: none; user-select: none; transition: font-size 0.2s;"></span>
+                </div>
+            </div>
+            
+            <!-- Brake zone info display -->
+            <div id="brake-zone-info-display" class="relative w-full h-2 mt-4 text-xs text-neutral-400 text-center">
+                No brake zones loaded
+            </div>
+        </div>
+        
         <!-- Track Map with Car Position -->
         <div class="panel glass-stripe rounded p-6">
             <div class="flex items-center justify-between mb-4">
@@ -1279,6 +1314,7 @@
         import { FuelTraceRecorder } from '/public/js/modules/fuel-trace-recorder.js';
         import { FuelComparisonChart } from '/public/js/modules/fuel-comparison-chart.js';
         import { BrakeZoneRecorder } from '/public/js/modules/brake-zone-recorder.js';
+        import { BrakeZoneVisualizer } from '/public/js/modules/brake-zone-visualizer.js';
         
         // Make available globally for live-tracker.js
         window.TrackMapComponent = TrackMapComponent;
@@ -1287,6 +1323,7 @@
         window.FuelTraceRecorder = FuelTraceRecorder;
         window.FuelComparisonChart = FuelComparisonChart;
         window.BrakeZoneRecorder = BrakeZoneRecorder;
+        window.BrakeZoneVisualizer = BrakeZoneVisualizer;
         
         // Setup toggle for fuel comparison (start collapsed)
         document.addEventListener('DOMContentLoaded', () => {

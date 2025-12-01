@@ -620,6 +620,9 @@ class LiveStrategyTracker {
             
             // Initialize brake zone recorder
             this.initializeBrakeZoneRecorder();
+            
+            // Initialize brake zone visualizer
+            this.initializeBrakeZoneVisualizer();
         });
         
         this.socket.on('disconnect', () => {
@@ -758,6 +761,17 @@ class LiveStrategyTracker {
                 debug('✅ Brake zone recorder initialized');
             } catch (error) {
                 debugError('❌ Failed to initialize brake zone recorder:', error);
+            }
+        }
+    }
+    
+    initializeBrakeZoneVisualizer() {
+        if (!this.brakeZoneVisualizer && window.BrakeZoneVisualizer) {
+            try {
+                this.brakeZoneVisualizer = new window.BrakeZoneVisualizer();
+                debug('✅ Brake zone visualizer initialized');
+            } catch (error) {
+                debugError('❌ Failed to initialize brake zone visualizer:', error);
             }
         }
     }
@@ -1104,8 +1118,23 @@ class LiveStrategyTracker {
                             playerPositionLabel.style.fontSize = '18px';
                         }
                     }
+                    
+                    // Update brake zone visualizer with player position
+                    if (this.brakeZoneVisualizer) {
+                        const playerPosition = values.CarIdxClassPosition?.[playerCarIdx];
+                        this.brakeZoneVisualizer.updatePlayerPosition(lapDistPct, playerPosition);
+                    }
                 }
             }
+        }
+        
+        // Update brake zone visualizer with all car positions
+        if (this.brakeZoneVisualizer) {
+            this.brakeZoneVisualizer.updateCarPositions(
+                values.CarIdxLapDistPct,
+                values.CarIdxClassPosition,
+                values.CarIdxCarNumber
+            );
         }
         
         // Update all cars on progress bar if enabled
@@ -1666,6 +1695,12 @@ class LiveStrategyTracker {
                 if (this.fuelComparisonChart && carName) {
                     this.fuelComparisonChart.loadIdealLap(trackId, carName);
                     this.idealLapLoaded = true; // Prevent repeated loads
+                }
+                
+                // Load brake zones for visualizer
+                if (this.brakeZoneVisualizer && carName) {
+                    this.brakeZoneVisualizer.setPlayerCarIdx(chartPlayerCarIdx);
+                    this.brakeZoneVisualizer.loadBrakeZones(trackId, carName);
                 }
             }
         }
