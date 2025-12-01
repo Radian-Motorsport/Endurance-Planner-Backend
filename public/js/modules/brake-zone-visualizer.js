@@ -357,7 +357,6 @@ export class BrakeZoneVisualizer {
                 
                 // Remove lift marker when car passes over it
                 this.removeLiftMarkerAtPosition(lapDistPct);
-                }
             });
         });
     }
