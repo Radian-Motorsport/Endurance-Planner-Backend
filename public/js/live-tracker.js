@@ -642,6 +642,7 @@ class LiveStrategyTracker {
             this.lastTelemetryTime = Date.now();  // Track last telemetry received
             this.handleTelemetryUpdate(data);
             this.updateDriverInputs(data);  // Update driver inputs display
+            this.updateCarPosition(data?.values);  // Always update car positions (even when driver inputs collapsed)
             
             // Throttle weather updates to 1000ms
             const now = Date.now();
@@ -921,9 +922,6 @@ class LiveStrategyTracker {
         if (this.elements.inputOverlap) {
             this.elements.inputOverlap.textContent = isOverlap ? 'YES' : 'NO';
         }
-        
-        // Update car position on track map
-        this.updateCarPosition(values);
         
         // Throttle fuel stats updates to 500ms
         const now = Date.now();
@@ -1219,6 +1217,7 @@ class LiveStrategyTracker {
                 dot.style.alignItems = 'center';
                 dot.style.justifyContent = 'center';
                 dot.title = driver.UserName || `Car ${carIdx}`;
+                dot.dataset.lastPct = percentage; // Track last position
                 
                 // Create inner circle (the colored dot)
                 const innerCircle = document.createElement('div');
@@ -1249,8 +1248,26 @@ class LiveStrategyTracker {
                 
                 container.appendChild(dot);
             } else {
-                // Update existing dot position (has transition class already)
-                dot.style.left = `${percentage}%`;
+                // Detect lap wrap (crossing from >90% to <10%)
+                const lastPct = parseFloat(dot.dataset.lastPct || 0);
+                const isLapWrap = lastPct > 90 && percentage < 10;
+                
+                if (isLapWrap) {
+                    // Disable transition for instant snap
+                    dot.classList.remove('transition-all', 'duration-100');
+                    dot.style.left = `${percentage}%`;
+                    dot.dataset.lastPct = percentage;
+                    
+                    // Re-enable transition on next frame
+                    requestAnimationFrame(() => {
+                        dot.classList.add('transition-all', 'duration-100');
+                    });
+                } else {
+                    // Normal position update with transition
+                    dot.style.left = `${percentage}%`;
+                    dot.dataset.lastPct = percentage;
+                }
+                
                 positionLabel = dot.querySelector('.progress-position-label');
             }
             

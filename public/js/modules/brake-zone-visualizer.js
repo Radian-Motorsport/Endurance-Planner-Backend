@@ -195,37 +195,76 @@ export class BrakeZoneVisualizer {
     updateCarPositions(carIdxLapDistPct, carIdxPosition, carIdxCarNumber) {
         if (!this.allCarsVisible || !this.carDotsContainer) return;
         
-        // Clear existing car dots
-        this.carDotsContainer.innerHTML = '';
+        const activeCars = new Set();
         
-        // Create dot for each car (skip player)
+        // Update or create dot for each car (skip player)
         carIdxLapDistPct.forEach((lapDist, carIdx) => {
             if (carIdx === this.playerCarIdx || lapDist < 0) return;
             
+            activeCars.add(carIdx);
             const position = carIdxPosition?.[carIdx];
             const carNumber = carIdxCarNumber?.[carIdx];
             
-            const dot = document.createElement('div');
-            dot.className = 'absolute bg-white rounded-full shadow-lg transition-all duration-100';
-            dot.style.left = `${lapDist * 100}%`;
-            dot.style.width = '20px';
-            dot.style.height = '20px';
-            dot.style.top = '50%';
-            dot.style.transform = 'translate(-50%, -50%)';
-            dot.style.display = 'flex';
-            dot.style.alignItems = 'center';
-            dot.style.justifyContent = 'center';
+            // Get or create dot
+            let dot = this.carDotsContainer.querySelector(`[data-car-idx="${carIdx}"]`);
             
-            if (position != null) {
+            if (!dot) {
+                // Create new dot
+                dot = document.createElement('div');
+                dot.className = 'absolute bg-white rounded-full shadow-lg transition-all duration-100';
+                dot.style.width = '20px';
+                dot.style.height = '20px';
+                dot.style.top = '50%';
+                dot.style.transform = 'translate(-50%, -50%)';
+                dot.style.display = 'flex';
+                dot.style.alignItems = 'center';
+                dot.style.justifyContent = 'center';
+                dot.dataset.carIdx = carIdx;
+                dot.dataset.lastPct = lapDist;
+                
                 const label = document.createElement('span');
-                label.textContent = position.toString();
                 label.style.fontSize = '12px';
                 label.style.fontWeight = 'bold';
                 label.style.color = '#000000';
                 dot.appendChild(label);
+                
+                this.carDotsContainer.appendChild(dot);
             }
             
-            this.carDotsContainer.appendChild(dot);
+            // Detect lap wrap (crossing from >0.9 to <0.1)
+            const lastPct = parseFloat(dot.dataset.lastPct || 0);
+            const isLapWrap = lastPct > 0.9 && lapDist < 0.1;
+            
+            if (isLapWrap) {
+                // Disable transition for instant snap
+                dot.classList.remove('transition-all', 'duration-100');
+                dot.style.left = `${lapDist * 100}%`;
+                dot.dataset.lastPct = lapDist;
+                
+                // Re-enable transition on next frame
+                requestAnimationFrame(() => {
+                    dot.classList.add('transition-all', 'duration-100');
+                });
+            } else {
+                // Normal position update with transition
+                dot.style.left = `${lapDist * 100}%`;
+                dot.dataset.lastPct = lapDist;
+            }
+            
+            // Update position label
+            const label = dot.querySelector('span');
+            if (label && position != null) {
+                label.textContent = position.toString();
+            }
+        });
+        
+        // Remove dots for inactive cars
+        const existingDots = this.carDotsContainer.querySelectorAll('[data-car-idx]');
+        existingDots.forEach(dot => {
+            const carIdx = parseInt(dot.dataset.carIdx);
+            if (!activeCars.has(carIdx)) {
+                dot.remove();
+            }
         });
     }
     
