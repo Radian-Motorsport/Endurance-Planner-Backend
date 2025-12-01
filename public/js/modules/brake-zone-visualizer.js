@@ -314,8 +314,11 @@ export class BrakeZoneVisualizer {
         const zones = this.groupBrakeZones(this.brakeZones);
         
         carIdxRPM.forEach((rpm, carIdx) => {
-            // Only check selected car
-            if (carIdx !== this.selectedCarIdx || rpm == null || rpm < 100) return;
+            // Skip player and invalid data
+            if (carIdx === this.playerCarIdx || rpm == null || rpm < 100) return;
+            
+            // Only check player's class
+            if (this.playerCarClass != null && carIdxClass[carIdx] !== this.playerCarClass) return;
             
             const lapDist = carIdxLapDistPct[carIdx];
             if (lapDist == null || lapDist < 0) return;
@@ -349,14 +352,18 @@ export class BrakeZoneVisualizer {
                         // Check if RPM drop exceeds threshold (15% default, controlled by slider)
                         if (rpmDrop > 0.15) {
                             this.liftingCars.add(carIdx);
-                            // Place vertical marker at current position
-                            this.addLiftMarker(lapDistPct);
+                            // Place vertical marker only for selected car
+                            if (carIdx === this.selectedCarIdx) {
+                                this.addLiftMarker(lapDistPct);
+                            }
                         }
                     }
                 }
                 
-                // Remove lift marker when car passes over it
-                this.removeLiftMarkerAtPosition(lapDistPct);
+                // Remove lift marker when selected car passes over it
+                if (carIdx === this.selectedCarIdx) {
+                    this.removeLiftMarkerAtPosition(lapDistPct);
+                }
             });
         });
     }
