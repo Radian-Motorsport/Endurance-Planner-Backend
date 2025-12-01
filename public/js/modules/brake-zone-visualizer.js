@@ -332,9 +332,12 @@ export class BrakeZoneVisualizer {
             zones.forEach((zone, zoneIndex) => {
                 const key = `${carIdx}-${zoneIndex}`;
                 
-                // Check if car is at the START of brake zone (record/update baseline RPM)
-                if (lapDistPct >= zone.start && lapDistPct < zone.start + 0.5) {
-                    // Always update baseline RPM when entering brake zone (keeps highest RPM across laps)
+                // Record baseline RPM in 2% window directly BEFORE brake zone starts (where driver should be flat out)
+                const baselineWindowEnd = zone.start;
+                const baselineWindowStart = Math.max(0, zone.start - 2.0);
+                
+                if (lapDistPct >= baselineWindowStart && lapDistPct < baselineWindowEnd) {
+                    // Keep highest RPM seen in this window across all laps
                     const currentBaseline = this.baselineRPM.get(key);
                     if (currentBaseline == null || rpm > currentBaseline) {
                         this.baselineRPM.set(key, rpm);
