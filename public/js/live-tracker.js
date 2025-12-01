@@ -657,6 +657,30 @@ class LiveStrategyTracker {
             this.updateDriverInputs(data);  // Update driver inputs display
             this.updateCarPosition(data?.values);  // Always update car positions (even when driver inputs collapsed)
             
+            // Update brake zone visualizer with all car positions (MUST run even when driver inputs collapsed)
+            const values = data?.values;
+            if (this.brakeZoneVisualizer && values) {
+                // Debug: Check if CarIdxRPM is available
+                if (values.CarIdxRPM) {
+                    console.log('🔍 CarIdxRPM available:', values.CarIdxRPM.length, 'cars, player RPM:', values.CarIdxRPM[values.PlayerCarIdx]);
+                    
+                    this.brakeZoneVisualizer.detectLiftAndCoast(
+                        values.CarIdxRPM,
+                        values.CarIdxLapDistPct,
+                        values.CarIdxClass
+                    );
+                } else {
+                    console.warn('⚠️ CarIdxRPM not available in telemetry');
+                }
+                
+                this.brakeZoneVisualizer.updateCarPositions(
+                    values.CarIdxLapDistPct,
+                    values.CarIdxClassPosition,
+                    values.CarIdxCarNumber,
+                    values.CarIdxClass
+                );
+            }
+            
             // Throttle weather updates to 1000ms
             const now = Date.now();
             if (now - this.lastWeatherUpdate > 1000) {
@@ -1137,29 +1161,6 @@ class LiveStrategyTracker {
                     }
                 }
             }
-        }
-        
-        // Update brake zone visualizer with all car positions
-        if (this.brakeZoneVisualizer) {
-            // Debug: Check if CarIdxRPM is available
-            if (values.CarIdxRPM) {
-                console.log('🔍 CarIdxRPM available:', values.CarIdxRPM.length, 'cars, player RPM:', values.CarIdxRPM[values.PlayerCarIdx]);
-                
-                this.brakeZoneVisualizer.detectLiftAndCoast(
-                    values.CarIdxRPM,
-                    values.CarIdxLapDistPct,
-                    values.CarIdxClass
-                );
-            } else {
-                console.warn('⚠️ CarIdxRPM not available in telemetry');
-            }
-            
-            this.brakeZoneVisualizer.updateCarPositions(
-                values.CarIdxLapDistPct,
-                values.CarIdxClassPosition,
-                values.CarIdxCarNumber,
-                values.CarIdxClass
-            );
         }
         
         // Update all cars on progress bar if enabled

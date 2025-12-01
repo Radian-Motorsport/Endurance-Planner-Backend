@@ -201,14 +201,24 @@ export class BrakeZoneVisualizer {
     updateCarPositions(carIdxLapDistPct, carIdxPosition, carIdxCarNumber, carIdxClass) {
         if (!this.allCarsVisible || !this.carDotsContainer) return;
         
+        console.log('🚗 Brake zone updateCarPositions:', {
+            playerCarClass: this.playerCarClass,
+            hasCarIdxClass: !!carIdxClass,
+            totalCars: carIdxLapDistPct?.length
+        });
+        
         const activeCars = new Set();
+        let carsFiltered = 0;
         
         // Update or create dot for each car (skip player)
         carIdxLapDistPct.forEach((lapDist, carIdx) => {
             if (carIdx === this.playerCarIdx || lapDist < 0) return;
             
             // Only show player's class
-            if (this.playerCarClass != null && carIdxClass && carIdxClass[carIdx] !== this.playerCarClass) return;
+            if (this.playerCarClass != null && carIdxClass && carIdxClass[carIdx] !== this.playerCarClass) {
+                carsFiltered++;
+                return;
+            }
             
             activeCars.add(carIdx);
             const position = carIdxPosition?.[carIdx];
@@ -272,6 +282,11 @@ export class BrakeZoneVisualizer {
             } else {
                 dot.style.boxShadow = '';
             }
+        });
+        
+        console.log('🚗 Brake zone cars:', {
+            active: activeCars.size,
+            filtered: carsFiltered
         });
         
         // Remove dots for inactive cars
