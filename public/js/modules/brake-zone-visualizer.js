@@ -351,7 +351,7 @@ export class BrakeZoneVisualizer {
                         const rpmDrop = (baselineRPM - rpm) / baselineRPM;
                         
                         // Check if RPM drop exceeds threshold (15% default, controlled by slider)
-                        if (rpmDrop > 0.15) {
+                        if (rpmDrop > 0.05) {
                             this.liftingCars.add(carIdx);
                             // Place vertical marker only for selected car, once per zone
                             if (carIdx === this.selectedCarIdx) {
