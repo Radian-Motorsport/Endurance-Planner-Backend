@@ -1677,6 +1677,15 @@ app.get('/api/brake-zone-trace/:trackId/:carName', async (req, res) => {
         const query = `
             SELECT * FROM brake_zone_traces
             WHERE track_id = $1 AND car_name = $2
+            LIMIT 1;
+        `;
+
+        const result = await pool.query(query, [parseInt(trackId), carName]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'No brake zone trace found for this track/car combination' });
+        }
+
         const row = result.rows[0];
 
         // Reconstruct samples array from separate JSONB columns
@@ -1708,15 +1717,6 @@ app.get('/api/brake-zone-trace/:trackId/:carName', async (req, res) => {
         };
 
         console.log(`✅ Found brake zone trace with ${samples.length} samples`);
-        res.json(response);w.wind_velocity,
-                windDir: row.wind_direction,
-                humidity: row.humidity,
-                skies: row.skies,
-                recordedAt: row.recorded_at
-            }
-        };
-
-        console.log(`✅ Found brake zone trace with ${row.samples.length} samples`);
         res.json(response);
 
     } catch (error) {
