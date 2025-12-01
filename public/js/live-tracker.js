@@ -2768,6 +2768,11 @@ class LiveStrategyTracker {
     selectCar(carIdx) {
         this.selectedCarIdx = carIdx;
         
+        // Update brake zone visualizer with selected car
+        if (this.brakeZoneVisualizer) {
+            this.brakeZoneVisualizer.setSelectedCar(carIdx);
+        }
+        
         // Find the driver and their class to potentially switch tabs
         const driver = this.driversList.find(d => d.CarIdx === carIdx);
         if (driver) {

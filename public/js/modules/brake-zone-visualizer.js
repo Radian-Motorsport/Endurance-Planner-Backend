@@ -31,7 +31,17 @@ export class BrakeZoneVisualizer {
         this.liftThreshold = 5;           // % before brake zone to check for lift (default 5%)
         this.liftingCars = new Set();     // Set of carIdx currently lifting before brake zones
         this.baselineRPM = new Map();     // Map of "carIdx-zoneIndex" -> baseline RPM at brake zone entry
-        this.liftingCarsTimers = new Map(); // Timers for delayed green circle removal
+        this.selectedCarIdx = null;       // Currently selected car for analysis
+        this.liftMarkers = [];            // Array of lift marker positions for selected car
+        
+        // Create lift markers container if it doesn't exist
+        if (!document.getElementById('brake-zone-lift-markers')) {
+            const liftMarkersContainer = document.createElement('div');
+            liftMarkersContainer.id = 'brake-zone-lift-markers';
+            liftMarkersContainer.className = 'absolute inset-0';
+            this.markersContainer?.parentElement?.appendChild(liftMarkersContainer);
+        }
+        this.liftMarkersContainer = document.getElementById('brake-zone-lift-markers');
         
         this.setupEventListeners();
     }
@@ -199,7 +209,7 @@ export class BrakeZoneVisualizer {
      * Update all car positions
      */
     updateCarPositions(carIdxLapDistPct, carIdxPosition, carIdxCarNumber, carIdxClass) {
-        if (!this.allCarsVisible || !this.carDotsContainer) return;
+        if (!this.allCarsVisible || !this.carDotsContainer || this.selectedCarIdx === null) return;
         
         /*console.log('🚗 Brake zone updateCarPositions:', {
             playerCarClass: this.playerCarClass,
@@ -210,15 +220,10 @@ export class BrakeZoneVisualizer {
         const activeCars = new Set();
         let carsFiltered = 0;
         
-        // Update or create dot for each car (skip player)
+        // Update or create dot for selected car only
         carIdxLapDistPct.forEach((lapDist, carIdx) => {
-            if (carIdx === this.playerCarIdx || lapDist < 0) return;
-            
-            // Only show player's class
-            if (this.playerCarClass != null && carIdxClass && carIdxClass[carIdx] !== this.playerCarClass) {
-                carsFiltered++;
-                return;
-            }
+            // Only show selected car
+            if (carIdx !== this.selectedCarIdx || lapDist < 0) return;
             
             activeCars.add(carIdx);
             const position = carIdxPosition?.[carIdx];
@@ -275,24 +280,6 @@ export class BrakeZoneVisualizer {
             if (label && position != null) {
                 label.textContent = position.toString();
             }
-            
-            // Apply green ring if car is lifting before brake zones
-            if (this.liftingCars.has(carIdx)) {
-                dot.style.boxShadow = '0 0 0 4px #10b981';
-                
-                // Clear any existing timer for this car
-                if (this.liftingCarsTimers.has(carIdx)) {
-                    clearTimeout(this.liftingCarsTimers.get(carIdx));
-                }
-                
-                // Set timer to remove green circle after 2 seconds
-                const timer = setTimeout(() => {
-                    dot.style.boxShadow = '';
-                    this.liftingCarsTimers.delete(carIdx);
-                }, 2000);
-                
-                this.liftingCarsTimers.set(carIdx, timer);
-            }
         });
         
         /*console.log('🚗 Brake zone cars:', {
@@ -317,7 +304,7 @@ export class BrakeZoneVisualizer {
      * @param {Array} carIdxClass - Car class IDs
      */
     detectLiftAndCoast(carIdxRPM, carIdxLapDistPct, carIdxClass) {
-        if (!this.brakeZones || !carIdxRPM || !carIdxLapDistPct || !carIdxClass) {
+        if (!this.brakeZones || !carIdxRPM || !carIdxLapDistPct || !carIdxClass || this.selectedCarIdx === null) {
             return;
         }
         
@@ -327,11 +314,8 @@ export class BrakeZoneVisualizer {
         const zones = this.groupBrakeZones(this.brakeZones);
         
         carIdxRPM.forEach((rpm, carIdx) => {
-            // Skip player and invalid data
-            if (carIdx === this.playerCarIdx || rpm == null || rpm < 100) return;
-            
-            // Only check player's class
-            if (this.playerCarClass != null && carIdxClass[carIdx] !== this.playerCarClass) return;
+            // Only check selected car
+            if (carIdx !== this.selectedCarIdx || rpm == null || rpm < 100) return;
             
             const lapDist = carIdxLapDistPct[carIdx];
             if (lapDist == null || lapDist < 0) return;
@@ -365,11 +349,75 @@ export class BrakeZoneVisualizer {
                         // Check if RPM drop exceeds threshold (15% default, controlled by slider)
                         if (rpmDrop > 0.15) {
                             this.liftingCars.add(carIdx);
+                            // Place vertical marker at current position
+                            this.addLiftMarker(lapDistPct);
                         }
                     }
                 }
+                
+                // Remove lift marker when car passes over it
+                this.removeLiftMarkerAtPosition(lapDistPct);
+                }
             });
         });
+    }
+    
+    /**
+     * Add vertical lift marker at position
+     */
+    addLiftMarker(lapDistPct) {
+        // Check if marker already exists at this position (within 0.5%)
+        const exists = this.liftMarkers.some(pos => Math.abs(pos - lapDistPct) < 0.5);
+        if (exists) return;
+        
+        this.liftMarkers.push(lapDistPct);
+        this.renderLiftMarkers();
+    }
+    
+    /**
+     * Remove lift marker when car passes over it
+     */
+    removeLiftMarkerAtPosition(currentLapDistPct) {
+        // Remove markers within 0.5% of current position
+        const before = this.liftMarkers.length;
+        this.liftMarkers = this.liftMarkers.filter(pos => Math.abs(pos - currentLapDistPct) > 0.5);
+        
+        if (this.liftMarkers.length !== before) {
+            this.renderLiftMarkers();
+        }
+    }
+    
+    /**
+     * Render all lift markers
+     */
+    renderLiftMarkers() {
+        if (!this.liftMarkersContainer) return;
+        
+        this.liftMarkersContainer.innerHTML = '';
+        
+        this.liftMarkers.forEach(lapDistPct => {
+            const marker = document.createElement('div');
+            marker.className = 'absolute bg-green-400';
+            marker.style.left = `${lapDistPct}%`;
+            marker.style.width = '2px';
+            marker.style.height = '100%';
+            marker.style.top = '0';
+            marker.title = `Lift detected at ${lapDistPct.toFixed(1)}%`;
+            
+            this.liftMarkersContainer.appendChild(marker);
+        });
+    }
+    
+    /**
+     * Set selected car and clear previous markers
+     */
+    setSelectedCar(carIdx) {
+        // Clear markers when changing car
+        if (this.selectedCarIdx !== carIdx) {
+            this.liftMarkers = [];
+            this.renderLiftMarkers();
+        }
+        this.selectedCarIdx = carIdx;
     }
     
     /**
