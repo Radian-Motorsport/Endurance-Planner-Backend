@@ -21,10 +21,16 @@ export class BrakeZoneVisualizer {
         // State
         this.brakeZones = null;           // Loaded brake zone data
         this.playerCarIdx = null;         // Player's car index
+        this.playerCarClass = null;       // Player's car class ID
         this.playerLapDistPct = 0;        // Player's current position (0-1)
         this.playerPosition = null;       // Player's position in class
         this.allCarsVisible = false;      // Show all car positions
         this.carPositions = new Map();    // CarIdx -> {lapDistPct, position, carNumber}
+        
+        // Lift-and-coast detection
+        this.liftThreshold = 5;           // % before brake zone to check for lift (default 5%)
+        this.liftingCars = new Set();     // Set of carIdx currently lifting before brake zones
+        this.previousRPM = new Map();     // Track previous RPM per car
         
         this.setupEventListeners();
     }
@@ -256,6 +262,13 @@ export class BrakeZoneVisualizer {
             if (label && position != null) {
                 label.textContent = position.toString();
             }
+            
+            // Apply green ring if car is lifting before brake zones
+            if (this.liftingCars.has(carIdx)) {
+                dot.style.boxShadow = '0 0 0 3px #10b981';
+            } else {
+                dot.style.boxShadow = '';
+            }
         });
         
         // Remove dots for inactive cars
@@ -269,10 +282,76 @@ export class BrakeZoneVisualizer {
     }
     
     /**
+     * Detect lift-and-coast behavior (RPM drops before brake zones)
+     * @param {Array} carIdxRPM - RPM values for all cars
+     * @param {Array} carIdxLapDistPct - Lap distance percentages
+     * @param {Array} carIdxClass - Car class IDs
+     */
+    detectLiftAndCoast(carIdxRPM, carIdxLapDistPct, carIdxClass) {
+        if (!this.brakeZones || !carIdxRPM || !carIdxLapDistPct || !carIdxClass) return;
+        
+        this.liftingCars.clear();
+        
+        // Group brake zones for easier lookup
+        const zones = this.groupBrakeZones(this.brakeZones);
+        
+        carIdxRPM.forEach((rpm, carIdx) => {
+            // Skip player and invalid data
+            if (carIdx === this.playerCarIdx || rpm == null || rpm < 100) return;
+            
+            // Only check player's class
+            if (this.playerCarClass != null && carIdxClass[carIdx] !== this.playerCarClass) return;
+            
+            const lapDist = carIdxLapDistPct[carIdx];
+            if (lapDist == null || lapDist < 0) return;
+            
+            const lapDistPct = lapDist * 100; // Convert to 0-100
+            
+            // Check if approaching any brake zone
+            for (const zone of zones) {
+                // Calculate the "lift zone" - threshold% before brake zone
+                const liftZoneStart = Math.max(0, zone.start - this.liftThreshold);
+                const liftZoneEnd = zone.start;
+                
+                // Check if car is in the lift detection zone
+                if (lapDistPct >= liftZoneStart && lapDistPct < liftZoneEnd) {
+                    // Get previous RPM
+                    const prevRPM = this.previousRPM.get(carIdx) || rpm;
+                    
+                    // Detect significant RPM drop (>15% drop indicates lift)
+                    const rpmDrop = (prevRPM - rpm) / prevRPM;
+                    if (rpmDrop > 0.15) {
+                        this.liftingCars.add(carIdx);
+                        break;
+                    }
+                }
+            }
+            
+            // Store current RPM for next comparison
+            this.previousRPM.set(carIdx, rpm);
+        });
+    }
+    
+    /**
+     * Set lift detection threshold
+     * @param {number} threshold - Percentage before brake zone (0-20)
+     */
+    setLiftThreshold(threshold) {
+        this.liftThreshold = Math.max(0, Math.min(20, threshold));
+    }
+    
+    /**
      * Set player car index
      */
     setPlayerCarIdx(carIdx) {
         this.playerCarIdx = carIdx;
+    }
+    
+    /**
+     * Set player car class
+     */
+    setPlayerCarClass(classId) {
+        this.playerCarClass = classId;
     }
     
     /**

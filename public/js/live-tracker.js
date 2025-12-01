@@ -489,6 +489,17 @@ class LiveStrategyTracker {
             });
         }
         
+        // Lift threshold slider
+        const liftThresholdSlider = document.getElementById('lift-threshold-slider');
+        const liftThresholdValue = document.getElementById('lift-threshold-value');
+        if (liftThresholdSlider && liftThresholdValue && this.brakeZoneVisualizer) {
+            liftThresholdSlider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                liftThresholdValue.textContent = `${value}%`;
+                this.brakeZoneVisualizer.setLiftThreshold(value);
+            });
+        }
+        
         // Track map toggle
         const toggleTrackMapBtn = document.getElementById('toggle-track-map');
         const trackMapDetails = document.getElementById('track-map-details');
@@ -1128,6 +1139,15 @@ class LiveStrategyTracker {
         
         // Update brake zone visualizer with all car positions
         if (this.brakeZoneVisualizer) {
+            // Detect lift-and-coast behavior
+            if (values.CarIdxRPM) {
+                this.brakeZoneVisualizer.detectLiftAndCoast(
+                    values.CarIdxRPM,
+                    values.CarIdxLapDistPct,
+                    values.CarIdxClass
+                );
+            }
+            
             this.brakeZoneVisualizer.updateCarPositions(
                 values.CarIdxLapDistPct,
                 values.CarIdxClassPosition,
@@ -1717,6 +1737,7 @@ class LiveStrategyTracker {
                 // Load brake zones for visualizer
                 if (this.brakeZoneVisualizer && carName) {
                     this.brakeZoneVisualizer.setPlayerCarIdx(chartPlayerCarIdx);
+                    this.brakeZoneVisualizer.setPlayerCarClass(this.playerCarClass);
                     this.brakeZoneVisualizer.loadBrakeZones(trackId, carName);
                 }
             }

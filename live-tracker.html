@@ -1132,6 +1132,17 @@
             <div id="brake-zone-info-display" class="relative w-full h-2 mt-4 text-xs text-neutral-400 text-center">
                 No brake zones loaded
             </div>
+            
+            <!-- Lift threshold control -->
+            <div class="mt-4 flex items-center gap-3">
+                <label class="text-xs text-neutral-400">Lift Detection Zone:</label>
+                <input type="range" id="lift-threshold-slider" min="0" max="20" value="5" step="1" 
+                       class="flex-1 h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer">
+                <span id="lift-threshold-value" class="text-xs text-neutral-300 min-w-[3rem]">5%</span>
+            </div>
+            <div class="text-xs text-neutral-500 mt-1">
+                Green ring = lifting before brake zone (fuel saving)
+            </div>
         </div>
         
         <!-- Track Map with Car Position -->
