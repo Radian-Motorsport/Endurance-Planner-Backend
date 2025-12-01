@@ -492,11 +492,13 @@ class LiveStrategyTracker {
         // Lift threshold slider
         const liftThresholdSlider = document.getElementById('lift-threshold-slider');
         const liftThresholdValue = document.getElementById('lift-threshold-value');
-        if (liftThresholdSlider && liftThresholdValue && this.brakeZoneVisualizer) {
+        if (liftThresholdSlider && liftThresholdValue) {
             liftThresholdSlider.addEventListener('input', (e) => {
                 const value = parseInt(e.target.value);
                 liftThresholdValue.textContent = `${value}%`;
-                this.brakeZoneVisualizer.setLiftThreshold(value);
+                if (this.brakeZoneVisualizer) {
+                    this.brakeZoneVisualizer.setLiftThreshold(value);
+                }
             });
         }
         
@@ -1151,7 +1153,8 @@ class LiveStrategyTracker {
             this.brakeZoneVisualizer.updateCarPositions(
                 values.CarIdxLapDistPct,
                 values.CarIdxClassPosition,
-                values.CarIdxCarNumber
+                values.CarIdxCarNumber,
+                values.CarIdxClass
             );
         }
         

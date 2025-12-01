@@ -198,7 +198,7 @@ export class BrakeZoneVisualizer {
     /**
      * Update all car positions
      */
-    updateCarPositions(carIdxLapDistPct, carIdxPosition, carIdxCarNumber) {
+    updateCarPositions(carIdxLapDistPct, carIdxPosition, carIdxCarNumber, carIdxClass) {
         if (!this.allCarsVisible || !this.carDotsContainer) return;
         
         const activeCars = new Set();
@@ -206,6 +206,9 @@ export class BrakeZoneVisualizer {
         // Update or create dot for each car (skip player)
         carIdxLapDistPct.forEach((lapDist, carIdx) => {
             if (carIdx === this.playerCarIdx || lapDist < 0) return;
+            
+            // Only show player's class
+            if (this.playerCarClass != null && carIdxClass && carIdxClass[carIdx] !== this.playerCarClass) return;
             
             activeCars.add(carIdx);
             const position = carIdxPosition?.[carIdx];
