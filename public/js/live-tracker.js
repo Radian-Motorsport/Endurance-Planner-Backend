@@ -665,7 +665,8 @@ class LiveStrategyTracker {
                     this.brakeZoneVisualizer.detectLiftAndCoast(
                         values.CarIdxRPM,
                         values.CarIdxLapDistPct,
-                        values.CarIdxClass
+                        values.CarIdxClass,
+                        values.CarIdxLap
                     );
                 }
                 

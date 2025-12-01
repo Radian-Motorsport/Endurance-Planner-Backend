@@ -303,9 +303,10 @@ export class BrakeZoneVisualizer {
      * @param {Array} carIdxRPM - RPM values for all cars
      * @param {Array} carIdxLapDistPct - Lap distance percentages
      * @param {Array} carIdxClass - Car class IDs
+     * @param {Array} carIdxLap - Current lap number for all cars
      */
-    detectLiftAndCoast(carIdxRPM, carIdxLapDistPct, carIdxClass) {
-        if (!this.brakeZones || !carIdxRPM || !carIdxLapDistPct || !carIdxClass || this.selectedCarIdx === null) {
+    detectLiftAndCoast(carIdxRPM, carIdxLapDistPct, carIdxClass, carIdxLap) {
+        if (!this.brakeZones || !carIdxRPM || !carIdxLapDistPct || !carIdxClass || !carIdxLap || this.selectedCarIdx === null) {
             return;
         }
         
@@ -325,6 +326,7 @@ export class BrakeZoneVisualizer {
             if (lapDist == null || lapDist < 0) return;
             
             const lapDistPct = lapDist * 100; // Convert to 0-100
+            const currentLap = carIdxLap[carIdx];
             
             // Check each brake zone
             zones.forEach((zone, zoneIndex) => {
@@ -353,9 +355,9 @@ export class BrakeZoneVisualizer {
                         // Check if RPM drop exceeds threshold (15% default, controlled by slider)
                         if (rpmDrop > 0.05) {
                             this.liftingCars.add(carIdx);
-                            // Place vertical marker only for selected car, once per zone
+                            // Place vertical marker only for selected car, once per zone per lap
                             if (carIdx === this.selectedCarIdx) {
-                                this.addLiftMarker(lapDistPct, zoneIndex);
+                                this.addLiftMarker(lapDistPct, zoneIndex, currentLap);
                             }
                         }
                     }
@@ -363,7 +365,7 @@ export class BrakeZoneVisualizer {
                 
                 // Remove lift marker when selected car passes over it
                 if (carIdx === this.selectedCarIdx) {
-                    this.removeLiftMarkerAtPosition(lapDistPct);
+                    this.removeLiftMarkerAtPosition(lapDistPct, currentLap);
                 }
             });
         });
@@ -372,19 +374,19 @@ export class BrakeZoneVisualizer {
     /**
      * Add vertical lift marker at position
      */
-    addLiftMarker(lapDistPct, zoneIndex) {
+    addLiftMarker(lapDistPct, zoneIndex, currentLap) {
         // Only place one marker per brake zone per lap
-        const key = `zone-${zoneIndex}`;
+        const key = `zone-${zoneIndex}-lap-${currentLap}`;
         
-        // Check if marker already exists for this brake zone
-        for (const [pos, lap] of this.liftMarkers.entries()) {
-            if (lap === key) {
+        // Check if marker already exists for this brake zone on this lap
+        for (const [pos, markerKey] of this.liftMarkers.entries()) {
+            if (markerKey === key) {
                 // Marker already placed for this brake zone this lap
                 return;
             }
         }
         
-        // New marker - tag it with zone index
+        // New marker - tag it with zone index and lap number
         this.liftMarkers.set(lapDistPct, key);
         this.renderLiftMarkers();
     }
@@ -392,12 +394,16 @@ export class BrakeZoneVisualizer {
     /**
      * Remove lift marker when car passes over it again on next lap
      */
-    removeLiftMarkerAtPosition(currentLapDistPct) {
-        // Remove markers that car has passed (within 0.5% tolerance)
+    removeLiftMarkerAtPosition(currentLapDistPct, currentLap) {
+        // Remove markers that car has passed (within 0.5% tolerance) and are from previous laps
         let removed = false;
-        for (const [pos, zoneKey] of this.liftMarkers.entries()) {
-            // If car is within 0.5% of marker position and has passed it
-            if (Math.abs(currentLapDistPct - pos) < 0.5 && currentLapDistPct >= pos) {
+        for (const [pos, markerKey] of this.liftMarkers.entries()) {
+            // Extract lap number from marker key (format: zone-X-lap-Y)
+            const markerLapMatch = markerKey.match(/lap-(\d+)$/);
+            const markerLap = markerLapMatch ? parseInt(markerLapMatch[1]) : 0;
+            
+            // If car is within 0.5% of marker position, has passed it, and marker is from a previous lap
+            if (Math.abs(currentLapDistPct - pos) < 0.5 && currentLapDistPct >= pos && markerLap < currentLap) {
                 this.liftMarkers.delete(pos);
                 removed = true;
             }
