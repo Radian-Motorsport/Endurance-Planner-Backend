@@ -869,11 +869,6 @@ class LiveStrategyTracker {
         const values = data?.values;
         if (!values) return;
         
-        // Skip ALL updates if driver inputs section is collapsed (performance optimization)
-        const driverInputsContainer = document.getElementById('driver-inputs-details');
-        const isCollapsed = driverInputsContainer?.classList.contains('hidden');
-        if (isCollapsed) return; // Early exit - no DOM manipulation when hidden
-        
         // Update inputs with formatting
         if (this.elements.inputThrottle) {
             this.elements.inputThrottle.textContent = `${((values.ThrottleRaw ?? 0) * 100).toFixed(0)}%`;
