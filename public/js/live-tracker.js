@@ -655,22 +655,18 @@ class LiveStrategyTracker {
             this.lastTelemetryTime = Date.now();  // Track last telemetry received
             this.handleTelemetryUpdate(data);
             this.updateDriverInputs(data);  // Update driver inputs display
-            this.updateCarPosition(data?.values);  // Always update car positions (even when driver inputs collapsed)
+            
+            const values = data?.values;
+            this.updateCarPosition(values);  // Always update car positions (even when driver inputs collapsed)
             
             // Update brake zone visualizer with all car positions (MUST run even when driver inputs collapsed)
-            const values = data?.values;
             if (this.brakeZoneVisualizer && values) {
-                // Debug: Check if CarIdxRPM is available
                 if (values.CarIdxRPM) {
-                    console.log('🔍 CarIdxRPM available:', values.CarIdxRPM.length, 'cars, player RPM:', values.CarIdxRPM[values.PlayerCarIdx]);
-                    
                     this.brakeZoneVisualizer.detectLiftAndCoast(
                         values.CarIdxRPM,
                         values.CarIdxLapDistPct,
                         values.CarIdxClass
                     );
-                } else {
-                    console.warn('⚠️ CarIdxRPM not available in telemetry');
                 }
                 
                 this.brakeZoneVisualizer.updateCarPositions(
