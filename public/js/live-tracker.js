@@ -1436,6 +1436,7 @@ class LiveStrategyTracker {
             carData.onPitRoad = currentOnPitRoad;
             carData.trackSurface = this.getTrackSurfaceName(currentTrackSurface);
             carData.surfaceMaterial = this.getSurfaceMaterialName(values.CarIdxTrackSurfaceMaterial?.[carIdx]);
+            carData.rpm = values.CarIdxRPM?.[carIdx] || 0;
             
             // Track off-track incidents per sector
             this.trackSectorIncident(carIdx, currentTrackSurface, values.CarIdxLapDistPct?.[carIdx]);
@@ -2849,6 +2850,7 @@ class LiveStrategyTracker {
         document.getElementById('detail-off-track').textContent = offTrackCount;
         document.getElementById('detail-stint-laps').textContent = data.stintLaps || 0;
         document.getElementById('detail-pit-duration').textContent = formatPitDuration(data.lastPitDuration);
+        document.getElementById('detail-rpm').textContent = data.rpm ? Math.round(data.rpm).toLocaleString() : '--';
     }
     
     handleTelemetryUpdate(data) {
